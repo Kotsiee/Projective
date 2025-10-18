@@ -1,0 +1,9 @@
+﻿{
+  "tasks": {
+    "dev": "deno task -q _dev",
+    "_dev": "deno run -A --watch=routes,islands,components apps/web/main.ts",
+    "test": "deno test -A --fail-fast",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  }
+}

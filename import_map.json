@@ -1,0 +1,8 @@
+﻿{
+  "imports": {
+    "@/": "./apps/web/",
+    "@ui/": "./packages/ui/",
+    "@lib/": "./packages/lib/",
+    "@sdk/": "./packages/sdk/"
+  }
+}
