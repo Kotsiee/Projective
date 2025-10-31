@@ -1,8 +1,25 @@
-﻿{
+{
   "imports": {
+    "fresh": "jsr:@fresh/core@^2.1.2",
+    "preact": "npm:preact@^10.27.2",
+    "@preact/signals": "npm:@preact/signals@^2.3.1",
+    "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.5",
+    "vite": "npm:vite@^7.1.3",
+
+    "std/": "https://deno.land/std@0.224.0/",
+
     "@/": "./apps/web/",
+    "@routes/": "./apps/web/routes/",
+    "@components/": "./apps/web/components/",
+    "@islands/": "./apps/web/islands/",
+    "@features/": "./apps/web/features/",
+    "@server/": "./apps/web/server/",
+    "@services/": "./apps/web/services/",
+    "@styles/": "./apps/web/styles/",
+    "@types/": "./apps/web/types/",
     "@ui/": "./packages/ui/",
     "@lib/": "./packages/lib/",
-    "@sdk/": "./packages/sdk/"
+    "@sdk/": "./packages/sdk/",
+    "@wasm/": "./packages/wasm/"
   }
 }

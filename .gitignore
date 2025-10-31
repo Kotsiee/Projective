@@ -3,3 +3,4 @@
 supabase/.branches/
 dist/
 coverage/
+_fresh/

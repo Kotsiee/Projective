@@ -1,9 +1,120 @@
-﻿{
+{
+  "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno task -q _dev",
-    "_dev": "deno run -A --watch=routes,islands,components apps/web/main.ts",
-    "test": "deno test -A --fail-fast",
-    "fmt": "deno fmt",
-    "lint": "deno lint"
+    "format": "deno fmt --check",
+    "lint": "deno lint",
+    "typecheck": "deno check",
+    "names": "deno run -A scripts/validate_names.ts",
+    "check": "deno fmt --check && deno lint && deno check && deno run -A scripts/validate_names.ts",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "deno serve -A _fresh/server.js",
+    "update": "deno run -A -r jsr:@fresh/update ."
+  },
+  "fmt": {
+    "files": {
+      "include": [
+        "routes/**/*",
+        "islands/**/*",
+        "components/**/*",
+        "features/**/*",
+        "plugins/**/*",
+        "utils/**/*",
+        "services/**/*",
+        "scripts/**/*",
+        "lib/**/*",
+        "_fresh/**/*",
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.jsx",
+        "*.css"
+      ],
+      "exclude": [
+        "node_modules/**",
+        "dist/**",
+        "tmp/**",
+        "infra/**",
+        "supabase/**",
+        "**/*.md"
+      ]
+    },
+    "options": {
+      "lineWidth": 100,
+      "indentWidth": 2,
+      "useTabs": true,
+      "singleQuote": true,
+      "proseWrap": "preserve"
+    }
+  },
+  "lint": {
+    "files": {
+      "include": [
+        "routes/**/*",
+        "islands/**/*",
+        "components/**/*",
+        "features/**/*",
+        "plugins/**/*",
+        "utils/**/*",
+        "services/**/*",
+        "scripts/**/*",
+        "lib/**/*",
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.jsx"
+      ],
+      "exclude": [
+        "node_modules/**",
+        "dist/**",
+        "tmp/**",
+        "infra/**",
+        "supabase/**",
+        "**/*.md"
+      ]
+    },
+    "rules": {
+      "tags": ["fresh", "recommended"]
+    }
+  },
+  "compilerOptions": {
+    "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns"],
+    "jsx": "precompile",
+    "jsxImportSource": "preact",
+    "jsxPrecompileSkipElements": [
+      "a",
+      "img",
+      "source",
+      "body",
+      "html",
+      "head",
+      "title",
+      "meta",
+      "script",
+      "link",
+      "style",
+      "base",
+      "noscript",
+      "template"
+    ],
+    "types": ["vite/client"]
+  },
+  "imports": {
+    "djwt": "jsr:@zaubrik/djwt@^3.0.2",
+    "fresh": "jsr:@fresh/core@^2.1.2",
+    "preact": "npm:preact@^10.27.2",
+    "@preact/signals": "npm:@preact/signals@^2.3.1",
+    "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.5",
+    "vite": "npm:vite@^7.1.3",
+    "supabaseClient": "npm:@supabase/supabase-js@2.76.1",
+
+    "@": "./apps/web/",
+    "@styles/": "./apps/web/styles/",
+    "@components/": "./apps/web/components/",
+    "@features/": "./apps/web/features/",
+    "@islands/": "./apps/web/islands/",
+    "@server/": "./apps/web/server/",
+    "@services/": "./apps/web/services/",
+    "@types/": "./apps/web/types/"
   }
 }
