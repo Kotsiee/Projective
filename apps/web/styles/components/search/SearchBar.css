@@ -1,0 +1,23 @@
+.search-bar {
+  display: flex;
+  gap: 0.5em;
+  width: 100%;
+  border-radius: var(--border-radius__small);
+  background-color: var(--card);
+
+  .search-bar__input {
+    width: 100%;
+    background: none;
+    font-size: 1.25em;
+    padding: 0.5em;
+    outline: none;
+    border: none;
+  }
+
+  .search-bar__enter {
+  }
+
+  &:has(.search-bar__input:focus) {
+    outline: 1px solid var(--primary);
+  }
+}
