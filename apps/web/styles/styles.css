@@ -8,20 +8,22 @@
 
   --scale: 1;
 
-  --primary-hue: 159;
-  --primary-saturation: 64%;
-  --primary-lightness: 43%;
+  --primary-hue: 186;
+  --primary-saturation: 57%;
+  --primary-lightness: 36%;
 
-  --primary: hsl(
-    var(--primary-hue),
-    var(--primary-saturation),
-    var(--primary-lightness)
-  );
+  --primary: hsl(var(--primary-hue),
+      var(--primary-saturation),
+      var(--primary-lightness));
   --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), 50%);
   --primary-active: hsl(var(--primary-hue), var(--primary-saturation), 60%);
 
+  --primary-half: hsla(var(--primary-hue),
+      var(--primary-saturation),
+      var(--primary-lightness), 0.5);
+
   --header-height: 4rem;
-  --side-nav-width: 4rem;
+  --side-nav-width: 0;
 
   --border-radius__xsmall: 4px;
   --border-radius__small: 6px;
@@ -36,20 +38,41 @@
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+
+  [data-sidebar-open] {
+    --side-nav-width: 4rem;
+
+  }
+
+  [data-sidebar-open='true'] {
+    --side-nav-width: 14rem;
+  }
 }
 
 body {
+  width: 100%;
   margin: 0;
   padding: 0;
 
   main {
-    margin-top: var(--header-height);
+    position: relative;
+    margin: 0;
+    padding: 0;
   }
+}
+
+.container {
+  position: relative;
+  height: calc(100vh - (var(--header-height) + 1rem));
+  width: calc(100vw - (var(--side-nav-width) + 2.1rem));
+  top: calc(var(--header-height) + 1rem);
+  left: calc(var(--side-nav-width) + 1rem);
 }
 
 a {
   text-decoration: none;
   color: inherit;
+  transition: all var(--fast);
 }
 
 input,
@@ -58,4 +81,38 @@ button {
   border: none;
   background: none;
   color: inherit;
+  outline: none;
+  border: none;
+}
+
+button {
+  cursor: pointer;
+  transition: all var(--fast);
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.5rem);
+  transform: translateX(-50%);
+  color: var(--text-medium);
+  background-color: var(--card);
+  border: 1px solid var(--card-light);
+  border-radius: var(--border-radius);
+  padding: 0.25rem 1rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fast) ease;
+  z-index: 100;
+  font-size: 0.75rem;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
 }

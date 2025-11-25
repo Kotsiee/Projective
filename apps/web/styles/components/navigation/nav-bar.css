@@ -1,0 +1,25 @@
+header {
+  width: 100%;
+  max-width: 100vw;
+  height: var(--header-height);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  z-index: 1000;
+
+  nav {
+    margin: 1rem;
+    width: 100%;
+    height: 100%;
+    background-color: var(--header);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1rem;
+  }
+}

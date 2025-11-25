@@ -1,30 +1,26 @@
 import { Head } from 'fresh/runtime';
-import NavBarGuest from '@islands/navigation/NavBarGuest.tsx';
+import { State } from '@utils';
 
 export default function App(
-	ctx: { Component: preact.ComponentType; stateTheme?: 'light' | 'dark' },
+	ctx: { Component: preact.ComponentType; stateTheme?: 'light' | 'dark'; state: State },
 ) {
 	const initial = ctx.stateTheme ?? 'dark';
+
 	return (
 		<html lang='en' data-theme={initial}>
 			<Head>
 				<meta charSet='utf-8' />
 				<meta name='viewport' content='width=device-width, initial-scale=1' />
-				<title>Projective</title>
 				<meta
 					name='description'
 					content='Collaborative freelancing platform.'
 				/>
+				<title>Projective</title>
 			</Head>
-			<body>
-				<NavBarGuest />
-
-				<main class='flex-1 max-w-6xl mx-auto w-full p-6'>
+			<body data-onboarded={ctx.state.isOnboarded}>
+				<main>
 					<ctx.Component />
 				</main>
-				<footer class='p-4 border-t bg-white text-center text-sm text-gray-500'>
-					© {new Date().getFullYear()} Projective
-				</footer>
 			</body>
 		</html>
 	);

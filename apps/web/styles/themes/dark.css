@@ -1,10 +1,19 @@
 :root[data-theme="dark"] {
   --bg: #222222;
   --header: #191919;
-  --text: #FFFFFF;
+  --text: #ffffff;
+  --text-medium: #999;
   --text-dark: #555555;
   --card: #303030;
+  --card-dark: #202020;
+  --card-light: #555555;
+  --button-hover: #fff2;
+  --button-hover-light: #fff6;
 
   --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), 30%);
   --primary-active: hsl(var(--primary-hue), var(--primary-saturation), 20%);
+  --primary-highlight: hsl(var(--primary-hue), var(--primary-saturation), 50%);
+  --primary-highlight-active: hsl(var(--primary-hue),
+      var(--primary-saturation),
+      55%);
 }

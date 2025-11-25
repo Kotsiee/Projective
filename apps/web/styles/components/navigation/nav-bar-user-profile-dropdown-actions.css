@@ -1,0 +1,14 @@
+  .nav-bar-user__profile__dropdown__actions {
+    display: flex;
+    flex-direction: column;
+
+    a {
+      padding: 0.5em 1em;
+      border-radius: var(--border-radius__small);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--button-hover);
+      }
+    }
+  }

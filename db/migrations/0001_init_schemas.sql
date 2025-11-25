@@ -15,7 +15,8 @@ CREATE SCHEMA IF NOT EXISTS integrations;
 -- enums
 CREATE TYPE profile_type AS ENUM ('freelancer', 'business');
 CREATE TYPE assignment_type AS ENUM ('freelancer', 'team');
-CREATE TYPE visibility AS ENUM ('public', 'invite_only');
+CREATE TYPE visibility AS ENUM ('public', 'invite_only', 'unlisted');
 CREATE TYPE project_status AS ENUM ('draft', 'active', 'on_hold', 'completed', 'cancelled');
 CREATE TYPE stage_status AS ENUM ('open','assigned','in_progress','submitted','approved','revisions','paid');
-CREATE TYPE dispute_status AS ENUM ('open','under_review','resolved','refunded');
+CREATE TYPE dispute_status AS ENUM ('open', 'under_review', 'resolved', 'refunded');
+

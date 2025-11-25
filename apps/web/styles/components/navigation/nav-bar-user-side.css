@@ -1,0 +1,107 @@
+.nav-bar-user-side {
+  position: fixed;
+  left: 1rem;
+  top: calc(var(--header-height) + 1rem);
+  width: var(--side-nav-width);
+  height: calc(100% - var(--header-height) - 1rem);
+  z-index: 1000;
+  display: flex;
+
+  .nav-bar-user-side__container {
+    margin: 1rem 0;
+    height: 100%;
+    max-height: calc(100% - 4rem);
+    width: 100%;
+    background-color: var(--header);
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    border-radius: 1rem;
+  }
+
+  .nav-bar-user-side__group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: 100%;
+
+    .nav-bar-user-side__app {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.5rem;
+
+      &[data-selected="true"] {
+        box-shadow: 0 0 12px var(--primary);
+        background-color: var(--primary-half);
+        outline: 1px solid var(--primary);
+        color: white;
+      }
+    }
+  }
+
+  .nav-bar-user-side__open {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 1rem;
+  }
+
+  a,
+  button {
+    border-radius: var(--border-radius__small);
+    height: 2.5rem;
+    min-height: 2.5rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-dark);
+
+    &:hover {
+      background-color: var(--button-hover);
+      color: var(--text-medium);
+    }
+  }
+
+  hr {
+    border: 1px solid var(--text-dark);
+    width: 80%;
+    opacity: 0.5;
+  }
+
+  &[data-sidebar-open='true'] {
+    .nav-bar-user-side__app {
+      justify-content: start !important;
+      gap: 0.5rem !important;
+      padding: 0 0.5rem !important;
+      width: calc(100% - 1rem) !important;
+    }
+
+    [data-tooltip]::before {
+      display: none;
+    }
+
+    [data-tooltip]:hover::before {
+      display: none;
+    }
+  }
+
+  &[data-sidebar-open='false'] {
+    .nav-bar-user-side__app {
+      justify-content: center !important;
+      gap: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+
+    [data-tooltip]::before {
+      left: 100% !important;
+      transform: translate(1rem, calc(-100% - 0.75rem));
+    }
+  }
+}

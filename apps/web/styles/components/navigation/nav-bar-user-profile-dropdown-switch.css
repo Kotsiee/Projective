@@ -1,0 +1,47 @@
+  .nav-bar-user__profile__dropdown__switch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .nav-bar-user__profile__dropdown__switch__switch {
+      display: flex;
+      justify-content: space-evenly;
+      width: 100%;
+
+      .nav-bar-user__profile__dropdown__switch__label {
+        cursor: pointer;
+
+        &:has(input:checked) {
+          color: var(--primary);
+          font-weight: bold;
+        }
+      }
+    }
+
+    hr {
+      width: 75%;
+      border: 1px solid var(--text-dark);
+    }
+
+    .nav-bar-user__profile__dropdown__switch__account-type {
+      width: 75%;
+
+      .nav-bar-user__profile__dropdown__add {
+        width: 100%;
+        color: var(--button-hover-light);
+        border: 1px solid var(--button-hover-light);
+        padding: 0.5rem 0;
+        border-radius: var(--border-radius__small);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 0.8em;
+
+        &:hover {
+          background-color: var(--button-hover);
+          color: var(--text);
+        }
+      }
+    }
+  }

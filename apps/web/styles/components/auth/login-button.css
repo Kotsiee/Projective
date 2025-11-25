@@ -1,0 +1,17 @@
+.login-button {
+  font-size: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  padding: 0.5em 1em;
+  width: 100%;
+
+  background-color: black;
+  color: white;
+  border-radius: var(--border-radius__large);
+
+  &:disabled {
+    background-color: red;
+  }
+}

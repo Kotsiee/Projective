@@ -2,6 +2,18 @@
     --bg: #f0f0f0;
     --header: #ffffff;
     --text: #000000;
+    --text-medium: #999;
     --text-dark: #BBBBBB;
     --card: #dfdfdf;
+    --card-dark: #202020;
+    --card-light: #555555;
+    --button-hover: #0002;
+    --button-hover-light: #0006;
+
+    --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), 30%);
+    --primary-active: hsl(var(--primary-hue), var(--primary-saturation), 20%);
+    --primary-highlight: hsl(var(--primary-hue), var(--primary-saturation), 50%);
+    --primary-highlight-active: hsl(var(--primary-hue),
+            var(--primary-saturation),
+            55%);
 }

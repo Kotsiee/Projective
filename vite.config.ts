@@ -9,13 +9,6 @@ export default defineConfig({
 
 	plugins: [fresh()],
 
-	build: {
-		outDir: '_fresh',
-		emptyOutDir: true,
-	},
-
-	server: { host: true, port: 3000 },
-
 	resolve: {
 		alias: {
 			'@': r('./apps/web/'),
@@ -26,6 +19,8 @@ export default defineConfig({
 			'@server': r('./apps/web/server/'),
 			'@services': r('./apps/web/services/'),
 			'@types': r('./apps/web/types/'),
+			'@utils': r('./apps/web/utils.ts'),
+			'packages': r('./packages'),
 		},
 	},
 });

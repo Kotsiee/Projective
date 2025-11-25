@@ -1,3 +1,11 @@
 .home {
-    padding: 0 10rem;
+    position: relative;
+    padding: 0;
+    margin: 0;
+
+    height: calc(100% + (var(--header-height) + 1rem));
+    width: calc(100% + (var(--side-nav-width) + 1rem));
+
+    top: calc((var(--header-height) + 1rem) * -1);
+    left: calc((var(--side-nav-width) + 1rem) * -1);
 }

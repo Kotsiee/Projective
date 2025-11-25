@@ -1,0 +1,35 @@
+.nav-bar-user__profile {
+  position: relative;
+
+  .nav-bar-user__profile__btn {
+    height: 2.75rem;
+    width: 2.75rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    max-height: 2.75rem;
+    max-width: 2.75rem;
+    border-radius: 4rem;
+
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .nav-bar-user__profile__btn__img {
+      min-height: inherit;
+      min-width: inherit;
+
+      border: 1px solid var(--text-dark);
+      border-radius: 4rem;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      img {
+        min-height: inherit;
+        min-width: inherit;
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+.header-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10rem;
+}
+
+.header__buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: bold;
+
+  .header__buttons__user {
+    padding: 0.4rem 2rem;
+    border-radius: var(--border-radius);
+    transition: background var(--medium), color var(--medium),
+      border var(--medium);
+
+    &.header__buttons__login {
+      color: var(--primary);
+      border: 1px solid var(--primary);
+
+      &:hover {
+        border: 1px solid var(--primary-highlight);
+        color: var(--primary-highlight);
+        box-shadow: 0 0 12px var(--primary);
+      }
+    }
+
+    &.header__buttons__join {
+      background-color: var(--primary);
+      color: white;
+
+      &:hover {
+        background-color: var(--primary-highlight);
+        box-shadow: 0 0 12px var(--primary);
+      }
+    }
+  }
+}

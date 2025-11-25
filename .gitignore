@@ -1,6 +1,16 @@
-﻿node_modules/
+# dotenv environment variable files
 .env
-supabase/.branches/
-dist/
-coverage/
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Fresh build directory
 _fresh/
+# npm + other dependencies
+node_modules/
+vendor/
+
+deno.lock
+
+.gitignore

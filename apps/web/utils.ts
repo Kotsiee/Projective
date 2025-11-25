@@ -1,9 +1,15 @@
-import { createDefine } from "fresh";
+// apps/web/utils/index.ts
+import { createDefine } from 'fresh';
 
-// This specifies the type of "ctx.state" which is used to share
-// data among middlewares, layouts and routes.
+// Per-request state (you can mutate its fields)
 export interface State {
-  shared: string;
+	shared?: string;
+
+	// Auth middleware flags
+	refreshedTokens?: { access: string; refresh: string } | null;
+	clearAuth?: boolean;
+	isAuthenticated?: boolean;
+	isOnboarded?: boolean;
 }
 
 export const define = createDefine<State>();
