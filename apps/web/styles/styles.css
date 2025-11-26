@@ -39,6 +39,36 @@
   color: var(--text);
   font-family: var(--font-sans);
 
+
+
+  /* -- Palette -- */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #111827;
+  --input-placeholder: #9ca3af;
+
+  /* -- States -- */
+  --input-focus-border: #3b82f6;
+  --input-focus-ring: rgba(59, 130, 246, 0.25);
+  --input-error-border: #ef4444;
+  --input-error-text: #ef4444;
+  --input-disabled-bg: #f3f4f6;
+  --input-disabled-text: #9ca3af;
+
+  /* -- Dropdown Specific -- */
+  --dropdown-bg: #ffffff;
+  --dropdown-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --option-hover: #f3f4f6;
+  --option-selected-bg: #eff6ff;
+  --option-selected-text: #2563eb;
+
+  /* -- Spacing & Radius -- */
+  --input-radius: 0.375rem;
+  --input-height: 2.5rem;
+  --input-padding-x: 0.75rem;
+
+
+
   [data-sidebar-open] {
     --side-nav-width: 4rem;
 

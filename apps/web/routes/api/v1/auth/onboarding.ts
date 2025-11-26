@@ -1,6 +1,5 @@
 import { define } from '@utils';
 import { onboarding } from '@server/auth/onboarding.ts';
-import { getAuthCookies } from '@server/auth/cookies.ts';
 import { supabaseClient } from '@server/core/clients/supabase.ts';
 
 export const handler = define.handlers({

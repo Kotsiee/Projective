@@ -1,8 +1,8 @@
 import '@styles/components/navigation/nav-bar-user-side.css';
 import { apps } from '@contracts/navigation.ts';
-import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-preact';
 import { useEffect, useState } from 'preact/hooks';
 import { signal } from '@preact/signals';
+import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-preact';
 
 const open = signal(false);
 

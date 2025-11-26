@@ -1,4 +1,4 @@
-import { ENV } from './env.ts';
+import { ENV } from "../config.ts";
 
 // packages/server-utils/jwt.ts
 let _jwtKey: CryptoKey | null = null;
@@ -10,11 +10,11 @@ export async function getJwtKey(): Promise<CryptoKey> {
 	const raw = new TextEncoder().encode(ENV.JWT_SECRET);
 
 	_jwtKey = await crypto.subtle.importKey(
-		'raw',
+		"raw",
 		raw,
-		{ name: 'HMAC', hash: 'SHA-256' },
+		{ name: "HMAC", hash: "SHA-256" },
 		false,
-		['sign', 'verify'],
+		["sign", "verify"],
 	);
 
 	return _jwtKey;

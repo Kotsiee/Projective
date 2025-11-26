@@ -1,5 +1,5 @@
 import '@styles/components/navigation/nav-bar-guest.css';
-import { theme } from '../../../../packages/ui/utils/ThemeSwitcher.ts';
+import { theme } from '@ui';
 
 export default function NavBarGuest() {
 	const switchTheme = () => {

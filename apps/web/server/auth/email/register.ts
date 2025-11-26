@@ -4,6 +4,7 @@ import { fail, ok, Result } from '../../core/http/result.ts';
 import { isLikelyEmail } from '../../core/validation/email.ts';
 import { Deps, RegisterOptions, SignUpData } from '../_shared/types.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
+import { Config } from '@backend';
 
 export async function registerWithEmail(
 	{ email, password }: RegisterWithEmailRequest,
@@ -18,7 +19,7 @@ export async function registerWithEmail(
 	if (p.length < 8) return fail('bad_request', 'Password must be at least 8 characters.', 400);
 
 	try {
-		const emailRedirectTo = `${Deno.env.get('URL')}/verify`;
+		const emailRedirectTo = `${Config.BASE_URL}/verify`;
 		const getClient = deps.getClient ?? supabaseClient;
 		const supabase = await getClient();
 

@@ -1,7 +1,7 @@
 // apps/web/routes/api/v1/auth/me.ts
 import { define } from '@utils';
 import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getAuthCookies } from '@server/auth/cookies.ts';
+import { getAuthCookies } from '@backend';
 
 export const handler = define.handlers({
 	async GET(ctx) {

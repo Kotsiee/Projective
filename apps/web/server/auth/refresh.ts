@@ -1,5 +1,5 @@
+import { getAuthCookies } from '@backend';
 import { supabaseClient } from '../core/clients/supabase.ts';
-import { getAuthCookies } from './cookies.ts';
 
 type RefreshResult = { access: string; refresh: string } | null;
 

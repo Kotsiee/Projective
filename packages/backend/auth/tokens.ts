@@ -1,5 +1,5 @@
 import { create } from 'djwt';
-import { hashArgon2id, randomTokenString } from './crypto.ts';
+import { hashArgon2id, randomTokenString } from '../crypto.ts';
 import { getJwtKey } from './jwt.ts'; // <-- new
 
 const ACCESS_TTL_SECONDS = 15 * 60; // 15 minutes

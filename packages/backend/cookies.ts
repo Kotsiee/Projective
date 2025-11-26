@@ -117,14 +117,3 @@ function randomToken(bytes = 32) {
 	crypto.getRandomValues(a);
 	return btoa(String.fromCharCode(...a)).replace(/=+$/, '');
 }
-
-export function getCsrfToken(name = 'pjv-csrf'): string | null {
-	const cookie = typeof document !== 'undefined' ? document.cookie : '';
-	if (!cookie) return null;
-
-	const match = cookie.match(
-		new RegExp('(?:^|; )' + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '=([^;]*)'),
-	);
-
-	return match ? decodeURIComponent(match[1]) : null;
-}

@@ -1,3 +1,49 @@
 .explore-filters {
+    height: 100%;
+    width: 100%;
 
+    .demo-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: sans-serif;
+    }
+
+    .demo-section {
+        margin-bottom: 2.5rem;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+    }
+
+    .demo-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #111827;
+    }
+
+    .demo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+        .demo-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .demo-state {
+        margin-top: 1rem;
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #6b7280;
+        background: #fff;
+        padding: 0.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+    }
 }

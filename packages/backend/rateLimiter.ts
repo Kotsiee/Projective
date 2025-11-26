@@ -1,11 +1,11 @@
-// packages/server-utils/rateLimiter.ts
-
 type BucketInfo = {
 	count: number;
-	resetAt: number; // ms timestamp
+	resetAt: number;
 };
 
-// naive in-memory store (resets on server restart)
+// Note: In a serverless environment (Deno Deploy), this Map is not shared across regions/isolates.
+// For strict global rate limiting, you must use Deno KV.
+// For now, this is "per-isolate" limiting.
 const buckets = new Map<string, BucketInfo>();
 
 export function rateLimitByIP(ip: string, limit = 20, windowMs = 60_000) {
@@ -13,7 +13,6 @@ export function rateLimitByIP(ip: string, limit = 20, windowMs = 60_000) {
 	const bucket = buckets.get(ip);
 
 	if (!bucket || now > bucket.resetAt) {
-		// start/reset bucket
 		buckets.set(ip, {
 			count: 1,
 			resetAt: now + windowMs,

@@ -1,6 +1,6 @@
 import '@styles/components/auth/login-button.css';
 import { useCallback, useState } from 'preact/hooks';
-import RegisterWithEmail from 'packages/utils/auth/register.ts';
+import RegisterWithEmail from 'packages/shared/validation/auth.ts';
 import { computed, Signal } from '@preact/signals';
 
 type Props = {

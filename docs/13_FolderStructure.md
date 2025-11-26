@@ -1,6 +1,8 @@
 # Projective Monorepo — Folder Structure & Naming Conventions
 
-This is a pragmatic structure for a Deno Fresh + Supabase (Postgres + RLS) + Rust WASM project. It keeps the edge app, API routes, database, and infra tidy; is CI-friendly; and scales from MVP to multi-team.
+This structure is a pragmatic foundation for a Deno Fresh + Supabase (Postgres + RLS) + Rust WASM
+project. It keeps the edge app, API routes, database, and packages tidy, is CI-friendly, and scales
+from MVP to multi-team.
 
 ---
 
@@ -11,12 +13,12 @@ projective/
 ├─ apps/
 │  └─ web/                     # Fresh (Deno) app: UI + API routes
 ├─ packages/
-│  ├─ ui/                      # Shared UI (islands/components, Tailwind, shadcn wrappers)
-│  ├─ lib/                     # Isomorphic TS utilities (validators, schema, errors, dates)
-│  ├─ sdk/                     # Typed client for calling /api/v1 from browser/edge jobs
-│  └─ wasm/                    # Rust crates compiled to WebAssembly
+│  ├─ backend/                 # Backend helpers (Auth, JWT, Cookies, Rate Limiting)
+│  ├─ shared/                  # Isomorphic TS utilities (Validation, Client-side CSRF)
+│  ├─ ui/                      # Shared UI (components, utils/ThemeSwitcher)
+│  └─ wasm/                    # Rust crates compiled to WebAssembly (e.g., image_ops)
 ├─ db/
-│  ├─ migrations/              # SQL migrations (idempotent, forward-only)
+│  ├─ migrations/              # SQL migrations (0001_init_schemas.sql, etc.)
 │  ├─ seeds/                   # Non-essential seed data
 │  ├─ policies/                # RLS policies split by schema/table
 │  ├─ functions/               # SQL & plpgsql functions (e.g., auth helpers)
@@ -26,20 +28,10 @@ projective/
 │  ├─ config/                  # Supabase CLI config, access roles
 │  ├─ storage-rules/           # Storage (policy) snippets per bucket
 │  └─ edge-functions/          # (Optional) Supabase Edge Functions
-├─ infra/
-│  ├─ deno/                    # Deno Deploy or self-host manifests
-│  ├─ cf/                      # Cloudflare Turnstile or Workers (if used)
-│  ├─ stripe/                  # Webhook fixtures & CLI scripts
-│  └─ github/                  # GitHub Actions workflows
-├─ docs/
-│  ├─ architecture/            # ADRs, diagrams
-│  ├─ api/                     # OpenAPI (generated), endpoint docs
-│  └─ product/                 # Feature specs, user flows
-├─ scripts/                    # Cross-repo task runners (deno task aliases)
-├─ .env.example                # Example env config (never commit real secrets)
-├─ deno.json                   # Deno config (tasks, import map, lint)
-├─ import_map.json             # Bare module specifiers mapping
-├─ README.md
+├─ docs/                       # Project documentation, architecture, APIs, product
+├─ scripts/                    # Cross-repo task runners (validate_names.ts)
+├─ deno.json                   # Deno config (tasks, imports, workspace)
+└─ README.md
 └─ LICENSE
 ```
 
@@ -48,53 +40,31 @@ projective/
 ## 2) `apps/web` (Fresh App) Structure
 
 ```text
-
 apps/web/
 ├─ routes/                     # Fresh routes: pages + API endpoints
-│  ├─ (public)/                # Authless pages (marketing, landing)
-│  ├─ (auth)/                  # /login, /signup
-│  ├─ (dashboard)/             # Authenticated areas
+│  ├─ (public)/                # Authless pages (/login, /explore, /)
+│  ├─ (auth)/                  # /login, /signup, /verify, /onboarding
+│  ├─ (dashboard)/             # Authenticated areas (/dashboard, /projects, /teams)
 │  ├─ api/                     # Fresh API routes (edge)
 │  │  └─ v1/                   # /api/v1/*
-│  │     ├─ auth/
-│  │     ├─ users/
-│  │     ├─ freelancers/
-│  │     ├─ businesses/
-│  │     ├─ teams/
-│  │     ├─ projects/
-│  │     ├─ stages/
-│  │     ├─ dms/
-│  │     ├─ templates/
-│  │     ├─ finance/
-│  │     ├─ marketplace/
-│  │     ├─ search/
-│  │     └─ meta/
 │  └─ _app.tsx                 # App shell
-├─ islands/                    # Preact interactive islands
-├─ components/                 # Presentational components
-├─ features/                   # Feature slices (screens, hooks, services)
-│  ├─ auth/
-│  ├─ account-switcher/
-│  ├─ team-selector/
-│  ├─ messaging/
-│  ├─ projects/
-│  ├─ marketplace/
-│  └─ templates/
-├─ server/                     # Server-side helpers (KV, cookies, auth)
-│  ├─ auth/
-│  ├─ kv/
-│  └─ middleware/
-├─ services/                   # API integrations (Supabase client, Stripe, Turnstile)
-├─ styles/                     # Tailwind CSS, global styles
-├─ types/                      # App-level TypeScript types
-├─ tests/                      # e2e/integration tests (deno test)
-└─ static/                     # Assets served as static files
+├─ islands/                    # Preact interactive islands (NavBar.tsx, Login.tsx)
+├─ components/                 # Presentational components (fields, buttons)
+├─ contracts/                  # Request/Response data shapes (auth, public)
+├─ server/                     # Server-side business logic
+│  ├─ auth/                    # Auth logic (email, oauth, refresh, onboarding)
+│  ├─ core/                    # Core clients (supabaseClient), utils, error handling
+│  └─ env.ts                   # Environment variable loading
+├─ styles/                     # CSS files (themes, components, layouts)
+├─ tests/                      # Unit & API integration tests
+├─ static/                     # Assets served as static files (logo.svg)
+└─ utils.ts                    # Fresh context & state definition (`define`, `State`)
 ```
 
 **API route filenames** mirror endpoint paths. Example:
 
 - `/api/v1/projects/[id].ts` → `GET, PATCH, DELETE` handlers
-- `/api/v1/stages/[stageId]/approve.ts` → action endpoints  
+- `/api/v1/stages/[stageId]/approve.ts` → action endpoints\
   Keep one file per resource or action for discoverability.
 
 ---
@@ -102,38 +72,42 @@ apps/web/
 ## 3) `packages` (Shared Code)
 
 ```text
-
-packages/ui/                   # Reusable UI (Tailwind + shadcn)
-packages/lib/                  # Pure TS: zod schemas, errors, utils
-packages/sdk/                  # Typed fetchers for /api/v1 (request/response types)
-packages/wasm/
-└─ image_ops/                  # Rust crate compiled to wasm (wasm-bindgen)
+packages/
+├─ backend/                   # Node/Deno server-side helpers (not frontend safe)
+│  ├─ auth/                   # JWT creation, token/cookie handling, configs
+│  ├─ config.ts               # Env variable access (`Config`)
+│  ├─ cookies.ts              # Deno cookie helpers (setAuthCookies, getAuthCookies)
+│  ├─ crypto.ts               # Hashing (`hashArgon2id`), token generation
+│  └─ rateLimiter.ts          # Per-isolate rate limiting utility
+├─ shared/                    # Isomorphic TS (can be imported by frontend or backend)
+│  ├─ validation/auth.ts      # Auth validators (`AuthValidator`)
+│  └─ cookies.ts              # Client-side CSRF token getter (`getCsrfToken`)
+├─ ui/
+│  └─ utils/ThemeSwitcher.ts  # Theme signaling logic
+└─ wasm/
 ```
 
 **Naming**
 
 - Packages: `kebab-case`.
 - Exports: prefer named exports; default export only for React components.
-- WASM crates: `snake_case` (Rust convention); built artifacts published to `packages/wasm/<crate>/dist/`.
+- WASM crates: `snake_case` (Rust convention); built artifacts published to
+  `packages/wasm/<crate>/dist/`.
 
 ---
 
 ## 4) Database Files (`/db`)
 
 ```text
-
 db/
 ├─ migrations/
-│  ├─ 0001_init_schemas.sql
-│  ├─ 0002_org_tables.sql
-│  ├─ 0003_projects_tables.sql
-│  ├─ 0004_comms_tables.sql
-│  ├─ 0005_finance_tables.sql
-│  ├─ 0006_marketplace_tables.sql
-│  ├─ 0007_search_templates.sql
-│  ├─ 0008_indexes_constraints.sql
-│  ├─ 0009_rls_enable.sql
-│  └─ 0010_policies_batch_1.sql
+│  ├─ 0001_init_schemas.sql        # Core schemas and enums
+│  ├─ 0002_security_tables.sql     # Audit, refresh_tokens, session_context
+│  ├─ 0003_org_tables.sql          # Profiles, teams, attachments
+│  ├─ 0005_projects_tables.sql     # Projects, stages, assignments
+│  ├─ 0006_comms_tables.sql        # Messages, channels, participants
+│  ├─ 0007_finance_tables.sql      # Wallets, escrows, disputes
+│  └─ 0020_helpers_functions.sql   # `security.is_admin`, `security.current_context`
 ├─ policies/
 │  ├─ org/
 │  │  ├─ freelancer_profiles.sql
@@ -163,15 +137,16 @@ db/
    └─ diff.sh
 ```
 
-**Migration naming**: `NNNN_descriptive_snake_case.sql` (monotonic, forward-only).  
-**Policy files**: one table per file, named exactly as `<schema>/<table>.sql`.  
+**Migration naming**: `NNNN_descriptive_snake_case.sql` (monotonic, forward-only).\
+**Policy files**: one table per file, named exactly as `<schema>/<table>.sql`.\
 **Functions/Views**: 1 file per function/view; name equals the function/view.
 
 ---
 
 ## 5) Supabase Storage Conventions
 
-**Buckets** (all lowercase, singular): `avatars`, `attachments`, `chat`, `project`, `marketplace`, `previews`, `quarantine`, `integrations`, `tmp`.
+**Buckets** (all lowercase, singular): `avatars`, `attachments`, `chat`, `project`, `marketplace`,
+`previews`, `quarantine`, `integrations`, `tmp`.
 
 **Object path format** (use stable IDs, never user-provided names in path segments):
 
@@ -193,7 +168,8 @@ db/
 - TypeScript types: `PascalCase` (`UserProfile`, `ProjectStage`)
 - Functions/variables: `camelCase`
 - Constants: `UPPER_SNAKE_CASE`
-- Enums (TS): `PascalCase` enum + `SCREAMING_SNAKE_CASE` members if numeric; otherwise `camelCase` string unions.
+- Enums (TS): `PascalCase` enum + `SCREAMING_SNAKE_CASE` members if numeric; otherwise `camelCase`
+  string unions.
 
 ### 6.2 UI & Components
 
@@ -224,7 +200,8 @@ db/
 
 ## 7) Database Naming Conventions
 
-- Schemas: `security`, `org`, `projects`, `comms`, `finance`, `marketplace`, `search`, `ops`, `analytics`, `integrations`.
+- Schemas: `security`, `org`, `projects`, `comms`, `finance`, `marketplace`, `search`, `ops`,
+  `analytics`, `integrations`.
 - Tables: **`snake_case` plural** (`freelancer_profiles`, `project_stages`).
 - Columns: `snake_case`. Primary keys named `id` (uuid). Foreign keys reference `<table>.<id>`.
 - Enums: `snake_case` values (`draft`, `in_progress`), type names `snake_case`.
@@ -242,16 +219,16 @@ db/
 
 - Enable RLS in a single migration early (`0009_rls_enable.sql`).
 - One policy file per table in `db/policies/<schema>/<table>.sql`.
-- Policy names reflect **who** and **why**:  
-  `pol_project_messages_channel_participant_select`,  
-  `pol_wallets_owner_select`,  
+- Policy names reflect **who** and **why**:\
+  `pol_project_messages_channel_participant_select`,\
+  `pol_wallets_owner_select`,\
   `pol_attachments_owner_or_shared_select`.
 
 ---
 
 ## 9) Env Vars & Secrets
 
-**Naming**: `UPPER_SNAKE_CASE`.  
+**Naming**: `UPPER_SNAKE_CASE`.\
 **Prefixes**:
 
 - Public (exposed to client): `PUBLIC_` (e.g., `PUBLIC_TURNSTILE_SITE_KEY`)
@@ -301,14 +278,15 @@ db/
 ## 12) Error Handling & Response Shapes
 
 - Error objects: `{ error: { code: string, message: string, details?: unknown } }`
-- Codes: `auth.invalid_token`, `auth.forbidden`, `validation.failed`, `resource.not_found`, `rate.limit_exceeded`
+- Codes: `auth.invalid_token`, `auth.forbidden`, `validation.failed`, `resource.not_found`,
+  `rate.limit_exceeded`
 - Never leak internal stack traces to clients.
 
 ---
 
 ## 13) API Response & File Naming
 
-- JSON fields: `snake_case` or `camelCase`? **Pick one and stick to it.**  
+- JSON fields: `snake_case` or `camelCase`? **Pick one and stick to it.**\
   For Deno + TS frontends, prefer **camelCase in JSON** (DX), keep **snake_case in DB**.
 - Download filenames: `kebab-case` + semantic suffixes (`project-export-2025-10-18.zip`).
 
@@ -412,4 +390,5 @@ Deploy workflows live under `infra/github/`. Separate jobs for `preview` and `pr
 - **Policies/Functions/Views**: one object per file, name = object.
 - **Env**: `PUBLIC_` for client-exposed, everything else server-only.
 
-This scaffolding + naming playbook prevents bikeshedding and keeps velocity high as the codebase grows.
+This scaffolding + naming playbook prevents bikeshedding and keeps velocity high as the codebase
+grows.

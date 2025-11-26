@@ -1,4 +1,5 @@
 import { define } from '@utils';
+import { Config } from '@backend';
 
 const startedAt = Date.now();
 
@@ -14,8 +15,7 @@ type HealthPayload = {
 
 function payload(): HealthPayload {
 	const uptime = Math.max(0, Date.now() - startedAt);
-	const env = Deno.env.get('APP_ENV') ??
-		(Deno.env.get('DENO_DEPLOYMENT_ID') ? 'production' : 'development');
+	const env = Config.APP_ENV ? 'production' : 'development';
 	return {
 		status: 'ok',
 		service: Deno.env.get('APP_NAME') ?? 'projective-api',

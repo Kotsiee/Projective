@@ -12,21 +12,14 @@ export type RegisterErrors = {
 	confirmPassword?: string;
 };
 
-export default class RegisterWithEmail {
+export class AuthValidator {
 	// --- email validation ---
 	static validateEmail(email: string): string | null {
 		const trimmed = email.trim();
-
-		if (!trimmed) {
-			return 'Email is required.';
-		}
-
+		if (!trimmed) return 'Email is required.';
+		// Basic regex, can be improved
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-		if (!emailPattern.test(trimmed)) {
-			return 'Enter a valid email address.';
-		}
-
+		if (!emailPattern.test(trimmed)) return 'Enter a valid email address.';
 		return null;
 	}
 
@@ -34,6 +27,10 @@ export default class RegisterWithEmail {
 	static validatePassword(password: string, email?: string): string | null {
 		if (!password) {
 			return 'Password is required.';
+		}
+
+		if (password.length < 8) {
+			return 'Password must be at least 8 characters long.';
 		}
 
 		if (!/[a-z]/.test(password)) {
@@ -54,10 +51,6 @@ export default class RegisterWithEmail {
 
 		if (/\s/.test(password)) {
 			return 'Password must not contain spaces.';
-		}
-
-		if (password.length < 8) {
-			return 'Password must be at least 8 characters long.';
 		}
 
 		if (email) {

@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { setAuthCookies } from '@server/auth/cookies.ts';
+import { setAuthCookies } from '@backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {

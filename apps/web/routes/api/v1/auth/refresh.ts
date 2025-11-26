@@ -1,7 +1,7 @@
 // apps/web/routes/api/v1/auth/refresh.ts
 import { define } from '@utils';
-import { clearAuthCookies, setAuthCookies } from '@server/auth/cookies.ts';
 import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
+import { clearAuthCookies, setAuthCookies } from '@backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {

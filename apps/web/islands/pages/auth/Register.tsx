@@ -5,7 +5,7 @@ import RegisterButton from '@components/auth/RegisterButton.tsx';
 import GoogleRegisterButton from '@components/auth/GoogleRegisterButton.tsx';
 import GitHubRegisterButton from '@components/auth/GitHubRegisterButton.tsx';
 import { signal } from '@preact/signals';
-import RegisterWithEmail, { RegisterErrors } from 'packages/utils/auth/register.ts';
+import { AuthValidator, RegisterErrors } from '@shared';
 
 const email = signal<string | undefined>(undefined);
 const password = signal<string | undefined>(undefined);
@@ -36,7 +36,8 @@ export default function RegisterIsland() {
 										emailError.value = '';
 									}}
 									onBlur={() => {
-										emailError.value = RegisterWithEmail.validateEmail(email.value || '');
+										emailError.value = AuthValidator
+											.validateEmail(email.value || '');
 									}}
 									placeholder='Email'
 									autocomplete='email'
@@ -50,8 +51,13 @@ export default function RegisterIsland() {
 									}}
 								/>
 								{emailError.value && (
-									<p id='email-error' class='register__field-error' role='alert'>
-										{emailError.value || errors.value?.email}
+									<p
+										id='email-error'
+										class='register__field-error'
+										role='alert'
+									>
+										{emailError.value ||
+											errors.value?.email}
 									</p>
 								)}
 							</div>
@@ -64,14 +70,16 @@ export default function RegisterIsland() {
 										confirmPasswordError.value = '';
 									}}
 									onBlur={() => {
-										passwordError.value = RegisterWithEmail.validateConfirmPassword(
-											password.value || '',
-											confirmPassword.value || '',
-										);
-										confirmPasswordError.value = RegisterWithEmail.validateConfirmPassword(
-											password.value || '',
-											confirmPassword.value || '',
-										);
+										passwordError.value = AuthValidator
+											.validateConfirmPassword(
+												password.value || '',
+												confirmPassword.value || '',
+											);
+										confirmPasswordError.value = AuthValidator
+											.validateConfirmPassword(
+												password.value || '',
+												confirmPassword.value || '',
+											);
 									}}
 									placeholder='Password'
 									autocomplete='new-password'
@@ -84,8 +92,13 @@ export default function RegisterIsland() {
 									}}
 								/>
 								{passwordError.value && (
-									<p id='password-error' class='register__field-error' role='alert'>
-										{passwordError.value || errors.value?.password}
+									<p
+										id='password-error'
+										class='register__field-error'
+										role='alert'
+									>
+										{passwordError.value ||
+											errors.value?.password}
 									</p>
 								)}
 							</div>
@@ -98,14 +111,16 @@ export default function RegisterIsland() {
 										confirmPasswordError.value = '';
 									}}
 									onBlur={() => {
-										passwordError.value = RegisterWithEmail.validateConfirmPassword(
-											password.value || '',
-											confirmPassword.value || '',
-										);
-										confirmPasswordError.value = RegisterWithEmail.validateConfirmPassword(
-											password.value || '',
-											confirmPassword.value || '',
-										);
+										passwordError.value = AuthValidator
+											.validateConfirmPassword(
+												password.value || '',
+												confirmPassword.value || '',
+											);
+										confirmPasswordError.value = AuthValidator
+											.validateConfirmPassword(
+												password.value || '',
+												confirmPassword.value || '',
+											);
 									}}
 									placeholder='Re-enter Password'
 									autocomplete='new-password'
@@ -118,8 +133,13 @@ export default function RegisterIsland() {
 									}}
 								/>
 								{confirmPasswordError.value && (
-									<p id='confirmPassword-error' class='register__field-error' role='alert'>
-										{confirmPasswordError.value || errors.value?.confirmPassword}
+									<p
+										id='confirmPassword-error'
+										class='register__field-error'
+										role='alert'
+									>
+										{confirmPasswordError.value ||
+											errors.value?.confirmPassword}
 									</p>
 								)}
 							</div>

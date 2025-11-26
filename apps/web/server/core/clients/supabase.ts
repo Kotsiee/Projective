@@ -1,12 +1,11 @@
 import { createClient, type SupabaseClient, type SupabaseClientOptions } from 'supabaseClient';
-
-import { getAuthCookies } from '../../auth/cookies.ts';
+import { Config, getAuthCookies } from '@backend';
 
 let anonClient: SupabaseClient /*<Database>*/ | null = null;
 
 function getEnv() {
-	const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-	const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+	const SUPABASE_URL = Config.SUPABASE_URL;
+	const ANON_KEY = Config.SUPABASE_SERVICE_ROLE_KEY;
 	if (!SUPABASE_URL || !ANON_KEY) throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
 	return { SUPABASE_URL, ANON_KEY };
 }

@@ -1,13 +1,14 @@
 // apps/web/routes/_middleware.ts
 import { define } from '@utils';
+import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
+import { isOnboarded } from '@server/auth/onboarding.ts';
 import {
 	clearAuthCookies,
 	getAuthCookies,
+	rateLimitByIP,
 	setAuthCookies,
 	verifyCsrf,
-} from '@server/auth/cookies.ts';
-import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
-import { isOnboarded } from '@server/auth/onboarding.ts';
+} from '@backend';
 
 function jwtExp(token: string): number | null {
 	try {
@@ -35,6 +36,10 @@ const middleware1 = define.middleware(async (ctx) => {
 	const { accessToken, refreshToken } = getAuthCookies(req);
 	const now = Math.floor(Date.now() / 1000);
 	const skew = 60;
+
+	const ip = (req.headers.get('x-forwarded-for') ?? '127.0.0.1').split(',')[0];
+	const { allowed } = rateLimitByIP(ip);
+	if (!allowed) return new Response('Too Many Requests', { status: 429 });
 
 	ctx.state.isAuthenticated = !!accessToken;
 

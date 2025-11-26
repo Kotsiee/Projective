@@ -58,7 +58,7 @@ export default function SearchIsland({ query }: { query: string }) {
 
 				<div class='search-page__options__bottom'>
 					<div class='search-page__options__results-count'>
-						<p type='button'>Showing 472 results for "{query}" category</p>
+						<p>Showing 472 results for "{query}" category</p>
 					</div>
 					<div class='search-page__options__category-type'>
 						<label>
@@ -130,11 +130,10 @@ export default function SearchIsland({ query }: { query: string }) {
 				{showFilters.value &&
 					(
 						<aside class='search-page__results__filters__container'>
-							<ExploreFilters />
 						</aside>
 					)}
 				<div class='search-page__results__content'>
-					Search Results
+					<ExploreFilters />
 				</div>
 			</div>
 		</div>
