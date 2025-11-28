@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { setAuthCookies } from '@backend';
+import { setAuthCookies } from '@projective/backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {

@@ -1,7 +1,7 @@
 import { define } from '@utils';
 import { loginWithEmail } from '@server/auth/email/login.ts';
 import { setCookie } from '@std/http/cookie';
-import { setAuthCookies } from '@backend';
+import { setAuthCookies } from '@projective/backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {

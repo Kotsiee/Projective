@@ -4,7 +4,7 @@
   gap: 0.5em;
   width: 100%;
   border-radius: var(--border-radius);
-  background-color: var(--card);
+  background-color: var(--header);
 
   .search-bar__input {
     width: 100%;

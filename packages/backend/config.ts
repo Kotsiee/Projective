@@ -21,6 +21,7 @@ function requireEnv(name: string): string {
 
 export const Config = {
 	SUPABASE_URL: requireEnv('SUPABASE_URL'),
+	SUPABASE_ANON_KEY: requireEnv('SUPABASE_ANON_KEY'),
 	SUPABASE_SERVICE_ROLE_KEY: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
 	JWT_SECRET: requireEnv('JWT_SECRET'),
 	APP_ENV: Deno.env.get('APP_ENV') ?? 'development',

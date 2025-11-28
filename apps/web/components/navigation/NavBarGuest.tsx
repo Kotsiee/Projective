@@ -1,5 +1,5 @@
 import '@styles/components/navigation/nav-bar-guest.css';
-import { theme } from '@ui';
+import { theme } from '@projective/ui';
 
 export default function NavBarGuest() {
 	const switchTheme = () => {

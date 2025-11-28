@@ -1,7 +1,7 @@
 // apps/web/islands/auth/OnboardingSubmit.tsx
 import { useCallback, useState } from 'preact/hooks';
 import { OnboardingRequest } from '@contracts/auth/onboading.ts';
-import { getCsrfToken } from '@shared';
+import { getCsrfToken } from '@projective/shared';
 
 export default function OnboardingSubmit({
 	firstName,

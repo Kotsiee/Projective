@@ -1,7 +1,7 @@
 # dotenv environment variable files
 .env
-# .env.development
-# .env.production
+.env.development
+.env.production
 
 # Fresh build directory
 _fresh/
@@ -10,5 +10,8 @@ node_modules/
 vendor/
 
 deno.lock
+cargo.lock
 
 .gitignore
+
+target/

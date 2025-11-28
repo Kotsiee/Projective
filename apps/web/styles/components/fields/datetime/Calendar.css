@@ -1,0 +1,152 @@
+/* --- Base --- */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  /* Default width, can be overridden */
+  background-color: var(--dropdown-bg, #ffffff);
+  border: 1px solid var(--input-border, #d1d5db);
+  border-radius: var(--input-radius, 0.5rem);
+  padding: 1rem;
+  user-select: none;
+  font-family: inherit;
+}
+
+/* --- Header --- */
+.calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.calendar__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--input-text, #111827);
+}
+
+.calendar__nav-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.calendar__nav-btn:hover {
+  background-color: #f3f4f6;
+  color: var(--input-text, #111827);
+}
+
+/* --- Weekdays --- */
+.calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.calendar__weekday {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+/* --- Grid --- */
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+/* --- Day Cell --- */
+.calendar__day {
+  height: 2.25rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--input-text, #111827);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.calendar__day:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+/* Muted (Adjacent month) */
+.calendar__day--muted {
+  color: #d1d5db;
+}
+
+/* Today */
+.calendar__day--today {
+  font-weight: 700;
+  color: var(--fill-bg, #3b82f6);
+}
+
+/* Selected */
+.calendar__day--selected {
+  background-color: var(--fill-bg, #3b82f6) !important;
+  color: #ffffff !important;
+}
+
+/* Disabled */
+.calendar__day--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* --- Range Styling --- */
+
+/* Start of Range */
+.calendar__day--range-start {
+  background-color: var(--fill-bg, #3b82f6);
+  color: #ffffff;
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* End of Range */
+.calendar__day--range-end {
+  background-color: var(--fill-bg, #3b82f6);
+  color: #ffffff;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Single Day Range (Start == End) */
+.calendar__day--range-start.calendar__day--range-end {
+  border-radius: 0.375rem;
+}
+
+/* Middle of Range (The connector) */
+.calendar__day--range-middle {
+  background-color: rgba(59, 130, 246, 0.15);
+  /* Light Blue */
+  color: var(--input-text);
+  border-radius: 0;
+  /* Rectangular connection */
+}
+
+/* Adjust hover effect for range middle */
+.calendar__day--range-middle:hover {
+  background-color: rgba(59, 130, 246, 0.25);
+}

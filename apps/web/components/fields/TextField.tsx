@@ -8,9 +8,9 @@ import {
 	IconEyeOff,
 	IconX,
 } from '@tabler/icons-preact';
-import { TextFieldProps } from '../../types/fields/text.ts';
-import { useTextMask } from '../../hooks/useTextMask.ts';
-import { formatCurrency, isValidCreditCard, parseNumber } from '@shared';
+import { TextFieldProps } from '@projective/types';
+import { useTextMask } from '@hooks/fields/useTextMask.ts';
+import { formatCurrency, isValidCreditCard, parseNumber } from '@projective/shared';
 
 export default function TextField(props: TextFieldProps) {
 	const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);

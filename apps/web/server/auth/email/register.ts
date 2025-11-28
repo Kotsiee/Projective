@@ -4,7 +4,7 @@ import { fail, ok, Result } from '../../core/http/result.ts';
 import { isLikelyEmail } from '../../core/validation/email.ts';
 import { Deps, RegisterOptions, SignUpData } from '../_shared/types.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { Config } from '@backend';
+import { Config } from '@projective/backend';
 
 export async function registerWithEmail(
 	{ email, password }: RegisterWithEmailRequest,

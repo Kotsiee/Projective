@@ -1,11 +1,11 @@
 import { createClient, type SupabaseClient, type SupabaseClientOptions } from 'supabaseClient';
-import { Config, getAuthCookies } from '@backend';
+import { Config, getAuthCookies } from '@projective/backend';
 
 let anonClient: SupabaseClient /*<Database>*/ | null = null;
 
 function getEnv() {
 	const SUPABASE_URL = Config.SUPABASE_URL;
-	const ANON_KEY = Config.SUPABASE_SERVICE_ROLE_KEY;
+	const ANON_KEY = Config.SUPABASE_ANON_KEY;
 	if (!SUPABASE_URL || !ANON_KEY) throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
 	return { SUPABASE_URL, ANON_KEY };
 }

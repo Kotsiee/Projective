@@ -1,0 +1,153 @@
+/* --- Field --- */
+.time-field {
+    width: 100%;
+}
+
+.time-field__icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--input-placeholder, #9ca3af);
+    display: flex;
+    align-items: center;
+    padding: 2px;
+}
+
+.time-field__clock-wrapper {
+    background: var(--dropdown-bg);
+    border-radius: var(--input-radius);
+    overflow: hidden;
+    width: 280px;
+}
+
+/* --- Clock Header --- */
+.time-clock__header {
+    background-color: var(--fill-bg, #3b82f6);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.time-clock__digital {
+    font-size: 2rem;
+    display: flex;
+    align-items: baseline;
+}
+
+.time-clock__sep {
+    margin: 0 0.25rem;
+    opacity: 0.7;
+}
+
+.time-clock__val {
+    background: none;
+    border: none;
+    font-size: inherit;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0;
+}
+
+.time-clock__val--active {
+    color: white;
+}
+
+.time-clock__ampm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.time-clock__meridiem {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+    padding: 0.1rem 0.3rem;
+    cursor: pointer;
+}
+
+.time-clock__meridiem--active {
+    background: white;
+    color: var(--fill-bg, #3b82f6);
+    font-weight: bold;
+}
+
+/* --- Clock Body --- */
+.time-clock__body {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.clock__face {
+    width: 230px;
+    height: 230px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    position: relative;
+    touch-action: none;
+    /* Crucial for drag */
+}
+
+.clock__center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: var(--fill-bg, #3b82f6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
+
+.clock__number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;
+    margin-left: -16px;
+    /* Center pivot */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    color: #111827;
+    pointer-events: none;
+    /* Let clicks pass to face */
+    z-index: 2;
+}
+
+.clock__number--active {
+    color: white;
+}
+
+.clock__hand {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    /* Pivot at bottom center (center of clock) */
+    width: 2px;
+    background: var(--fill-bg, #3b82f6);
+    transform-origin: bottom center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.clock__hand-knob {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--fill-bg, #3b82f6);
+    transform: translateX(-50%);
+}

@@ -5,7 +5,7 @@ import RegisterButton from '@components/auth/RegisterButton.tsx';
 import GoogleRegisterButton from '@components/auth/GoogleRegisterButton.tsx';
 import GitHubRegisterButton from '@components/auth/GitHubRegisterButton.tsx';
 import { signal } from '@preact/signals';
-import { AuthValidator, RegisterErrors } from '@shared';
+import { AuthValidator, RegisterErrors } from '@projective/shared';
 
 const email = signal<string | undefined>(undefined);
 const password = signal<string | undefined>(undefined);
@@ -40,7 +40,6 @@ export default function RegisterIsland() {
 											.validateEmail(email.value || '');
 									}}
 									placeholder='Email'
-									autocomplete='email'
 									type='email'
 									aria-label='Email address'
 									aria-required='true'

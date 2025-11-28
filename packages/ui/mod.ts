@@ -1,1 +1,1 @@
-export * from './utils/ThemeSwitcher.ts';
+export * from './ThemeSwitcher.ts';

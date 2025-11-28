@@ -1,7 +1,7 @@
 // apps/web/routes/api/v1/auth/me.ts
 import { define } from '@utils';
 import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getAuthCookies } from '@backend';
+import { getAuthCookies } from '@projective/backend';
 
 export const handler = define.handlers({
 	async GET(ctx) {

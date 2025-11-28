@@ -1,26 +1,23 @@
-import { LoginWithEmailRequest } from "@contracts/auth/login.ts";
-import { supabaseClient } from "../../core/clients/supabase.ts";
-import { fail, ok, Result } from "../../core/http/result.ts";
-import { isLikelyEmail } from "../../core/validation/email.ts";
-import { Deps, SignInData } from "../_shared/types.ts";
-import {
-	normaliseSupabaseError,
-	normaliseUnknownError,
-} from "../../core/errors/normalise.ts";
-import { Config } from "@backend";
+import { LoginWithEmailRequest } from '@contracts/auth/login.ts';
+import { supabaseClient } from '../../core/clients/supabase.ts';
+import { fail, ok, Result } from '../../core/http/result.ts';
+import { isLikelyEmail } from '../../core/validation/email.ts';
+import { Deps, SignInData } from '../_shared/types.ts';
+import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
+import { Config } from '@projective/backend';
 
 export async function loginWithEmail(
 	{ email, password }: LoginWithEmailRequest,
 	deps: Deps = {},
 ): Promise<Result<SignInData>> {
-	const e = (email ?? "").trim().toLowerCase();
-	const p = (password ?? "").trim();
+	const e = (email ?? '').trim().toLowerCase();
+	const p = (password ?? '').trim();
 
 	if (!e || !p) {
-		return fail("bad_request", "Email and password are required.", 400);
+		return fail('bad_request', 'Email and password are required.', 400);
 	}
 	if (!isLikelyEmail(e)) {
-		return fail("bad_request", "Invalid email format.", 400);
+		return fail('bad_request', 'Invalid email format.', 400);
 	}
 
 	try {

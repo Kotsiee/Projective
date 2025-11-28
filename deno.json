@@ -4,7 +4,9 @@
     "./apps/web",
     "./packages/shared",
     "./packages/backend",
-    "./packages/ui"
+    "./packages/ui",
+    "./packages/utils",
+    "./packages/types"
   ],
   "tasks": {
     "format": "deno fmt --check",
@@ -124,9 +126,11 @@
     "supabaseClient": "npm:@supabase/supabase-js@2.76.1",
 
     "packages/": "./packages/",
-    "@shared": "./packages/shared/mod.ts",
-    "@backend": "./packages/backend/mod.ts",
-    "@ui": "./packages/ui/mod.ts",
+    "@projective/shared": "./packages/shared/mod.ts",
+    "@projective/backend": "./packages/backend/mod.ts",
+    "@projective/ui": "./packages/ui/mod.ts",
+    "@projective/utils": "./packages/utils/mod.ts",
+    "@projective/types": "./packages/types/mod.ts",
 
     "@/": "./apps/web/",
     "@components/": "./apps/web/components/",
@@ -134,7 +138,7 @@
     "@styles/": "./apps/web/styles/",
     "@server/": "./apps/web/server/",
     "@contracts/": "./apps/web/contracts/",
-    "@utils": "./apps/web/utils.ts"
+    "@hooks/": "./apps/web/hooks/"
   },
   "exclude": ["**/_fresh/*"]
 }

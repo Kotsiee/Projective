@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { Config } from '@backend';
+import { Config } from '@projective/backend';
 
 const startedAt = Date.now();
 

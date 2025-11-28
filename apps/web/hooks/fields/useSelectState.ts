@@ -1,6 +1,6 @@
 import { useComputed, useSignal } from '@preact/signals';
 import { useCallback } from 'preact/hooks';
-import { SelectOption } from '../types/fields/select.ts';
+import { SelectOption } from '../../types/fields/select.ts';
 
 interface UseSelectStateProps {
 	options: SelectOption[];

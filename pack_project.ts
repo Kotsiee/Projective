@@ -2,7 +2,7 @@ import { walk } from 'https://deno.land/std@0.208.0/fs/walk.ts';
 import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // Config: Add files/folders to ignore
-const IGNORE_DIRS = ['.git', 'node_modules', '_fresh', '.vscode', 'cov_profile'];
+const IGNORE_DIRS = ['.git', 'node_modules', '_fresh', '.vscode', 'cov_profile', 'docs', 'tests'];
 const IGNORE_FILES = ['.env', 'deno.lock', '.DS_Store', 'pack_project.ts', 'README.md'];
 const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.css', '.md', '.json', '.toml'];
 

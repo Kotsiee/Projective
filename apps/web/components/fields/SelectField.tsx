@@ -1,9 +1,8 @@
 import '@styles/components/fields/SelectField.css';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { IconCheck, IconChevronDown, IconLoader2, IconSelector, IconX } from '@tabler/icons-preact';
-import { useSelectState } from '../../hooks/useSelectState.ts';
-import { BaseFieldProps } from '../../types/fields/form.ts';
-import { SelectFieldConfig, SelectOption } from '../../types/fields/select.ts';
+import { useSelectState } from '@hooks/fields/useSelectState.ts';
+import { BaseFieldProps, SelectFieldConfig, SelectOption } from '@projective/types';
 
 interface SelectFieldProps extends BaseFieldProps, SelectFieldConfig {
 	options: SelectOption[];

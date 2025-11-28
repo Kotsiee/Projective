@@ -1,4 +1,3 @@
-// apps/web/routes/_middleware.ts
 import { define } from '@utils';
 import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
 import { isOnboarded } from '@server/auth/onboarding.ts';
@@ -8,7 +7,7 @@ import {
 	rateLimitByIP,
 	setAuthCookies,
 	verifyCsrf,
-} from '@backend';
+} from '@projective/backend';
 
 function jwtExp(token: string): number | null {
 	try {
@@ -28,24 +27,46 @@ function jwtExp(token: string): number | null {
 	}
 }
 
-const middleware1 = define.middleware(async (ctx) => {
+// Assets to exclude from rate limiting and auth checks
+const EXCLUDED_PATHS = [
+	'/_fresh',
+	'/static',
+	'/favicon.ico',
+	'/logo.svg',
+	'/styles.css',
+	'/components',
+];
+
+export const handler = define.middleware(async (ctx) => {
 	const req = ctx.req;
 	const url = new URL(req.url);
 	const path = url.pathname;
 
+	// 1. Skip expensive logic for static assets
+	if (
+		EXCLUDED_PATHS.some((p) => path.startsWith(p)) ||
+		path.match(/\.(css|js|png|jpg|jpeg|svg|ico|woff2?)$/)
+	) {
+		return await ctx.next();
+	}
+
+	// 2. Rate Limiting
+	const ip = (req.headers.get('x-forwarded-for') ?? '127.0.0.1').split(',')[0];
+	const { allowed } = rateLimitByIP(ip);
+
+	if (!allowed) {
+		console.warn(`[RateLimit] Blocked ${ip} on ${path}`);
+		return new Response('Too Many Requests', { status: 429 });
+	}
+
+	// 3. Auth & Refresh Logic
 	const { accessToken, refreshToken } = getAuthCookies(req);
 	const now = Math.floor(Date.now() / 1000);
 	const skew = 60;
 
-	const ip = (req.headers.get('x-forwarded-for') ?? '127.0.0.1').split(',')[0];
-	const { allowed } = rateLimitByIP(ip);
-	if (!allowed) return new Response('Too Many Requests', { status: 429 });
-
 	ctx.state.isAuthenticated = !!accessToken;
-
-	if (!ctx.state.isAuthenticated) {
-		ctx.state.isOnboarded = false;
-	}
+	ctx.state.refreshedTokens = null;
+	ctx.state.clearAuth = false;
 
 	// Decide if we should refresh
 	let shouldRefresh = false;
@@ -57,23 +78,23 @@ const middleware1 = define.middleware(async (ctx) => {
 		}
 	}
 
-	// Use ctx.state fields (OK), do NOT reassign ctx.state
-	ctx.state.refreshedTokens = null;
-	ctx.state.clearAuth = false;
-
 	if (shouldRefresh) {
 		const refreshed = await maybeRefreshFromRequest(req);
 		if (refreshed) {
 			ctx.state.refreshedTokens = refreshed;
+			ctx.state.isAuthenticated = true; // We are now technically authenticated
 		} else {
 			ctx.state.clearAuth = true;
+			ctx.state.isAuthenticated = false;
 		}
 	}
 
-	// CSRF for cookie-auth state-changing requests (skip if Authorization: Bearer present)
+	// 4. CSRF Check (State changing methods)
 	const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
 	const hasBearer = !!req.headers.get('authorization')?.startsWith('Bearer ');
-	if (isStateChanging && !hasBearer && (accessToken || ctx.state.refreshedTokens)) {
+
+	// Skip CSRF for specific endpoints if needed (like webhooks), handled separately usually
+	if (isStateChanging && !hasBearer && ctx.state.isAuthenticated) {
 		if (!verifyCsrf(req)) {
 			return new Response(
 				JSON.stringify({ error: { code: 'csrf_failed', message: 'CSRF check failed' } }),
@@ -82,9 +103,19 @@ const middleware1 = define.middleware(async (ctx) => {
 		}
 	}
 
-	// Always allow /verify
+	// 5. Populate Onboarding State (Only if authenticated)
+	// We do this here so it's available for specific route middlewares
+	ctx.state.isOnboarded = false;
+	if (ctx.state.isAuthenticated) {
+		// Note: Optimally, this should be in the JWT claims to avoid a DB hit on every request.
+		// For MVP, we check DB.
+		ctx.state.isOnboarded = await isOnboarded(ctx.req);
+	}
+
+	// 6. Handle /verify Logic (Pass-through)
 	if (path.startsWith('/verify')) {
 		const res = await ctx.next();
+		// Apply cookie updates to response
 		if (ctx.state.refreshedTokens) {
 			const { access, refresh } = ctx.state.refreshedTokens;
 			setAuthCookies(res.headers, {
@@ -97,8 +128,10 @@ const middleware1 = define.middleware(async (ctx) => {
 		return res;
 	}
 
+	// 7. Proceed
 	const res = await ctx.next();
 
+	// 8. Apply Cookie Updates (Refresh or Clear)
 	if (ctx.state.refreshedTokens) {
 		const { access, refresh } = ctx.state.refreshedTokens;
 		setAuthCookies(res.headers, {
@@ -111,13 +144,3 @@ const middleware1 = define.middleware(async (ctx) => {
 
 	return res;
 });
-
-const middleware2 = define.middleware(async (ctx) => {
-	if (ctx.state.isAuthenticated && !ctx.state.isOnboarded) {
-		ctx.state.isOnboarded = await isOnboarded(ctx.req);
-	}
-
-	return await ctx.next();
-});
-
-export default [middleware1, middleware2];

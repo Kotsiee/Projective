@@ -1,5 +1,5 @@
 {
-  "name": "@shared",
+  "name": "@projective/shared",
   "version": "0.0.0",
   "exports": "./mod.ts"
 }

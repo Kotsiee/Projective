@@ -1,0 +1,92 @@
+.datetime-field {
+    width: 100%;
+}
+
+.datetime-field__icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--input-placeholder, #9ca3af);
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.datetime-field__icon-btn:hover {
+    background-color: var(--input-bg-hover, #f3f4f6);
+    color: var(--input-text);
+}
+
+/* --- Popup Structure --- */
+.datetime-field__popup {
+    background: var(--dropdown-bg, #ffffff);
+    border-radius: var(--input-radius, 0.5rem);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    /* Consistent width for both views */
+}
+
+/* --- Tabs --- */
+.datetime-field__tabs {
+    display: flex;
+    border-bottom: 1px solid var(--input-border, #e5e7eb);
+    background-color: #f9fafb;
+}
+
+.datetime-field__tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.datetime-field__tab:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.datetime-field__tab--active {
+    color: var(--fill-bg, #3b82f6);
+    border-bottom-color: var(--fill-bg, #3b82f6);
+    background-color: #ffffff;
+}
+
+.datetime-field__tab-val {
+    font-size: 0.75rem;
+    font-family: monospace;
+    opacity: 0.8;
+}
+
+/* --- Body --- */
+.datetime-field__body {
+    position: relative;
+    min-height: 320px;
+    /* Prevent height jumping between views */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-bottom: 0.5rem;
+}
+
+.datetime-field__calendar {
+    border: none;
+    /* Remove calendar's own border since popover handles it */
+    width: 100%;
+}
+
+.datetime-field__clock-wrapper {
+    padding-top: 1rem;
+}
