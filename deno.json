@@ -138,7 +138,8 @@
     "@styles/": "./apps/web/styles/",
     "@server/": "./apps/web/server/",
     "@contracts/": "./apps/web/contracts/",
-    "@hooks/": "./apps/web/hooks/"
+    "@hooks/": "./apps/web/hooks/",
+    "@utils": "./apps/web/utils.ts"
   },
   "exclude": ["**/_fresh/*"]
 }

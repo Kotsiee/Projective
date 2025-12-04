@@ -1,3 +1,7 @@
 export default function Projects() {
-	return <div></div>;
+	return (
+		<div>
+			<a href='/projects/new'>New Project</a>
+		</div>
+	);
 }

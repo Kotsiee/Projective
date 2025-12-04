@@ -1,16 +1,16 @@
+// deno-lint-ignore-file no-explicit-any
 import '@styles/components/fields/DateField.css';
-import { useComputed, useSignal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { IconCalendar } from '@tabler/icons-preact';
 import TextField from '../fields/TextField.tsx';
 import Calendar from './datetime/Calendar.tsx';
 import Popover from '../../components/overlays/Popover.tsx';
-import { DateTime } from '@projective/types';
+import { BaseFieldProps, DateTime } from '@projective/types';
 
 type DateValue = DateTime | [DateTime | null, DateTime | null];
 
-interface DateFieldProps {
+interface DateFieldProps extends BaseFieldProps<DateTime> {
 	label?: string;
-	value?: DateValue;
 	onChange?: (date: any) => void; // Typed loosely to allow undefined/null
 	min?: DateTime;
 	max?: DateTime;
@@ -78,7 +78,7 @@ export default function DateField(props: DateFieldProps) {
 			try {
 				const dt = new DateTime(strVal, 'dd/MM/yyyy', true);
 				if (dt.isValid()) props.onChange?.(dt);
-			} catch (e) { /* invalid */ }
+			} catch (_) { /* invalid */ }
 		}
 	};
 
@@ -89,8 +89,8 @@ export default function DateField(props: DateFieldProps) {
 				onClose={() => isOpen.value = false}
 				trigger={
 					<TextField
-						name='date-field'
 						{...props}
+						name={`date-field_${props.name}`}
 						// Passes clearable, label, error, etc.
 						type='text'
 						// Use mask only for single mode for now

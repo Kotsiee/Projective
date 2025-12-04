@@ -6,7 +6,9 @@ import {
 	IconCode,
 	IconMail,
 	IconPalette,
+	IconPaperclip,
 	IconSearch,
+	IconSend,
 	IconStar,
 	IconUser,
 } from '@tabler/icons-preact';
@@ -21,6 +23,7 @@ import DateTimeField from '../../fields/DateTimeField.tsx';
 import FileDrop from '../../fields/file/FileDrop.tsx';
 import { MockImageOptimizer } from '@projective/utils';
 import { WasmImageResizer } from '../../../utils/processors/wasm-resizer.ts';
+import GlobalFileDrop from '../../wrappers/GlobalFileDrop.tsx';
 
 const ROLE_OPTIONS: SelectOption[] = [
 	{ label: 'Frontend Developer', value: 'fe', icon: <IconCode size={18} />, group: 'Engineering' },
@@ -81,9 +84,176 @@ export default function ExploreFilters() {
 		quality: 80,
 	});
 
+	const [messages, setMessages] = useState<
+		{ id: number; text: string; sender: string; files?: File[] }[]
+	>([
+		{ id: 1, text: 'Hey! Can you send me that design?', sender: 'them' },
+	]);
+	const [inputText, setInputText] = useState('');
+	const [attachments, setAttachments] = useState<File[]>([]);
+
+	const handleSend = () => {
+		if (!inputText && attachments.length === 0) return;
+
+		// In a real app, you'd upload attachments here
+		const newMsg = {
+			id: Date.now(),
+			text: inputText,
+			sender: 'me',
+			files: attachments,
+		};
+
+		setMessages([...messages, newMsg]);
+		setInputText('');
+		setAttachments([]);
+	};
+
 	return (
 		<div class='explore-filters'>
 			<section>
+				<GlobalFileDrop
+					name='chat-dropper'
+					accept='image/*, .pdf'
+					maxSize={10 * 1024 * 1024}
+					onChange={(files) => setAttachments([...attachments, ...files])}
+					overlayText='Drop to attach to message'
+					multiple
+				>
+					<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+						{/* Header */}
+						<div
+							style={{
+								padding: '1rem',
+								borderBottom: '1px solid #eee',
+								background: '#f9fafb',
+								fontWeight: 'bold',
+							}}
+						>
+							Chat with Gemini
+						</div>
+
+						{/* Messages Area */}
+						<div style={{ flex: 1, padding: '1rem', overflowY: 'auto', background: '#fff' }}>
+							{messages.map((msg) => (
+								<div
+									key={msg.id}
+									style={{
+										marginBottom: '1rem',
+										textAlign: msg.sender === 'me' ? 'right' : 'left',
+									}}
+								>
+									<div
+										style={{
+											display: 'inline-block',
+											padding: '0.5rem 1rem',
+											borderRadius: '12px',
+											background: msg.sender === 'me' ? '#3b82f6' : '#f3f4f6',
+											color: msg.sender === 'me' ? 'white' : 'black',
+										}}
+									>
+										{msg.text}
+										{/* Render sent images */}
+										{msg.files && msg.files.length > 0 && (
+											<div style={{ marginTop: '0.5rem', fontSize: '0.8rem', opacity: 0.9 }}>
+												📎 {msg.files.length} file(s) attached
+											</div>
+										)}
+									</div>
+								</div>
+							))}
+						</div>
+
+						{/* Input Area */}
+						<div style={{ padding: '1rem', borderTop: '1px solid #eee', background: '#fff' }}>
+							{/* Attachment Preview Area (Mini List) */}
+							{attachments.length > 0 && (
+								<div
+									style={{
+										display: 'flex',
+										gap: '0.5rem',
+										marginBottom: '0.5rem',
+										overflowX: 'auto',
+										paddingBottom: '0.5rem',
+									}}
+								>
+									{attachments.map((file, i) => (
+										<div
+											key={i}
+											style={{
+												background: '#f3f4f6',
+												padding: '0.25rem 0.5rem',
+												borderRadius: '4px',
+												fontSize: '0.75rem',
+												display: 'flex',
+												alignItems: 'center',
+												gap: '0.5rem',
+												whiteSpace: 'nowrap',
+											}}
+										>
+											{file.name}
+											<button
+												onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}
+												style={{
+													border: 'none',
+													background: 'none',
+													cursor: 'pointer',
+													color: '#999',
+												}}
+											>
+												✕
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+
+							<div style={{ display: 'flex', gap: '0.5rem' }}>
+								<button
+									style={{
+										background: 'none',
+										border: 'none',
+										color: '#9ca3af',
+										cursor: 'pointer',
+									}}
+								>
+									<IconPaperclip />
+								</button>
+								<input
+									type='text'
+									value={inputText}
+									onChange={(e) => setInputText(e.currentTarget.value)}
+									placeholder='Type a message...'
+									style={{
+										flex: 1,
+										border: '1px solid #e5e7eb',
+										borderRadius: '20px',
+										padding: '0.5rem 1rem',
+										outline: 'none',
+									}}
+									onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+								/>
+								<button
+									onClick={handleSend}
+									style={{
+										background: '#3b82f6',
+										color: 'white',
+										border: 'none',
+										width: '36px',
+										height: '36px',
+										borderRadius: '50%',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										cursor: 'pointer',
+									}}
+								>
+									<IconSend size={18} />
+								</button>
+							</div>
+						</div>
+					</div>
+				</GlobalFileDrop>
+
 				<div style={{ padding: '2rem', maxWidth: '600px' }}>
 					<h3>Client-Side Processing (Mock WASM)</h3>
 					<p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.9rem' }}>

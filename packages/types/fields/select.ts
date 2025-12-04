@@ -5,7 +5,7 @@ export interface SelectOption {
 	value: string | number;
 	icon?: VNode;
 	avatarUrl?: string;
-	group?: string; // Group Header Label
+	group?: string;
 	disabled?: boolean;
 }
 

@@ -12,6 +12,10 @@ export default function SelectField(props: SelectFieldProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	// FIX 1: Ref to track if the highlight change was caused by the mouse
+	const preventScrollRef = useRef(false);
+
 	const [menuPosition, setMenuPosition] = useState<'down' | 'up'>('down');
 
 	const sortedOptions = useMemo(() => {
@@ -43,6 +47,10 @@ export default function SelectField(props: SelectFieldProps) {
 		disabled: props.disabled,
 	});
 
+	const isValueSelected = (optionValue: string | number) => {
+		return selectedValues.some((val) => String(val) === String(optionValue));
+	};
+
 	useEffect(() => {
 		if (isOpen.value && containerRef.current) {
 			const rect = containerRef.current.getBoundingClientRect();
@@ -51,12 +59,19 @@ export default function SelectField(props: SelectFieldProps) {
 
 			if (inputRef.current) inputRef.current.focus();
 
-			if (listRef.current) {
+			// FIX 2: Only scroll if the change WAS NOT caused by mouse hover
+			if (listRef.current && !preventScrollRef.current) {
 				const selectedEl = listRef.current.querySelector(
 					'.select-field__option--selected, .select-field__option--highlighted',
 				);
-				if (selectedEl) selectedEl.scrollIntoView({ block: 'nearest' });
+				if (selectedEl) {
+					// 'nearest' ensures minimal movement if already visible
+					selectedEl.scrollIntoView({ block: 'nearest' });
+				}
 			}
+
+			// Always reset the flag after the render cycle
+			preventScrollRef.current = false;
 		}
 	}, [isOpen.value, highlightedIndex.value]);
 
@@ -82,7 +97,7 @@ export default function SelectField(props: SelectFieldProps) {
 
 	const renderChips = () => {
 		return selectedValues.map((val) => {
-			const opt = props.options.find((o) => o.value === val);
+			const opt = props.options.find((o) => String(o.value) === String(val));
 			if (!opt) return null;
 			return (
 				<span key={val} className='select-field__chip'>
@@ -112,7 +127,7 @@ export default function SelectField(props: SelectFieldProps) {
 		}
 
 		if (!props.multiple && selectedValues.length > 0 && searchQuery.value === '') {
-			const opt = props.options.find((o) => o.value === selectedValues[0]);
+			const opt = props.options.find((o) => String(o.value) === String(selectedValues[0]));
 			return opt ? <div className='select-field__single-value'>{opt.label}</div> : null;
 		}
 
@@ -127,7 +142,7 @@ export default function SelectField(props: SelectFieldProps) {
 		let lastGroup: string | undefined = undefined;
 
 		return filteredOptions.value.map((option, index) => {
-			const isSelected = selectedValues.includes(option.value);
+			const isSelected = isValueSelected(option.value);
 			const isHighlighted = index === highlightedIndex.value;
 			const showHeader = option.group !== lastGroup;
 			lastGroup = option.group;
@@ -149,8 +164,20 @@ export default function SelectField(props: SelectFieldProps) {
 						onClick={(e) => {
 							e.stopPropagation();
 							selectOption(option);
+							if (!props.multiple) {
+								setSearchQuery('');
+								toggleOpen(false);
+							}
 						}}
-						onMouseEnter={() => highlightedIndex.value = index}
+						// FIX 3: Flag that this update came from the mouse
+						onMouseEnter={() => {
+							if (highlightedIndex.value !== index) {
+								preventScrollRef.current = true;
+								highlightedIndex.value = index;
+							}
+						}}
+						// Optional: Using onMouseMove can sometimes feel snappier
+						// if the user moves pixel-by-pixel, but onMouseEnter is standard.
 					>
 						<div className='select-field__opt-content'>
 							{option.icon && <span className='select-field__icon'>{option.icon}</span>}
@@ -174,12 +201,11 @@ export default function SelectField(props: SelectFieldProps) {
 		`select-field--pos-${menuPosition}`,
 	].filter(Boolean).join(' ');
 
-	// --- FIX: Logic to determine if "All Enabled" are selected ---
 	const areAllEnabledSelected = (() => {
 		if (!props.multiple) return false;
 		const enabledOptions = filteredOptions.value.filter((o) => !o.disabled);
 		if (enabledOptions.length === 0) return false;
-		return enabledOptions.every((o) => selectedValues.includes(o.value));
+		return enabledOptions.every((o) => isValueSelected(o.value));
 	})();
 
 	return (
@@ -195,6 +221,7 @@ export default function SelectField(props: SelectFieldProps) {
 				onMouseDown={(e) => {
 					if (e.target !== inputRef.current) {
 						e.preventDefault();
+						inputRef.current?.focus();
 						toggleOpen();
 					}
 				}}
@@ -211,7 +238,10 @@ export default function SelectField(props: SelectFieldProps) {
 						placeholder={selectedValues.length === 0 ? props.placeholder : ''}
 						onInput={(e) => setSearchQuery(e.currentTarget.value)}
 						onKeyDown={handleKeyDown}
-						onClick={() => toggleOpen(true)}
+						onClick={(e) => {
+							e.stopPropagation();
+							toggleOpen(true);
+						}}
 						onFocus={() => toggleOpen(true)}
 						disabled={props.disabled}
 						readOnly={!props.searchable}
@@ -228,6 +258,7 @@ export default function SelectField(props: SelectFieldProps) {
 							className='select-field__clear'
 							onMouseDown={(e) => {
 								e.stopPropagation();
+								setSearchQuery('');
 								props.onChange?.(props.multiple ? [] : null);
 							}}
 						>

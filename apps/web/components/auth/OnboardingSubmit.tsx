@@ -7,6 +7,7 @@ export default function OnboardingSubmit({
 	firstName,
 	lastName,
 	username,
+	dob,
 	type,
 }: OnboardingRequest) {
 	const [loading, setLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function OnboardingSubmit({
 					'Content-Type': 'application/json',
 					'X-CSRF': csrf,
 				},
-				body: JSON.stringify({ firstName, lastName, username, type }),
+				body: JSON.stringify({ firstName, lastName, username, dob, type }),
 			});
 
 			if (!response.ok) {
@@ -41,13 +42,13 @@ export default function OnboardingSubmit({
 
 			const data = await response.json();
 			console.log('Onboarding success:', data);
-			// globalThis.location.href = '/dashboard';
+			globalThis.location.href = '/dashboard';
 		} catch (err) {
 			console.error('Onboarding error:', err);
 		} finally {
 			setLoading(false);
 		}
-	}, [loading, firstName, lastName, username, type]);
+	}, [loading, firstName, lastName, username, dob, type]);
 
 	return (
 		<button

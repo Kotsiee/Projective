@@ -3,10 +3,13 @@ import { useEffect } from 'preact/hooks';
 import { signal } from '@preact/signals';
 import OnboardingSubmit from '@components/auth/OnboardingSubmit.tsx';
 import TextField from '@components/fields/TextField.tsx';
+import DateField from '@components/fields/DateField.tsx';
+import { DateTime } from '@projective/types';
 
 const firstName = signal('');
 const lastName = signal('');
 const username = signal('');
+const dob = signal(new DateTime().minus(18, 'years'));
 const type = signal<'freelancer' | 'client'>('client');
 
 export default function OnboardingIsland() {
@@ -72,12 +75,37 @@ export default function OnboardingIsland() {
 					<hr class='onboarding-stage__separator' />
 
 					<div class='onboarding-stage__name'>
-						<TextField value={firstName} placeholder='First Name' />
-						<TextField value={lastName} placeholder='Last Name' />
+						<TextField
+							name='first_name'
+							value={firstName.value}
+							placeholder='First Name'
+							label='First Name'
+							onChange={(val) => firstName.value = val.toString()}
+						/>
+						<TextField
+							name='last_name'
+							value={lastName.value}
+							placeholder='Last Name'
+							label='Last Name'
+							onChange={(val) => lastName.value = val.toString()}
+						/>
 					</div>
 
-					<TextField value={username} placeholder='DoB' />
-					<TextField value={username} placeholder='Username' />
+					<DateField
+						name='dob'
+						max={new DateTime().minus(18, 'years')}
+						value={dob.value}
+						placeholder='DoB'
+						label='DoB'
+						onChange={(val) => dob.value = val}
+					/>
+					<TextField
+						name='username'
+						value={username.value}
+						placeholder='Username'
+						label='Username'
+						onChange={(val) => username.value = val.toString()}
+					/>
 				</form>
 			</div>
 			<div class='onboarding-stage-location'>
@@ -85,6 +113,7 @@ export default function OnboardingIsland() {
 					firstName={firstName.value}
 					lastName={lastName.value}
 					username={username.value}
+					dob={dob.value.toISO()}
 					type={type.value}
 				/>
 			</div>

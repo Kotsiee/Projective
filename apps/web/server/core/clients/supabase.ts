@@ -17,6 +17,7 @@ function getEnv() {
  *
  * No session persistence; SSR-safe.
  */
+// deno-lint-ignore require-await
 export async function supabaseClient(req?: Request): Promise<SupabaseClient> {
 	const { SUPABASE_URL, ANON_KEY } = getEnv();
 

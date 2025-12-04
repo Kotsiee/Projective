@@ -1,5 +1,5 @@
 import { useSignal } from '@preact/signals';
-import { IconCalendar, IconClock, IconX } from '@tabler/icons-preact';
+import { IconCalendar, IconClock } from '@tabler/icons-preact';
 import TextField from '../fields/TextField.tsx';
 import Calendar from './datetime/Calendar.tsx';
 import TimeClock from './datetime/TimeClock.tsx';
