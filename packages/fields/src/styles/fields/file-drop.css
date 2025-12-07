@@ -1,0 +1,95 @@
+/* FileDrop Styles */
+
+.field-file {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.field-file__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 2px dashed var(--field-border);
+  border-radius: var(--field-radius);
+  background-color: var(--field-bg);
+  transition: all var(--field-transition);
+  cursor: pointer;
+  text-align: center;
+}
+
+.field-file__dropzone:hover {
+  background-color: var(--field-bg-hover);
+  border-color: var(--field-border-hover);
+}
+
+.field-file__dropzone--dragover {
+  background-color: var(--primary-50);
+  border-color: var(--primary-500);
+}
+
+.field-file__dropzone--disabled {
+  background-color: var(--field-bg-disabled);
+  border-color: var(--field-border-disabled);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.field-file__icon {
+  color: var(--field-text-placeholder);
+  margin-bottom: 8px;
+}
+
+.field-file__text {
+  font-size: var(--field-font-size);
+  color: var(--field-text);
+}
+
+.field-file__subtext {
+  font-size: 0.875em;
+  color: var(--field-text-placeholder);
+  margin-top: 4px;
+}
+
+.field-file__input {
+  display: none;
+}
+
+/* File List */
+.field-file__list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-file__item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+}
+
+.field-file__item-name {
+  flex: 1;
+  font-size: 0.875em;
+  color: var(--field-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field-file__item-remove {
+  color: var(--field-text-placeholder);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.field-file__item-remove:hover {
+  color: var(--error-500);
+}

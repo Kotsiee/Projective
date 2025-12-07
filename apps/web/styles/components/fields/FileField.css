@@ -5,6 +5,7 @@
     width: 100%;
     font-family: inherit;
     gap: 0.5rem;
+    position: relative;
 }
 
 .file-field__label {

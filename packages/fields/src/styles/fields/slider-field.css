@@ -1,0 +1,67 @@
+/* SliderField Styles */
+
+.field-slider {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Added to contain absolute elements */
+  width: 100%;
+}
+
+.field-slider__container {
+  display: flex;
+  align-items: center;
+  height: var(--field-height);
+  padding: 0 8px;
+}
+
+.field-slider__track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background-color: var(--field-bg-disabled);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.field-slider__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background-color: var(--primary-500);
+  border-radius: 2px;
+}
+
+.field-slider__thumb {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background-color: var(--gray-0);
+  border: 2px solid var(--primary-500);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  transition: transform 0.1s, box-shadow 0.1s;
+  z-index: 2;
+}
+
+.field-slider__thumb:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.field-slider__thumb:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 0 4px var(--field-ring-color);
+}
+
+.field-slider__input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}

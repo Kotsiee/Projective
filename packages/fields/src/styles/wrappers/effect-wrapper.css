@@ -1,0 +1,32 @@
+/* --- Effect Wrapper (Ripple & Focus Ring) --- */
+.field-focus-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--field-radius);
+  pointer-events: none;
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow var(--field-transition);
+}
+
+.field-focus-ring--active {
+  box-shadow: 0 0 0 var(--field-ring-width) var(--field-ring-color);
+}
+
+.field-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background-color: var(--field-ripple-color);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}

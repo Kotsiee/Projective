@@ -1,0 +1,80 @@
+/* TagInput Styles */
+
+.field-tag {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.field-tag__container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  transition: all var(--field-transition);
+  min-height: var(--field-height);
+  padding: 4px var(--field-padding-x);
+  cursor: text;
+}
+
+.field-tag__container:hover {
+  background-color: var(--field-bg-hover);
+  border-color: var(--field-border-hover);
+}
+
+.field-tag__container--focused {
+  border-color: var(--field-border-focus);
+  background-color: var(--field-bg-active);
+}
+
+.field-tag__container--error {
+  border-color: var(--field-border-error);
+}
+
+.field-tag__container--disabled {
+  background-color: var(--field-bg-disabled);
+  border-color: var(--field-border-disabled);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.field-tag__chip {
+  display: flex;
+  align-items: center;
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+  border-radius: 16px;
+  padding: 2px 8px;
+  font-size: 0.875em;
+}
+
+.field-tag__chip-remove {
+  margin-left: 4px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.field-tag__chip-remove:hover {
+  opacity: 1;
+}
+
+.field-tag__input {
+  flex: 1;
+  min-width: 60px;
+  border: none;
+  background: transparent;
+  font-family: var(--field-font-family);
+  font-size: var(--field-font-size);
+  color: var(--field-text);
+  outline: none;
+  padding: 4px 0;
+}
+
+.field-tag__input::placeholder {
+  color: var(--field-text-placeholder);
+}

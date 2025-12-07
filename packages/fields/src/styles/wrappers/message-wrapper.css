@@ -1,0 +1,29 @@
+/* --- Message Wrapper --- */
+.field-message {
+  font-family: var(--field-font-family);
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.2;
+  margin-top: 4px;
+  min-height: 0;
+  transition: all var(--field-transition);
+  opacity: 1;
+}
+
+.field-message--hidden {
+  opacity: 0;
+  margin-top: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.field-message--error {
+  color: var(--field-text-error);
+}
+
+.field-message--warning {
+  color: var(--warning-500);
+}
+
+.field-message--info {
+  color: var(--field-text-placeholder);
+}

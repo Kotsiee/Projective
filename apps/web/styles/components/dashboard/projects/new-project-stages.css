@@ -1,0 +1,67 @@
+.new-project__stages {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 900px;
+}
+
+.stages-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.testing-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Splitters fill their parent height. 
+   We must define a fixed height for the container 
+   so percentages (e.g. 50%) have a reference.
+*/
+.testing-environment {
+    height: 500px; 
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background-color: var(--field-bg);
+    overflow: hidden; /* Ensure splitter doesn't spill out */
+}
+
+/* Pane visual styling for demo */
+.demo-pane {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--gray-50);
+}
+
+.demo-pane__header {
+    padding: 0.5rem 1rem;
+    background-color: var(--gray-100);
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.demo-pane__content {
+    padding: 1rem;
+    flex: 1;
+    overflow: auto;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+.demo-pane__content--code {
+    font-family: monospace;
+    white-space: pre;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}

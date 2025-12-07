@@ -6,7 +6,8 @@
     "./packages/backend",
     "./packages/ui",
     "./packages/utils",
-    "./packages/types"
+    "./packages/types",
+    "./packages/fields"
   ],
   "tasks": {
     "format": "deno fmt --check",
@@ -131,6 +132,7 @@
     "@projective/ui": "./packages/ui/mod.ts",
     "@projective/utils": "./packages/utils/mod.ts",
     "@projective/types": "./packages/types/mod.ts",
+    "@projective/fields": "./packages/fields/mod.ts",
 
     "@/": "./apps/web/",
     "@components/": "./apps/web/components/",

@@ -1,0 +1,122 @@
+/* --- Root --- */
+.splitter {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.splitter--horizontal {
+    flex-direction: row;
+}
+
+.splitter--vertical {
+    flex-direction: column;
+}
+
+.splitter--resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.splitter--vertical.splitter--resizing {
+    cursor: row-resize;
+}
+
+/* --- Pane Wrapper --- */
+.splitter__pane-wrapper {
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.splitter__pane-wrapper--collapsed {
+    display: none;
+}
+
+/* --- Pane Inner --- */
+.splitter__pane {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+/* --- Gutter --- */
+.splitter__gutter {
+    background-color: var(--field-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    z-index: 10;
+    flex-shrink: 0;
+    position: relative;
+    /* Context for hitbox */
+    outline: none;
+    /* Custom focus style below */
+}
+
+/* Keyboard Focus State */
+.splitter__gutter:focus-visible {
+    background-color: var(--primary-500);
+    box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.splitter__gutter:hover,
+.splitter__gutter:active {
+    background-color: var(--primary-500);
+}
+
+/* Horizontal Gutter */
+.splitter__gutter--horizontal {
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+}
+
+/* Vertical Gutter */
+.splitter__gutter--vertical {
+    height: 4px;
+    width: 100%;
+    cursor: row-resize;
+}
+
+/* Visual Handle */
+.splitter__gutter-handle {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* Hitbox (Invisible expansion for touch) */
+.splitter__gutter-hitbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Expand hitbox based on direction */
+.splitter__gutter--horizontal .splitter__gutter-hitbox {
+    left: -6px;
+    width: 16px;
+    /* 4px visual + 6px padding each side */
+}
+
+.splitter__gutter--vertical .splitter__gutter-hitbox {
+    top: -6px;
+    height: 16px;
+}
+
+/* --- Responsive Stack Divider --- */
+.splitter__divider-stack {
+    width: 100%;
+    height: 1px;
+    background-color: var(--field-border);
+    margin: 0;
+}

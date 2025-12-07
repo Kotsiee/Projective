@@ -1,8 +1,8 @@
 import { VNode } from 'preact';
 
-export interface SelectOption {
+export interface SelectOption<T> {
 	label: string;
-	value: string | number;
+	value: string | T | number;
 	icon?: VNode;
 	avatarUrl?: string;
 	group?: string;
@@ -18,7 +18,7 @@ export interface SelectIcons {
 	invalid?: VNode;
 }
 
-export interface SelectFieldConfig {
+export interface SelectFieldConfig<T> {
 	multiple?: boolean;
 	clearable?: boolean;
 	searchable?: boolean;
@@ -33,6 +33,6 @@ export interface SelectFieldConfig {
 	icons?: SelectIcons;
 
 	// Optional Renderers
-	renderOption?: (option: SelectOption) => VNode;
-	renderSelection?: (selected: SelectOption[]) => VNode;
+	renderOption?: (option: SelectOption<T>) => VNode;
+	renderSelection?: (selected: SelectOption<T>[]) => VNode;
 }

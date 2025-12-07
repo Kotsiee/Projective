@@ -1,0 +1,201 @@
+/*Website*/
+
+:root {
+        /* =============================================
+       1. LOGIC SETTINGS
+       ============================================= */
+        /* HOVER LOGIC:
+       In Light Mode: We SUBTRACT lightness (-8%) to make buttons darker on hover.
+       In Dark Mode: We ADD lightness (+8%) to make buttons brighter on hover.
+    */
+        --lightness-delta: -8%;
+        --active-delta: -12%;
+
+
+        /* =============================================
+       2. BASE PALETTE (H/S/L Values)
+       ============================================= */
+
+        /* --- BACKGROUNDS (Light Mode Defaults) --- */
+        --bg-hue: 0;
+        --bg-saturation: 0%;
+        --bg-lightness: 98%;
+        /* Very light gray/off-white */
+
+        --header-hue: 0;
+        --header-saturation: 0%;
+        --header-lightness: 100%;
+        /* Pure White */
+
+        --card-hue: 0;
+        --card-saturation: 0%;
+        --card-lightness: 100%;
+        /* Pure White */
+
+        /* --- TEXT (Light Mode Defaults) --- */
+        --text-hue: 0;
+        --text-saturation: 0%;
+        --text-lightness: 10%;
+        /* Very dark gray (softer than pure black) */
+
+        /* --- PRIMARY (Fixed) --- */
+        --primary-hue: 186;
+        --primary-saturation: 57%;
+        --primary-lightness: 36%;
+
+        /* --- INFO (Mirrors Primary) --- */
+        --info-hue: 186;
+        --info-saturation: 57%;
+        --info-lightness: 36%;
+
+        /* --- DANGER (Red) --- */
+        --danger-hue: 0;
+        --danger-saturation: 70%;
+        --danger-lightness: 55%;
+
+        /* --- WARNING (Orange/Amber) --- */
+        --warning-hue: 37;
+        --warning-saturation: 90%;
+        --warning-lightness: 45%;
+
+        /* --- SUCCESS (Green) --- */
+        --success-hue: 160;
+        --success-saturation: 65%;
+        --success-lightness: 40%;
+
+
+        /* =============================================
+       3. GENERATED COLOR VARIABLES
+       (These build the actual colors using the H/S/L above)
+       ============================================= */
+
+        /* --- UI LAYERS --- */
+        --bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
+        --header: hsl(var(--header-hue), var(--header-saturation), var(--header-lightness));
+        --card: hsl(var(--card-hue), var(--card-saturation), var(--card-lightness));
+
+        /* --- PRIMARY ACTIONS --- */
+        --primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+        --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--lightness-delta)));
+        --primary-active: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--active-delta)));
+        --primary-half: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5);
+        /* Surface: Used for subtle backgrounds (like a selected item in a list) */
+        --primary-surface: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.12);
+
+        /* --- INFO ACTIONS --- */
+        --info: hsl(var(--info-hue), var(--info-saturation), var(--info-lightness));
+        --info-hover: hsl(var(--info-hue), var(--info-saturation), calc(var(--info-lightness) + var(--lightness-delta)));
+        --info-surface: hsla(var(--info-hue), var(--info-saturation), var(--info-lightness), 0.12);
+
+        /* --- DANGER ACTIONS --- */
+        --danger: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
+        --danger-hover: hsl(var(--danger-hue), var(--danger-saturation), calc(var(--danger-lightness) + var(--lightness-delta)));
+        --danger-surface: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.12);
+
+        /* --- WARNING ACTIONS --- */
+        --warning: hsl(var(--warning-hue), var(--warning-saturation), var(--warning-lightness));
+        --warning-hover: hsl(var(--warning-hue), var(--warning-saturation), calc(var(--warning-lightness) + var(--lightness-delta)));
+        --warning-surface: hsla(var(--warning-hue), var(--warning-saturation), var(--warning-lightness), 0.12);
+
+        /* --- SUCCESS ACTIONS --- */
+        --success: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
+        --success-hover: hsl(var(--success-hue), var(--success-saturation), calc(var(--success-lightness) + var(--lightness-delta)));
+        --success-surface: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.12);
+
+
+        /* =============================================
+       4. TEXT HIERARCHY & STRUCTURE
+       ============================================= */
+
+        /* Text Colors */
+        --text: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
+        --text-main: var(--text);
+        --text-muted: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.65);
+        /* Meta data */
+        --text-disabled: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
+        /* Disabled states */
+
+        /* Structural Colors */
+        --border-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15);
+        /* Subtle dividers */
+        --input-bg: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+        /* Form fields */
+        --disabled-bg: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.10);
+        /* Disabled inputs */
+
+        /* Accessibility Focus Ring (Glow) */
+        --focus-ring: 0 0 0 3px hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.4);
+
+
+        /* =============================================
+       5. WORKFLOW MAPPINGS
+       (Aliasing colors to semantic names)
+       ============================================= */
+        --incomplete: var(--danger);
+        --in-progress: var(--warning);
+        --complete: var(--primary);
+
+
+        /* =============================================
+       6. FIELD MAPPINGS
+       (Mapping Theme System variables to Website values)
+       ============================================= */
+
+        /* Backgrounds: Using Card (White) for default, Input-Bg (Grey) for hover */
+        --field-bg: var(--card) !important;
+        --field-bg-hover: var(--input-bg) !important;
+        --field-bg-disabled: var(--disabled-bg) !important;
+        --field-bg-active: var(--card) !important;
+
+        /* Borders */
+        --field-border: var(--border-color) !important;
+        --field-border-hover: var(--text-muted) !important;
+        --field-border-focus: var(--primary) !important;
+        --field-border-error: var(--danger) !important;
+        --field-border-disabled: var(--border-color) !important;
+
+        /* Text */
+        --field-text: var(--text-main) !important;
+        --field-text-placeholder: var(--text-muted) !important;
+        --field-text-label: var(--text-main) !important;
+        --field-text-disabled: var(--text-disabled) !important;
+        --field-text-error: var(--danger) !important;
+
+        /* Rings & Effects */
+        --field-ring-color: var(--primary-surface) !important;
+        --field-ripple-color: var(--primary-surface) !important;
+}
+
+
+/* =============================================
+   7. DARK MODE OVERRIDES
+   ============================================= */
+:root[data-theme="dark"] {
+
+        /* 1. FLIP LOGIC: Add lightness to make things brighter on hover in dark mode */
+        --lightness-delta: 8%;
+        --active-delta: 12%;
+
+        /* 2. BACKGROUNDS (Dark Mode Values) */
+        --bg-lightness: 10%;
+        --header-lightness: 8%;
+        --card-lightness: 13%;
+
+        /* 3. TEXT (Flip to White) */
+        --text-lightness: 100%;
+
+        /* 4. ADJUST STATUS COLORS (Lighter to contrast against dark bg) */
+        --danger-lightness: 55%;
+        --warning-lightness: 50%;
+        --success-lightness: 45%;
+
+        /* 5. ADJUST STRUCTURAL OPACITY 
+       (Dark mode needs higher opacity for borders/tints to be visible) 
+    */
+        --border-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.25);
+        --primary-surface: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.25);
+        --info-surface: hsla(var(--info-hue), var(--info-saturation), var(--info-lightness), 0.25);
+        --danger-surface: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.25);
+        --warning-surface: hsla(var(--warning-hue), var(--warning-saturation), var(--warning-lightness), 0.25);
+        --success-surface: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.25);
+}

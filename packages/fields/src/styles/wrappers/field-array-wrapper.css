@@ -1,0 +1,16 @@
+/* --- Field Array Wrapper --- */
+.field-array {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap);
+}
+
+.field-array__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--field-gap);
+}
+
+.field-array__action {
+  margin-top: 4px; /* Align with input */
+}

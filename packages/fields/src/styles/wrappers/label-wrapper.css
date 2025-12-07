@@ -1,0 +1,94 @@
+/* --- Label Wrapper --- */
+.field-label {
+  display: block;
+  font-family: var(--field-font-family);
+  font-size: var(--field-font-size);
+  color: var(--field-text-label);
+  margin-bottom: 4px;
+  transition: all var(--field-transition);
+  pointer-events: none;
+  transform-origin: top left;
+  line-height: 1.5;
+
+  /* Order -1: Ensures that if it's static (not floating), it renders before the input.
+	   Since TextField is row-flex, this places it to the left of input if static.
+	*/
+  order: -1;
+}
+
+/* Positioning Modifiers */
+.field-label--pos-left {
+  margin-bottom: 0;
+  margin-right: 8px;
+  align-self: center;
+  order: initial;
+}
+
+.field-label--pos-right {
+  margin-bottom: 0;
+  margin-left: 8px;
+  align-self: center;
+  order: 1;
+}
+
+.field-label--pos-bottom {
+  margin-bottom: 0;
+  margin-top: 4px;
+  order: 1;
+}
+
+/* --- Floating Logic --- */
+
+.field-label--floating {
+  position: absolute;
+  z-index: 1;
+  background-color: transparent;
+  padding: 0 4px;
+  /* Tiny padding for "cutout" effect readability */
+  margin-bottom: 0;
+
+  /* X-AXIS: Aligned with the input text padding */
+  left: var(--field-padding-x);
+
+  /* Y-AXIS (Single Line): Center vertically relative to the container */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* MULTILINE OVERRIDE:
+   For textareas, we align to the top padding (usually 8px-12px) 
+   instead of centering.
+*/
+.field-label--multiline.field-label--floating {
+  top: 8px;
+  /* Matches textarea padding-top */
+  transform: none;
+}
+
+/* INACTIVE STATE: Placeholder look */
+.field-label--floating:not(.field-label--active) {
+  color: var(--field-text-placeholder);
+}
+
+/* ACTIVE STATE: Floats up to the border */
+.field-label--active {
+  /* Move to top border */
+  top: 0 !important;
+  transform: translateY(-50%) scale(0.85) !important;
+
+  /* Pull left slightly to account for the scale shrinkage */
+  left: calc(var(--field-padding-x) - 2px);
+
+  color: var(--field-border-focus);
+  background-color: var(--field-bg);
+}
+
+/* Error State */
+.field-label--error {
+  color: var(--field-text-error);
+}
+
+/* Disabled State */
+.field-label--disabled {
+  color: var(--field-text-disabled);
+}

@@ -1,0 +1,68 @@
+.popover-wrapper {
+    position: relative;
+    width: 100%;
+    display: inline-block;
+}
+
+.popover-content {
+    position: absolute;
+    z-index: 50;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-overlay);
+    border: 1px solid var(--border-default);
+    border-radius: var(--field-radius);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    min-width: 320px;
+
+    /* Animation base state */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+}
+
+.popover-content--open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Position: Bottom (Default) */
+.popover-content--bottom {
+    top: 100%;
+    transform: translateY(-4px);
+}
+
+.popover-content--bottom.popover-content--open {
+    transform: translateY(0);
+}
+
+/* Position: Top (Flipped) */
+.popover-content--top {
+    bottom: 100%;
+    top: auto;
+    transform: translateY(4px);
+}
+
+.popover-content--top.popover-content--open {
+    transform: translateY(0);
+}
+
+.popover-content--left {
+    left: 0;
+}
+
+.popover-content--right {
+    right: 0;
+}
+
+@keyframes popoverFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

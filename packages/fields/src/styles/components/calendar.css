@@ -1,0 +1,198 @@
+/* --- Base --- */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  background-color: var(--bg-overlay);
+  border: none;
+  /* Border handled by popover usually, but safe to keep 0 */
+  padding: 1rem;
+  user-select: none;
+  font-family: inherit;
+}
+
+/* --- Header --- */
+.calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  height: 32px;
+}
+
+.calendar__title-btn {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.calendar__title-btn:hover {
+  background-color: var(--bg-surface-active);
+}
+
+.calendar__nav-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.calendar__nav-btn:hover {
+  background-color: var(--bg-surface-active);
+  color: var(--text-primary);
+}
+
+/* --- Body Wrapper --- */
+.calendar__body {
+  min-height: 240px;
+}
+
+/* --- Weekdays --- */
+.calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.calendar__weekday {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+/* --- Grids --- */
+.calendar__grid--days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar__grid--months,
+.calendar__grid--years {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  height: 100%;
+}
+
+/* --- Day Cell (Small) --- */
+.calendar__day {
+  height: 2.25rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.calendar__day:hover:not(:disabled) {
+  background-color: var(--bg-surface-active);
+}
+
+.calendar__day--muted {
+  color: var(--text-tertiary);
+}
+
+.calendar__day--today {
+  font-weight: 700;
+  color: var(--text-brand);
+}
+
+.calendar__day--selected {
+  background-color: var(--bg-brand-solid) !important;
+  color: var(--text-on-brand) !important;
+}
+
+.calendar__day--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Range Styling */
+.calendar__day--range-start {
+  background-color: var(--bg-brand-solid);
+  color: var(--text-on-brand);
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.calendar__day--range-end {
+  background-color: var(--bg-brand-solid);
+  color: var(--text-on-brand);
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.calendar__day--range-start.calendar__day--range-end {
+  border-radius: 0.375rem;
+}
+
+.calendar__day--range-middle {
+  background-color: var(--bg-brand-subtle);
+  border-radius: 0;
+}
+
+.calendar__day--range-middle:hover {
+  background-color: var(--primary-100);
+}
+
+/* --- Large Cells --- */
+.calendar__cell-lg {
+  height: 3.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.calendar__cell-lg:hover {
+  background-color: var(--bg-surface-active);
+  border-color: var(--border-subtle);
+}
+
+.calendar__cell-lg--today {
+  font-weight: 700;
+  color: var(--text-brand);
+  border-color: var(--border-focus);
+}
+
+.calendar__cell-lg--selected {
+  background-color: var(--bg-brand-solid) !important;
+  color: var(--text-on-brand) !important;
+}
+
+.calendar__cell-lg--muted {
+  color: var(--text-tertiary);
+}

@@ -1,21 +1,21 @@
 import { DateTime } from '@projective/types';
+import { DateValue } from '../fields/src/types/components/date-field.ts';
 
 export interface CalendarDay {
 	date: DateTime;
 	isCurrentMonth: boolean;
 	isToday: boolean;
 	isDisabled: boolean;
-	// Selection States
-	isSelected: boolean; // Exact match (Single mode)
-	isRangeStart: boolean; // [Start, ...]
-	isRangeEnd: boolean; // [..., End]
-	isRangeMiddle: boolean; // Between Start and End
+	isSelected: boolean;
+	isRangeStart: boolean;
+	isRangeEnd: boolean;
+	isRangeMiddle: boolean;
 }
 
 export function getCalendarGrid(
 	viewDate: DateTime,
-	value?: DateTime | [DateTime | null, DateTime | null], // Single or Range
-	hoverDate?: DateTime | null, // For ghost range preview
+	value?: DateValue,
+	hoverDate?: DateTime | null,
 	min?: DateTime,
 	max?: DateTime,
 	startOfWeek: 0 | 1 = 1,
@@ -23,36 +23,44 @@ export function getCalendarGrid(
 	const days: CalendarDay[] = [];
 	const today = DateTime.today();
 
-	// Normalize Selection
 	let start: DateTime | null = null;
 	let end: DateTime | null = null;
+	let multiDates: DateTime[] = [];
+	let mode: 'single' | 'range' | 'multiple' = 'single';
 
 	if (Array.isArray(value)) {
-		start = value[0];
-		end = value[1];
+		if (
+			value.length === 2 && (value[0] === null || value[0] instanceof DateTime) &&
+			(value[1] === null || value[1] instanceof DateTime)
+		) {
+			start = value[0] as DateTime | null;
+			end = value[1] as DateTime | null;
+			mode = 'range';
+		} else {
+			multiDates = value as DateTime[];
+			mode = 'multiple';
+		}
 	} else if (value) {
-		start = value;
-		end = value;
+		start = value as DateTime;
+		end = value as DateTime; // For single, start=end for logic simplification
+		mode = 'single';
 	}
 
-	// Ghost Range Logic (If we have a start but no end, use hover as temporary end)
-	if (Array.isArray(value) && start && !end && hoverDate) {
+	// Ghost Range Logic
+	if (mode === 'range' && start && !end && hoverDate) {
 		if (hoverDate.isAfter(start)) {
 			end = hoverDate;
 		} else {
-			// If user hovers before start, swap visually
 			end = start;
 			start = hoverDate;
 		}
 	}
 
-	// 1. Grid Start Calculation
 	const startOfMonth = viewDate.startOf('month');
 	const currentDayOfWeek = startOfMonth.getDay();
 	const daysToSubtract = (currentDayOfWeek - startOfWeek + 7) % 7;
 	let currentIter = startOfMonth.minus(daysToSubtract, 'days');
 
-	// 2. Generate Grid
 	for (let i = 0; i < 42; i++) {
 		const isCurrentMonth = currentIter.getMonth() === viewDate.getMonth();
 
@@ -60,14 +68,26 @@ export function getCalendarGrid(
 		if (min && currentIter.isBefore(min.startOf('day'))) isDisabled = true;
 		if (max && currentIter.isAfter(max.endOf('day'))) isDisabled = true;
 
-		// Range Checks
-		const isRangeStart = !!start && currentIter.isSameDay(start);
-		const isRangeEnd = !!end && currentIter.isSameDay(end);
-
+		let isSelected = false;
+		let isRangeStart = false;
+		let isRangeEnd = false;
 		let isRangeMiddle = false;
-		if (start && end) {
-			// isBetween is exclusive '()', so we use custom logic for inclusive
-			isRangeMiddle = currentIter.isAfter(start) && currentIter.isBefore(end);
+
+		if (mode === 'multiple') {
+			// FIX: Use isSameDay
+			isSelected = multiDates.some((d) => currentIter.isSameDay(d));
+		} else {
+			isRangeStart = !!start && currentIter.isSameDay(start);
+			isRangeEnd = !!end && currentIter.isSameDay(end);
+
+			if (mode === 'single') {
+				isSelected = isRangeStart;
+			} else {
+				if (start && end) {
+					isRangeMiddle = currentIter.isAfter(start) && currentIter.isBefore(end);
+				}
+				isSelected = isRangeStart || isRangeEnd;
+			}
 		}
 
 		days.push({
@@ -75,7 +95,7 @@ export function getCalendarGrid(
 			isCurrentMonth,
 			isToday: currentIter.isSameDay(today),
 			isDisabled,
-			isSelected: isRangeStart || isRangeEnd, // For single select, start==end
+			isSelected,
 			isRangeStart,
 			isRangeEnd,
 			isRangeMiddle,

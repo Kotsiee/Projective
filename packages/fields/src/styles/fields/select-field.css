@@ -1,0 +1,253 @@
+/* SelectField Styles */
+
+.field-select {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.field-select__container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  transition: all var(--field-transition);
+  min-height: var(--field-height);
+  cursor: pointer;
+  padding-right: 8px;
+  /* Space for arrows */
+}
+
+.field-select__container:hover {
+  background-color: var(--field-bg-hover);
+  border-color: var(--field-border-hover);
+}
+
+.field-select__container--focused {
+  border-color: var(--field-border-focus);
+  background-color: var(--field-bg-active);
+}
+
+.field-select__container--error {
+  border-color: var(--field-border-error);
+}
+
+.field-select__container--disabled {
+  background-color: var(--field-bg-disabled);
+  border-color: var(--field-border-disabled);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Content Area */
+.field-select__content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px var(--field-padding-x);
+  min-height: var(--field-height);
+}
+
+.field-select__input {
+  border: none;
+  background: transparent;
+  font-family: var(--field-font-family);
+  font-size: var(--field-font-size);
+  color: var(--field-text);
+  outline: none;
+  padding: 0;
+  margin: 0;
+  min-width: 60px;
+  flex: 1;
+}
+
+/* Single Value Display */
+.field-select__single {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--field-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Icons & Avatars */
+.field-select__icon,
+.field-select__option-icon {
+  display: flex;
+  align-items: center;
+  color: var(--field-text-placeholder);
+  margin-right: 8px;
+}
+
+.field-select__avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+/* Chips */
+.field-select__chip {
+  display: flex;
+  align-items: center;
+  background-color: var(--gray-100);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  gap: 4px;
+  color: var(--field-text);
+}
+
+.field-select__chip-remove {
+  cursor: pointer;
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+}
+
+.field-select__chip-remove:hover {
+  opacity: 1;
+}
+
+/* Arrows & Clear */
+.field-select__arrow {
+  color: var(--field-text-placeholder);
+  transition: transform 0.2s;
+  display: flex;
+}
+
+.field-select__arrow--flip {
+  transform: rotate(180deg);
+}
+
+.field-select__clear {
+  color: var(--field-text-placeholder);
+  cursor: pointer;
+  margin-right: 4px;
+  display: flex;
+}
+
+.field-select__clear:hover {
+  color: var(--field-text-error);
+}
+
+.field-select__spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dropdown Menu */
+.field-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 250px;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: all 0.1s;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-select__menu--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Group Styles */
+.field-select__option--group {
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+/* Options */
+.field-select__option {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--field-text);
+  display: flex;
+  align-items: center;
+  transition: background-color 0.1s;
+}
+
+.field-select__option:hover,
+.field-select__option--highlighted {
+  background-color: var(--field-bg-hover);
+}
+
+.field-select__option--selected {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.field-select__option--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.field-select__check {
+  margin-left: auto;
+  color: currentColor;
+}
+
+.field-select__option-label {
+  flex: 1;
+}
+
+.field-select__no-options {
+  padding: 12px;
+  color: var(--field-text-placeholder);
+  text-align: center;
+}
+
+.field-select__action-bar {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--field-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-600);
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.field-select__action-bar:hover {
+  background-color: var(--gray-50);
+}
+
+/* Upward Flip */
+.field-select--up .field-select__menu {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+/* Chips Below */
+.field-select__chips-external {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}

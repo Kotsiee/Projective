@@ -5,11 +5,7 @@ import { relative, resolve } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./apps/web/components/fields',
-	'./apps/web/styles/components/fields',
-	'./apps/web/hooks/fields',
-	'./apps/web/components/wrappers',
-	'./packages/types',
+	'./packages/fields',
 	// './src/specific_file.ts' // You can also add specific files
 ];
 
@@ -24,6 +20,8 @@ const IGNORE_FILES = [
 	'.DS_Store',
 	'pack_project.ts',
 	'README.md',
+	'TextFile.tsx',
+	'text-field.css',
 	OUTPUT_FILE,
 ];
 const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.css', '.md', '.json', '.toml'];

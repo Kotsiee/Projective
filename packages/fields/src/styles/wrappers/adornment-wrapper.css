@@ -1,0 +1,26 @@
+/* --- Adornment Wrapper --- */
+.field-adornment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--field-text-placeholder);
+  min-width: var(--field-icon-size);
+}
+
+.field-adornment--prefix {
+  margin-right: var(--field-gap);
+}
+
+.field-adornment--suffix {
+  margin-left: var(--field-gap);
+}
+
+.field-adornment--interactive {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color var(--field-transition);
+}
+
+.field-adornment--interactive:hover {
+  color: var(--field-text);
+}

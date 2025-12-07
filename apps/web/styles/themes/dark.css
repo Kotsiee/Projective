@@ -21,25 +21,12 @@
       var(--primary-saturation),
       55%);
 
+  --info: #fff;
+  --danger: #fff;
+  --warning: #fff;
+  --success: #fff;
 
-  /* -- Palette -- */
-  --input-bg: #202020;
-  --input-border: #353535;
-  --input-hover: #777777;
-  --input-placeholder: #9ca3af;
-
-  /* -- States -- */
-  --input-focus-border: #3b82f6;
-  --input-focus-ring: rgba(59, 130, 246, 0.25);
-  --input-error-border: #ef4444;
-  --input-error-text: #ef4444;
-  --input-disabled-bg: #f3f4f6;
-  --input-disabled-text: #9ca3af;
-
-  /* -- Dropdown Specific -- */
-  --dropdown-bg: #222222;
-  --dropdown-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --option-hover: #353535;
-  --option-selected-bg: #303030;
-  --option-selected-text: var(--text);
+  --incomplete: #fff;
+  --in-progress: #fff;
+  --complete: #fff;
 }

@@ -1,26 +1,9 @@
-@import "themes/light.css";
-@import "themes/dark.css";
+@import "themes/variables/colour.css";
+@import "themes/variables/font.css";
+/* @import "themes/dark.css"; */
 
 :root {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-  --font-dyslexia: "OpenDyslexic", Atkinson, var(--font-sans);
-
   --scale: 1;
-
-  --primary-hue: 186;
-  --primary-saturation: 57%;
-  --primary-lightness: 36%;
-
-  --primary: hsl(var(--primary-hue),
-      var(--primary-saturation),
-      var(--primary-lightness));
-  --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), 50%);
-  --primary-active: hsl(var(--primary-hue), var(--primary-saturation), 60%);
-
-  --primary-half: hsla(var(--primary-hue),
-      var(--primary-saturation),
-      var(--primary-lightness), 0.5);
 
   --header-height: 4rem;
   --side-nav-width: 0rem;

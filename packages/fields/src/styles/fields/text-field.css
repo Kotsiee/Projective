@@ -1,0 +1,105 @@
+/* TextField Styles */
+
+.field-text {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.field-text__container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  transition: all var(--field-transition);
+  min-height: var(--field-height);
+  cursor: text;
+}
+
+.field-text__container:hover {
+  background-color: var(--field-bg-hover);
+  border-color: var(--field-border-hover);
+}
+
+.field-text__container--focused {
+  border-color: var(--field-border-focus);
+  background-color: var(--field-bg-active);
+}
+
+.field-text__container--error {
+  border-color: var(--field-border-error);
+}
+
+.field-text__container--disabled {
+  background-color: var(--field-bg-disabled);
+  border-color: var(--field-border-disabled);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Input & Textarea Shared Styles 
+  They share the same font and color inheritance.
+*/
+.field-text__input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0 var(--field-padding-x);
+  font-family: var(--field-font-family);
+  font-size: var(--field-font-size);
+  color: var(--field-text);
+  outline: none;
+  min-width: 0;
+  /* Flexbox fix */
+}
+
+/* Adjust padding if adornments are present */
+.field-text__container:has(.field-adornment--prefix) .field-text__input {
+  padding-left: 0;
+}
+
+.field-text__container:has(.field-adornment--suffix) .field-text__input {
+  padding-right: 0;
+}
+
+.field-text__input::placeholder {
+  color: var(--field-text-placeholder);
+  opacity: 1;
+  /* Firefox fix */
+}
+
+/* Textarea Specifics 
+  Standard height is auto, but min-height matches field height
+*/
+textarea.field-text__input {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  min-height: var(--field-height);
+  resize: vertical;
+  line-height: 1.5;
+  display: block;
+}
+
+/* When disabled */
+.field-text__input:disabled {
+  cursor: not-allowed;
+  color: var(--field-text-disabled);
+}
+
+/* Character Count */
+.field-text__count {
+  align-self: flex-end;
+  font-size: 0.75rem;
+  color: var(--field-text-placeholder);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.field-text__count--limit {
+  color: var(--field-text-error);
+}

@@ -1,0 +1,108 @@
+/* new-project-details.css */
+
+/* Project Details Layout */
+.new-project__details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+
+    h2 {
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.project-thumbnail-section__title {
+    margin: 0;
+    padding: 0;
+}
+
+.project-thumbnail-section__subtitle {
+    font-size: 0.875em;
+    color: var(--text-disabled);
+    margin: 0;
+    padding: 0;
+    margin-bottom: 0.75em;
+}
+
+/* Shared Grid Layout for both Thumbnail and Attachments */
+.action-grid-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    width: 100%;
+    max-width: 30rem;
+    /* Adjust based on preference */
+    height: 10rem;
+}
+
+/* Force the FileDrop internal zone to fill the grid cell */
+.action-grid-container .field-file {
+    height: 100%;
+}
+
+.action-grid-container .field-file__dropzone {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    min-height: 0;
+    /* Fix flex overflow */
+}
+
+/* Shared styles for the inner content of buttons/dropzones */
+.action-card__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    color: var(--field-text-placeholder);
+}
+
+.action-card__icon {
+    color: var(--field-text-placeholder);
+    /* Match file-drop default */
+}
+
+.action-card__label {
+    font-weight: 500;
+}
+
+/* The Library Button Styling - Matching .field-file__dropzone exactly */
+.action-card__library-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--field-bg);
+    border: 2px dashed var(--field-border);
+    /* Changed to 2px to match Dropzone */
+    border-radius: var(--field-radius);
+    cursor: pointer;
+    transition: all var(--field-transition);
+    padding: 0;
+}
+
+/* Hover State - Matches .field-file__dropzone:hover */
+.action-card__library-button:hover {
+    background-color: var(--field-bg-hover);
+    border-color: var(--field-border-hover);
+}
+
+/* Focus State */
+.action-card__library-button:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* Active/Press State */
+.action-card__library-button:active {
+    background-color: var(--field-bg-active, var(--field-bg-hover));
+}
+
+/* Specific overrides for specific sections if needed */
+.project-thumbnail-section {}
