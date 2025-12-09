@@ -9,8 +9,9 @@ import {
 } from '@tabler/icons-preact';
 
 // Components
-import { Step, Stepper, StepperFooter, StepperHeader, useStepperContext } from '@projective/fields';
+import { Step, Stepper, StepperHeader, useStepperContext } from '@projective/fields';
 import ProjectDetails from '@components/dashboard/projects/new/ProjectDetails.tsx';
+import ProjectLegal from '@components/dashboard/projects/new/ProjectLegal.tsx';
 import ProjectStages from '@components/dashboard/projects/new/ProjectStages.tsx';
 
 // --- Wrapper to bridge custom footer with Stepper Logic ---
@@ -57,8 +58,10 @@ export default function NewProjectIsland() {
 			case 0:
 				return <ProjectDetails />;
 			case 1:
-				return <ProjectStages />;
+				return <ProjectLegal />;
 			case 2:
+				return <ProjectStages />;
+			case 3:
 				return (
 					<div style={{ textAlign: 'center', padding: '4rem' }}>
 						<h3>Review & Settings</h3>
@@ -98,6 +101,11 @@ export default function NewProjectIsland() {
 								label='Details'
 								description='Basic Info'
 								icon={<IconFileDescription size={20} />}
+							/>
+							<Step
+								label='Legal'
+								description='IP & Screening'
+								icon={<IconCheck size={20} />}
 							/>
 							<Step
 								label='Stages'

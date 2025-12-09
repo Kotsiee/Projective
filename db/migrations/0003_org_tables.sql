@@ -1,3 +1,6 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
 CREATE TABLE org.attachments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   owner_profile_id uuid NOT NULL,
@@ -144,7 +147,8 @@ CREATE TABLE org.user_emails (
     with
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT user_emails_pkey PRIMARY KEY (id),
-        CONSTRAINT user_emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+        CONSTRAINT user_emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
+        CONSTRAINT user_emails_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES org.users_public (user_id)
 );
 
 CREATE TABLE org.user_skills (

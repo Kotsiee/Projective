@@ -1,5 +1,3 @@
-import { FileError } from '../types/file.ts';
-
 /**
  * Validates a single file against size and type constraints.
  */

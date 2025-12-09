@@ -123,7 +123,10 @@
     "@tabler/icons-preact": "npm:@tabler/icons-preact@^3.35.0",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "fresh": "jsr:@fresh/core@^2.2.0",
+    "marked": "npm:marked@^17.0.1",
     "preact": "npm:preact@^10.27.2",
+    "quill": "npm:quill@^2.0.3",
+    "quill-delta-to-html": "npm:quill-delta-to-html@^0.12.1",
     "supabaseClient": "npm:@supabase/supabase-js@2.76.1",
 
     "packages/": "./packages/",
@@ -141,6 +144,7 @@
     "@server/": "./apps/web/server/",
     "@contracts/": "./apps/web/contracts/",
     "@hooks/": "./apps/web/hooks/",
+    "@enums/": "./apps/web/enums/",
     "@utils": "./apps/web/utils.ts"
   },
   "exclude": ["**/_fresh/*"]

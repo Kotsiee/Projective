@@ -1,0 +1,160 @@
+/* Base Layout */
+.field-rich-text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+
+.field-rich-text__container {
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background-color: var(--field-bg);
+    transition: border-color 0.2s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Framed Variant (Default) */
+.field-rich-text--framed .field-rich-text__container:hover {
+    border-color: var(--field-border-hover);
+}
+
+.field-rich-text--framed .field-rich-text__container:focus-within {
+    border-color: var(--field-border-focus);
+}
+
+/* States */
+.field-rich-text__container--error {
+    border-color: var(--field-border-error) !important;
+}
+
+.field-rich-text__container--warning {
+    border-color: var(--warning-500) !important;
+}
+
+/* Inline Variant */
+.field-rich-text--inline .field-rich-text__container {
+    border: none;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.field-rich-text--inline .ql-toolbar.ql-snow {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    padding-bottom: 8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.field-rich-text--inline:focus-within .ql-toolbar.ql-snow,
+.field-rich-text--inline:hover .ql-toolbar.ql-snow {
+    opacity: 1;
+}
+
+.field-rich-text--inline .ql-container.ql-snow {
+    border: none;
+}
+
+.field-rich-text--inline .ql-editor {
+    padding: 0;
+    min-height: 0;
+}
+
+/* --- Quill Base Overrides --- */
+.ql-toolbar.ql-snow {
+    border: none;
+    border-bottom: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface-subtle);
+    font-family: inherit;
+    padding: 8px;
+    z-index: 2;
+}
+
+.ql-container.ql-snow {
+    border: none;
+    font-family: var(--field-font-family);
+    font-size: var(--field-font-size);
+    color: var(--field-text);
+    /* Flex grow to allow max-height to work properly on the container if needed, 
+       but usually max-height is applied to .ql-editor */
+}
+
+.ql-editor {
+    min-height: 100px;
+    padding: 16px;
+    line-height: 1.6;
+    /* Smooth scrolling */
+    overflow-y: auto; 
+}
+
+.ql-editor.ql-blank::before {
+    color: var(--field-text-placeholder);
+    font-style: normal;
+    left: 16px;
+}
+
+.field-rich-text--inline .ql-editor.ql-blank::before {
+    left: 0;
+}
+
+/* Character Count */
+.field-rich-text__count {
+    align-self: flex-end;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.field-rich-text__count--limit {
+    color: var(--text-error);
+    font-weight: 500;
+}
+
+/* Read Only Mode */
+.field-rich-text--readonly .ql-toolbar {
+    display: none;
+    border-bottom: none;
+}
+
+.field-rich-text--readonly .field-rich-text__container {
+    background-color: var(--bg-surface-disabled);
+}
+
+.field-rich-text--readonly .ql-container.ql-snow {
+    color: var(--field-text); 
+    opacity: 0.8;
+}
+
+.field-rich-text--readonly .ql-editor {
+    padding: 12px;
+}
+
+.field-rich-text--inline.field-rich-text--readonly .field-rich-text__container {
+    background-color: transparent;
+    border: none;
+}
+
+.field-rich-text--inline.field-rich-text--readonly .ql-editor {
+    padding: 0;
+}
+
+/* Icons Colors */
+.ql-snow .ql-stroke { stroke: var(--text-secondary); }
+.ql-snow .ql-fill { fill: var(--text-secondary); }
+.ql-snow .ql-picker { color: var(--text-secondary); }
+
+.ql-snow .ql-picker:hover, .ql-snow .ql-picker.ql-expanded { color: var(--text-primary); }
+.ql-snow .ql-picker-options {
+    background-color: var(--bg-overlay);
+    border-color: var(--border-default);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.ql-snow .ql-picker-item:hover { color: var(--text-brand); }
+.ql-snow .ql-active .ql-stroke { stroke: var(--text-brand); }
+.ql-snow .ql-active .ql-fill { fill: var(--text-brand); }
+.ql-toolbar.ql-snow button { margin-right: 4px; }

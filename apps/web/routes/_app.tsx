@@ -16,6 +16,10 @@ export default function App(
 					content='Collaborative freelancing platform.'
 				/>
 				<title>Projective</title>
+				<link
+					href='https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css'
+					rel='stylesheet'
+				/>
 			</Head>
 			<body data-onboarded={ctx.state.isOnboarded}>
 				<main>

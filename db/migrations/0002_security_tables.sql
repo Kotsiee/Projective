@@ -1,3 +1,6 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
 CREATE TABLE security.audit_logs (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
@@ -39,14 +42,15 @@ CREATE TABLE security.refresh_tokens (
 
 CREATE TABLE security.session_context (
     user_id uuid NOT NULL,
-    active_profile_type USER - DEFINED NOT NULL,
-    active_profile_id uuid NOT NULL,
+    active_profile_type USER - DEFINED,
+    active_profile_id uuid,
     active_team_id uuid,
     updated_at timestamp
     with
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT session_context_pkey PRIMARY KEY (user_id),
-        CONSTRAINT session_context_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+        CONSTRAINT session_context_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
+        CONSTRAINT session_context_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES org.users_public (user_id)
 );
 
 CREATE TABLE security.turnstile_verifications (

@@ -1,6 +1,4 @@
-import { BaseFieldProps } from "./fields/form.ts";
-
-export type FileStatus = "pending" | "processing" | "ready" | "error";
+export type FileStatus = 'pending' | 'processing' | 'ready' | 'error';
 
 export interface FileError {
 	code: string;
@@ -16,18 +14,4 @@ export interface FileWithMeta {
 	progress: number; // 0-100
 	errors: FileError[];
 	processingMeta?: Record<string, any>; // Store WASM results here
-}
-
-export interface FileFieldProps extends BaseFieldProps<File[]> {
-	accept?: string;
-	maxSize?: number;
-	maxFiles?: number;
-	multiple?: boolean;
-	layout?: "list" | "grid";
-	dropzoneLabel?: string;
-
-	// New: Inject processors
-	processors?: import("./processing.ts").FileProcessor[];
-
-	onDrop?: (acceptedFiles: File[], rejectedFiles: FileWithMeta[]) => void;
 }

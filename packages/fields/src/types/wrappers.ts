@@ -1,6 +1,8 @@
 import { Signal } from '@preact/signals';
 import { JSX } from 'preact';
 
+export type HelpPosition = 'inline' | 'top-right' | 'bottom-right' | 'bottom-left';
+
 /**
  * Props for the LabelWrapper component.
  */
@@ -9,6 +11,27 @@ export interface LabelWrapperProps {
 	label?: string;
 	required?: boolean;
 	floating?: boolean;
+
+	/**
+	 * Tooltip text to display.
+	 */
+	help?: string | JSX.Element;
+
+	/**
+	 * Optional URL to navigate to when the help icon is clicked.
+	 */
+	helpLink?: string;
+
+	/**
+	 * Position of the help icon.
+	 * - 'inline': Next to the label text (moves with label).
+	 * - 'top-right': Fixed to the top-right of the component.
+	 * - 'bottom-right': Fixed to the bottom-right.
+	 * - 'bottom-left': Fixed to the bottom-left.
+	 * @default 'inline'
+	 */
+	helpPosition?: HelpPosition;
+
 	active?: boolean | Signal<boolean>;
 	error?: boolean | Signal<boolean>;
 	disabled?: boolean | Signal<boolean>;

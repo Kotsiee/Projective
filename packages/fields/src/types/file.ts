@@ -1,3 +1,4 @@
+import { FileWithMeta } from '@projective/types';
 import { ValueFieldProps } from './core.ts';
 import { LabelWrapperProps, MessageWrapperProps } from './wrappers.ts';
 
@@ -6,17 +7,6 @@ export type FileStatus = 'pending' | 'processing' | 'ready' | 'error';
 export interface FileError {
 	code: string;
 	message: string;
-}
-
-export interface FileWithMeta {
-	file: File;
-	originalFile?: File;
-	id: string;
-	preview?: string;
-	status: FileStatus;
-	progress: number;
-	errors: FileError[];
-	processingMeta?: Record<string, any>;
 }
 
 export interface FileProcessor {

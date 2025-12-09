@@ -28,6 +28,9 @@ export function TextField(props: TextFieldProps) {
 		hint,
 		warning,
 		info,
+		help,
+		helpLink,
+		helpPosition, // NEW
 		type = 'text',
 		multiline,
 		rows = 3,
@@ -151,7 +154,6 @@ export function TextField(props: TextFieldProps) {
 					{prefix}
 				</AdornmentWrapper>
 
-				{/* Label Moved Inside Container for Correct Relative Positioning */}
 				<LabelWrapper
 					id={id}
 					label={label}
@@ -163,6 +165,9 @@ export function TextField(props: TextFieldProps) {
 					position={position}
 					floatingRule={floatingRule}
 					multiline={multiline}
+					help={help}
+					helpLink={helpLink}
+					helpPosition={helpPosition} // Passed down
 				/>
 
 				{renderInput()}

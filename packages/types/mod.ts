@@ -5,3 +5,5 @@ export * from './fields/text.ts';
 export * from './processing.ts';
 export * from './file.ts';
 export * from './DateTime.ts';
+export * from './currency.ts';
+export * from './file/fileCategories.ts';

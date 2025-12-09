@@ -1,6 +1,8 @@
-import { Signal } from '@preact/signals';
 import '../styles/wrappers/label-wrapper.css';
+import '../styles/components/help-tooltip.css';
+import { Signal } from '@preact/signals';
 import { LabelWrapperProps } from '../types/wrappers.ts';
+import { HelpTooltip } from '../components/HelpTooltip.tsx';
 
 export function LabelWrapper(props: LabelWrapperProps) {
 	if (!props.label) return null;
@@ -9,18 +11,21 @@ export function LabelWrapper(props: LabelWrapperProps) {
 	const isError = props.error instanceof Signal ? props.error.value : props.error;
 	const isDisabled = props.disabled instanceof Signal ? props.disabled.value : props.disabled;
 
-	const { position = 'top', floatingRule = 'auto', floatingOrigin = 'top-left' } = props;
+	const {
+		position = 'top',
+		floatingRule = 'auto',
+		floatingOrigin = 'top-left',
+		helpPosition = 'inline',
+	} = props;
 
 	// Determine if floating styles should be applied (Absolute positioning)
-	// If rule is 'auto' (default) or 'always', we need the floating base class.
-	// We only skip this if position isn't top or rule is explicitly 'never'.
 	const canFloat = position === 'top' && floatingRule !== 'never';
 	const isFloating = canFloat;
 
 	// Determine if the label is currently in the "up" (active) state
 	const isFloatedUp = floatingRule === 'always' || (floatingRule === 'auto' && isActive);
 
-	const classes = [
+	const labelClasses = [
 		'field-label',
 		`field-label--pos-${position}`,
 		isFloating && 'field-label--floating',
@@ -34,10 +39,31 @@ export function LabelWrapper(props: LabelWrapperProps) {
 		.filter(Boolean)
 		.join(' ');
 
+	// Render Helper
+	const tooltip = props.help
+		? (
+			<HelpTooltip
+				content={props.help}
+				href={props.helpLink}
+				className={helpPosition !== 'inline' ? `help-tooltip--${helpPosition}` : ''}
+			/>
+		)
+		: null;
+
 	return (
-		<label htmlFor={props.id} className={classes} style={props.style}>
-			{props.label}
-			{props.required && <span className='field-label__required'>*</span>}
-		</label>
+		<>
+			<div className={labelClasses} style={props.style}>
+				<label htmlFor={props.id}>
+					{props.label}
+					{props.required && <span className='field-label__required'>*</span>}
+				</label>
+
+				{/* Render inline if position is inline */}
+				{helpPosition === 'inline' && tooltip}
+			</div>
+
+			{/* Render outside if position is corner-based (Detached from label transforms) */}
+			{helpPosition !== 'inline' && tooltip}
+		</>
 	);
 }
