@@ -1,0 +1,138 @@
+/* Block */
+.project-list-item {
+    /* Layout */
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+
+    /* Sizing */
+    width: 100%;
+    padding: 0.75rem;
+
+    /* Theming */
+    background-color: transparent;
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+    /* Reserve space for border to prevent layout shift */
+    cursor: pointer;
+    transition: all var(--fast) ease;
+    height: 100%;
+    width: 100%;
+}
+
+/* Interactive States */
+.project-list-item:hover {
+    background-color: var(--input-bg);
+    /* Subtle grey/off-white */
+}
+
+.project-list-item:active,
+.project-list-item[aria-selected="true"] {
+    background-color: var(--primary-surface);
+    /* Tinted background */
+    border-color: var(--primary-surface);
+}
+
+/* Element: Avatar */
+.project-list-item__avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    object-fit: cover;
+
+    /* Border to separate from bg */
+    border: 1px solid var(--border-color);
+    background-color: var(--disabled-bg);
+}
+
+/* Element: Content Wrapper */
+.project-list-item__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    overflow: hidden;
+    /* For text truncation */
+}
+
+/* Element: Title */
+.project-list-item__title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-main);
+
+    /* Truncation */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Element: Meta Row */
+.project-list-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Element: Status Dot */
+.project-list-item__status {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Status Modifiers - Mapping to colour.css logic */
+.project-list-item__status--active {
+    background-color: var(--primary);
+    /* Standard brand color */
+    box-shadow: 0 0 0 2px var(--primary-surface);
+}
+
+.project-list-item__status--in-progress {
+    background-color: var(--in-progress);
+    /* Warning/Orange */
+}
+
+.project-list-item__status--completed {
+    background-color: var(--success);
+    /* Green */
+}
+
+.project-list-item__status--draft {
+    background-color: var(--text-disabled);
+    /* Grey */
+    border: 1px solid var(--text-muted);
+    /* Outline for visibility */
+}
+
+.project-list-item__status--archived {
+    background-color: var(--disabled-bg);
+    border: 1px solid var(--border-color);
+}
+
+/* Element: Indicators (Stars/Unread) */
+.project-list-item__indicators {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-list-item__icon--starred {
+    color: var(--warning);
+    /* Star is usually amber/warning color */
+    fill: var(--warning);
+}
+
+.project-list-item__unread-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: var(--danger);
+    /* Red for alerts */
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--card);
+    /* Cutout effect against row bg */
+}

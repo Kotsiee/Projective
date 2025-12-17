@@ -1,11 +1,13 @@
 import '@styles/components/dashboard/projects/new-project-legal.css';
-import { useSignal } from '@preact/signals';
 import { SelectOption } from '@projective/types';
 import { SelectField, TagInput, TextField } from '@projective/fields';
 import { IconTrash } from '@tabler/icons-preact';
 import { IPOptionMode, PortfolioDisplayRights } from '@enums/project.ts';
+import { useProjectContext } from '@contexts/ProjectContext.tsx';
 
 export default function ProjectLegal() {
+	const state = useProjectContext();
+
 	const ipOptions: SelectOption<string>[] = [
 		{ label: 'Exclusive Transfer', value: IPOptionMode.ExclusiveTransfer },
 		{ label: 'Licensed Use', value: IPOptionMode.LicensedUse },
@@ -24,28 +26,19 @@ export default function ProjectLegal() {
 		{ label: 'No', value: 'false' },
 	];
 
-	// State
-	const ipMode = useSignal<string>(IPOptionMode.ExclusiveTransfer);
-	const ndaRequired = useSignal<string>('false');
-	const portfolioRights = useSignal<string>(PortfolioDisplayRights.Allowed);
-	const locationRestriction = useSignal('');
-	const languageRequirement = useSignal('');
-	const skills = useSignal<string[]>([]); // Note: These are strings, need mapping to UUIDs on backend
-
-	const screeningQuestions = useSignal<string[]>(['']);
-
+	// Handlers for Screening Questions (now modifying Context state)
 	const addQuestion = () => {
-		screeningQuestions.value = [...screeningQuestions.value, ''];
+		state.screeningQuestions.value = [...state.screeningQuestions.value, ''];
 	};
 
 	const removeQuestion = (index: number) => {
-		screeningQuestions.value = screeningQuestions.value.filter((_, i) => i !== index);
+		state.screeningQuestions.value = state.screeningQuestions.value.filter((_, i) => i !== index);
 	};
 
 	const updateQuestion = (index: number, value: string) => {
-		const newQuestions = [...screeningQuestions.value];
+		const newQuestions = [...state.screeningQuestions.value];
 		newQuestions[index] = value;
-		screeningQuestions.value = newQuestions;
+		state.screeningQuestions.value = newQuestions;
 	};
 
 	return (
@@ -57,8 +50,8 @@ export default function ProjectLegal() {
 					name='ip_ownership'
 					label='IP Ownership Mode'
 					options={ipOptions}
-					value={ipMode.value}
-					onChange={(v) => ipMode.value = v as string}
+					value={state.ipMode.value}
+					onChange={(v) => state.ipMode.value = v as string}
 					searchable={false}
 					multiple={false}
 					floating
@@ -69,8 +62,8 @@ export default function ProjectLegal() {
 					name='nda_required'
 					label='NDA Required'
 					options={booleanOptions}
-					value={ndaRequired.value}
-					onChange={(v) => ndaRequired.value = v as string}
+					value={state.ndaRequired.value}
+					onChange={(v) => state.ndaRequired.value = v as string}
 					searchable={false}
 					multiple={false}
 					floating
@@ -82,8 +75,8 @@ export default function ProjectLegal() {
 				name='portfolio_rights'
 				label='Portfolio Display Rights'
 				options={portfolioOptions}
-				value={portfolioRights.value}
-				onChange={(v) => portfolioRights.value = v as string}
+				value={state.portfolioRights.value}
+				onChange={(v) => state.portfolioRights.value = v as string}
 				searchable={false}
 				multiple={false}
 				floating
@@ -93,16 +86,16 @@ export default function ProjectLegal() {
 			<div className='field-group'>
 				<TextField
 					label='Location Restriction'
-					value={locationRestriction}
-					onChange={(v) => locationRestriction.value = v}
+					value={state.locationRestriction}
+					onChange={(v) => state.locationRestriction.value = v}
 					placeholder='e.g. US Only, Europe'
 					floating
 				/>
 
 				<TextField
 					label='Language Requirement'
-					value={languageRequirement}
-					onChange={(v) => languageRequirement.value = v}
+					value={state.languageRequirement}
+					onChange={(v) => state.languageRequirement.value = v}
 					placeholder='e.g. English (Native)'
 					floating
 				/>
@@ -111,8 +104,8 @@ export default function ProjectLegal() {
 			<TagInput
 				name='skills'
 				label='Required Skills'
-				value={skills}
-				onChange={(v) => skills.value = v}
+				value={state.skills}
+				onChange={(v) => state.skills.value = v}
 				placeholder='Add skills...'
 				floating
 			/>
@@ -123,7 +116,7 @@ export default function ProjectLegal() {
 				</div>
 
 				<div className='screening-questions__list'>
-					{screeningQuestions.value.map((question, index) => (
+					{state.screeningQuestions.value.map((question, index) => (
 						<div key={index} className='screening-questions__item'>
 							<div style={{ flex: 1 }}>
 								<TextField
@@ -134,7 +127,7 @@ export default function ProjectLegal() {
 									floating
 								/>
 							</div>
-							{screeningQuestions.value.length > 1 && (
+							{state.screeningQuestions.value.length > 1 && (
 								<button
 									type='button'
 									className='btn-remove'

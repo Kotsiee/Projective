@@ -186,6 +186,15 @@ export function RichTextField(props: RichTextFieldProps) {
 				readOnly: isReadOnly,
 			});
 
+			const toolbarC = containerRef.current?.querySelector('.ql-toolbar');
+			if (toolbarC) {
+				// Select buttons and dropdowns (selects)
+				const controls = toolbarC.querySelectorAll('button, select');
+				controls.forEach((control) => {
+					control.setAttribute('tabindex', '-1');
+				});
+			}
+
 			if (!isReadOnly) {
 				quillInstance.current.root.addEventListener('drop', (e: DragEvent) => {
 					if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -198,23 +207,28 @@ export function RichTextField(props: RichTextFieldProps) {
 			const raw = getRawValue();
 			if (raw) {
 				try {
-					const trimmed = raw.trim();
-					if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-						quillInstance.current.setContents(JSON.parse(trimmed));
-					} else if (trimmed.startsWith('<')) {
-						const delta = quillInstance.current.clipboard.convert(trimmed);
-						quillInstance.current.setContents(delta);
-					} else {
-						if (parserRef.current) {
-							parserRef.current.markdownToDelta(raw).then((delta: any) => {
-								quillInstance.current.setContents(delta);
-							});
+					if (typeof raw === 'object' && raw !== null) {
+						quillInstance.current.setContents(raw);
+					} else if (typeof raw === 'string') {
+						const trimmed = raw.trim();
+						if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+							quillInstance.current.setContents(JSON.parse(trimmed));
+						} else if (trimmed.startsWith('<')) {
+							const delta = quillInstance.current.clipboard.convert(trimmed);
+							quillInstance.current.setContents(delta);
 						} else {
-							quillInstance.current.setText(raw);
+							if (parserRef.current) {
+								parserRef.current.markdownToDelta(raw).then((delta: any) => {
+									quillInstance.current.setContents(delta);
+								});
+							} else {
+								quillInstance.current.setText(raw);
+							}
 						}
 					}
 				} catch (e) {
-					quillInstance.current.setText(raw);
+					// Fallback for non-parseable strings
+					quillInstance.current.setText(String(raw));
 				}
 			}
 

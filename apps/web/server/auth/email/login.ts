@@ -2,9 +2,8 @@ import { LoginWithEmailRequest } from '@contracts/auth/login.ts';
 import { supabaseClient } from '../../core/clients/supabase.ts';
 import { fail, ok, Result } from '../../core/http/result.ts';
 import { isLikelyEmail } from '../../core/validation/email.ts';
-import { Deps, SignInData } from '../_shared/types.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { Config } from '@projective/backend';
+import { Deps, SignInData } from '../../_shared/types.ts';
 
 export async function loginWithEmail(
 	{ email, password }: LoginWithEmailRequest,

@@ -2,9 +2,8 @@ import '@styles/pages/auth/onboarding.css';
 import { useEffect } from 'preact/hooks';
 import { signal } from '@preact/signals';
 import OnboardingSubmit from '@components/auth/OnboardingSubmit.tsx';
-import TextField from '@components/fields/TextField.tsx';
-import DateField from '@components/fields/DateField.tsx';
 import { DateTime } from '@projective/types';
+import { DateField, TextField } from '@projective/fields';
 
 const firstName = signal('');
 const lastName = signal('');
@@ -93,7 +92,7 @@ export default function OnboardingIsland() {
 
 					<DateField
 						name='dob'
-						max={new DateTime().minus(18, 'years')}
+						maxDate={new DateTime().minus(18, 'years')}
 						value={dob.value}
 						placeholder='DoB'
 						label='DoB'

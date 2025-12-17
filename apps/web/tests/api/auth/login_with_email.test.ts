@@ -1,5 +1,6 @@
 import { assert, assertEquals } from '../../_helpers/asserts.ts';
 import { loginWithEmail } from '../../../server/auth/email/login.ts';
+import { User } from 'supabaseClient';
 
 type FakeAuthReturn =
 	| { data: { user: unknown; session: unknown }; error: null }
@@ -70,7 +71,7 @@ Deno.test({
 		);
 
 		assert(res.ok);
-		assertEquals(res.data.user, data.user);
+		assertEquals(res.data.user, data.user as User);
 		assertEquals(res.data.session, data.session);
 	},
 });

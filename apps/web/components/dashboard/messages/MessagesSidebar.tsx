@@ -1,10 +1,10 @@
 import '@styles/components/dashboard/messages/messages-sidebar.css';
-import SelectField from '../../fields/SelectField.tsx';
 import { signal } from '@preact/signals';
 import { IconMessages, IconMessagesOff, IconSearch, IconStar } from '@tabler/icons-preact';
 import { SelectOption } from '@projective/types';
+import { SelectField } from '@projective/fields';
 
-const messageTypes: SelectOption[] = [
+const messageTypes: SelectOption<string>[] = [
 	{ value: 'all', label: 'All Messages', icon: <IconMessages /> },
 	{ value: 'unread', label: 'Unread', icon: <IconMessagesOff /> },
 	{ value: 'starred', label: 'Starred', icon: <IconStar /> },

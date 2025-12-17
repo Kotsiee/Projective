@@ -1,0 +1,116 @@
+.data-table {
+    display: inline-block;
+    min-width: 100%;
+}
+
+
+.data-table__header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background-color: var(--table-header-bg);
+    border-bottom: 1px solid var(--border-default);
+    height: var(--table-header-height);
+
+}
+
+.data-table__header-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--table-cell-padding);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.data-table__header-cell--sortable {
+    cursor: pointer;
+}
+
+.data-table__header-cell--sortable:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-surface-subtle);
+}
+
+
+.data-table__sort-icon {
+    margin-left: 4px;
+    font-size: 10px;
+    color: var(--text-brand);
+}
+
+
+.data-table__resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 12px;
+    transform: translateX(50%);
+    cursor: col-resize;
+    z-index: 1;
+    touch-action: none;
+}
+
+
+.data-table__resizer::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    bottom: 20%;
+    width: 1px;
+    background-color: transparent;
+    transition: background-color 0.1s;
+}
+
+.data-table__resizer:hover::after,
+.data-table__resizer--active::after {
+    background-color: var(--border-focus);
+    width: 2px;
+}
+
+
+.data-table__row {
+
+    display: flex;
+    border-bottom: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface);
+    transition: background-color 0.1s;
+}
+
+.data-table__row:last-child {
+    border-bottom: none;
+}
+
+.data-table__row--interactive {
+    cursor: pointer;
+}
+
+.data-table__row--interactive:hover {
+    background-color: var(--bg-surface-subtle);
+}
+
+.data-table__row--selected {
+    background-color: var(--bg-selection);
+}
+
+.data-table__row--selected:hover {
+    background-color: var(--bg-selection);
+}
+
+
+.data-table__cell {
+    padding: var(--table-cell-padding);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    align-self: center;
+    color: var(--text-primary);
+}

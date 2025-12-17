@@ -37,3 +37,4 @@ export * from './src/components/accordion/index.ts';
 export * from './src/components/splitter/index.ts';
 export * from './src/components/stepper/index.ts';
 export * from './src/components/HelpTooltip.tsx';
+export * from './src/components/feedback/toast/index.ts';

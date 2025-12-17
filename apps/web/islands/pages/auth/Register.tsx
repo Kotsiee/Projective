@@ -1,11 +1,10 @@
 import '@styles/pages/auth/register.css';
-import TextField from '@components/fields/TextField.tsx';
-import PasswordField from '@components/fields/PasswordField.tsx';
 import RegisterButton from '@components/auth/RegisterButton.tsx';
 import GoogleRegisterButton from '@components/auth/GoogleRegisterButton.tsx';
 import GitHubRegisterButton from '@components/auth/GitHubRegisterButton.tsx';
 import { signal } from '@preact/signals';
 import { AuthValidator, RegisterErrors } from '@projective/shared';
+import { TextField } from '@projective/fields';
 
 const email = signal<string | undefined>(undefined);
 const password = signal<string | undefined>(undefined);
@@ -62,8 +61,8 @@ export default function RegisterIsland() {
 							</div>
 
 							<div class='register__field'>
-								<PasswordField
-									id='password'
+								<TextField
+									type='password'
 									onFocus={() => {
 										passwordError.value = '';
 										confirmPasswordError.value = '';
@@ -81,7 +80,6 @@ export default function RegisterIsland() {
 											);
 									}}
 									placeholder='Password'
-									autocomplete='new-password'
 									aria-label='Password'
 									aria-required='true'
 									aria-invalid={!!passwordError.value}
@@ -103,7 +101,7 @@ export default function RegisterIsland() {
 							</div>
 
 							<div class='register__field'>
-								<PasswordField
+								<TextField
 									id='confirmPassword'
 									onFocus={() => {
 										passwordError.value = '';
@@ -122,7 +120,6 @@ export default function RegisterIsland() {
 											);
 									}}
 									placeholder='Re-enter Password'
-									autocomplete='new-password'
 									aria-label='Confirm password'
 									aria-required='true'
 									aria-invalid={!!confirmPasswordError.value}

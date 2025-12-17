@@ -7,7 +7,8 @@
     "./packages/ui",
     "./packages/utils",
     "./packages/types",
-    "./packages/fields"
+    "./packages/fields",
+    "./packages/data"
   ],
   "tasks": {
     "format": "deno fmt --check",
@@ -120,6 +121,7 @@
     "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.8",
     "@preact/signals": "npm:@preact/signals@^2.5.0",
     "@std/regexp": "jsr:@std/regexp@^1.0.1",
+    "@std/testing": "jsr:@std/testing@^1.0.16",
     "@tabler/icons-preact": "npm:@tabler/icons-preact@^3.35.0",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "fresh": "jsr:@fresh/core@^2.2.0",
@@ -136,6 +138,7 @@
     "@projective/utils": "./packages/utils/mod.ts",
     "@projective/types": "./packages/types/mod.ts",
     "@projective/fields": "./packages/fields/mod.ts",
+    "@projective/data": "./packages/data/mod.ts",
 
     "@/": "./apps/web/",
     "@components/": "./apps/web/components/",
@@ -143,9 +146,11 @@
     "@styles/": "./apps/web/styles/",
     "@server/": "./apps/web/server/",
     "@contracts/": "./apps/web/contracts/",
+    "@contexts/": "./apps/web/contexts/",
     "@hooks/": "./apps/web/hooks/",
     "@enums/": "./apps/web/enums/",
-    "@utils": "./apps/web/utils.ts"
+    "@utils": "./apps/web/utils.ts",
+    "zod": "npm:zod@^4.1.13"
   },
   "exclude": ["**/_fresh/*"]
 }

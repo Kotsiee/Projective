@@ -11,11 +11,6 @@ export default function ProjectStageFile(
 		{ label: 'No Due Date', value: 'no_due_date' },
 	];
 
-	// Note: These fields (file_due_date, etc) might not be in the strict 'Stage' DB interface
-	// but usually would be handled by a specific config column or specific fields.
-	// Assuming you will add these specific fields to your DB or type definition if not present.
-	// For now I am keeping them as they were in your original code, assuming they exist on the interface.
-
 	return (
 		<div>
 			<SelectField
@@ -27,6 +22,7 @@ export default function ProjectStageFile(
 				searchable={false}
 				multiple={false}
 				floating
+				required
 			/>
 
 			{stage['file_duration_mode'] === 'fixed_deadline' && (
@@ -37,6 +33,7 @@ export default function ProjectStageFile(
 					minDate={new DateTime()}
 					format='dd/MM/yyyy'
 					floating
+					required
 				/>
 			)}
 
@@ -47,6 +44,7 @@ export default function ProjectStageFile(
 					value={stage['file_duration_days']?.toString()}
 					onChange={(v) => updateStage('file_duration_days' as any, parseInt(v))}
 					floating
+					required
 				/>
 			)}
 

@@ -1,17 +1,19 @@
 import '@styles/components/dashboard/projects/new-project-details.css';
-import { useSignal } from '@preact/signals';
-import { DateTime, FileWithMeta, SelectOption } from '@projective/types';
+import { DateTime, SelectOption } from '@projective/types';
 import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
 import ProjectDetailsThumbnail from './ProjectDetailsThumbnail.tsx';
 import ProjectDetailsAttachments from './ProjectDetailsAttachments.tsx';
 import { Visibility } from '@enums/core.ts';
 import { TimelinePreset } from '@enums/project.ts';
+import { useProjectContext } from '@contexts/ProjectContext.tsx';
 
 export default function ProjectDetails() {
+	const state = useProjectContext();
+
 	const categoryOptions: SelectOption<string>[] = [
-		{ label: 'Web Development', value: 'web' },
-		{ label: 'Design', value: 'design' },
-		{ label: 'Marketing', value: 'marketing' },
+		{ label: 'Web Development', value: 'befe48ee-4c71-4e8f-b8e6-01b6602eea6c' },
+		{ label: 'Design', value: 'bf332d34-e262-4b4e-978b-bec8114ecb59' },
+		{ label: 'Marketing', value: '6f39bcc2-22da-4cef-8663-3e9770046508' },
 	];
 
 	const visibilityOptions: SelectOption<string>[] = [
@@ -32,33 +34,18 @@ export default function ProjectDetails() {
 		{ label: 'Custom', value: TimelinePreset.Custom },
 	];
 
-	// State
-	const title = useSignal('');
-	// Initialize as an empty Quill Delta
-	const brief = useSignal<any>({ ops: [{ insert: '\n' }] });
-	const tags = useSignal<string[]>(['Design', 'Development']);
-
-	const category = useSignal<string | undefined>(undefined);
-	const visibility = useSignal<string>(Visibility.Public);
-	const currency = useSignal<string>('USD');
-	const timelinePreset = useSignal<string | undefined>(undefined);
-	const targetStartDate = useSignal<DateTime | undefined>(undefined);
-
-	const thumbnail = useSignal<FileWithMeta | undefined>(undefined);
-	const attachments = useSignal<FileWithMeta[]>([]);
-
 	return (
 		<div className='new-project__details'>
 			<h2>Project Details</h2>
 
 			<ProjectDetailsThumbnail
-				value={thumbnail}
+				value={state.thumbnail}
 			/>
 
 			<TextField
 				label='Title'
-				value={title}
-				onChange={(v) => title.value = v}
+				value={state.title}
+				onChange={(v) => state.title.value = v}
 				showCount
 				maxLength={100}
 				floating
@@ -67,18 +54,18 @@ export default function ProjectDetails() {
 
 			<RichTextField
 				label='Description'
-				value={brief}
-				onChange={(v) => brief.value = v}
+				value={state.description}
+				onChange={(v) => state.description.value = v as string}
 				minHeight='120px'
 				toolbar='basic'
 				placeholder='Describe the project goals and requirements...'
 				variant='framed'
-				outputFormat='delta' // Returns JSON object { ops: [...] }
+				outputFormat='delta'
 				required
 			/>
 
 			<ProjectDetailsAttachments
-				files={attachments}
+				files={state.attachments}
 			/>
 
 			<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -86,8 +73,8 @@ export default function ProjectDetails() {
 					name='industry_category'
 					label='Industry Category'
 					options={categoryOptions}
-					value={category.value}
-					onChange={(v) => category.value = v as string}
+					value={state.category.value}
+					onChange={(v) => state.category.value = v as string}
 					searchable
 					multiple={false}
 					floating
@@ -98,8 +85,8 @@ export default function ProjectDetails() {
 					name='visibility'
 					label='Visibility'
 					options={visibilityOptions}
-					value={visibility.value}
-					onChange={(v) => visibility.value = v as string}
+					value={state.visibility.value}
+					onChange={(v) => state.visibility.value = v as string}
 					searchable={false}
 					multiple={false}
 					floating
@@ -112,8 +99,8 @@ export default function ProjectDetails() {
 					name='currency'
 					label='Currency'
 					options={currencyOptions}
-					value={currency.value}
-					onChange={(v) => currency.value = v as string}
+					value={state.currency.value}
+					onChange={(v) => state.currency.value = v as string}
 					searchable={false}
 					multiple={false}
 					floating
@@ -122,11 +109,12 @@ export default function ProjectDetails() {
 
 				<DateField
 					label='Target Start Date'
-					value={targetStartDate.value}
-					onChange={(v) => targetStartDate.value = v}
+					value={state.targetStartDate.value}
+					onChange={(v) => state.targetStartDate.value = v}
 					minDate={new DateTime()}
 					format='dd/MM/yyyy'
 					floating
+					required
 				/>
 			</div>
 
@@ -134,19 +122,20 @@ export default function ProjectDetails() {
 				name='timeline_preset'
 				label='Timeline Preset'
 				options={timelinePresetOptions}
-				value={timelinePreset.value}
-				onChange={(v) => timelinePreset.value = v as string}
+				value={state.timelinePreset.value}
+				onChange={(v) => state.timelinePreset.value = v as string}
 				searchable={false}
 				multiple={false}
 				floating
 				hint='Used to apply bulk settings initially.'
+				required
 			/>
 
 			<TagInput
 				name='tags'
 				label='Tags'
-				value={tags}
-				onChange={(v) => tags.value = v}
+				value={state.tags}
+				onChange={(v) => state.tags.value = v}
 				placeholder='Add tags...'
 				floating
 			/>

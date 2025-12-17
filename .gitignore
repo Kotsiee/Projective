@@ -12,6 +12,6 @@ vendor/
 deno.lock
 cargo.lock
 
-.gitignore
-
 target/
+
+coverage/

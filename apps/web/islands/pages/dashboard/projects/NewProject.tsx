@@ -2,30 +2,37 @@ import { useSignal } from '@preact/signals';
 import {
 	IconArrowLeft,
 	IconCheck,
-	IconDeviceFloppy,
 	IconFileDescription,
 	IconListCheck,
-	IconSettings,
+	IconUpload,
 } from '@tabler/icons-preact';
 
-// Components
-import { Step, Stepper, StepperHeader, useStepperContext } from '@projective/fields';
+import { Step, Stepper, StepperHeader, toast, useStepperContext } from '@projective/fields';
 import ProjectDetails from '@components/dashboard/projects/new/ProjectDetails.tsx';
 import ProjectLegal from '@components/dashboard/projects/new/ProjectLegal.tsx';
 import ProjectStages from '@components/dashboard/projects/new/ProjectStages.tsx';
+import ProjectPublish from '@components/dashboard/projects/new/ProjectPublish.tsx';
+import {
+	PublishButton,
+	SaveDraftButton,
+} from '@components/dashboard/projects/new/ProjectActions.tsx';
+import { ProjectFormProvider } from '@contexts/ProjectContext.tsx';
 
-// --- Wrapper to bridge custom footer with Stepper Logic ---
+// --- Updated Footer ---
 function ProjectStepperFooter() {
-	// We access the context inside the provider to hook up our custom buttons
 	const { next, back, activeStep, totalSteps } = useStepperContext();
 	const isFirst = activeStep.value === 0;
 	const isLast = activeStep.value === totalSteps.value - 1;
 
+	const click = () => {
+		toast.info('Test Message');
+	};
+
 	return (
 		<div className='new-project__actions'>
-			<button type='button' className='btn btn--secondary btn-save'>
-				<IconDeviceFloppy size={18} /> <span>Save Draft</span>
-			</button>
+			{/* Always available Save Draft */}
+			<SaveDraftButton />
+			<button type='button' onClick={() => click()}>Toast</button>
 
 			<div className='new-project__nav-buttons'>
 				<button
@@ -36,13 +43,19 @@ function ProjectStepperFooter() {
 				>
 					Back
 				</button>
-				<button
-					type='button'
-					className='btn btn--primary'
-					onClick={next}
-				>
-					{isLast ? 'Create Project' : 'Next Step'}
-				</button>
+
+				{/* Logic Switch: Regular Next vs Publish Component */}
+				{!isLast
+					? (
+						<button
+							type='button'
+							className='btn btn--primary'
+							onClick={next}
+						>
+							Next Step
+						</button>
+					)
+					: <PublishButton />}
 			</div>
 		</div>
 	);
@@ -51,8 +64,6 @@ function ProjectStepperFooter() {
 export default function NewProjectIsland() {
 	const activeStep = useSignal(0);
 
-	// This handles switching content based on the active step
-	// Using a map or switch is cleaner than conditional rendering sprawl
 	const renderStepContent = (index: number) => {
 		switch (index) {
 			case 0:
@@ -62,81 +73,56 @@ export default function NewProjectIsland() {
 			case 2:
 				return <ProjectStages />;
 			case 3:
-				return (
-					<div style={{ textAlign: 'center', padding: '4rem' }}>
-						<h3>Review & Settings</h3>
-						<p style={{ color: 'var(--gray-500)' }}>
-							Configure final project settings before launch.
-						</p>
-					</div>
-				);
+				return <ProjectPublish />;
 			default:
 				return null;
 		}
 	};
 
 	return (
-		<div className='new-project'>
-			<div className='new-project__header'>
-				<h1 className='new-project__title'>
-					<IconArrowLeft style={{ cursor: 'pointer' }} />
-					Create New Project
-				</h1>
-			</div>
+		<ProjectFormProvider>
+			<div className='new-project'>
+				<div className='new-project__header'>
+					<h1 className='new-project__title'>
+						<IconArrowLeft style={{ cursor: 'pointer' }} />
+						Create New Project
+					</h1>
+				</div>
 
-			<div className='new-project__content'>
-				{/* Stepper controls the state flow */}
-				<Stepper
-					activeStep={activeStep.value}
-					onStepChange={(s) => activeStep.value = s}
-					onComplete={() => console.log('Project Created!')}
-					linear={true}
-					orientation='horizontal'
-					style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-				>
-					{/* 1. Header Navigation */}
-					<div className='new-project__stepper-container'>
-						<StepperHeader>
-							<Step
-								label='Details'
-								description='Basic Info'
-								icon={<IconFileDescription size={20} />}
-							/>
-							<Step
-								label='Legal'
-								description='IP & Screening'
-								icon={<IconCheck size={20} />}
-							/>
-							<Step
-								label='Stages'
-								description='Workflow'
-								icon={<IconListCheck size={20} />}
-							/>
-							<Step
-								label='Settings'
-								description='Finalize'
-								icon={<IconSettings size={20} />}
-							/>
-						</StepperHeader>
-					</div>
-
-					{/* 2. Main Content Area */}
-					<div className='new-project__content__stage'>
-						<div className='new-project__edit'>
-							{/* Render active step content */}
-							{renderStepContent(activeStep.value)}
+				<div className='new-project__content'>
+					<Stepper
+						activeStep={activeStep.value}
+						onStepChange={(s) => activeStep.value = s}
+						linear
+						orientation='horizontal'
+						style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+					>
+						<div className='new-project__stepper-container'>
+							<StepperHeader>
+								<Step
+									label='Details'
+									description='Basic Info'
+									icon={<IconFileDescription size={20} />}
+								/>
+								<Step label='Legal' description='IP & Screening' icon={<IconCheck size={20} />} />
+								<Step label='Stages' description='Workflow' icon={<IconListCheck size={20} />} />
+								<Step label='Publish' description='Finalize' icon={<IconUpload size={20} />} />
+							</StepperHeader>
 						</div>
 
-						{/* Static Preview Sidebar (Persistent across steps) */}
-						<div className='new-project__preview'>
-							Live Preview Area
+						<div className='new-project__content__stage'>
+							<div className='new-project__edit'>
+								{renderStepContent(activeStep.value)}
+							</div>
+							<div className='new-project__preview'>
+								Live Preview Area
+							</div>
 						</div>
-					</div>
 
-					{/* 3. Footer Actions */}
-					<ProjectStepperFooter />
-				</Stepper>
+						<ProjectStepperFooter />
+					</Stepper>
+				</div>
 			</div>
-		</div>
+		</ProjectFormProvider>
 	);
 }

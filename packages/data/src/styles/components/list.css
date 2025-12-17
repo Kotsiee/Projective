@@ -1,0 +1,31 @@
+.data-list__row {
+    box-sizing: border-box;
+}
+
+.data-list__item {
+    width: 100%;
+    height: 100%;
+    /* padding: 8px 12px; */
+    cursor: default;
+    transition: background-color var(--data-transition);
+    border-bottom: 1px solid transparent;
+    position: relative;
+    display: flex;
+}
+
+
+.data-list__item--interactive {
+    cursor: pointer;
+}
+
+.data-list__item--interactive:hover {
+    background-color: var(--bg-surface-subtle);
+}
+
+.data-list__item--selected {
+    background-color: var(--bg-selection);
+}
+
+.data-list__item--selected:hover {
+    background-color: var(--bg-selection);
+}

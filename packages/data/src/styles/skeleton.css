@@ -1,0 +1,23 @@
+@keyframes data-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.data-skeleton {
+  animation: data-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.data-table__row--skeleton {
+  pointer-events: none;
+}
+
+.data-table__row--skeleton .data-table__cell {
+  display: flex;
+  align-items: center;
+}
+
+.data-skeleton__text {
+  height: 16px;
+  background-color: var(--bg-surface-active);
+  border-radius: 4px;
+}

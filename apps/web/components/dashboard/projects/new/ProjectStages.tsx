@@ -1,5 +1,5 @@
 import '@styles/components/dashboard/projects/new-project-stages.css';
-import { Signal, useSignal } from '@preact/signals';
+import { Signal, signal } from '@preact/signals';
 import { IconCheck, IconCircle, IconTrash } from '@tabler/icons-preact';
 
 // Components
@@ -10,6 +10,7 @@ import {
 	AccordionTrigger,
 	DateField,
 	MoneyField,
+	RichTextField,
 	SelectField,
 	TextField,
 } from '@projective/fields';
@@ -19,40 +20,35 @@ import ProjectStageFile from './stages/ProjectStageFile.tsx';
 import ProjectStageMaintenance from './stages/ProjectStageMaintenance.tsx';
 import ProjectStageManagement from './stages/ProjectStageManagement.tsx';
 import ProjectStageSession from './stages/ProjectStageSession.tsx';
-import { Stage } from '@contracts/dashboard/projects/Stage.ts';
+import { Stage } from '@contracts/dashboard/projects/new/Stage.ts';
 import { BudgetType, StageType, StartTriggerType } from '@enums/project.ts';
+import { useProjectContext } from '@contexts/ProjectContext.tsx';
 
-// Extended type for UI state management (things not directly in DB table)
+// Extended type for UI state management
 export interface UIStage extends Stage {
-	_ui_model_type: 'defined_roles' | 'open_seats'; // Transient toggle
-	_attachments_temp: Signal<FileWithMeta[]>; // Files not yet uploaded
+	_ui_model_type: 'defined_roles' | 'open_seats';
+	_attachments_temp: Signal<FileWithMeta[]>;
 }
 
 export default function ProjectStages() {
-	const stages = useSignal<UIStage[]>([
-		createDefaultStage(),
-	]);
+	const state = useProjectContext(); // Shared State
 
+	// Factory function for new stages
 	function createDefaultStage(): UIStage {
 		return {
-			title: 'Initial Stage',
+			title: 'New Stage',
 			description: { ops: [{ insert: '\n' }] },
 			stage_type: StageType.FileBased,
 			status: 'open',
-			order: 0,
+			order: state.stages.value.length,
 
-			// Timeline defaults
-			start_trigger_type: StartTriggerType.OnProjectStart,
-
-			// Staffing defaults
+			start_trigger_type: StartTriggerType.DependentOnStage,
 			staffing_roles: [],
 			open_seats: [],
 
-			// UI Helper defaults
 			_ui_model_type: 'defined_roles',
-			_attachments_temp: new Signal([]),
+			_attachments_temp: signal([]),
 
-			// Type specific defaults (optional in DB, initialized here for UI)
 			file_revisions_allowed: 1,
 			session_duration_minutes: 60,
 		};
@@ -67,16 +63,11 @@ export default function ProjectStages() {
 	};
 
 	const addStage = () => {
-		stages.value = [...stages.value, {
-			...createDefaultStage(),
-			title: '',
-			start_trigger_type: StartTriggerType.DependentOnStage,
-			order: stages.value.length,
-		}];
+		state.stages.value = [...state.stages.value, createDefaultStage()];
 	};
 
 	const removeStage = (index: number) => {
-		stages.value = stages.value.filter((_, i) => i !== index);
+		state.stages.value = state.stages.value.filter((_, i) => i !== index);
 	};
 
 	return (
@@ -84,7 +75,7 @@ export default function ProjectStages() {
 			<div className='stages-section'>
 				<h2>Stages</h2>
 				<Accordion type='multiple' variant='outlined' defaultValue={['0']}>
-					{stages.value.map((stage, index) => (
+					{state.stages.value.map((stage, index) => (
 						<AccordionItem key={index.toString()} value={index.toString()}>
 							<AccordionTrigger
 								startIcon={getStatusIcon(stage.status)}
@@ -93,7 +84,7 @@ export default function ProjectStages() {
 								{stage.title.length > 0 ? stage.title : `Stage ${index + 1}`}
 							</AccordionTrigger>
 							<AccordionContent>
-								<ProjectStage id={index} stages={stages} />
+								<ProjectStage id={index} />
 								<div style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
 									<button
 										type='button'
@@ -129,7 +120,12 @@ export default function ProjectStages() {
 	);
 }
 
-export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStage[]> }) {
+export function ProjectStage({ id }: { id: number }) {
+	const state = useProjectContext();
+	const stage = state.stages.value[id];
+
+	if (!stage) return null;
+
 	const stageTypes: SelectOption<string>[] = [
 		{ label: 'File Based (Deliverable)', value: StageType.FileBased },
 		{ label: 'Session Based (Call/Workshop)', value: StageType.SessionBased },
@@ -150,15 +146,10 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 	];
 
 	const updateStage = (field: keyof UIStage, value: any) => {
-		stages.value = stages.value.map((s, i) => {
-			if (i === id) {
-				return { ...s, [field]: value };
-			}
-			return s;
-		});
+		const newStages = [...state.stages.value];
+		newStages[id] = { ...newStages[id], [field]: value };
+		state.stages.value = newStages;
 	};
-
-	const stage = stages.value[id];
 
 	return (
 		<div className='new-project__stage'>
@@ -174,13 +165,15 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 					required
 				/>
 
-				<TextField
+				<RichTextField
 					label='Description'
-					value={typeof stage.description === 'string' ? stage.description : 'Description...'}
-					onChange={(v) => updateStage('description', { ops: [{ insert: v + '\n' }] })}
-					multiline
-					rows={3}
-					floating
+					value={stage.description.toString()}
+					onChange={(v) => updateStage('description', v)}
+					minHeight='120px'
+					toolbar='basic'
+					placeholder='Describe the project goals and requirements...'
+					variant='framed'
+					outputFormat='delta'
 					required
 				/>
 
@@ -210,6 +203,7 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 					searchable={false}
 					multiple={false}
 					floating
+					required
 				/>
 
 				{stage._ui_model_type === 'defined_roles'
@@ -299,6 +293,7 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 											searchable={false}
 											multiple={false}
 											floating
+											required
 										/>
 										<MoneyField
 											label='Budget Amount'
@@ -309,6 +304,7 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 												updateStage('staffing_roles', newRoles);
 											}}
 											floating
+											required
 										/>
 									</div>
 								</div>
@@ -350,6 +346,7 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 								multiline
 								rows={2}
 								floating
+								required
 							/>
 							<div style={{ display: 'flex', gap: '1rem' }}>
 								<MoneyField
@@ -390,6 +387,7 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 					searchable={false}
 					multiple={false}
 					floating
+					required
 				/>
 
 				{stage.start_trigger_type === StartTriggerType.FixedDate && (
@@ -399,14 +397,12 @@ export function ProjectStage({ id, stages }: { id: number; stages: Signal<UIStag
 							? new DateTime(stage.fixed_start_date.toString())
 							: undefined}
 						onChange={(v) => {
-							if (v instanceof DateTime) {
-								updateStage('fixed_start_date', v);
-							} else {
-								updateStage('fixed_start_date', undefined);
-							}
+							if (v instanceof DateTime) updateStage('fixed_start_date', v);
+							else updateStage('fixed_start_date', undefined);
 						}}
 						format='dd/MM/yyyy'
 						floating
+						required
 					/>
 				)}
 

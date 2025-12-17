@@ -1,10 +1,9 @@
 import '@styles/pages/auth/login.css';
-import TextField from '@components/fields/TextField.tsx';
-import PasswordField from '@components/fields/PasswordField.tsx';
 import LoginButton from '@components/auth/LoginButton.tsx';
 import GoogleLoginButton from '@components/auth/GoogleLoginButton.tsx';
 import GitHubLoginButton from '@components/auth/GitHubRegisterButton.tsx';
 import { signal } from '@preact/signals';
+import { TextField } from '@projective/fields';
 
 const email = signal<string | undefined>(undefined);
 const password = signal<string | undefined>(undefined);
@@ -24,7 +23,6 @@ export default function LoginIsland() {
 							<TextField
 								id='email'
 								placeholder='Email'
-								autocomplete='email'
 								type='email'
 								aria-label='Email address'
 								aria-required='true'
@@ -34,10 +32,10 @@ export default function LoginIsland() {
 								}}
 							/>
 							<div>
-								<PasswordField
+								<TextField
 									id='password'
 									placeholder='Password'
-									autocomplete='new-password'
+									type='password'
 									aria-label='Password'
 									aria-required='true'
 									aria-describedby='password-error'

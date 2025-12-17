@@ -1,5 +1,6 @@
 import { Head } from 'fresh/runtime';
 import { State } from '@utils';
+import Providers from '@islands/Providers.tsx';
 
 export default function App(
 	ctx: { Component: preact.ComponentType; stateTheme?: 'light' | 'dark'; state: State },
@@ -23,6 +24,7 @@ export default function App(
 			</Head>
 			<body data-onboarded={ctx.state.isOnboarded}>
 				<main>
+					<Providers />
 					<ctx.Component />
 				</main>
 			</body>
