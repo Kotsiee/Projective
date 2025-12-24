@@ -1,0 +1,89 @@
+.stage-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+    text-decoration: none;
+    background-color: var(--bg-surface);
+    transition: border-color var(--fast), background-color var(--fast);
+    cursor: pointer;
+}
+
+.stage-list-item:hover {
+    border-color: var(--border-subtle);
+    background-color: var(--bg-surface-active);
+}
+
+.stage-list-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow: hidden;
+}
+
+.stage-list-item__title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stage-list-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stage-list-item__status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+/* Status Colors Mapping */
+.stage-list-item__status-dot--open {
+    background-color: var(--text-tertiary);
+}
+
+.stage-list-item__status-dot--assigned {
+    background-color: var(--info);
+}
+
+.stage-list-item__status-dot--in-progress {
+    background-color: var(--warning);
+}
+
+.stage-list-item__status-dot--submitted {
+    background-color: var(--primary);
+}
+
+.stage-list-item__status-dot--approved {
+    background-color: var(--success);
+}
+
+.stage-list-item__status-dot--paid {
+    background-color: var(--success);
+}
+
+.stage-list-item__type {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.stage-list-item__indicators {
+    display: flex;
+    align-items: center;
+    color: var(--text-tertiary);
+}
+
+.stage-list-item__unread {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--border-error);
+}

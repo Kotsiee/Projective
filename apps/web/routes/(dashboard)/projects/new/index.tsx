@@ -1,4 +1,4 @@
-import '@styles/pages/dashboard/projects/new-project.css';
+// import '@styles/pages/dashboard/projects/new/new-project.css';
 import NewProjectIsland from '@islands/pages/dashboard/projects/NewProject.tsx';
 
 export default function NewProject() {

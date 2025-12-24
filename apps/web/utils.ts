@@ -10,6 +10,7 @@ export interface State {
 	clearAuth?: boolean;
 	isAuthenticated?: boolean;
 	isOnboarded?: boolean;
+	slugs?: Record<string, string>;
 }
 
 export const define = createDefine<State>();

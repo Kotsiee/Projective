@@ -1,11 +1,11 @@
 import { IconDeviceFloppy, IconRocket } from '@tabler/icons-preact';
 import { toast } from '@projective/fields';
-import { useProjectContext } from '@contexts/ProjectContext.tsx';
+import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 import { CreateProjectSchema } from '@contracts/dashboard/projects/new/_validation.ts';
 import { getCsrfToken } from '@projective/shared';
 
 export function SaveDraftButton() {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 
 	const handleSave = async () => {
 		// Prepare description: If string, wrap in Delta format. If object, keep as is.
@@ -44,7 +44,7 @@ export function SaveDraftButton() {
 }
 
 export function PublishButton() {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 
 	const handlePublish = async () => {
 		const rawDesc = state.description.value;

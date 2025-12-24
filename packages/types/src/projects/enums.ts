@@ -1,3 +1,25 @@
+// --- Status Enums ---
+
+export enum ProjectStatus {
+	Draft = 'draft',
+	Active = 'active',
+	OnHold = 'on_hold',
+	Completed = 'completed',
+	Cancelled = 'cancelled',
+}
+
+export enum StageStatus {
+	Open = 'open',
+	Assigned = 'assigned',
+	InProgress = 'in_progress',
+	Submitted = 'submitted',
+	Approved = 'approved',
+	Revisions = 'revisions',
+	Paid = 'paid',
+}
+
+// --- Configuration Enums ---
+
 export enum StageType {
 	FileBased = 'file_based',
 	SessionBased = 'session_based',
@@ -55,7 +77,8 @@ export enum DurationMode {
 	NoDueDate = 'no_due_date',
 }
 
-// Scheduling & Management Enums
+// --- Scheduling & Management ---
+
 export enum SchedulingWindowMode {
 	SpecificDates = 'specific_dates',
 	ToBeAgreed = 'to_be_agreed',

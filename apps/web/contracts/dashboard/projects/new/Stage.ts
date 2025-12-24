@@ -1,6 +1,5 @@
 import { QuillDelta } from '@projective/utils';
-import { BudgetType, StageType, StartTriggerType } from '@enums/project.ts';
-import { DateTime } from '@projective/types';
+import { BudgetType, DateTime, StageType, StartTriggerType } from '@projective/types';
 
 // Corresponds to table: projects.stage_staffing_roles
 export interface StageStaffingRole {

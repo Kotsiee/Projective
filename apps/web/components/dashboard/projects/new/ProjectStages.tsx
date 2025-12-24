@@ -1,4 +1,4 @@
-import '@styles/components/dashboard/projects/new-project-stages.css';
+import '@styles/components/dashboard/projects/new/new-project-stages.css';
 import { Signal, signal } from '@preact/signals';
 import { IconCheck, IconCircle, IconTrash } from '@tabler/icons-preact';
 
@@ -14,15 +14,21 @@ import {
 	SelectField,
 	TextField,
 } from '@projective/fields';
-import { DateTime, FileWithMeta, SelectOption } from '@projective/types';
+import {
+	BudgetType,
+	DateTime,
+	FileWithMeta,
+	SelectOption,
+	StageType,
+	StartTriggerType,
+} from '@projective/types';
 
 import ProjectStageFile from './stages/ProjectStageFile.tsx';
 import ProjectStageMaintenance from './stages/ProjectStageMaintenance.tsx';
 import ProjectStageManagement from './stages/ProjectStageManagement.tsx';
 import ProjectStageSession from './stages/ProjectStageSession.tsx';
 import { Stage } from '@contracts/dashboard/projects/new/Stage.ts';
-import { BudgetType, StageType, StartTriggerType } from '@enums/project.ts';
-import { useProjectContext } from '@contexts/ProjectContext.tsx';
+import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 
 // Extended type for UI state management
 export interface UIStage extends Stage {
@@ -31,7 +37,7 @@ export interface UIStage extends Stage {
 }
 
 export default function ProjectStages() {
-	const state = useProjectContext(); // Shared State
+	const state = useNewProjectContext(); // Shared State
 
 	// Factory function for new stages
 	function createDefaultStage(): UIStage {
@@ -121,7 +127,7 @@ export default function ProjectStages() {
 }
 
 export function ProjectStage({ id }: { id: number }) {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 	const stage = state.stages.value[id];
 
 	if (!stage) return null;

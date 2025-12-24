@@ -1,5 +1,4 @@
 import { z } from 'zod'; // zod@4.1.13
-
 import {
 	BudgetType,
 	IPOptionMode,
@@ -7,9 +6,8 @@ import {
 	StageType,
 	StartTriggerType,
 	TimelinePreset,
-} from '@enums/project.ts';
-
-import { Visibility } from '@enums/core.ts';
+	Visibility,
+} from '@projective/types';
 
 // ---------------------------------------------------------
 // 2. Sub-Schemas

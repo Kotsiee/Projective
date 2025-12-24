@@ -5,7 +5,7 @@ import { relative, resolve } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./packages/data',
+	'./packages/types',
 	// './src/specific_file.ts' // You can also add specific files
 ];
 

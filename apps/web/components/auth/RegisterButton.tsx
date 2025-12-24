@@ -1,7 +1,7 @@
 import '@styles/components/auth/login-button.css';
 import { useCallback, useState } from 'preact/hooks';
-import RegisterWithEmail from 'packages/shared/validation/auth.ts';
 import { computed, Signal } from '@preact/signals';
+import { AuthValidator } from '@projective/shared';
 
 type Props = {
 	email: Signal<string | undefined>;
@@ -21,7 +21,7 @@ export default function RegisterButton({
 		const p = (password.value || '').trim();
 		const c = (confirmPassword.value || '').trim();
 
-		const v = RegisterWithEmail.validate({
+		const v = AuthValidator.validate({
 			email: e,
 			password: p,
 			confirmPassword: c,
@@ -39,7 +39,7 @@ export default function RegisterButton({
 			const p = (password.value || '').trim();
 			const c = (confirmPassword.value || '').trim();
 
-			const { ok } = RegisterWithEmail.validate({
+			const { ok } = AuthValidator.validate({
 				email: e,
 				password: p,
 				confirmPassword: c,

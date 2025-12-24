@@ -3,11 +3,7 @@
   "version": "0.0.0",
   "exports": "./mod.ts",
   "tasks": {
-    "check": "deno fmt --check && deno lint && deno check main.ts",
-    "dev": "vite --port 3000 --open --host --mode development",
-    "build": "vite build --mode production",
-    "start": "deno serve -A --watch --port 3000 --env-file=../../.env main.ts",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "check": "deno fmt --check && deno lint && deno check mod.ts"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

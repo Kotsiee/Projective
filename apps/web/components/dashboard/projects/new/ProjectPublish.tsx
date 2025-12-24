@@ -1,9 +1,9 @@
+import '@styles/components/dashboard/projects/new/new-project-publish.css';
 import { IconCheck, IconX } from '@tabler/icons-preact';
-import '@styles/components/dashboard/projects/new-project-publish.css';
-import { useProjectContext } from '@contexts/ProjectContext.tsx';
+import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 
 export default function ProjectPublish() {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 
 	// Helper to sum up budgets (rough estimate for display)
 	const totalBudget = state.stages.value.reduce((acc, stage) => {

@@ -1,4 +1,4 @@
-import { FileProcessor } from '../../types/processing.ts';
+import { FileProcessor } from '../../types/src/files/processing.ts';
 
 /**
  * Simulates a WASM Image Optimizer.

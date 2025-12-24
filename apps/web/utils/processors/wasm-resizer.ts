@@ -1,5 +1,5 @@
 import init, { resize_image } from '../../static/wasm/wasm.js';
-import { FileProcessor } from '../../../../packages/types/processing.ts';
+import { FileProcessor } from 'packages/types/src/files/processing.ts';
 
 // Config interface
 interface ResizerConfig {

@@ -1,12 +1,11 @@
-import '@styles/components/dashboard/projects/new-project-legal.css';
-import { SelectOption } from '@projective/types';
+import '@styles/components/dashboard/projects/new/new-project-legal.css';
+import { IPOptionMode, PortfolioDisplayRights, SelectOption } from '@projective/types';
 import { SelectField, TagInput, TextField } from '@projective/fields';
 import { IconTrash } from '@tabler/icons-preact';
-import { IPOptionMode, PortfolioDisplayRights } from '@enums/project.ts';
-import { useProjectContext } from '@contexts/ProjectContext.tsx';
+import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 
 export default function ProjectLegal() {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 
 	const ipOptions: SelectOption<string>[] = [
 		{ label: 'Exclusive Transfer', value: IPOptionMode.ExclusiveTransfer },

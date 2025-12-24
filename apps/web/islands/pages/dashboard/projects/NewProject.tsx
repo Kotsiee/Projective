@@ -16,7 +16,7 @@ import {
 	PublishButton,
 	SaveDraftButton,
 } from '@components/dashboard/projects/new/ProjectActions.tsx';
-import { ProjectFormProvider } from '@contexts/ProjectContext.tsx';
+import { ProjectFormProvider } from '@contexts/NewProjectContext.tsx';
 
 // --- Updated Footer ---
 function ProjectStepperFooter() {

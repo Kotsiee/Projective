@@ -1,15 +1,14 @@
-import { DateTime } from 'packages/types/DateTime.ts';
+import { DateTime } from 'packages/types/src/core/datetime.ts';
+import { CurrencyDefinition } from 'packages/types/src/finance/currency.ts';
+import { FileWithMeta } from 'packages/types/src/files/model.ts';
+import { Stage } from './Stage.ts';
+import { QuillDelta } from '@projective/utils';
 import {
-	BudgetType,
 	IPOptionMode,
 	PortfolioDisplayRights,
 	TimelinePreset,
-} from '@enums/project.ts';
-import { CurrencyDefinition } from 'packages/types/currency.ts';
-import { FileWithMeta } from 'packages/types/file.ts';
-import { Stage } from './Stage.ts';
-import { Visibility } from '@enums/core.ts';
-import { QuillDelta } from '@projective/utils';
+	Visibility,
+} from '@projective/types';
 
 export interface LegalAndScreening {
 	ip_ownership_mode: IPOptionMode;

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'npm:vite@7.2.2';
 import { fresh } from '@fresh/plugin-vite';
 import { fileURLToPath } from 'node:url';
 
@@ -6,9 +6,7 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
 	root: 'apps/web',
-
 	plugins: [fresh()],
-
 	resolve: {
 		alias: {
 			'@': r('./apps/web/'),
@@ -20,7 +18,20 @@ export default defineConfig({
 			'@services': r('./apps/web/services/'),
 			'@types': r('./apps/web/types/'),
 			'@utils': r('./apps/web/utils.ts'),
-			'packages': r('./packages'),
+
+			'@projective/shared': r('./packages/shared/mod.ts'),
+			'@projective/backend': r('./packages/backend/mod.ts'),
+			'@projective/ui': r('./packages/ui/mod.ts'),
+			'@projective/utils': r('./packages/utils/mod.ts'),
+			'@projective/types': r('./packages/types/mod.ts'),
+			'@projective/fields': r('./packages/fields/mod.ts'),
+			'@projective/data': r('./packages/data/mod.ts'),
+		},
+	},
+
+	build: {
+		commonjsOptions: {
+			include: [/packages\//, /node_modules/],
 		},
 	},
 });

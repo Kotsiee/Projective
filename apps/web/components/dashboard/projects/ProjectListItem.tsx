@@ -7,8 +7,15 @@ interface ProjectListItemProps {
 }
 
 export function ProjectListItem({ project }: ProjectListItemProps) {
+	const projectUrl = `/projects/${project.project_id}`;
+
 	return (
-		<div className='project-list-item'>
+		<a
+			href={projectUrl}
+			className='project-list-item'
+			data-f-preload
+			f-client-nav={false}
+		>
 			<img
 				src={project.owner_avatar_url || 'https://placehold.co/32x32'}
 				alt={project.owner_name}
@@ -37,6 +44,6 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 					<span className='project-list-item__unread-dot' title='Unread activity' />
 				)}
 			</div>
-		</div>
+		</a>
 	);
 }

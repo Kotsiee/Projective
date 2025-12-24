@@ -1,36 +1,29 @@
-/* Block */
 .layout-projects__sidebar {
-    /* Structural */
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
 
-    /* Theming */
-    background-color: var(--card);
-    /* Using card background as base */
-    border-right: 1px solid var(--border-color);
-    /* Subtle divider if next to main content */
+    background-color: var(--header);
     border-radius: var(--border-radius__large);
 
-    /* Spacing */
     padding: 1rem;
     gap: 1rem;
 }
 
-/* Header Element: Contains Filter + Search Toggle */
+.data-display {
+    background: none !important;
+}
+
 .layout-projects__sidebar__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-
-    /* Ensure header stays fixed height if needed */
     flex-shrink: 0;
 }
 
-/* Toggle Button (Search Icon) */
 .layout-projects__sidebar__toggle {
     display: flex;
     align-items: center;
@@ -49,23 +42,19 @@
     background-color: var(--primary-surface);
 }
 
-/* Search Container */
 .layout-projects__sidebar__search {
     flex-shrink: 0;
     transition: all var(--medium) ease;
 }
 
-/* Search Input Field */
 .layout-projects__sidebar__search-input {
     width: 100%;
     height: var(--input-height, 2.5rem);
     padding: 0 var(--input-padding-x, 0.75rem);
 
-    /* Typography */
     font-size: 0.875rem;
     color: var(--text-main);
 
-    /* Theming */
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -79,23 +68,17 @@
 
 .layout-projects__sidebar__search-input:hover {
     border-color: var(--text-muted);
-    /* Darker border on hover */
 }
 
 .layout-projects__sidebar__search-input:focus {
     border-color: var(--primary);
     box-shadow: var(--focus-ring);
     background-color: var(--card);
-    /* Brighter bg on focus */
 }
 
-/* Content Area (The List) */
 .layout-projects__sidebar__content {
     flex: 1;
     min-height: 0;
-    /* Critical for scrolling inside flex items */
     margin-right: -0.5rem;
-    /* Pull scrollbar slightly right */
     padding-right: 0.5rem;
-    /* Add padding back for content */
 }

@@ -1,14 +1,12 @@
-import '@styles/components/dashboard/projects/new-project-details.css';
-import { DateTime, SelectOption } from '@projective/types';
+import '@styles/components/dashboard/projects/new/new-project-details.css';
+import { DateTime, SelectOption, TimelinePreset, Visibility } from '@projective/types';
 import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
 import ProjectDetailsThumbnail from './ProjectDetailsThumbnail.tsx';
 import ProjectDetailsAttachments from './ProjectDetailsAttachments.tsx';
-import { Visibility } from '@enums/core.ts';
-import { TimelinePreset } from '@enums/project.ts';
-import { useProjectContext } from '@contexts/ProjectContext.tsx';
+import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 
 export default function ProjectDetails() {
-	const state = useProjectContext();
+	const state = useNewProjectContext();
 
 	const categoryOptions: SelectOption<string>[] = [
 		{ label: 'Web Development', value: 'befe48ee-4c71-4e8f-b8e6-01b6602eea6c' },
