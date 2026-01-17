@@ -1,57 +1,83 @@
-// apps/web/routes/api/v1/auth/me.ts
-import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getAuthCookies } from '@projective/backend';
+import { define } from "@utils";
+import { supabaseClient } from "@server/core/clients/supabase.ts";
+import { getAuthCookies } from "@projective/backend";
 
 export const handler = define.handlers({
 	async GET(ctx) {
+		console.log(ctx);
 		const { accessToken } = getAuthCookies(ctx.req);
 		if (!accessToken) {
-			return new Response(JSON.stringify({ error: { code: 'unauthorized' } }), {
-				status: 401,
-				headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-			});
+			return new Response(
+				JSON.stringify({ error: { code: "unauthorized" } }),
+				{
+					status: 401,
+					headers: {
+						"content-type": "application/json; charset=utf-8",
+						"cache-control": "no-store",
+					},
+				},
+			);
 		}
 
 		const sb = await supabaseClient(ctx.req);
 		const { data: userRes, error: userErr } = await sb.auth.getUser();
+
 		if (userErr || !userRes?.user) {
-			return new Response(JSON.stringify({ error: { code: 'unauthorized' } }), {
-				status: 401,
-				headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-			});
+			console.log("Auth Me Error:", userErr);
+			return new Response(
+				JSON.stringify({ error: { code: "unauthorized" } }),
+				{
+					status: 401,
+					headers: {
+						"content-type": "application/json; charset=utf-8",
+						"cache-control": "no-store",
+					},
+				},
+			);
 		}
 
-		// Fetch public profile under RLS
-		const { data: row } = await sb
-			.from('org.users_public')
-			.select(
-				'user_id, display_name, avatar_url, active_profile_type, active_profile_id, active_team_id',
-			)
-			.eq('user_id', userRes.user.id)
+		const { data: publicProfile } = await sb
+			.schema("org")
+			.from("users_public")
+			.select("user_id, first_name, last_name, username, avatar_url")
+			.eq("user_id", userRes.user.id)
 			.single();
 
-		const payload = row
-			? {
-				id: row.user_id as string,
-				displayName: (row.display_name as string) ?? null,
-				avatarUrl: (row.avatar_url as string) ?? null,
-				activeProfileType: (row.active_profile_type as 'freelancer' | 'business' | null) ?? null,
-				activeProfileId: (row.active_profile_id as string | null) ?? null,
-				activeTeamId: (row.active_team_id as string | null) ?? null,
-			}
-			: {
-				id: userRes.user.id,
-				displayName: null,
-				avatarUrl: null,
-				activeProfileType: null,
-				activeProfileId: null,
-				activeTeamId: null,
-			};
+		const { data: sessionContext } = await sb
+			.schema("security")
+			.from("session_context")
+			.select("active_profile_type, active_profile_id, active_team_id")
+			.eq("user_id", userRes.user.id)
+			.single();
+
+		const payload = {
+			id: userRes.user.id,
+
+			displayName: publicProfile
+				? `${publicProfile.first_name || ""} ${
+					publicProfile.last_name || ""
+				}`.trim() ||
+					publicProfile.username
+				: null,
+			username: publicProfile?.username ?? null,
+			avatarUrl: publicProfile?.avatar_url ?? null,
+
+			activeProfileType: (sessionContext?.active_profile_type as
+				| "freelancer"
+				| "business"
+				| null) ?? null,
+			activeProfileId:
+				(sessionContext?.active_profile_id as string | null) ?? null,
+			activeTeamId: (sessionContext?.active_team_id as string | null) ??
+				null,
+		};
 
 		return new Response(JSON.stringify({ user: payload }), {
 			status: 200,
-			headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+			headers: {
+				"content-type": "application/json; charset=utf-8",
+				"cache-control": "no-store",
+			},
 		});
 	},
 });

@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'preact/hooks';
-import type { CSSProperties, JSX } from 'preact';
+import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import type { CSSProperties } from 'preact';
 
-// CSS Imports
 import '../styles/theme.css';
 import '../styles/base.css';
-// import "../../styles/skeleton.css";
+import '../styles/scroll-pane.css';
 
 import { createEmptyDataset, type Dataset, type NormalizedItem } from '../core/dataset.ts';
 import type { DataSource } from '../core/datasource.ts';
@@ -20,12 +19,18 @@ import { Grid } from './displays/Grid.tsx';
 import { Table } from './table/Table.tsx';
 
 export type DisplayMode = 'list' | 'grid' | 'table';
+export type ScrollMode = 'container' | 'window';
 
 interface DataDisplayProps<TOut, TIn = unknown> {
 	dataSource: DataSource<TOut, TIn> | TOut[];
 	renderItem: (item: TOut, index: number) => preact.VNode;
 	renderSkeleton?: (index: number) => preact.VNode;
 	mode?: DisplayMode;
+
+	// Scroll Configuration
+	scrollMode?: ScrollMode;
+	scrollToBottom?: boolean;
+
 	gridColumns?: number;
 	columns?: ColumnDef<TOut>[];
 	estimateHeight?: number;
@@ -64,6 +69,8 @@ export function DataDisplay<TOut, TIn>({
 	dataSource,
 	renderItem,
 	mode = 'list',
+	scrollMode = 'container',
+	scrollToBottom = false,
 	gridColumns = 3,
 	columns,
 	estimateHeight = 50,
@@ -111,10 +118,35 @@ export function DataDisplay<TOut, TIn>({
 
 	const virtualRowCount = mode === 'grid' ? Math.ceil(totalCount / gridColumns) : totalCount;
 
+	// --- Scroll Restoration Logic (For Chat) ---
+	const previousTotalCount = useRef(totalCount);
+	const previousScrollHeight = useRef(0);
+
+	// Logic: If we are in reverse mode (scrollToBottom) and items were ADDED (count increased),
+	// it usually means we fetched older history at the top. We need to adjust scroll
+	// so the user stays on the same message they were looking at.
+	useLayoutEffect(() => {
+		if (scrollToBottom && scrollMode === 'window' && totalCount > previousTotalCount.current) {
+			// Calculate how much height was added
+			const newScrollHeight = document.body.scrollHeight;
+			const heightDifference = newScrollHeight - previousScrollHeight.current;
+
+			// Only adjust if we were near the top (fetching history)
+			// This prevents jumping if we are at the bottom receiving new messages.
+			if (window.scrollY < 100 && heightDifference > 0) {
+				window.scrollBy(0, heightDifference);
+			}
+		}
+		previousTotalCount.current = totalCount;
+		previousScrollHeight.current = document.body.scrollHeight;
+	}, [totalCount, scrollToBottom, scrollMode]);
+
 	const { parentRef, virtualizer, getItems, getTotalSize } = useVirtual({
 		count: virtualRowCount,
 		estimateSize: () => estimateHeight,
 		overscan: 5,
+		useWindowScroll: scrollMode === 'window',
+		initialScrollToBottom: scrollToBottom,
 	});
 
 	const virtualItems = getItems();
@@ -151,12 +183,15 @@ export function DataDisplay<TOut, TIn>({
 				</div>
 			)}
 
-			<ScrollPane ref={parentRef} className='data-display__scroll-pane'>
+			<ScrollPane
+				ref={parentRef}
+				mode={scrollMode}
+				className='data-display__scroll-pane'
+			>
 				<div
+					className='scroll-pane__shim'
 					style={{
 						height: `${getTotalSize()}px`,
-						width: '100%',
-						position: 'relative',
 						minWidth: mode === 'table' ? 'fit-content' : '100%',
 					}}
 				>

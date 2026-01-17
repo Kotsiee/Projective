@@ -1,7 +1,7 @@
 import '@styles/layouts/projects.css';
 import { type ComponentChildren } from 'preact';
-import ProjectsSidebar from '@components/dashboard/projects/ProjectsSidebar.tsx';
 import { ProjectProvider } from '@contexts/ProjectContext.tsx';
+import ProjectsSidebar from '@components/dashboard/projects/ProjectsSidebar.tsx';
 
 type ProjectsLayoutProps = {
 	url: URL;

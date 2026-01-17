@@ -1,0 +1,1 @@
+ALTER VIEW security.v_current_context SET(security_invoker = true);

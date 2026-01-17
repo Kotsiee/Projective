@@ -1,0 +1,50 @@
+.scroll-pane {
+    position: relative;
+    width: 100%;
+    display: block;
+}
+
+/* --- Container Mode (Default) --- */
+.scroll-pane--container {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    contain: strict;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-active) transparent;
+}
+
+.scroll-pane--container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scroll-pane--container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-pane--container::-webkit-scrollbar-thumb {
+    background-color: var(--border-subtle);
+    border-radius: 4px;
+}
+
+.scroll-pane--container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--border-active);
+}
+
+/* --- Window Mode --- */
+.scroll-pane--window {
+    height: auto;
+    overflow: visible;
+    /* FIX: Disable native browser anchoring so it doesn't fight our virtualizer */
+    overflow-anchor: none;
+}
+
+/* Internal wrapper for the content height shim */
+.scroll-pane__shim {
+    position: relative;
+    width: 100%;
+    /* min-width helps table modes */
+    min-width: 100%;
+}

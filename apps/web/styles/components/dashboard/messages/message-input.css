@@ -1,0 +1,78 @@
+.chat-message-input {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    width: 100%;
+    background-color: var(--field-bg, #f3f4f6);
+    border-radius: 1.5rem;
+    padding: 0.5rem 0.75rem;
+    transition: background-color 0.2s;
+}
+
+.chat-message-input:focus-within {
+    background-color: var(--field-bg-active, #fff);
+    box-shadow: 0 0 0 2px var(--primary, #3b82f6);
+}
+
+.chat-message-input__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    max-height: 120px;
+    resize: none;
+    outline: none;
+    color: var(--text-main, #111827);
+    line-height: 1.4;
+}
+
+.chat-message-input__input::placeholder {
+    color: var(--text-muted, #9ca3af);
+}
+
+.chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted, #6b7280);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.chat-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-main, #111827);
+}
+
+.chat-btn--primary {
+    background-color: var(--primary, #3b82f6);
+    color: white;
+}
+
+.chat-btn--primary:hover {
+    background-color: var(--primary-hover, #2563eb);
+    color: white;
+}
+
+.chat-btn--voice {
+    /* Style distinctively if needed */
+}
+
+/* Desktop-only specific logic usually handled by media queries */
+.chat-btn--desktop-only {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .chat-btn--desktop-only {
+        display: flex;
+    }
+}

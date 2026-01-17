@@ -16,7 +16,16 @@ export type FileCategory =
 	| 'Data'
 	| 'Font'
 	| 'Security'
-	| 'System';
+	| 'System'
+	| 'Email'
+	| 'DiskImage'
+	| 'VMImage'
+	| 'ContainerImage'
+	| 'CAD'
+	| 'GIS'
+	| 'Ebook'
+	| 'Config'
+	| 'Package';
 
 export interface FileDefinition {
 	extension: string;
@@ -34,6 +43,12 @@ export const extensionCategories: ExtensionMap = {
 			application: 'Microsoft Word',
 			validMimeTypes: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
 		},
+
+		{
+			extension: 'docm',
+			application: 'Microsoft Word Macro-Enabled Document',
+			validMimeTypes: ['application/vnd.ms-word.document.macroEnabled.12'],
+		},
 		{
 			extension: 'dot',
 			application: 'Microsoft Word Template',
@@ -43,6 +58,12 @@ export const extensionCategories: ExtensionMap = {
 			extension: 'dotx',
 			application: 'Microsoft Word Template',
 			validMimeTypes: ['application/vnd.openxmlformats-officedocument.wordprocessingml.template'],
+		},
+
+		{
+			extension: 'dotm',
+			application: 'Microsoft Word Macro-Enabled Template',
+			validMimeTypes: ['application/vnd.ms-word.template.macroEnabled.12'],
 		},
 		{ extension: 'pdf', application: 'Adobe Acrobat', validMimeTypes: ['application/pdf'] },
 		{ extension: 'txt', application: 'Plain Text', validMimeTypes: ['text/plain'] },
@@ -74,12 +95,16 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'tex', application: 'LaTeX Document' },
 		{ extension: 'ltx', application: 'LaTeX Source File' },
 		{ extension: 'bib', application: 'BibTeX Bibliography File' },
+
+		{ extension: 'sty', application: 'LaTeX Style File' },
+		{ extension: 'cls', application: 'LaTeX Class File' },
+
 		{ extension: 'epub', application: 'EPUB eBook', validMimeTypes: ['application/epub+zip'] },
 		{ extension: 'mobi', application: 'Mobipocket eBook' },
 		{ extension: 'azw', application: 'Amazon Kindle eBook' },
 		{ extension: 'azw3', application: 'Amazon Kindle eBook' },
 		{ extension: 'fb2', application: 'FictionBook eBook' },
-		// Comics (Added)
+
 		{
 			extension: 'cbr',
 			application: 'Comic Book RAR Archive',
@@ -90,7 +115,9 @@ export const extensionCategories: ExtensionMap = {
 			application: 'Comic Book ZIP Archive',
 			validMimeTypes: ['application/vnd.comicbook+zip'],
 		},
-		// Business
+
+		{ extension: 'cb7', application: 'Comic Book 7-Zip Archive' },
+
 		{ extension: 'gov', application: 'Government Document' },
 		{ extension: 'legx', application: 'Legal XML Format' },
 		{ extension: 'xfdl', application: 'Extensible Forms Description Language' },
@@ -116,11 +143,7 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'pub', application: 'Microsoft Publisher Document' },
 		{ extension: 'sla', application: 'Scribus Document' },
 		{ extension: 'mml', application: 'Mathematical Markup Language' },
-		{ extension: 'fodp', application: 'Flat OpenDocument Presentation' },
-		{ extension: 'odg', application: 'OpenDocument Graphics' },
-		{ extension: 'fodg', application: 'Flat OpenDocument Graphics' },
-		{ extension: 'ott', application: 'OpenDocument Text Template' },
-		{ extension: 'dotm', application: 'Microsoft Word Macro-Enabled Template' },
+
 		{ extension: 'url', application: 'Internet Shortcut' },
 		{ extension: 'webloc', application: 'Mac Web Shortcut' },
 		{ extension: 'desktop', application: 'Linux Desktop Shortcut' },
@@ -221,10 +244,49 @@ export const extensionCategories: ExtensionMap = {
 			application: 'Microsoft PowerPoint',
 			validMimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
 		},
+
+		{
+			extension: 'pptm',
+			application: 'Microsoft PowerPoint Macro-Enabled Presentation',
+			validMimeTypes: ['application/vnd.ms-powerpoint.presentation.macroEnabled.12'],
+		},
+
+		{
+			extension: 'potx',
+			application: 'Microsoft PowerPoint Template',
+			validMimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.template'],
+		},
+		{
+			extension: 'potm',
+			application: 'Microsoft PowerPoint Macro-Enabled Template',
+			validMimeTypes: ['application/vnd.ms-powerpoint.template.macroEnabled.12'],
+		},
+
+		{
+			extension: 'pps',
+			application: 'Microsoft PowerPoint Slideshow',
+			validMimeTypes: ['application/vnd.ms-powerpoint'],
+		},
+		{
+			extension: 'ppsx',
+			application: 'Microsoft PowerPoint Slideshow',
+			validMimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.slideshow'],
+		},
+		{
+			extension: 'ppsm',
+			application: 'Microsoft PowerPoint Macro-Enabled Slideshow',
+			validMimeTypes: ['application/vnd.ms-powerpoint.slideshow.macroEnabled.12'],
+		},
 		{
 			extension: 'odp',
 			application: 'OpenDocument Presentation',
 			validMimeTypes: ['application/vnd.oasis.opendocument.presentation'],
+		},
+
+		{
+			extension: 'otp',
+			application: 'OpenDocument Presentation Template',
+			validMimeTypes: ['application/vnd.oasis.opendocument.presentation-template'],
 		},
 	],
 
@@ -309,6 +371,11 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'xm', application: 'FastTracker 2 Extended Module' },
 		{ extension: 'it', application: 'Impulse Tracker Module' },
 		{ extension: 's3m', application: 'Scream Tracker Module' },
+
+		{ extension: 'aax', application: 'Audible Enhanced Audiobook' },
+		{ extension: 'ac3', application: 'Dolby Digital Audio' },
+		{ extension: 'dts', application: 'DTS Audio' },
+		{ extension: 'mka', application: 'Matroska Audio' },
 	],
 
 	Video: [
@@ -371,7 +438,13 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'mve', application: 'Interplay MVE Video' },
 		{ extension: 'rpl', application: 'Replay Video Format' },
 		{ extension: 'smk', application: 'Smacker Video' },
-		// Subtitles (Added)
+
+		{ extension: 'mpeg', application: 'MPEG Video' },
+		{ extension: 'mpg', application: 'MPEG Video' },
+		{ extension: 'mpe', application: 'MPEG Video' },
+		{ extension: 'ts', application: 'MPEG Transport Stream' },
+		{ extension: 'm2v', application: 'MPEG-2 Video' },
+
 		{ extension: 'srt', application: 'SubRip Subtitle', validMimeTypes: ['application/x-subrip'] },
 		{ extension: 'vtt', application: 'Web Video Text Tracks', validMimeTypes: ['text/vtt'] },
 		{ extension: 'sub', application: 'MicroDVD Subtitle' },
@@ -416,7 +489,7 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'iff', application: 'Amiga Interchange File Format' },
 		{ extension: 'tga', application: 'Truevision TGA', validMimeTypes: ['image/x-targa'] },
 		{ extension: 'icns', application: 'Apple Icon Image' },
-		{ extension: 'procreate', application: 'Procreate Image' }, // Added
+		{ extension: 'procreate', application: 'Procreate Image' },
 		{ extension: 'raw', application: 'General RAW Image Format' },
 		{ extension: 'cr2', application: 'Canon RAW Image' },
 		{ extension: 'cr3', application: 'Canon RAW Image' },
@@ -477,13 +550,14 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'emf', application: 'Enhanced Metafile' },
 		{ extension: 'wmf', application: 'Windows Metafile' },
 		{ extension: 'sketch', application: 'Sketch Design File' },
-		{ extension: 'fig', application: 'Figma Design File' }, // Added
-		{ extension: 'xd', application: 'Adobe XD File' }, // Added
+		{ extension: 'fig', application: 'Figma Design File' },
+		{ extension: 'xd', application: 'Adobe XD File' },
 		{ extension: 'cgm', application: 'Computer Graphics Metafile' },
 		{ extension: 'fxg', application: 'Flash XML Graphics File' },
 		{ extension: 'pict', application: 'Apple PICT File' },
 		{ extension: 'swf', application: 'Shockwave Flash Vector File' },
 		{ extension: 'xar', application: 'Xara Vector File' },
+
 		{ extension: 'shp', application: 'ESRI Shapefile' },
 		{ extension: 'shx', application: 'ESRI Shapefile Index' },
 		{ extension: 'dbf', application: 'Shapefile Database Format' },
@@ -518,10 +592,14 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: '7z', validMimeTypes: ['application/x-7z-compressed'] },
 		{ extension: 'tar', validMimeTypes: ['application/x-tar'] },
 		{ extension: 'gz', validMimeTypes: ['application/gzip'] },
-		{ extension: 'tgz', validMimeTypes: ['application/gzip'] }, // Added
-		{ extension: 'bz2', validMimeTypes: ['application/x-bzip2'] }, // Added
-		{ extension: 'xz', validMimeTypes: ['application/x-xz'] }, // Added
-		{ extension: 'zst', validMimeTypes: ['application/zstd'] }, // Added
+		{ extension: 'tgz', validMimeTypes: ['application/gzip'] },
+		{ extension: 'bz2', validMimeTypes: ['application/x-bzip2'] },
+		{ extension: 'xz', validMimeTypes: ['application/x-xz'] },
+		{ extension: 'zst', validMimeTypes: ['application/zstd'] },
+
+		{ extension: 'lz4', application: 'LZ4 Compressed File' },
+		{ extension: 'lz', application: 'Lzip Compressed File' },
+		{ extension: 'lzma', application: 'LZMA Compressed File' },
 	],
 
 	Executable: [
@@ -540,33 +618,36 @@ export const extensionCategories: ExtensionMap = {
 			extension: 'apk',
 			application: 'Android Package',
 			validMimeTypes: ['application/vnd.android.package-archive'],
-		}, // Added
+		},
 		{
 			extension: 'ipa',
 			application: 'iOS App Store Package',
 			validMimeTypes: ['application/octet-stream'],
-		}, // Added
+		},
 		{
 			extension: 'deb',
 			application: 'Debian Software Package',
 			validMimeTypes: ['application/vnd.debian.binary-package'],
-		}, // Added
+		},
 		{
 			extension: 'rpm',
 			application: 'Red Hat Package Manager',
 			validMimeTypes: ['application/x-rpm'],
-		}, // Added
+		},
 		{
 			extension: 'iso',
 			application: 'Disc Image File',
 			validMimeTypes: ['application/x-iso9660-image'],
-		}, // Added
-		{ extension: 'img', application: 'Disk Image File' }, // Added
+		},
+		{ extension: 'img', application: 'Disk Image File' },
 		{
 			extension: 'dll',
 			application: 'Dynamic Link Library',
 			validMimeTypes: ['application/x-msdownload'],
-		}, // Added
+		},
+
+		{ extension: 'pkg', application: 'macOS Installer Package' },
+		{ extension: 'app', application: 'macOS App Bundle (Directory)' },
 	],
 
 	Code: [
@@ -664,16 +745,16 @@ export const extensionCategories: ExtensionMap = {
 			extension: 'tf',
 			application: 'Terraform Configuration',
 			validMimeTypes: ['application/hcl'],
-		}, // Added
-		{ extension: 'tfvars', application: 'Terraform Variables' }, // Added
-		{ extension: 'toml', application: 'TOML Configuration', validMimeTypes: ['application/toml'] }, // Added
-		{ extension: 'dockerfile', application: 'Docker Build File' }, // Added
+		},
+		{ extension: 'tfvars', application: 'Terraform Variables' },
+		{ extension: 'toml', application: 'TOML Configuration', validMimeTypes: ['application/toml'] },
+		{ extension: 'dockerfile', application: 'Docker Build File' },
 		{
 			extension: 'ipynb',
 			application: 'Jupyter Notebook',
 			validMimeTypes: ['application/x-ipynb+json'],
-		}, // Added
-		{ extension: 'prisma', application: 'Prisma Schema' }, // Added
+		},
+		{ extension: 'prisma', application: 'Prisma Schema' },
 		{ extension: 'repl', application: 'REPL Script' },
 		{ extension: 'robots.txt', application: 'Robots.txt for Web Crawlers' },
 		{ extension: 'htaccess', application: 'Apache Configuration' },
@@ -913,6 +994,8 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'ini', application: 'Configuration File' },
 		{ extension: 'cfg', application: 'Configuration File' },
 		{ extension: 'properties', application: 'Java Properties File' },
+
+		{ extension: 'arrow', application: 'Apache Arrow File Format' },
 	],
 
 	Font: [
@@ -939,7 +1022,6 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'chm', application: 'Compiled HTML Help Font' },
 	],
 
-	// New Category: Security
 	Security: [
 		{
 			extension: 'crt',
@@ -952,7 +1034,7 @@ export const extensionCategories: ExtensionMap = {
 			application: 'Privacy Enhanced Mail Certificate',
 			validMimeTypes: ['application/x-pem-file'],
 		},
-		{ extension: 'key', application: 'Private Key File' }, // Distinct from Presentation 'key'
+		{ extension: 'key', application: 'Private Key File' },
 		{ extension: 'pub', application: 'Public Key File' },
 		{
 			extension: 'p12',
@@ -970,7 +1052,6 @@ export const extensionCategories: ExtensionMap = {
 	],
 
 	System: [
-		// 🪟 WINDOWS SYSTEM FILES
 		{
 			extension: 'sys',
 			application: 'Windows System File',
@@ -1003,14 +1084,13 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'cur', application: 'Windows Cursor' },
 		{ extension: 'ani', application: 'Animated Windows Cursor' },
 		{ extension: 'minidump', application: 'Windows Memory Dump' },
-		{ extension: 'dmp', application: 'System Memory Dump' }, // Note: Can conflict with Oracle DB .dmp
+		{ extension: 'dmp', application: 'System Memory Dump' },
 		{
 			extension: 'cab',
 			application: 'Windows Cabinet File',
 			validMimeTypes: ['application/vnd.ms-cab-compressed'],
 		},
 
-		// 🍎 MACOS SYSTEM FILES
 		{ extension: 'ds_store', application: 'macOS Folder Settings' },
 		{
 			extension: 'plist',
@@ -1021,7 +1101,6 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'webloc', application: 'macOS Web Shortcut' },
 		{ extension: 'mobileconfig', application: 'Apple Configuration Profile' },
 
-		// 🐧 LINUX / UNIX SYSTEM FILES
 		{
 			extension: 'so',
 			application: 'Shared Object Library',
@@ -1031,14 +1110,134 @@ export const extensionCategories: ExtensionMap = {
 		{ extension: 'pid', application: 'Process ID File' },
 		{ extension: 'sock', application: 'Unix Socket File' },
 		{ extension: 'swap', application: 'Swap File' },
-		{ extension: 'rc', application: 'Run Command Configuration' }, // e.g., .bashrc, .vimrc
+		{ extension: 'rc', application: 'Run Command Configuration' },
 
-		// 🗑️ TEMPORARY & BACKUP
 		{ extension: 'tmp', application: 'Temporary File' },
 		{ extension: 'temp', application: 'Temporary File' },
 		{ extension: 'bak', application: 'Generic Backup File' },
 		{ extension: 'swp', application: 'Vim Swap File' },
 		{ extension: 'old', application: 'Backup / Old Version File' },
 		{ extension: 'log', application: 'System Log File', validMimeTypes: ['text/plain'] },
+	],
+
+	Email: [
+		{ extension: 'eml', application: 'RFC 822 Email Message', validMimeTypes: ['message/rfc822'] },
+		{ extension: 'msg', application: 'Outlook Message' },
+		{ extension: 'mbox', application: 'Mailbox File' },
+		{ extension: 'pst', application: 'Outlook Personal Storage Table' },
+		{ extension: 'ost', application: 'Outlook Offline Storage Table' },
+
+		{ extension: 'ics', application: 'iCalendar File', validMimeTypes: ['text/calendar'] },
+		{ extension: 'vcf', application: 'vCard Contact File', validMimeTypes: ['text/vcard'] },
+	],
+
+	DiskImage: [
+		{
+			extension: 'iso',
+			application: 'ISO Disc Image',
+			validMimeTypes: ['application/x-iso9660-image'],
+		},
+		{ extension: 'img', application: 'Disk Image File' },
+		{
+			extension: 'dmg',
+			application: 'Apple Disk Image',
+			validMimeTypes: ['application/x-apple-diskimage'],
+		},
+		{ extension: 'sparsebundle', application: 'macOS Sparse Bundle Disk Image' },
+		{ extension: 'toast', application: 'Roxio Toast Disc Image' },
+	],
+
+	VMImage: [
+		{ extension: 'vhd', application: 'Virtual Hard Disk' },
+		{ extension: 'vhdx', application: 'Virtual Hard Disk v2' },
+		{ extension: 'vmdk', application: 'VMware Virtual Disk' },
+		{ extension: 'vdi', application: 'VirtualBox Disk Image' },
+		{ extension: 'qcow2', application: 'QEMU Copy-On-Write v2 Disk Image' },
+		{ extension: 'ova', application: 'Open Virtual Appliance' },
+		{ extension: 'ovf', application: 'Open Virtualization Format' },
+	],
+
+	ContainerImage: [
+		{ extension: 'oci', application: 'OCI Image Layout' },
+		{ extension: 'sif', application: 'Singularity Image Format' },
+	],
+
+	CAD: [
+		{ extension: 'dwg', application: 'AutoCAD Drawing' },
+		{ extension: 'dxf', application: 'Drawing Exchange Format' },
+		{ extension: 'dwt', application: 'AutoCAD Drawing Template' },
+		{ extension: 'dwf', application: 'Design Web Format' },
+	],
+
+	GIS: [
+		{ extension: 'shp', application: 'ESRI Shapefile' },
+		{ extension: 'shx', application: 'ESRI Shapefile Index' },
+		{ extension: 'dbf', application: 'Shapefile Attribute Table' },
+		{ extension: 'prj', application: 'Shapefile Projection' },
+		{ extension: 'cpg', application: 'Shapefile Code Page' },
+		{ extension: 'qpj', application: 'QGIS Projection File' },
+		{ extension: 'geojson', application: 'GeoJSON' },
+		{ extension: 'topojson', application: 'TopoJSON' },
+		{ extension: 'kml', application: 'Keyhole Markup Language' },
+		{ extension: 'kmz', application: 'Compressed KML' },
+		{ extension: 'gpx', application: 'GPS Exchange Format' },
+		{ extension: 'gml', application: 'Geography Markup Language' },
+
+		{ extension: 'gpkg', application: 'GeoPackage' },
+		{ extension: 'mbtiles', application: 'Mapbox MBTiles' },
+	],
+
+	Ebook: [
+		{ extension: 'epub', application: 'EPUB eBook', validMimeTypes: ['application/epub+zip'] },
+		{ extension: 'mobi', application: 'Mobipocket eBook' },
+		{ extension: 'azw', application: 'Amazon Kindle eBook' },
+		{ extension: 'azw3', application: 'Amazon Kindle eBook' },
+		{ extension: 'kfx', application: 'Kindle Format 10 (KFX)' },
+		{ extension: 'fb2', application: 'FictionBook eBook' },
+		{ extension: 'ibooks', application: 'Apple iBooks' },
+		{ extension: 'opf', application: 'Open Packaging Format (eBook metadata)' },
+		{ extension: 'ncx', application: 'Navigation Control file for XML (eBook TOC)' },
+
+		{ extension: 'cbz', application: 'Comic Book ZIP Archive' },
+		{ extension: 'cbr', application: 'Comic Book RAR Archive' },
+		{ extension: 'cb7', application: 'Comic Book 7-Zip Archive' },
+	],
+
+	Config: [
+		{ extension: 'env', application: 'Environment Variables File (filename: .env)' },
+		{ extension: 'editorconfig', application: 'EditorConfig (filename: .editorconfig)' },
+		{ extension: 'gitignore', application: 'Git Ignore Rules (filename: .gitignore)' },
+		{ extension: 'gitattributes', application: 'Git Attributes (filename: .gitattributes)' },
+		{ extension: 'npmrc', application: 'npm Configuration (filename: .npmrc)' },
+		{ extension: 'yarnrc', application: 'Yarn Configuration (filename: .yarnrc)' },
+		{
+			extension: 'yaml',
+			application: "YAML Ain't Markup Language",
+			validMimeTypes: ['application/x-yaml'],
+		},
+		{
+			extension: 'yml',
+			application: "YAML Ain't Markup Language",
+			validMimeTypes: ['application/x-yaml'],
+		},
+		{ extension: 'toml', application: 'TOML Configuration', validMimeTypes: ['application/toml'] },
+		{ extension: 'ini', application: 'INI Configuration' },
+		{ extension: 'cfg', application: 'Config File' },
+		{ extension: 'properties', application: 'Java Properties' },
+		{ extension: 'json', application: 'JSON', validMimeTypes: ['application/json'] },
+	],
+
+	Package: [
+		{ extension: 'jar', application: 'Java Archive' },
+		{ extension: 'war', application: 'Web Application Archive' },
+		{ extension: 'ear', application: 'Enterprise Application Archive' },
+
+		{ extension: 'whl', application: 'Python Wheel Package' },
+
+		{ extension: 'gem', application: 'RubyGems Package' },
+
+		{ extension: 'nupkg', application: 'NuGet Package' },
+
+		{ extension: 'xcarchive', application: 'Xcode Archive' },
 	],
 };

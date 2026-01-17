@@ -1,24 +1,47 @@
 {
-  "deno.enable": true,
-  "deno.lint": true,
-  "editor.defaultFormatter": "denoland.vscode-deno",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
-  "[typescript]": {
+  "[javascript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "[javascript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
   "[sql]": {
     "editor.defaultFormatter": "cweijan.vscode-postgresql-client2"
   },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "cSpell.words": [
+    "normalise",
+    "PORJECTIVE",
+    "supabase",
+    "tabler"
+  ],
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "editor.defaultFormatter": "denoland.vscode-deno",
   "files.exclude": {
     "node_modules": true
-  },
-  "cSpell.words": ["normalise", "PORJECTIVE", "supabase", "tabler"]
+  }
 }

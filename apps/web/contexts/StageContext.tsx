@@ -1,41 +1,49 @@
-import { createContext } from 'preact';
-import { useContext, useEffect } from 'preact/hooks';
-import { Signal, useSignal } from '@preact/signals';
-import { ComponentChildren } from 'preact';
-import { StagePermission, StageType } from '@projective/types';
+import { createContext } from "preact";
+import { useContext, useEffect } from "preact/hooks";
+import { Signal, useSignal } from "@preact/signals";
+import { ComponentChildren } from "preact";
+import { StagePermission, StageType } from "@projective/types";
 
-export type StageRole = 'owner' | 'assignee' | 'viewer';
+export type StageRole = "owner" | "assignee" | "viewer";
 
 export interface StageDetails {
 	stage_id: string;
 	project_id: string;
+	channel_id: string;
 	title: string;
 	description: string;
-	order: number;
+	sort_order: number;
 
-	// Status flow
-	status: 'open' | 'assigned' | 'in_progress' | 'submitted' | 'approved' | 'revisions' | 'paid';
+	status:
+		| "open"
+		| "assigned"
+		| "in_progress"
+		| "submitted"
+		| "approved"
+		| "revisions"
+		| "paid";
 	stage_type: StageType;
-	ip_mode: 'exclusive_transfer' | 'licensed_use' | 'internal_only' | 'template_only';
+	ip_mode:
+		| "exclusive_transfer"
+		| "licensed_use"
+		| "internal_only"
+		| "template_only";
 	due_date: string | null;
 
-	// Financials (Nullable based on role visibility?)
 	budget: {
-		type: 'fixed' | 'hourly_cap' | 'free';
+		type: "fixed" | "hourly_cap" | "free";
 		amount_cents: number;
 		currency: string;
 	} | null;
 
-	// Who is doing the work
 	assignee: {
 		profile_id: string;
 		name: string;
 		avatar_url: string | null;
-		type: 'freelancer' | 'team';
-		status: 'invited' | 'accepted';
+		type: "freelancer" | "team";
+		status: "invited" | "accepted";
 	} | null;
 
-	// Latest submission (if any)
 	latest_submission: {
 		id: string;
 		submitted_at: string;
@@ -43,7 +51,6 @@ export interface StageDetails {
 		files: Array<{ name: string; url: string }>;
 	} | null;
 
-	// Perspective: "Who am I in this stage?"
 	viewer_context: {
 		role: StageRole;
 		permissions: StagePermission[];
@@ -85,11 +92,14 @@ export function StageProvider(
 		error.value = null;
 
 		try {
-			const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId.value}`);
+			const res = await fetch(
+				`/api/v1/dashboard/projects/${projectId}/stages/${stageId.value}`,
+			);
 			if (!res.ok) throw new Error(`Error ${res.status}`);
 			stage.value = await res.json();
+			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
-			console.error('Stage Fetch Error:', err);
+			console.error("Stage Fetch Error:", err);
 			error.value = err.message;
 		} finally {
 			isLoading.value = false;
@@ -117,6 +127,8 @@ export function StageProvider(
 
 export function useStageContext() {
 	const ctx = useContext(StageContext);
-	if (!ctx) throw new Error('useStageContext must be used within StageProvider');
+	if (!ctx) {
+		throw new Error("useStageContext must be used within StageProvider");
+	}
 	return ctx;
 }

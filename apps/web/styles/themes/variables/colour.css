@@ -200,6 +200,6 @@
         --success-surface: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.25);
 
         --scrollbar-bg: hsl(var(--bg-hue), var(--bg-saturation), 10%);
-        --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 12%);
-        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 14%);
+        --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
+        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 22%);
 }

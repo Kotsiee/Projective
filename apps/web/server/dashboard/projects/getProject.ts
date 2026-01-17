@@ -19,11 +19,11 @@ export async function getProject(
 			.single();
 
 		if (error) {
-			console.error('RPC Error:', error);
+			console.error('getProject RPC Error:', error);
 			const n = normaliseSupabaseError(error);
 			return fail(n.code, n.message, n.status);
 		}
-		console.log(data);
+
 		return ok(data);
 	} catch (err) {
 		const n = normaliseUnknownError(err);

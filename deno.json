@@ -129,6 +129,7 @@
     "preact": "npm:preact@^10.27.2",
     "quill": "npm:quill@^2.0.3",
     "quill-delta-to-html": "npm:quill-delta-to-html@^0.12.1",
+    "supabase": "npm:supabase@^2.72.7",
     "supabaseClient": "npm:@supabase/supabase-js@2.76.1",
 
     "packages/": "./packages/",
@@ -151,5 +152,9 @@
     "@utils": "./apps/web/utils.ts",
     "zod": "npm:zod@^4.1.13"
   },
-  "exclude": ["**/_fresh/*"]
+  "exclude": ["**/_fresh/*"],
+  "allowScripts": {
+    "allow": [],
+    "deny": ["npm:esbuild@0.25.7", "npm:supabase@2.72.7"]
+  }
 }

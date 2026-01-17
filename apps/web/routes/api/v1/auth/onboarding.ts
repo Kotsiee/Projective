@@ -1,6 +1,6 @@
-import { define } from '@utils';
-import { onboarding } from '@server/auth/onboarding.ts';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { define } from "@utils";
+import { onboarding } from "@server/auth/onboarding.ts";
+import { supabaseClient } from "@server/core/clients/supabase.ts";
 
 export const handler = define.handlers({
 	async POST(ctx) {
@@ -12,12 +12,15 @@ export const handler = define.handlers({
 		if (!res.ok) {
 			return new Response(JSON.stringify({ error: res.error }), {
 				status: res.error.status ?? 400,
-				headers: { 'content-type': 'application/json; charset=utf-8' },
+				headers: { "content-type": "application/json; charset=utf-8" },
 			});
 		}
 
-		return new Response(JSON.stringify({ ok: true, redirectTo: '/dashboard' }), {
-			status: 200,
-		});
+		return new Response(
+			JSON.stringify({ ok: true, redirectTo: "/dashboard" }),
+			{
+				status: 200,
+			},
+		);
 	},
 });

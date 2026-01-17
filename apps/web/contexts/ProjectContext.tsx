@@ -22,7 +22,6 @@ export interface ProjectDetails {
 	banner_url: string | null;
 	is_starred: boolean;
 
-	// Owner Info
 	owner: {
 		id: string;
 		name: string;
@@ -30,10 +29,8 @@ export interface ProjectDetails {
 		type: 'business' | 'freelancer';
 	};
 
-	// The list of stages for the sidebar/overview
 	stages: ProjectStageSummary[];
 
-	// The current user's perspective on this project
 	viewer_context: {
 		role: ProjectRole;
 		permissions: ProjectPermission[];
@@ -58,7 +55,6 @@ export function ProjectProvider(
 	const isLoading = useSignal(false);
 	const error = useSignal<string | null>(null);
 
-	// Sync prop -> signal
 	if (projectId.value !== id) {
 		projectId.value = id;
 		project.value = null;
@@ -75,6 +71,7 @@ export function ProjectProvider(
 			const res = await fetch(`/api/v1/dashboard/projects/${projectId.value}`);
 			if (!res.ok) throw new Error(`Error ${res.status}`);
 			project.value = await res.json();
+			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
 			console.error('Project Fetch Error:', err);
 			error.value = err.message;

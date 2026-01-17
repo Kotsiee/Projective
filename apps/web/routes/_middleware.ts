@@ -1,39 +1,39 @@
-import { define } from '@utils';
-import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
-import { isOnboarded } from '@server/auth/onboarding.ts';
+import { define } from "@utils";
+import { maybeRefreshFromRequest } from "@server/auth/refresh.ts";
+import { isOnboarded } from "@server/auth/onboarding.ts";
 import {
 	clearAuthCookies,
 	getAuthCookies,
 	rateLimitByIP,
 	setAuthCookies,
 	verifyCsrf,
-} from '@projective/backend';
+} from "@projective/backend";
 
 function jwtExp(token: string): number | null {
 	try {
-		const payload = token.split('.')[1];
+		const payload = token.split(".")[1];
 		if (!payload) return null;
 		const json = JSON.parse(
 			new TextDecoder().decode(
 				Uint8Array.from(
-					atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+					atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
 					(c) => c.charCodeAt(0),
 				),
 			),
 		);
-		return typeof json.exp === 'number' ? json.exp : null;
+		return typeof json.exp === "number" ? json.exp : null;
 	} catch {
 		return null;
 	}
 }
 
 const EXCLUDED_PATHS = [
-	'/_fresh',
-	'/static',
-	'/favicon.ico',
-	'/logo.svg',
-	'/styles.css',
-	'/components',
+	"/_fresh",
+	"/static",
+	"/favicon.ico",
+	"/logo.svg",
+	"/styles.css",
+	"/components",
 ];
 
 export const handler = define.middleware(async (ctx) => {
@@ -48,12 +48,13 @@ export const handler = define.middleware(async (ctx) => {
 		return await ctx.next();
 	}
 
-	const ip = (req.headers.get('x-forwarded-for') ?? '127.0.0.1').split(',')[0];
+	const ip =
+		(req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
 	const { allowed } = rateLimitByIP(ip);
 
 	if (!allowed) {
 		console.warn(`[RateLimit] Blocked ${ip} on ${path}`);
-		return new Response('Too Many Requests', { status: 429 });
+		return new Response("Too Many Requests", { status: 429 });
 	}
 
 	const { accessToken, refreshToken } = getAuthCookies(req);
@@ -84,14 +85,26 @@ export const handler = define.middleware(async (ctx) => {
 		}
 	}
 
-	const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
-	const hasBearer = !!req.headers.get('authorization')?.startsWith('Bearer ');
+	const isStateChanging = ["POST", "PUT", "PATCH", "DELETE"].includes(
+		req.method.toUpperCase(),
+	);
+	const hasBearer = !!req.headers.get("authorization")?.startsWith("Bearer ");
 
 	if (isStateChanging && !hasBearer && ctx.state.isAuthenticated) {
 		if (!verifyCsrf(req)) {
 			return new Response(
-				JSON.stringify({ error: { code: 'csrf_failed', message: 'CSRF check failed' } }),
-				{ status: 403, headers: { 'content-type': 'application/json; charset=utf-8' } },
+				JSON.stringify({
+					error: {
+						code: "csrf_failed",
+						message: "CSRF check failed",
+					},
+				}),
+				{
+					status: 403,
+					headers: {
+						"content-type": "application/json; charset=utf-8",
+					},
+				},
 			);
 		}
 	}
@@ -101,7 +114,7 @@ export const handler = define.middleware(async (ctx) => {
 		ctx.state.isOnboarded = await isOnboarded(ctx.req);
 	}
 
-	if (path.startsWith('/verify')) {
+	if (path.startsWith("/verify")) {
 		const res = await ctx.next();
 
 		if (ctx.state.refreshedTokens) {

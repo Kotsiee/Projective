@@ -8,3 +8,4 @@ export * from './src/components/DataDisplay.tsx';
 export { useVirtual } from './src/hooks/useVirtual.ts';
 export { useDataManager } from './src/hooks/useDataManager.ts';
 export { useSelection } from './src/hooks/useSelection.ts';
+export { ChatList } from './src/components/displays/ChatList.tsx';

@@ -1,0 +1,23 @@
+/* Container Inversion: Flips the scroll direction */
+.data-chat__scroll-pane {
+    transform: scaleY(-1);
+    /* Ensure the scrollbar is also flipped if needed, 
+       though native scrollbars might look odd on some OS. 
+       Usually acceptable for chat UIs or styled with ::-webkit-scrollbar 
+    */
+}
+
+/* Item Inversion: Flips the content back up so it's readable */
+.data-chat__item {
+    transform: scaleY(-1);
+    display: flex;
+    flex-direction: column;
+    /* Ensure items take full width and handle their own height */
+    width: 100%;
+}
+
+/* Optional: Chat specific row styling overrides */
+.data-chat__row {
+    width: 100%;
+    /* Remove absolute positioning assumptions if any specific layout is needed */
+}

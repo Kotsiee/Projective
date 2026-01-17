@@ -18,10 +18,10 @@ export async function getStage(
 				p_project_id: project_id,
 				p_stage_id: stage_id,
 			})
-			.single(); // Expecting a single object, not an array
+			.single();
 
 		if (error) {
-			console.error('RPC Error:', error);
+			console.error('getStage RPC Error:', error);
 			const n = normaliseSupabaseError(error);
 			return fail(n.code, n.message, n.status);
 		}

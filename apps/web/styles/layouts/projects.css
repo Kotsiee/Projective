@@ -1,7 +1,8 @@
 .layout-projects {
     display: flex;
     flex-direction: row;
-    height: 100%;
+    min-height: 100vh;
+    height: auto;
     position: relative;
 
     --messages-sidebar-width: 20vw;
@@ -20,8 +21,9 @@
 
 .layout-projects__content__container {
     position: relative;
-    left: calc(2rem + var(--messages-sidebar-width));
-    height: 200vh;
+    margin-left: calc(2rem + var(--messages-sidebar-width));
+    left: auto;
+    height: auto;
     min-height: calc(100vh - var(--header-height) - 4rem);
     width: calc(100% - var(--messages-sidebar-width) - 2.5rem);
 }
