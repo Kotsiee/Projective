@@ -1,30 +1,38 @@
-import { createClient, type SupabaseClient, type SupabaseClientOptions } from 'supabaseClient';
-import { Config, getAuthCookies } from '@projective/backend';
+import {
+	createClient,
+	type SupabaseClient,
+	type SupabaseClientOptions,
+} from "supabaseClient";
+import { Config, getAuthCookies } from "@projective/backend";
 
-let anonClient: SupabaseClient /*<Database>*/ | null = null;
+let anonClient: SupabaseClient | null = null;
 
 function getEnv() {
 	const SUPABASE_URL = Config.SUPABASE_URL;
 	const ANON_KEY = Config.SUPABASE_ANON_KEY;
-	if (!SUPABASE_URL || !ANON_KEY) throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
+	if (!SUPABASE_URL || !ANON_KEY) {
+		throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+	}
 	return { SUPABASE_URL, ANON_KEY };
 }
 
 /**
- * Returns a Supabase client:
- * - If `req` contains an access token cookie, a **new per-request client** with `Authorization: Bearer <token>`.
- * - Otherwise, a **shared anon client** (cached).
+ * Returns a Supabase client.
  *
- * No session persistence; SSR-safe.
+ * @param req - The incoming request (for auth headers)
+ * @param options - Configuration options (e.g. { realtime: true })
  */
 // deno-lint-ignore require-await
-export async function supabaseClient(req?: Request): Promise<SupabaseClient> {
+export async function supabaseClient(
+	req?: Request,
+): Promise<SupabaseClient> {
 	const { SUPABASE_URL, ANON_KEY } = getEnv();
 
-	const baseOptions: SupabaseClientOptions<'public'> = {
+	const baseOptions: SupabaseClientOptions<"public"> = {
 		auth: {
 			persistSession: false,
 			detectSessionInUrl: false,
+			autoRefreshToken: false,
 		},
 	};
 

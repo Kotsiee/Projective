@@ -1,11 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
-import { Deps } from '../../_shared/types.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
-import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { fail, ok, Result } from '../../core/http/result.ts';
+import { Deps } from "../../_shared/types.ts";
+import { supabaseClient } from "../../core/clients/supabase.ts";
+import {
+	normaliseSupabaseError,
+	normaliseUnknownError,
+} from "../../core/errors/normalise.ts";
+import { fail, ok, Result } from "../../core/http/result.ts";
 
 interface GetMessagesOptions {
-	type?: 'dm' | 'channel';
+	type?: "dm" | "channel";
 	start?: number;
 	limit?: number;
 	countOnly?: boolean;
@@ -20,17 +23,17 @@ export async function getMessages(
 		const getClient = deps.getClient ?? supabaseClient;
 		const supabase = await getClient();
 
-		const { type = 'channel' } = options;
-		const table = type === 'dm' ? 'dm_messages' : 'project_messages';
-		const channelCol = type === 'dm' ? 'thread_id' : 'channel_id';
+		const { type = "channel" } = options;
+		const table = type === "dm" ? "dm_messages" : "project_messages";
+		const channelCol = type === "dm" ? "thread_id" : "channel_id";
 
-		console.log('params:', channel_id);
+		const fullTableName = `comms.${table}`;
 
 		if (options.countOnly) {
 			const { count, error } = await supabase
-				.schema('comms')
+				.schema("comms")
 				.from(table)
-				.select('*', { count: 'exact', head: true })
+				.select("*", { count: "exact", head: true })
 				.eq(channelCol, channel_id);
 
 			if (error) {
@@ -45,14 +48,11 @@ export async function getMessages(
 		const end = start + limit - 1;
 
 		const { data: messages, count, error } = await supabase
-			.schema('comms')
+			.schema("comms")
 			.from(table)
-			.select(
-				`*`,
-				{ count: 'exact' },
-			)
+			.select(`*`, { count: "exact" })
 			.eq(channelCol, channel_id)
-			.order('created_at', { ascending: false })
+			.order("created_at", { ascending: false })
 			.range(start, end);
 
 		if (error) {
@@ -64,27 +64,71 @@ export async function getMessages(
 			return ok({ items: [], meta: { totalCount: count ?? 0 } });
 		}
 
-		const userIds = [...new Set(messages.map((m: any) => m.sender_user_id))];
+		const messageIds = messages.map((m: any) => m.id);
+
+		const { data: rawAttachments, error: attError } = await supabase
+			.schema("comms")
+			.from("message_file_details")
+			.select("*")
+			.in("message_id", messageIds)
+			.eq("message_table", fullTableName);
+
+		if (attError) {
+			console.error("Attachment fetch error:", attError);
+		}
+
+		console.log("Raw attachments:", rawAttachments);
+		const attachmentMap = new Map<string, any[]>();
+
+		if (rawAttachments) {
+			rawAttachments.forEach((row: any) => {
+				const existing = attachmentMap.get(row.message_id) || [];
+
+				const fileObj = {
+					id: row.file_id,
+					display_name: row.display_name,
+					mime_type: row.mime_type,
+					size_bytes: row.size_bytes,
+				};
+
+				existing.push(fileObj);
+				attachmentMap.set(row.message_id, existing);
+			});
+		}
+
+		const userIds = [
+			...new Set(messages.map((m: any) => m.sender_user_id)),
+		];
 
 		const { data: profiles } = await supabase
-			.schema('org')
-			.from('users_public')
-			.select('user_id, display_name, avatar_url')
-			.in('user_id', userIds);
+			.schema("org")
+			.from("users_public")
+			.select("user_id, display_name, avatar_url")
+			.in("user_id", userIds);
 
-		const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
+		const profileMap = new Map(
+			profiles?.map((p: any) => [p.user_id, p]) || [],
+		);
 		const userId = (await supabase.auth.getUser()).data.user?.id;
 
 		const items = messages.map((msg: any) => {
 			const profile = profileMap.get(msg.sender_user_id) || {};
 
-			const mappedAttachments = msg.attachments?.map((att: any) => ({
-				id: att.file?.id,
-				name: att.file?.display_name,
-				type: att.file?.mime_type,
-				size: att.file?.size_bytes,
-				url: `/api/v1/files/${att.file?.id}/access`,
-			})) || [];
+			const fileData = attachmentMap.get(msg.id) || [];
+
+			const mappedAttachments = fileData.map((file: any) => ({
+				id: file.id,
+				name: file.display_name,
+				type: file.mime_type,
+				size: file.size_bytes,
+				url: `/api/v1/files/${file.id}/access`,
+			}));
+
+			console.log(
+				"Mapped attachments for message",
+				msg.id,
+				mappedAttachments,
+			);
 
 			return {
 				id: msg.id,
@@ -93,13 +137,13 @@ export async function getMessages(
 				isSelf: msg.sender_user_id === userId,
 				sender: {
 					id: msg.sender_user_id,
-					name: profile.display_name || 'Unknown User',
+					name: profile.display_name || "Unknown User",
 					avatarUrl: profile.avatar_url,
 				},
 				attachments: mappedAttachments,
 			};
 		}).reverse();
-
+		console.log("Fetched messages:", items);
 		return ok({
 			items,
 			meta: {

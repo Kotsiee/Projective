@@ -1,0 +1,21 @@
+.chat-message-input__attach {
+    position: relative;
+}
+
+.chat-message-input__attach__button {
+    transition: transform 0.2s ease-in-out;
+
+    &[data-open='true'] {
+        transform: rotate(45deg);
+    }
+}
+
+.chat-message-input__attach__attachment-popup {
+    position: absolute;
+    bottom: calc(100% + 1.5rem);
+    left: 0;
+    width: 120px;
+    background-color: var(--field-bg, #f3f4f6);
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: var(--border-radius__small);
+}

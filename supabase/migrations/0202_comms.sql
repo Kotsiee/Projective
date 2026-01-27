@@ -68,3 +68,32 @@ SELECT TO authenticated USING (
                 )
         )
     );
+
+DROP POLICY IF EXISTS "Users link own message attachments" ON comms.message_attachments;
+
+CREATE POLICY "Users link own message attachments" ON comms.message_attachments FOR
+INSERT
+    TO authenticated
+WITH
+    CHECK (
+        (
+            message_table = 'comms.project_messages'
+            AND EXISTS (
+                SELECT 1
+                FROM comms.project_messages pm
+                WHERE
+                    pm.id = message_id
+                    AND pm.sender_user_id = auth.uid ()
+            )
+        )
+        OR (
+            message_table = 'comms.dm_messages'
+            AND EXISTS (
+                SELECT 1
+                FROM comms.dm_messages dm
+                WHERE
+                    dm.id = message_id
+                    AND dm.sender_user_id = auth.uid ()
+            )
+        )
+    );

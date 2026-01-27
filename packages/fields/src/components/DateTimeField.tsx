@@ -1,14 +1,14 @@
-import '../styles/components/datetime-field.css';
-import { Signal, useSignal } from '@preact/signals';
-import { IconCalendar, IconClock } from '@tabler/icons-preact';
-import { DateTime } from '@projective/types';
-import { DateTimeFieldProps } from '../types/components/datetime-field.ts';
-import { TextField } from './TextField.tsx';
-import { Calendar } from './datetime/Calendar.tsx';
-import { TimeClock } from './datetime/TimeClock.tsx';
-import { Popover } from './overlays/Popover.tsx';
+import "../styles/components/datetime-field.css";
+import { Signal, useSignal } from "@preact/signals";
+import { IconCalendar, IconClock } from "@tabler/icons-preact";
+import { DateTime } from "@projective/types";
+import { DateTimeFieldProps } from "../types/components/datetime-field.ts";
+import { TextField } from "./TextField.tsx";
+import { Calendar } from "./datetime/Calendar.tsx";
+import { TimeClock } from "./datetime/TimeClock.tsx";
+import { Popover } from "@projective/ui";
 
-type TabView = 'date' | 'time';
+type TabView = "date" | "time";
 
 export function DateTimeField(props: DateTimeFieldProps) {
 	const {
@@ -22,8 +22,8 @@ export function DateTimeField(props: DateTimeFieldProps) {
 	} = props;
 
 	const isOpen = useSignal(false);
-	const activeTab = useSignal<TabView>('date');
-	const inputValue = useSignal('');
+	const activeTab = useSignal<TabView>("date");
+	const inputValue = useSignal("");
 
 	// Normalize signal
 	const isValueSignal = value instanceof Signal;
@@ -31,7 +31,9 @@ export function DateTimeField(props: DateTimeFieldProps) {
 		isValueSignal ? value.peek() : (value ?? defaultValue),
 	);
 
-	if (!isValueSignal && value !== undefined && value !== internalSignal.peek()) {
+	if (
+		!isValueSignal && value !== undefined && value !== internalSignal.peek()
+	) {
 		internalSignal.value = value;
 	}
 
@@ -39,8 +41,8 @@ export function DateTimeField(props: DateTimeFieldProps) {
 
 	// --- Format Helper ---
 	const formatValue = (val?: DateTime) => {
-		if (!val) return '';
-		return val.toFormat('dd/MM/yyyy HH:mm');
+		if (!val) return "";
+		return val.toFormat("dd/MM/yyyy HH:mm");
 	};
 
 	// Sync Input (Unidirectional)
@@ -71,7 +73,7 @@ export function DateTimeField(props: DateTimeFieldProps) {
 		onChange?.(nextVal);
 		inputValue.value = formatValue(nextVal);
 
-		activeTab.value = 'time';
+		activeTab.value = "time";
 	};
 
 	const updateTimePart = (newTime: DateTime) => {
@@ -94,7 +96,7 @@ export function DateTimeField(props: DateTimeFieldProps) {
 
 	const handleInputChange = (val: string) => {
 		inputValue.value = val;
-		if (val === '') {
+		if (val === "") {
 			// Handle clear
 			// We can't set undefined to DateTime signal easily if strict?
 			// But ValueFieldProps<DateTime> implies it might be undefined?
@@ -110,7 +112,7 @@ export function DateTimeField(props: DateTimeFieldProps) {
 			return;
 		}
 		try {
-			const dt = new DateTime(val, 'dd/MM/yyyy HH:mm', true);
+			const dt = new DateTime(val, "dd/MM/yyyy HH:mm", true);
 			// Check validity? DateTime constructor throws if invalid format?
 			// Assuming it's valid if no throw.
 
@@ -127,54 +129,63 @@ export function DateTimeField(props: DateTimeFieldProps) {
 
 	// Tabs Header
 	const renderTabs = () => (
-		<div className='datetime-field__tabs'>
+		<div className="datetime-field__tabs">
 			<button
-				type='button'
+				type="button"
 				className={`datetime-field__tab ${
-					activeTab.value === 'date' ? 'datetime-field__tab--active' : ''
+					activeTab.value === "date"
+						? "datetime-field__tab--active"
+						: ""
 				}`}
-				onClick={() => activeTab.value = 'date'}
+				onClick={() => activeTab.value = "date"}
 			>
 				<IconCalendar size={16} />
 				<span>Date</span>
-				<span className='datetime-field__tab-val'>
-					{signalValue.value ? signalValue.value.toFormat('dd MMM') : '--'}
+				<span className="datetime-field__tab-val">
+					{signalValue.value
+						? signalValue.value.toFormat("dd MMM")
+						: "--"}
 				</span>
 			</button>
 
 			<button
-				type='button'
+				type="button"
 				className={`datetime-field__tab ${
-					activeTab.value === 'time' ? 'datetime-field__tab--active' : ''
+					activeTab.value === "time"
+						? "datetime-field__tab--active"
+						: ""
 				}`}
-				onClick={() => activeTab.value = 'time'}
+				onClick={() => activeTab.value = "time"}
 			>
 				<IconClock size={16} />
 				<span>Time</span>
-				<span className='datetime-field__tab-val'>
-					{signalValue.value ? signalValue.value.toFormat('HH:mm') : '--:--'}
+				<span className="datetime-field__tab-val">
+					{signalValue.value
+						? signalValue.value.toFormat("HH:mm")
+						: "--:--"}
 				</span>
 			</button>
 		</div>
 	);
 
 	return (
-		<div className='datetime-field'>
+		<div className="datetime-field">
 			<Popover
 				isOpen={isOpen.value}
 				onClose={() => isOpen.value = false}
 				trigger={
 					<TextField
-						name='datetime-field'
+						name="datetime-field"
 						{...rest}
-						type='text'
-						placeholder={placeholder || 'DD/MM/YYYY HH:mm'}
+						type="text"
+						placeholder={placeholder || "DD/MM/YYYY HH:mm"}
 						value={inputValue.value}
-						onInput={(e) => handleInputChange(e.currentTarget.value)}
+						onInput={(e) =>
+							handleInputChange(e.currentTarget.value)}
 						suffix={
 							<button
-								type='button'
-								className='datetime-field__icon-btn'
+								type="button"
+								className="datetime-field__icon-btn"
 								onClick={(e) => {
 									e.preventDefault();
 									isOpen.value = !isOpen.value;
@@ -188,24 +199,26 @@ export function DateTimeField(props: DateTimeFieldProps) {
 					/>
 				}
 				content={
-					<div className='datetime-field__popup'>
+					<div className="datetime-field__popup">
 						{renderTabs()}
 
-						<div className='datetime-field__body'>
-							{activeTab.value === 'date'
+						<div className="datetime-field__body">
+							{activeTab.value === "date"
 								? (
 									<Calendar
 										value={signalValue.value}
 										onChange={(v) => {
-											if (v instanceof DateTime) updateDatePart(v);
+											if (v instanceof DateTime) {
+												updateDatePart(v);
+											}
 										}}
 										min={min}
 										max={max}
-										className='datetime-field__calendar'
+										className="datetime-field__calendar"
 									/>
 								)
 								: (
-									<div className='datetime-field__clock-wrapper'>
+									<div className="datetime-field__clock-wrapper">
 										<TimeClock
 											value={signalValue.value}
 											onChange={updateTimePart}

@@ -1,9 +1,11 @@
-import { ToastProvider } from '@projective/fields';
+import { ToastProvider } from '@projective/ui';
+import { UserProvider } from '@contexts/UserContext.tsx';
 
-export default function Providers() {
+export default function Providers({ children }: { children: any }) {
 	return (
-		<>
+		<UserProvider>
 			<ToastProvider />
-		</>
+			{children}
+		</UserProvider>
 	);
 }

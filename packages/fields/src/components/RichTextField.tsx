@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'preact/hooks';
-import { Signal, useComputed, useSignal } from '@preact/signals';
-import { RichTextFieldProps } from '../types/components/rich-text-field.ts';
-import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
-import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
-import '../styles/fields/rich-text-field.css';
+import "../styles/fields/rich-text-field.css";
+import { useEffect, useRef } from "preact/hooks";
+import { Signal, useComputed, useSignal } from "@preact/signals";
+import { RichTextFieldProps } from "../types/components/rich-text-field.ts";
+import { LabelWrapper } from "../wrappers/LabelWrapper.tsx";
+import { MessageWrapper } from "../wrappers/MessageWrapper.tsx";
 
 let Quill: any = null;
 
@@ -14,9 +14,9 @@ export function RichTextField(props: RichTextFieldProps) {
 		value,
 		defaultValue,
 		onChange,
-		outputFormat = 'delta',
-		toolbar = 'basic',
-		variant = 'framed',
+		outputFormat = "delta",
+		toolbar = "basic",
+		variant = "framed",
 		secureLinks = true,
 		placeholder,
 		readOnly,
@@ -27,7 +27,7 @@ export function RichTextField(props: RichTextFieldProps) {
 		info,
 		disabled,
 		required,
-		minHeight = '150px',
+		minHeight = "150px",
 		maxHeight,
 		maxLength,
 		showCount,
@@ -45,7 +45,7 @@ export function RichTextField(props: RichTextFieldProps) {
 
 	const getRawValue = () => {
 		if (value instanceof Signal) return value.value;
-		return value || defaultValue || '';
+		return value || defaultValue || "";
 	};
 
 	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
@@ -54,24 +54,30 @@ export function RichTextField(props: RichTextFieldProps) {
 	const isWarning = warning instanceof Signal ? warning.value : warning;
 
 	// Computed for character limit style
-	const isOverLimit = useComputed(() => maxLength ? length.value > maxLength : false);
+	const isOverLimit = useComputed(() =>
+		maxLength ? length.value > maxLength : false
+	);
 
 	// --- Link Security Blot ---
 	const registerSecureLink = (QuillArg: any) => {
-		const Link = QuillArg.import('formats/link');
+		const Link = QuillArg.import("formats/link");
 		class SecureLink extends Link {
 			static create(value: string) {
 				const node = super.create(value);
 				value = this.sanitize(value);
-				node.setAttribute('href', value);
-				node.setAttribute('rel', 'noopener noreferrer');
-				node.setAttribute('target', '_blank');
+				node.setAttribute("href", value);
+				node.setAttribute("rel", "noopener noreferrer");
+				node.setAttribute("target", "_blank");
 				return node;
 			}
 			static sanitize(url: string) {
-				const protocol = url.slice(0, url.indexOf(':'));
-				if (['javascript', 'vbscript', 'data'].includes(protocol.toLowerCase())) {
-					return 'about:blank';
+				const protocol = url.slice(0, url.indexOf(":"));
+				if (
+					["javascript", "vbscript", "data"].includes(
+						protocol.toLowerCase(),
+					)
+				) {
+					return "about:blank";
 				}
 				return super.sanitize(url);
 			}
@@ -86,7 +92,7 @@ export function RichTextField(props: RichTextFieldProps) {
 		const quill = quillInstance.current;
 		if (!quill) return;
 		const range = quill.getSelection(true);
-		quill.insertEmbed(range.index, 'image', url);
+		quill.insertEmbed(range.index, "image", url);
 		quill.setSelection(range.index + 1);
 	};
 
@@ -95,21 +101,21 @@ export function RichTextField(props: RichTextFieldProps) {
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
-			if (file.type.startsWith('image/')) {
+			if (file.type.startsWith("image/")) {
 				try {
 					const url = await onImageUpload(file);
 					insertImage(url);
 				} catch (err) {
-					console.error('Image upload failed', err);
+					console.error("Image upload failed", err);
 				}
 			}
 		}
 	};
 
 	const imageHandler = () => {
-		const input = document.createElement('input');
-		input.setAttribute('type', 'file');
-		input.setAttribute('accept', 'image/*');
+		const input = document.createElement("input");
+		input.setAttribute("type", "file");
+		input.setAttribute("accept", "image/*");
 		input.click();
 
 		input.onchange = () => {
@@ -128,17 +134,19 @@ export function RichTextField(props: RichTextFieldProps) {
 	};
 
 	useEffect(() => {
-		if (typeof window === 'undefined' || !editorRef.current) return;
+		if (typeof window === "undefined" || !editorRef.current) return;
 
 		const init = async () => {
 			if (!Quill) {
-				const mod = await import('quill');
+				const mod = await import("quill");
 				Quill = mod.default;
 				registerSecureLink(Quill);
 			}
 
 			if (!parserRef.current) {
-				const { MarkdownParser } = await import('../../../utils/QuillParser.ts');
+				const { MarkdownParser } = await import(
+					"../../../utils/QuillParser.ts"
+				);
 				parserRef.current = new MarkdownParser();
 			}
 
@@ -150,23 +158,25 @@ export function RichTextField(props: RichTextFieldProps) {
 			}
 
 			let toolbarConfig = toolbar;
-			if (toolbar === 'basic') {
+			if (toolbar === "basic") {
 				toolbarConfig = [
-					['bold', 'italic', 'underline', 'strike'],
-					['link', 'blockquote'],
-					[{ 'list': 'ordered' }, { 'list': 'bullet' }],
-					['clean'],
+					["bold", "italic", "underline", "strike"],
+					["link", "blockquote"],
+					[{ "list": "ordered" }, { "list": "bullet" }],
+					["clean"],
 				];
-			} else if (toolbar === 'full') {
+			} else if (toolbar === "full") {
 				toolbarConfig = [
-					[{ 'header': [1, 2, 3, false] }],
-					['bold', 'italic', 'underline', 'strike'],
-					[{ 'color': [] }, { 'background': [] }],
-					[{ 'script': 'sub' }, { 'script': 'super' }],
-					['link', 'blockquote', 'code-block', 'image'],
-					[{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-					[{ 'align': [] }],
-					['clean'],
+					[{ "header": [1, 2, 3, false] }],
+					["bold", "italic", "underline", "strike"],
+					[{ "color": [] }, { "background": [] }],
+					[{ "script": "sub" }, { "script": "super" }],
+					["link", "blockquote", "code-block", "image"],
+					[{ "list": "ordered" }, { "list": "bullet" }, {
+						"indent": "-1",
+					}, { "indent": "+1" }],
+					[{ "align": [] }],
+					["clean"],
 				];
 			}
 
@@ -180,47 +190,62 @@ export function RichTextField(props: RichTextFieldProps) {
 			};
 
 			quillInstance.current = new Quill(editorRef.current, {
-				theme: 'snow',
+				theme: "snow",
 				modules,
-				placeholder: isReadOnly ? '' : placeholder,
+				placeholder: isReadOnly ? "" : placeholder,
 				readOnly: isReadOnly,
 			});
 
-			const toolbarC = containerRef.current?.querySelector('.ql-toolbar');
+			const toolbarC = containerRef.current?.querySelector(".ql-toolbar");
 			if (toolbarC) {
 				// Select buttons and dropdowns (selects)
-				const controls = toolbarC.querySelectorAll('button, select');
+				const controls = toolbarC.querySelectorAll("button, select");
 				controls.forEach((control) => {
-					control.setAttribute('tabindex', '-1');
+					control.setAttribute("tabindex", "-1");
 				});
 			}
 
 			if (!isReadOnly) {
-				quillInstance.current.root.addEventListener('drop', (e: DragEvent) => {
-					if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-						e.preventDefault();
-						handleFiles(e.dataTransfer.files);
-					}
-				});
+				quillInstance.current.root.addEventListener(
+					"drop",
+					(e: DragEvent) => {
+						if (
+							e.dataTransfer && e.dataTransfer.files &&
+							e.dataTransfer.files.length
+						) {
+							e.preventDefault();
+							handleFiles(e.dataTransfer.files);
+						}
+					},
+				);
 			}
 
 			const raw = getRawValue();
 			if (raw) {
 				try {
-					if (typeof raw === 'object' && raw !== null) {
+					if (typeof raw === "object" && raw !== null) {
 						quillInstance.current.setContents(raw);
-					} else if (typeof raw === 'string') {
+					} else if (typeof raw === "string") {
 						const trimmed = raw.trim();
-						if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-							quillInstance.current.setContents(JSON.parse(trimmed));
-						} else if (trimmed.startsWith('<')) {
-							const delta = quillInstance.current.clipboard.convert(trimmed);
+						if (
+							trimmed.startsWith("{") || trimmed.startsWith("[")
+						) {
+							quillInstance.current.setContents(
+								JSON.parse(trimmed),
+							);
+						} else if (trimmed.startsWith("<")) {
+							const delta = quillInstance.current.clipboard
+								.convert(trimmed);
 							quillInstance.current.setContents(delta);
 						} else {
 							if (parserRef.current) {
-								parserRef.current.markdownToDelta(raw).then((delta: any) => {
-									quillInstance.current.setContents(delta);
-								});
+								parserRef.current.markdownToDelta(raw).then(
+									(delta: any) => {
+										quillInstance.current.setContents(
+											delta,
+										);
+									},
+								);
 							} else {
 								quillInstance.current.setText(raw);
 							}
@@ -236,18 +261,21 @@ export function RichTextField(props: RichTextFieldProps) {
 			length.value = Math.max(0, quillInstance.current.getLength() - 1);
 
 			// --- Change Listener ---
-			quillInstance.current.on('text-change', () => {
+			quillInstance.current.on("text-change", () => {
 				const delta = quillInstance.current.getContents();
 				// Update char count (Quill adds trailing newline)
-				length.value = Math.max(0, quillInstance.current.getLength() - 1);
+				length.value = Math.max(
+					0,
+					quillInstance.current.getLength() - 1,
+				);
 
-				let output = '';
+				let output = "";
 
-				if (outputFormat === 'delta') {
+				if (outputFormat === "delta") {
 					output = JSON.stringify(delta);
-				} else if (outputFormat === 'html') {
+				} else if (outputFormat === "html") {
 					output = quillInstance.current.root.innerHTML;
-				} else if (outputFormat === 'markdown' && parserRef.current) {
+				} else if (outputFormat === "markdown" && parserRef.current) {
 					output = parserRef.current.deltaToMarkdown(delta);
 				}
 
@@ -264,8 +292,8 @@ export function RichTextField(props: RichTextFieldProps) {
 	return (
 		<div
 			className={`field-rich-text field-rich-text--${variant} ${
-				isReadOnly ? 'field-rich-text--readonly' : ''
-			} ${className || ''}`}
+				isReadOnly ? "field-rich-text--readonly" : ""
+			} ${className || ""}`}
 			style={style}
 		>
 			<LabelWrapper
@@ -274,37 +302,44 @@ export function RichTextField(props: RichTextFieldProps) {
 				required={required}
 				error={!!isError}
 				disabled={isDisabled}
-				position='top'
-				floatingRule='never'
+				position="top"
+				floatingRule="never"
 			/>
 
 			<div
 				ref={containerRef}
 				className={`field-rich-text__container ${
-					isError ? 'field-rich-text__container--error' : ''
-				} ${isWarning ? 'field-rich-text__container--warning' : ''}`}
+					isError ? "field-rich-text__container--error" : ""
+				} ${isWarning ? "field-rich-text__container--warning" : ""}`}
 			>
 				<div
 					ref={editorRef}
 					style={{
-						minHeight: variant === 'inline' ? 'auto' : minHeight,
+						minHeight: variant === "inline" ? "auto" : minHeight,
 						maxHeight: maxHeight, // Apply scrolling limit
 					}}
 				/>
 			</div>
 
-			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+			<div style={{ display: "flex", justifyContent: "space-between" }}>
 				<div style={{ flex: 1 }}>
-					<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+					<MessageWrapper
+						error={error}
+						hint={hint}
+						warning={warning}
+						info={info}
+					/>
 				</div>
 
 				{showCount && (
 					<div
 						className={`field-rich-text__count ${
-							isOverLimit.value ? 'field-rich-text__count--limit' : ''
+							isOverLimit.value
+								? "field-rich-text__count--limit"
+								: ""
 						}`}
 					>
-						{length}/{maxLength || '∞'}
+						{length}/{maxLength || "∞"}
 					</div>
 				)}
 			</div>

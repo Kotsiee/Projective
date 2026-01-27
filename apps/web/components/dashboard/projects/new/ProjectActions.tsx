@@ -1,5 +1,5 @@
 import { IconDeviceFloppy, IconRocket } from '@tabler/icons-preact';
-import { toast } from '@projective/fields';
+import { toast } from '@projective/ui';
 import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
 import { CreateProjectSchema } from '@contracts/dashboard/projects/new/_validation.ts';
 import { getCsrfToken } from '@projective/shared';

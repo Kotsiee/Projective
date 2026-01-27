@@ -14,16 +14,8 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "cSpell.words": [
-    "normalise",
-    "PORJECTIVE",
-    "supabase",
-    "tabler"
-  ],
+  "cSpell.words": ["normalise", "PORJECTIVE", "supabase", "tabler"],
   "deno.enable": true,
-  "deno.enablePaths": [
-    "supabase/functions"
-  ],
   "deno.lint": true,
   "deno.unstable": [
     "bare-node-builtins",

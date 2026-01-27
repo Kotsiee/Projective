@@ -7,7 +7,7 @@ import {
 	IconUpload,
 } from '@tabler/icons-preact';
 
-import { Step, Stepper, StepperHeader, toast, useStepperContext } from '@projective/fields';
+import { Step, Stepper, StepperHeader, toast, useStepperContext } from '@projective/ui';
 import ProjectDetails from '@components/dashboard/projects/new/ProjectDetails.tsx';
 import ProjectLegal from '@components/dashboard/projects/new/ProjectLegal.tsx';
 import ProjectStages from '@components/dashboard/projects/new/ProjectStages.tsx';
@@ -24,15 +24,9 @@ function ProjectStepperFooter() {
 	const isFirst = activeStep.value === 0;
 	const isLast = activeStep.value === totalSteps.value - 1;
 
-	const click = () => {
-		toast.info('Test Message');
-	};
-
 	return (
 		<div className='new-project__actions'>
-			{/* Always available Save Draft */}
 			<SaveDraftButton />
-			<button type='button' onClick={() => click()}>Toast</button>
 
 			<div className='new-project__nav-buttons'>
 				<button
@@ -44,7 +38,6 @@ function ProjectStepperFooter() {
 					Back
 				</button>
 
-				{/* Logic Switch: Regular Next vs Publish Component */}
 				{!isLast
 					? (
 						<button
@@ -84,7 +77,7 @@ export default function NewProjectIsland() {
 			<div className='new-project'>
 				<div className='new-project__header'>
 					<h1 className='new-project__title'>
-						<IconArrowLeft style={{ cursor: 'pointer' }} />
+						<IconArrowLeft />
 						Create New Project
 					</h1>
 				</div>

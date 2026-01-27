@@ -5,8 +5,13 @@ import { useVirtual } from '../../hooks/useVirtual.ts';
 import { useScrollAnchoring } from '../../hooks/useScrollAnchoring.ts';
 import { ScrollPane } from '../ScrollPane.tsx';
 
+interface RealtimeDataSource<T> extends DataSource<T> {
+	getMeta(): Promise<{ totalCount: number }>;
+	subscribe?: (cb: (item: T) => void) => () => void;
+}
+
 interface ChatListProps<T> {
-	dataSource: DataSource<T>;
+	dataSource: RealtimeDataSource<T>;
 	renderItem: (item: T) => preact.VNode;
 	estimateHeight?: number;
 	pageSize?: number;
@@ -19,19 +24,18 @@ export function ChatList<T>({
 	pageSize = 20,
 }: ChatListProps<T>) {
 	const items = useSignal<T[]>([]);
-	const [totalAvailable, setTotalAvailable] = useState(0);
 	const [isLoading, setIsLoading] = useState(false);
 	const [cursor, setCursor] = useState(0);
 
 	const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
 	useEffect(() => {
+		let unsubscribe: (() => void) | undefined;
+
 		const init = async () => {
 			setIsLoading(true);
 
-			// @ts-ignore
 			const meta = await dataSource.getMeta();
-			setTotalAvailable(meta.totalCount);
 
 			const start = Math.max(0, meta.totalCount - pageSize);
 			const result = await dataSource.fetch({ start, length: pageSize });
@@ -39,8 +43,23 @@ export function ChatList<T>({
 			items.value = result.items as T[];
 			setCursor(start);
 			setIsLoading(false);
+
+			if (dataSource.subscribe) {
+				unsubscribe = dataSource.subscribe((newItem: T) => {
+					items.value = [...items.value, newItem];
+
+					requestAnimationFrame(() => {
+						globalThis.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+					});
+				});
+			}
 		};
+
 		init();
+
+		return () => {
+			if (unsubscribe) unsubscribe();
+		};
 	}, [dataSource]);
 
 	const loadMore = async () => {
@@ -58,12 +77,12 @@ export function ChatList<T>({
 		setIsLoading(false);
 	};
 
-	const { parentRef, virtualizer, getItems, getTotalSize } = useVirtual({
+	const { parentRef, virtualizer: _, getItems, getTotalSize } = useVirtual({
 		count: items.value.length,
 		estimateSize: () => estimateHeight,
 		overscan: 5,
 		useWindowScroll: true,
-		initialScrollToBottom: false,
+		initialScrollToBottom: true,
 		onChange: () => forceUpdate(0),
 	});
 
@@ -84,7 +103,7 @@ export function ChatList<T>({
 	const hasJumped = useRef(false);
 	useLayoutEffect(() => {
 		if (!hasJumped.current && items.value.length > 0) {
-			window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+			globalThis.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
 			hasJumped.current = true;
 		}
 	}, [items.value.length]);

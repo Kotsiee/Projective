@@ -232,7 +232,7 @@ db/
 **Prefixes**:
 
 - Public (exposed to client): `PUBLIC_` (e.g., `PUBLIC_TURNSTILE_SITE_KEY`)
-- Server-only: no `PUBLIC_` (e.g., `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`)
+- Server-only: no `PUBLIC_` (e.g., `SB_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`)
 
 **Files**:
 

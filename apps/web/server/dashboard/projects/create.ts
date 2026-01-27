@@ -13,14 +13,11 @@ export async function createProject(
 		const getClient = deps.getClient ?? supabaseClient;
 		const supabase = await getClient();
 
-		// 1. Auth Check
 		const { data: { user }, error: authError } = await supabase.auth.getUser();
 		if (authError || !user) {
 			return fail('unauthorized', 'You must be signed in to create a project.', 401);
 		}
 
-		// 2. Call RPC to insert all data (Project + Stages + Roles)
-		// The RPC defaults status to 'draft'
 		const { data: projectId, error: rpcError } = await supabase
 			.schema('projects')
 			.rpc('create_project', {

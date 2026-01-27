@@ -1,15 +1,15 @@
-import '../styles/fields/date-field.css';
-import { computed, Signal, useSignal } from '@preact/signals';
-import { TimeFieldProps, TimeValue } from '../types/components/time-field.ts';
-import { useInteraction } from '../hooks/useInteraction.ts';
-import { useFieldState } from '../hooks/useFieldState.ts';
-import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
-import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
-import { DateTime } from '@projective/types';
-import { Popover } from './overlays/Popover.tsx';
-import { TimeClock } from './datetime/TimeClock.tsx';
-import { TextField } from './TextField.tsx';
-import { IconClock } from '@tabler/icons-preact';
+import "../styles/fields/date-field.css";
+import { computed, Signal, useSignal } from "@preact/signals";
+import { TimeFieldProps, TimeValue } from "../types/components/time-field.ts";
+import { useInteraction } from "../hooks/useInteraction.ts";
+import { useFieldState } from "../hooks/useFieldState.ts";
+import { AdornmentWrapper } from "../wrappers/AdornmentWrapper.tsx";
+import { MessageWrapper } from "../wrappers/MessageWrapper.tsx";
+import { DateTime } from "@projective/types";
+import { Popover } from "@projective/ui";
+import { TimeClock } from "./datetime/TimeClock.tsx";
+import { TextField } from "./TextField.tsx";
+import { IconClock } from "@tabler/icons-preact";
 
 export function TimeField(props: TimeFieldProps) {
 	const {
@@ -30,8 +30,8 @@ export function TimeField(props: TimeFieldProps) {
 		hint,
 		warning,
 		info,
-		variant = 'popup',
-		selectionMode = 'single',
+		variant = "popup",
+		selectionMode = "single",
 	} = props;
 
 	// FIX: Explicitly type the field state to allow DateTime arrays
@@ -52,22 +52,22 @@ export function TimeField(props: TimeFieldProps) {
 
 	const displayValue = computed(() => {
 		const val = fieldState.value.value;
-		if (!val) return '';
+		if (!val) return "";
 
 		if (Array.isArray(val)) {
-			if (val.length === 0) return '';
-			if (val.length === 1) return val[0].toFormat('HH:mm');
+			if (val.length === 0) return "";
+			if (val.length === 1) return val[0].toFormat("HH:mm");
 			return `${val.length} times selected`;
 		}
 
-		return (val as DateTime).toFormat('HH:mm');
+		return (val as DateTime).toFormat("HH:mm");
 	});
 
 	const handleTimeSelect = (date: TimeValue) => {
 		fieldState.setValue(date);
 
 		// Auto-close logic
-		if (selectionMode === 'single' && !Array.isArray(date)) {
+		if (selectionMode === "single" && !Array.isArray(date)) {
 			// Small delay to allow visual feedback
 			setTimeout(() => {
 				isOpen.value = false;
@@ -77,22 +77,30 @@ export function TimeField(props: TimeFieldProps) {
 	};
 
 	// --- Inline Variant ---
-	if (variant === 'inline') {
+	if (variant === "inline") {
 		return (
-			<div className={`field-date field-date--inline ${className || ''}`} style={style}>
+			<div
+				className={`field-date field-date--inline ${className || ""}`}
+				style={style}
+			>
 				<TimeClock
 					value={fieldState.value.value}
 					onChange={handleTimeSelect}
 					selectionMode={selectionMode}
 				/>
-				<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+				<MessageWrapper
+					error={error}
+					hint={hint}
+					warning={warning}
+					info={info}
+				/>
 			</div>
 		);
 	}
 
 	// --- Popup Variant ---
 	return (
-		<div className={`field-date ${className || ''}`} style={style}>
+		<div className={`field-date ${className || ""}`} style={style}>
 			<Popover
 				isOpen={isOpen.value}
 				onClose={() => {
@@ -100,12 +108,15 @@ export function TimeField(props: TimeFieldProps) {
 					interaction.handleBlur();
 				}}
 				trigger={
-					<div onClick={() => !isDisabled && (isOpen.value = !isOpen.value)}>
+					<div
+						onClick={() =>
+							!isDisabled && (isOpen.value = !isOpen.value)}
+					>
 						<TextField
 							id={id}
 							label={label}
 							value={displayValue.value}
-							placeholder={placeholder || 'HH:MM'}
+							placeholder={placeholder || "HH:MM"}
 							error={errorMessage}
 							disabled={isDisabled}
 							required={required}
@@ -115,10 +126,11 @@ export function TimeField(props: TimeFieldProps) {
 							readonly
 							suffix={
 								<AdornmentWrapper
-									position='suffix'
+									position="suffix"
 									onClick={(e) => {
 										e.stopPropagation();
-										!isDisabled && (isOpen.value = !isOpen.value);
+										!isDisabled &&
+											(isOpen.value = !isOpen.value);
 									}}
 								>
 									<IconClock size={18} />
@@ -137,7 +149,12 @@ export function TimeField(props: TimeFieldProps) {
 					/>
 				}
 			/>
-			<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+			<MessageWrapper
+				error={error}
+				hint={hint}
+				warning={warning}
+				info={info}
+			/>
 		</div>
 	);
 }

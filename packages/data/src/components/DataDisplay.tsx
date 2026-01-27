@@ -1,13 +1,12 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { CSSProperties } from 'preact';
-
 import '../styles/theme.css';
 import '../styles/base.css';
 import '../styles/scroll-pane.css';
 
-import { createEmptyDataset, type Dataset, type NormalizedItem } from '../core/dataset.ts';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+
 import type { DataSource } from '../core/datasource.ts';
-import { type ColumnDef, getCellValue, initTableState, type TableState } from '../core/table.ts';
+import { initTableState, type TableState } from '../core/table.ts';
+import { sortLocalData } from '../core/helpers.ts';
 
 import { useVirtual } from '../hooks/useVirtual.ts';
 import { useDataManager } from '../hooks/useDataManager.ts';
@@ -17,53 +16,7 @@ import { ScrollPane } from './ScrollPane.tsx';
 import { List } from './displays/List.tsx';
 import { Grid } from './displays/Grid.tsx';
 import { Table } from './table/Table.tsx';
-
-export type DisplayMode = 'list' | 'grid' | 'table';
-export type ScrollMode = 'container' | 'window';
-
-interface DataDisplayProps<TOut, TIn = unknown> {
-	dataSource: DataSource<TOut, TIn> | TOut[];
-	renderItem: (item: TOut, index: number) => preact.VNode;
-	renderSkeleton?: (index: number) => preact.VNode;
-	mode?: DisplayMode;
-
-	// Scroll Configuration
-	scrollMode?: ScrollMode;
-	scrollToBottom?: boolean;
-
-	gridColumns?: number;
-	columns?: ColumnDef<TOut>[];
-	estimateHeight?: number;
-	pageSize?: number;
-	selectionMode?: 'none' | 'single' | 'multi';
-	onSelectionChange?: (keys: Set<string>) => void;
-	className?: string;
-	style?: CSSProperties;
-	interactive?: boolean;
-}
-
-function sortLocalData<T>(
-	dataset: Dataset<T>,
-	colId: string,
-	dir: 'asc' | 'desc',
-	columns?: ColumnDef<T>[],
-) {
-	const colDef = columns?.find((c) => c.id === colId);
-	if (!colDef) return dataset.order;
-
-	return [...dataset.order].sort((keyA, keyB) => {
-		const itemA = dataset.items.get(keyA)?.data;
-		const itemB = dataset.items.get(keyB)?.data;
-		if (!itemA || !itemB) return 0;
-
-		const valA = getCellValue(itemA, colDef);
-		const valB = getCellValue(itemB, colDef);
-
-		if (valA < valB) return dir === 'asc' ? -1 : 1;
-		if (valA > valB) return dir === 'asc' ? 1 : -1;
-		return 0;
-	});
-}
+import { DataDisplayProps } from '../types/DataDisplayProps.ts';
 
 export function DataDisplay<TOut, TIn>({
 	dataSource,
@@ -81,23 +34,17 @@ export function DataDisplay<TOut, TIn>({
 	style,
 	interactive,
 }: DataDisplayProps<TOut, TIn>) {
-	const [dataset, setDataset] = useState<Dataset<TOut>>(() => {
-		if (Array.isArray(dataSource)) {
-			const items = new Map<string, NormalizedItem<TOut>>();
-			const order: string[] = [];
-			dataSource.forEach((d, i) => {
-				const key = String(i);
-				items.set(key, { key, data: d, selected: false, isSkeleton: false });
-				order.push(key);
-			});
-			return { items, order, totalCount: dataSource.length, pendingRanges: [] };
-		}
-		return createEmptyDataset<TOut>();
-	});
+	const isLocal = Array.isArray(dataSource);
+
+	const manager = useDataManager(
+		isLocal ? null : dataSource as DataSource<TOut, TIn>,
+		isLocal ? dataSource as TOut[] : undefined,
+		pageSize,
+	);
 
 	const { handleItemClick } = useSelection({
-		dataset,
-		setDataset,
+		dataset: manager.dataset.value,
+		setDataset: (d) => manager.dataset.value = d,
 		selectionMode,
 		onSelectionChange,
 	});
@@ -105,40 +52,28 @@ export function DataDisplay<TOut, TIn>({
 	const [tableState, setTableState] = useState<TableState>(() => initTableState(columns || []));
 
 	const activeOrder = useMemo(() => {
+		const d = manager.dataset.value;
 		const { columnId, direction } = tableState.sort;
-		if (Array.isArray(dataSource) && columnId && direction) {
-			return sortLocalData(dataset, columnId, direction, columns);
+
+		if (isLocal && columnId && direction) {
+			return sortLocalData(d, columnId, direction, columns);
 		}
-		return dataset.order;
-	}, [dataset, tableState.sort, dataSource, columns]);
 
-	const totalCount = Array.isArray(dataSource)
-		? activeOrder.length
-		: (dataset.totalCount ?? activeOrder.length + 100);
+		return d.order;
+	}, [manager.dataset.value, tableState.sort, isLocal, columns]);
 
+	const totalCount = manager.dataset.value.totalCount ?? (activeOrder.length + 100);
 	const virtualRowCount = mode === 'grid' ? Math.ceil(totalCount / gridColumns) : totalCount;
 
-	// --- Scroll Restoration Logic (For Chat) ---
 	const previousTotalCount = useRef(totalCount);
-	const previousScrollHeight = useRef(0);
-
-	// Logic: If we are in reverse mode (scrollToBottom) and items were ADDED (count increased),
-	// it usually means we fetched older history at the top. We need to adjust scroll
-	// so the user stays on the same message they were looking at.
 	useLayoutEffect(() => {
 		if (scrollToBottom && scrollMode === 'window' && totalCount > previousTotalCount.current) {
-			// Calculate how much height was added
 			const newScrollHeight = document.body.scrollHeight;
-			const heightDifference = newScrollHeight - previousScrollHeight.current;
-
-			// Only adjust if we were near the top (fetching history)
-			// This prevents jumping if we are at the bottom receiving new messages.
-			if (window.scrollY < 100 && heightDifference > 0) {
-				window.scrollBy(0, heightDifference);
+			if (globalThis.scrollY < 100 && newScrollHeight > 0) {
+				globalThis.scrollBy(0, newScrollHeight);
 			}
 		}
 		previousTotalCount.current = totalCount;
-		previousScrollHeight.current = document.body.scrollHeight;
 	}, [totalCount, scrollToBottom, scrollMode]);
 
 	const { parentRef, virtualizer, getItems, getTotalSize } = useVirtual({
@@ -151,43 +86,30 @@ export function DataDisplay<TOut, TIn>({
 
 	const virtualItems = getItems();
 
-	const visibleRange = useMemo(() => {
-		if (virtualItems.length === 0) return { start: 0, end: 0 };
-		const startRow = virtualItems[0].index;
-		const endRow = virtualItems[virtualItems.length - 1].index;
+	useEffect(() => {
+		if (virtualItems.length > 0) {
+			const startRow = virtualItems[0].index;
+			const endRow = virtualItems[virtualItems.length - 1].index;
 
-		if (mode === 'grid') {
-			return { start: startRow * gridColumns, end: (endRow + 1) * gridColumns - 1 };
+			let start = startRow;
+			let end = endRow;
+
+			if (mode === 'grid') {
+				start = startRow * gridColumns;
+				end = (endRow + 1) * gridColumns - 1;
+			}
+
+			manager.setVisibleRange(start, end);
 		}
-		return { start: startRow, end: endRow };
-	}, [virtualItems, mode, gridColumns]);
-
-	const { isFetching } = useDataManager({
-		dataset,
-		setDataset,
-		dataSource: Array.isArray(dataSource) ? null : dataSource,
-		visibleRange,
-		pageSize,
-	});
+	}, [virtualItems, mode, gridColumns, manager]);
 
 	const safeRenderItem = (item: TOut, index: number) => renderItem(item, index);
 
 	return (
-		<div
-			className={`data-display ${className ?? ''}`}
-			style={style}
-		>
-			{isFetching && (
-				<div className='data-display__loader'>
-					Loading...
-				</div>
-			)}
+		<div className={`data-display ${className ?? ''}`} style={style}>
+			{manager.isFetching.value && <div className='data-display__loader'>Loading...</div>}
 
-			<ScrollPane
-				ref={parentRef}
-				mode={scrollMode}
-				className='data-display__scroll-pane'
-			>
+			<ScrollPane ref={parentRef} mode={scrollMode} className='data-display__scroll-pane'>
 				<div
 					className='scroll-pane__shim'
 					style={{
@@ -197,7 +119,7 @@ export function DataDisplay<TOut, TIn>({
 				>
 					{mode === 'list' && (
 						<List
-							dataset={{ ...dataset, order: activeOrder }}
+							dataset={{ ...manager.dataset.value, order: activeOrder }}
 							virtualItems={virtualItems}
 							virtualizer={virtualizer}
 							renderItem={safeRenderItem}
@@ -208,7 +130,7 @@ export function DataDisplay<TOut, TIn>({
 
 					{mode === 'grid' && (
 						<Grid
-							dataset={{ ...dataset, order: activeOrder }}
+							dataset={{ ...manager.dataset.value, order: activeOrder }}
 							virtualItems={virtualItems}
 							virtualizer={virtualizer}
 							renderItem={safeRenderItem}
@@ -219,7 +141,7 @@ export function DataDisplay<TOut, TIn>({
 
 					{mode === 'table' && columns && (
 						<Table
-							dataset={{ ...dataset, order: activeOrder }}
+							dataset={{ ...manager.dataset.value, order: activeOrder }}
 							virtualItems={virtualItems}
 							virtualizer={virtualizer}
 							columns={columns}

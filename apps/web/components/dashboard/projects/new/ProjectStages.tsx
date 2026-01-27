@@ -4,10 +4,6 @@ import { IconCheck, IconCircle, IconTrash } from "@tabler/icons-preact";
 
 // Components
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
 	DateField,
 	MoneyField,
 	RichTextField,
@@ -22,6 +18,13 @@ import {
 	StageType,
 	StartTriggerType,
 } from "@projective/types";
+
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@projective/ui";
 
 import ProjectStageFile from "./stages/ProjectStageFile.tsx";
 import ProjectStageMaintenance from "./stages/ProjectStageMaintenance.tsx";

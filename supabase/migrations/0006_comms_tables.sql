@@ -66,6 +66,7 @@ CREATE TABLE comms.dm_messages (
     thread_id uuid NOT NULL,
     sender_user_id uuid NOT NULL,
     body text NOT NULL,
+    has_attachments boolean NOT NULL DEFAULT false,
     created_at timestamp
     with
         time zone NOT NULL DEFAULT now(),
@@ -93,6 +94,7 @@ CREATE TABLE comms.project_messages (
     channel_id uuid NOT NULL,
     sender_user_id uuid NOT NULL,
     body text NOT NULL,
+    has_attachments boolean NOT NULL DEFAULT false,
     created_at timestamp
     with
         time zone NOT NULL DEFAULT now(),

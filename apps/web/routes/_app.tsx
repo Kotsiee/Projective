@@ -24,8 +24,9 @@ export default function App(
 			</Head>
 			<body data-onboarded={ctx.state.isOnboarded}>
 				<main>
-					<Providers />
-					<ctx.Component />
+					<Providers>
+						<ctx.Component />
+					</Providers>
 				</main>
 			</body>
 		</html>

@@ -106,7 +106,7 @@ BEGIN
              SELECT 1 FROM comms.notifications n 
              WHERE n.user_id = v_user_id AND n.read_at IS NULL AND n.entity_id = ps.id
           )
-        ) ORDER BY ps."order" ASC
+        ) ORDER BY ps.sort_order ASC
       )
       FROM projects.project_stages ps
       WHERE ps.project_id = p.id

@@ -1,4 +1,5 @@
 export type FileStatus = 'pending' | 'processing' | 'ready' | 'error';
+import { FileCategory } from './categories.ts';
 
 export interface FileError {
 	code: string;
@@ -6,12 +7,12 @@ export interface FileError {
 }
 
 export interface FileWithMeta {
-	file: File; // The CURRENT file (may change after processing!)
-	originalFile?: File; // Keep reference to original if needed
-	id: string;
+	file: File;
+	id?: string;
 	preview?: string;
 	status: FileStatus;
-	progress: number; // 0-100
+	progress: number;
 	errors: FileError[];
-	processingMeta?: Record<string, any>; // Store WASM results here
+	processingMeta?: Record<string, any>;
+	type?: FileCategory;
 }

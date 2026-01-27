@@ -1,5 +1,9 @@
 {
   "name": "@projective/ui",
   "version": "0.0.0",
-  "exports": "./mod.ts"
+  "exports": "./mod.ts",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
 }
