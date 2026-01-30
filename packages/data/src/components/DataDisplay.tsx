@@ -1,4 +1,3 @@
-import '../styles/theme.css';
 import '../styles/base.css';
 import '../styles/scroll-pane.css';
 

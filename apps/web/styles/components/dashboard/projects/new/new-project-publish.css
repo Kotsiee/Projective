@@ -1,92 +1,24 @@
-/* Container */
-.project-publish {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1rem;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.project-publish__header {
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.project-publish__header h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.5rem;
-    color: var(--gray-900);
-}
-
-.project-publish__header p {
-    margin: 0;
-    color: var(--gray-500);
-}
-
-/* Grid Layout */
-.project-publish__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-/* Card */
+/* #region Publish Review */
 .project-publish__card {
-    background: var(--surface-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
+    background: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.project-publish__card--full {
-    grid-column: 1 / -1;
-}
-
 .project-publish__card-title {
     margin: 0 0 0.5rem 0;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--gray-800);
-    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.75rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.project-publish__total {
-    font-size: 0.875rem;
-    color: var(--primary-600);
-    font-weight: 700;
-}
-
-/* Data Rows */
-.project-publish__row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-}
-
-.project-publish__label {
-    color: var(--gray-500);
-}
-
-.project-publish__value {
-    color: var(--gray-900);
-    font-weight: 500;
-    text-align: right;
-}
-
-/* Stages List */
-.project-publish__stages-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
 }
 
 .project-publish__stage-item {
@@ -94,15 +26,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem;
-    background: var(--surface-bg);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
-}
-
-.project-publish__stage-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    background: var(--input-bg);
+    border-radius: var(--border-radius__small);
+    border: 1px solid var(--border-color);
 }
 
 .project-publish__stage-number {
@@ -111,48 +37,21 @@
     justify-content: center;
     width: 1.75rem;
     height: 1.75rem;
-    background: var(--primary-100);
-    color: var(--primary-700);
+    background: var(--primary-surface);
+    color: var(--primary);
     border-radius: 50%;
     font-size: 0.75rem;
     font-weight: 700;
 }
 
-.project-publish__stage-name {
-    font-weight: 500;
-    color: var(--gray-900);
-}
-
-.project-publish__stage-type {
-    font-size: 0.75rem;
-    color: var(--gray-500);
-    text-transform: capitalize;
-}
-
-.project-publish__stage-meta {
-    font-size: 0.75rem;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Tags */
-.tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.125rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
 .tag--yes {
-    background: var(--success-100);
-    color: var(--success-700);
+    background: var(--success-surface);
+    color: var(--success);
 }
 
 .tag--no {
-    background: var(--error-100);
-    color: var(--error-700);
+    background: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.12);
+    color: var(--danger);
 }
+
+/* #endregion */

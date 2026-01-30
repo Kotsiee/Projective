@@ -9,12 +9,12 @@ import { useSignal } from '@preact/signals';
 
 export default function ProjectsSidebarList() {
 	const projectCategories: SelectOption<string>[] = [
-		{ value: 'all', label: 'All Projects', icon: <IconMessages /> },
-		{ value: 'unread', label: 'Unread', icon: <IconMessagesOff /> },
-		{ value: 'starred', label: 'Starred', icon: <IconStar /> },
-		{ value: 'in-progress', label: 'In Progress', icon: <IconStar /> },
-		{ value: 'completed', label: 'Completed', icon: <IconStar /> },
-		{ value: 'archived', label: 'Archived', icon: <IconStar /> },
+		{ value: 'all', label: 'All Projects', icon: <IconMessages size={18} /> },
+		{ value: 'unread', label: 'Unread', icon: <IconMessagesOff size={18} /> },
+		{ value: 'starred', label: 'Starred', icon: <IconStar size={18} /> },
+		{ value: 'in-progress', label: 'In Progress', icon: <IconStar size={18} /> },
+		{ value: 'completed', label: 'Completed', icon: <IconStar size={18} /> },
+		{ value: 'archived', label: 'Archived', icon: <IconStar size={18} /> },
 	];
 
 	const searchQuery = useSignal('');
@@ -41,39 +41,34 @@ export default function ProjectsSidebarList() {
 	return (
 		<>
 			<div class='layout-projects__sidebar__header'>
-				<SelectField
-					name='message-type'
-					value={selectedMessageType}
-					options={projectCategories}
-					multiple={false}
-					searchable={false}
-					onChange={(value) => selectedMessageType.value = value as string}
-				/>
-				<button type='button' title='Search'>
-					<IconSearch />
-				</button>
+				<div class='layout-projects__sidebar__filter'>
+					<SelectField
+						name='message-type'
+						value={selectedMessageType}
+						options={projectCategories}
+						multiple={false}
+						searchable={false}
+						onChange={(value) => selectedMessageType.value = value as string}
+					/>
+				</div>
 			</div>
 
-			<div style={{ paddingBottom: '1rem' }}>
+			<div class='layout-projects__sidebar__search'>
+				<IconSearch size={18} class='layout-projects__sidebar__search-icon' />
 				<input
 					type='text'
+					class='layout-projects__sidebar__search-input'
 					placeholder='Search projects...'
 					value={searchQuery}
 					onInput={handleSearchInput}
-					style={{
-						width: '100%',
-						padding: '8px',
-						borderRadius: '6px',
-						border: '1px solid var(--border-subtle)',
-					}}
 				/>
 			</div>
 
-			<div style={{ flex: 1, minHeight: 0 }}>
+			<div class='layout-projects__sidebar__content'>
 				<DataDisplay<ProjectItem, ProjectItem>
 					dataSource={dataSource}
 					mode='list'
-					estimateHeight={56}
+					estimateHeight={72} /* Adjusted for the new taller card */
 					pageSize={20}
 					selectionMode='none'
 					renderItem={(project) => <ProjectListItem project={project} />}

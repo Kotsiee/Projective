@@ -1,8 +1,4 @@
 .nav-bar-user__profile__dropdown__teams {
-  width: 100%;
-}
-
-.nav-bar-user__profile__dropdown__teams {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -11,66 +7,83 @@
 .nav-bar-user__profile__dropdown__teams-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 250px;
+  max-height: 220px;
   overflow-y: auto;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;
+  gap: 2px;
+
+  /* Thin Scrollbar */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+  }
 }
 
-/* --- Team Card --- */
+/* --- Team Card Component Styling --- */
+/* (Assuming NavBarTeamCard.tsx uses these classes) */
 .nav-bar-team-card {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
   width: 100%;
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: background-color 0.15s;
+  border-radius: var(--border-radius__small);
+  transition: background-color var(--fast);
+  text-decoration: none;
+  color: inherit;
   text-align: left;
 }
 
 .nav-bar-team-card:hover {
-  background-color: var(--bg-surface-hover);
+  background-color: var(--field-bg-hover);
 }
 
 .nav-bar-team-card--active {
-  background-color: var(--bg-brand-subtle);
+  background-color: var(--primary-surface);
 }
 
 .nav-bar-team-card__avatar {
   width: 2rem;
   height: 2rem;
-  flex-shrink: 0;
   border-radius: 6px;
-  background-color: var(--bg-surface-strong);
+  background-color: var(--input-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
-  overflow: hidden;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .nav-bar-team-card__avatar img {
   width: 100%;
   height: 100%;
+  border-radius: 6px;
   object-fit: cover;
 }
 
 .nav-bar-team-card__info {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  /* Text truncation fix */
+  flex: 1;
 }
 
 .nav-bar-team-card__name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -78,51 +91,40 @@
 
 .nav-bar-team-card__slug {
   font-size: 0.75rem;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--text-muted);
 }
 
-.nav-bar-team-card__action {
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-}
-
-.nav-bar-team-card:hover .nav-bar-team-card__icon--switch {
-  color: var(--text-primary);
-}
-
-.nav-bar-team-card__icon--active {
-  color: var(--text-brand);
-}
-
-/* --- Other States --- */
+/* --- Empty / Loading States --- */
 .nav-bar-user__profile__dropdown__loading,
 .nav-bar-user__profile__dropdown__empty {
-  padding: 1rem;
+  padding: 1.5rem;
   text-align: center;
   font-size: 0.875rem;
-  color: var(--text-tertiary);
+  color: var(--text-muted);
+  font-style: italic;
 }
 
+/* --- Create Action --- */
 .nav-bar-user__profile__dropdown__add {
-  margin-top: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 0.5rem;
+  gap: 0.5rem;
+  margin: 0.5rem 1rem 1rem 1rem;
+  /* Inset from edges */
+  padding: 0.6rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary);
-  border-top: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--border-radius__small);
   text-decoration: none;
   cursor: pointer;
-}
+  transition: all var(--fast);
 
-.nav-bar-user__profile__dropdown__add:hover {
-  color: var(--text-primary);
-  background-color: var(--bg-surface-subtle);
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background-color: var(--primary-surface);
+  }
 }

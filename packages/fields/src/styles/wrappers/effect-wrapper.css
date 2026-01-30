@@ -1,3 +1,5 @@
+/* packages/fields/src/styles/wrappers/effect-wrapper.css */
+
 /* --- Effect Wrapper (Ripple & Focus Ring) --- */
 .field-focus-ring {
   position: absolute;
@@ -5,14 +7,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: var(--field-radius);
+  border-radius: var(--field-radius, 8px);
+  /* cite: 1 */
   pointer-events: none;
   box-shadow: 0 0 0 0 transparent;
-  transition: box-shadow var(--field-transition);
+  transition: box-shadow var(--field-transition, 150ms ease);
+  /* cite: 1 */
 }
 
 .field-focus-ring--active {
-  box-shadow: 0 0 0 var(--field-ring-width) var(--field-ring-color);
+  /* Uses mapped focus ring color and width from the design system */
+  box-shadow: 0 0 0 var(--field-ring-width, 3px) var(--field-ring-color, rgba(59, 130, 246, 0.12));
+  /* cite: 1 */
 }
 
 .field-ripple {
@@ -20,7 +26,8 @@
   border-radius: 50%;
   transform: scale(0);
   animation: ripple 600ms linear;
-  background-color: var(--field-ripple-color);
+  background-color: var(--field-ripple-color, rgba(0, 0, 0, 0.1));
+  /* cite: 1 */
   pointer-events: none;
 }
 

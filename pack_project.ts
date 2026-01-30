@@ -9,8 +9,6 @@ const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.css', '.md', '.jso
 // Output file name
 const OUTPUT_FILE = 'codebase_context.md';
 
-console.log('📦 Packing project...');
-
 let output = '# Project Codebase Context\n\n';
 
 // 1. Generate Tree Structure
@@ -46,8 +44,6 @@ for await (
 	const ext = entry.name.substring(entry.name.lastIndexOf('.'));
 	if (!INCLUDE_EXTS.includes(ext)) continue;
 
-	console.log(`Reading: ${relPath}`);
-
 	try {
 		const content = await Deno.readTextFile(entry.path);
 		output += `### File: ${relPath}\n\n`;
@@ -60,4 +56,3 @@ for await (
 }
 
 await Deno.writeTextFile(OUTPUT_FILE, output);
-console.log(`✅ Done! Project packed into: ${OUTPUT_FILE}`);

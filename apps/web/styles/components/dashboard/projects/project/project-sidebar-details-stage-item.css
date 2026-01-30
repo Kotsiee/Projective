@@ -1,33 +1,40 @@
+.stage-list-item__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .stage-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 0.625rem 0.75rem;
-    border-radius: var(--border-radius);
-    border: 1px solid transparent;
+    border-radius: var(--border-radius__small);
+    border: 1px solid var(--border-color);
     text-decoration: none;
-    background-color: var(--bg-surface);
-    transition: border-color var(--fast), background-color var(--fast);
+    background-color: var(--card);
+    transition: all var(--fast);
     cursor: pointer;
+    padding: 0.75em;
 }
 
 .stage-list-item:hover {
-    border-color: var(--border-subtle);
-    background-color: var(--bg-surface-active);
+    border-color: var(--text-muted);
+    background-color: var(--field-bg-hover);
 }
 
 .stage-list-item__info {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    overflow: hidden;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1;
 }
 
 .stage-list-item__title {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -39,15 +46,21 @@
     gap: 0.5rem;
 }
 
+.stage-list-item__type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .stage-list-item__status-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
-/* Status Colors Mapping */
+/* Status Mappings */
 .stage-list-item__status-dot--open {
-    background-color: var(--text-tertiary);
+    background-color: var(--text-muted);
 }
 
 .stage-list-item__status-dot--assigned {
@@ -68,22 +81,19 @@
 
 .stage-list-item__status-dot--paid {
     background-color: var(--success);
+    box-shadow: 0 0 0 2px var(--success-surface);
 }
 
-.stage-list-item__type {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-}
-
+/* Indicators */
 .stage-list-item__indicators {
     display: flex;
     align-items: center;
-    color: var(--text-tertiary);
+    padding-left: 0.5rem;
 }
 
 .stage-list-item__unread {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background-color: var(--border-error);
+    background-color: var(--danger);
 }

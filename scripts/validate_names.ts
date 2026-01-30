@@ -137,7 +137,6 @@ async function run() {
 		for (const v of violations) console.error(' - ' + v);
 		Deno.exit(1);
 	} else {
-		console.log('✅ Naming conventions OK');
 	}
 }
 

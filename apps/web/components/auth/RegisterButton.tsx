@@ -55,7 +55,7 @@ export default function RegisterButton({
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Registration success:', data);
+
 				globalThis.location.href = '/verify';
 			} else {
 				console.error('Registration failed:', response);

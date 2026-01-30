@@ -49,76 +49,79 @@ export function TeamCard({ team }: TeamCardProps) {
 
 	return (
 		<div className={`team-card ${isActive ? 'team-card--active' : ''}`}>
-			{/* Header / Avatar */}
-			<div className='team-card__header'>
-				<div className='team-card__identity'>
-					<div className='team-card__avatar'>
-						{team.avatar_url
-							? (
-								<img
-									src={team.avatar_url}
-									alt={team.name}
-								/>
-							)
-							: <IconUsers size={20} />}
-					</div>
-					<div className='team-card__info'>
-						<h3 className='team-card__name' title={team.name}>
-							{team.name}
-						</h3>
-						<p className='team-card__slug'>@{team.slug}</p>
-					</div>
-				</div>
-
-				{isActive && <span className='team-card__active-badge'>Active</span>}
-
-				<button className='team-card__menu-btn'>
-					<IconDotsVertical size={16} />
-				</button>
-			</div>
-
-			{/* Body / Description */}
-			<div className='team-card__content'>
-				<p className='team-card__description' title={description}>
-					{description}
-				</p>
-			</div>
-
-			{/* Tags / Info */}
-			<div className='team-card__tags'>
-				<span
-					className={`team-card__tag ${
-						isOwner ? 'team-card__tag--owner' : 'team-card__tag--member'
-					}`}
-				>
-					<IconShield size={10} />
-					{team.user_role.toUpperCase()}
-				</span>
-
-				{team.payout_model === 'smart_split' && (
-					<span className='team-card__tag team-card__tag--smart-split'>
-						<IconCurrencyDollar size={10} />
-						Smart Split
-					</span>
-				)}
-			</div>
-
-			{/* Footer / Meta */}
-			<div className='team-card__footer'>
-				<div className='team-card__stat'>
-					<IconUsers size={14} />
-					<span>{team.member_count} Members</span>
-				</div>
-
-				<button
-					className={`team-card__switch-btn ${isActive ? 'team-card__switch-btn--disabled' : ''}`}
-					onClick={handleSwitch}
-					disabled={isActive}
-				>
-					{isActive ? 'Current' : 'Switch'}
-					{!isActive && <IconArrowRight size={14} />}
-				</button>
-			</div>
 		</div>
 	);
 }
+
+// <div className={`team-card ${isActive ? 'team-card--active' : ''}`}>
+// 	{/* Header / Avatar */}
+// 	<div className='team-card__header'>
+// 		<div className='team-card__identity'>
+// 			<div className='team-card__avatar'>
+// 				{team.avatar_url
+// 					? (
+// 						<img
+// 							src={team.avatar_url}
+// 							alt={team.name}
+// 						/>
+// 					)
+// 					: <IconUsers size={20} />}
+// 			</div>
+// 			<div className='team-card__info'>
+// 				<h3 className='team-card__name' title={team.name}>
+// 					{team.name}
+// 				</h3>
+// 				<p className='team-card__slug'>@{team.slug}</p>
+// 			</div>
+// 		</div>
+
+// 		{isActive && <span className='team-card__active-badge'>Active</span>}
+
+// 		<button className='team-card__menu-btn'>
+// 			<IconDotsVertical size={16} />
+// 		</button>
+// 	</div>
+
+// 	{/* Body / Description */}
+// 	<div className='team-card__content'>
+// 		<p className='team-card__description' title={description}>
+// 			{description}
+// 		</p>
+// 	</div>
+
+// 	{/* Tags / Info */}
+// 	<div className='team-card__tags'>
+// 		<span
+// 			className={`team-card__tag ${
+// 				isOwner ? 'team-card__tag--owner' : 'team-card__tag--member'
+// 			}`}
+// 		>
+// 			<IconShield size={10} />
+// 			{team.user_role.toUpperCase()}
+// 		</span>
+
+// 		{team.payout_model === 'smart_split' && (
+// 			<span className='team-card__tag team-card__tag--smart-split'>
+// 				<IconCurrencyDollar size={10} />
+// 				Smart Split
+// 			</span>
+// 		)}
+// 	</div>
+
+// 	{/* Footer / Meta */}
+// 	<div className='team-card__footer'>
+// 		<div className='team-card__stat'>
+// 			<IconUsers size={14} />
+// 			<span>{team.member_count} Members</span>
+// 		</div>
+
+// 		<button
+// 			className={`team-card__switch-btn ${isActive ? 'team-card__switch-btn--disabled' : ''}`}
+// 			onClick={handleSwitch}
+// 			disabled={isActive}
+// 		>
+// 			{isActive ? 'Current' : 'Switch'}
+// 			{!isActive && <IconArrowRight size={14} />}
+// 		</button>
+// 	</div>
+// </div>

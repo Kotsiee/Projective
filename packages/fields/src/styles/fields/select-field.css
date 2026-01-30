@@ -1,5 +1,8 @@
-/* SelectField Styles */
-
+/* #region 1. BLOCK: field-select */
+/**
+ * @file select-field.css
+ * @description Refactored Select component using strict semantic tokens.
+ */
 .field-select {
   display: flex;
   flex-direction: column;
@@ -7,6 +10,9 @@
   width: 100%;
 }
 
+/* #endregion */
+
+/* #region 2. ELEMENT: field-select__container */
 .field-select__container {
   display: flex;
   align-items: center;
@@ -18,7 +24,7 @@
   min-height: var(--field-height);
   cursor: pointer;
   padding-right: 8px;
-  /* Space for arrows */
+  /* Room for arrow */
 }
 
 .field-select__container:hover {
@@ -42,7 +48,9 @@
   opacity: 0.8;
 }
 
-/* Content Area */
+/* #endregion */
+
+/* #region 3. ELEMENT: field-select__content & input */
 .field-select__content {
   flex: 1;
   display: flex;
@@ -56,7 +64,7 @@
 .field-select__input {
   border: none;
   background: transparent;
-  font-family: var(--field-font-family);
+  font-family: inherit;
   font-size: var(--field-font-size);
   color: var(--field-text);
   outline: none;
@@ -66,44 +74,18 @@
   flex: 1;
 }
 
-/* Single Value Display */
-.field-select__single {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--field-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* #endregion */
 
-/* Icons & Avatars */
-.field-select__icon,
-.field-select__option-icon {
-  display: flex;
-  align-items: center;
-  color: var(--field-text-placeholder);
-  margin-right: 8px;
-}
-
-.field-select__avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 8px;
-}
-
-/* Chips */
+/* #region 4. ELEMENT: field-select__chip */
 .field-select__chip {
   display: flex;
   align-items: center;
-  background-color: var(--gray-100);
-  border-radius: 4px;
+  background-color: var(--primary-surface);
+  border-radius: var(--border-radius__small);
   padding: 2px 6px;
   font-size: 0.85em;
   gap: 4px;
-  color: var(--field-text);
+  color: var(--text-main);
 }
 
 .field-select__chip-remove {
@@ -111,51 +93,23 @@
   opacity: 0.5;
   display: flex;
   align-items: center;
+  transition: opacity var(--fast);
 }
 
 .field-select__chip-remove:hover {
   opacity: 1;
+  color: var(--danger);
 }
 
-/* Arrows & Clear */
-.field-select__arrow {
-  color: var(--field-text-placeholder);
-  transition: transform 0.2s;
-  display: flex;
-}
+/* #endregion */
 
-.field-select__arrow--flip {
-  transform: rotate(180deg);
-}
-
-.field-select__clear {
-  color: var(--field-text-placeholder);
-  cursor: pointer;
-  margin-right: 4px;
-  display: flex;
-}
-
-.field-select__clear:hover {
-  color: var(--field-text-error);
-}
-
-.field-select__spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Dropdown Menu */
+/* #region 5. BLOCK: field-select__menu & options */
 .field-select__menu {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background-color: var(--field-bg);
+  background-color: var(--card);
   border: 1px solid var(--field-border);
   border-radius: var(--field-radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -165,7 +119,7 @@
   opacity: 0;
   transform: translateY(-5px);
   pointer-events: none;
-  transition: all 0.1s;
+  transition: all var(--fast);
   display: flex;
   flex-direction: column;
 }
@@ -176,20 +130,13 @@
   pointer-events: auto;
 }
 
-/* Group Styles */
-.field-select__option--group {
-  font-weight: 600;
-  color: var(--gray-600);
-}
-
-/* Options */
 .field-select__option {
   padding: 8px 12px;
   cursor: pointer;
-  color: var(--field-text);
+  color: var(--text-main);
   display: flex;
   align-items: center;
-  transition: background-color 0.1s;
+  transition: background-color var(--fast);
 }
 
 .field-select__option:hover,
@@ -198,28 +145,15 @@
 }
 
 .field-select__option--selected {
-  background-color: var(--primary-50);
-  color: var(--primary-700);
+  background-color: var(--primary-surface);
+  color: var(--text-brand);
+  font-weight: 500;
 }
 
-.field-select__option--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.field-select__check {
-  margin-left: auto;
-  color: currentColor;
-}
-
-.field-select__option-label {
-  flex: 1;
-}
-
-.field-select__no-options {
-  padding: 12px;
-  color: var(--field-text-placeholder);
-  text-align: center;
+.field-select__option--group {
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--bg-surface-subtle);
 }
 
 .field-select__action-bar {
@@ -229,25 +163,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--primary-600);
+  color: var(--primary);
   font-weight: 500;
   font-size: 0.9em;
+  transition: background-color var(--fast);
 }
 
 .field-select__action-bar:hover {
-  background-color: var(--gray-50);
+  background-color: var(--input-bg);
 }
 
-/* Upward Flip */
-.field-select--up .field-select__menu {
-  top: auto;
-  bottom: calc(100% + 4px);
-}
-
-/* Chips Below */
-.field-select__chips-external {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
-}
+/* #endregion */

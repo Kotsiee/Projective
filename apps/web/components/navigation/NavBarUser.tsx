@@ -6,14 +6,14 @@ export default function NavBarUser() {
 	return (
 		<div class='nav-bar-user'>
 			<div class='nav-bar-user__logo'>
-				<img class='nav-bar-user__logo__svg' src='/logo.svg' alt='Logo' />
-				<h1>Projective</h1>
+				<a href='/'>
+					<img class='nav-bar-user__logo__svg' src='/logo.svg' alt='Logo' />
+				</a>
 			</div>
 			<div class='nav-bar-user__search'>
-				<h1>Logo</h1>
 			</div>
 			<div class='nav-bar-user__actions'>
-				<IconBell />
+				{/* <IconBell /> */}
 				<NavBarUserProfile />
 			</div>
 		</div>

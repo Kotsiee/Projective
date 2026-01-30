@@ -34,8 +34,6 @@ export const handler = define.handlers({
 				});
 			}
 
-			console.log(params);
-			console.log('API GET /dashboard/teams - Retrieved teams:', res.data);
 			return new Response(JSON.stringify(res.data), {
 				headers: { 'Content-Type': 'application/json' },
 			});

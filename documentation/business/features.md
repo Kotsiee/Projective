@@ -36,8 +36,8 @@ administrative burden of traditional agency setups.
   vs. major revisions.
 - **Account Flexibility**: Act as an individual freelancer on one project while being an active
   member of several teams on others.
-- **Income Smoothing (Phase 2)**: Utilize the AI-driven "Income Smoother" wallet to stabilize
-  monthly payouts during fluctuating earning cycles.
+- **Income Smoothing (Phase 2)**: Utilize an AI-driven "Income Smoother" to stabilize monthly
+  payouts during fluctuating earning cycles.
 - **Digital Storefront (Phase 2)**: Sell templates, code snippets, or assets directly on your
   profile with customizable IP licensing.
 
@@ -50,7 +50,7 @@ with the agility of freelancers.
 - **Internal Role Management**: Define internal roles and manage task distribution within the team
   room.
 - **Collective Revenue Sharing**: Transparently manage how stage payments are distributed among team
-  members based on pre-set agreements.
+  members using "Per-Stage Smart Splits".
 - **Team Visibility Control**: Set the team to 'Public' for discovery, 'Unlisted', or 'Invite-Only'
   for private collaborations.
 
@@ -67,7 +67,9 @@ These core system features ensure security, trust, and efficiency across all int
 - **Secure File Handling**: Files are classified by category and processed through an asynchronous
   pipeline for optimization and security.
 
-````text // Feature Priority Matrix MVP (Alpha): Core Hiring, Businesses & Teams, Escrow, Stage
-Rooms, RLS Security. Phase 2: Marketplace, AI Income Smoothing, Reviews, Disputes. Phase 3+:
-Multi-user Business Departments, API Access, Global Search Embeddings. ```
-````
+```text
+// Feature Priority Matrix
+MVP (Alpha): Core Hiring, Businesses & Teams, Escrow, Stage Rooms, RLS Security.
+Phase 2: Marketplace, AI Income Smoothing, Reviews, Disputes.
+Phase 3+: Multi-user Business Departments, API Access, Global Search Embeddings.
+```

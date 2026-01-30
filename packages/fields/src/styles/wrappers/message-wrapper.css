@@ -1,29 +1,22 @@
-/* --- Message Wrapper --- */
+/* packages/fields/src/styles/wrappers/message-wrapper.css */
+
 .field-message {
-  font-family: var(--field-font-family);
-  font-size: 0.75rem; /* 12px */
+  font-family: inherit;
+  font-size: 0.75rem;
   line-height: 1.2;
   margin-top: 4px;
-  min-height: 0;
-  transition: all var(--field-transition);
+  transition: all var(--field-transition, 150ms ease);
   opacity: 1;
 }
 
-.field-message--hidden {
-  opacity: 0;
-  margin-top: 0;
-  height: 0;
-  overflow: hidden;
-}
-
 .field-message--error {
-  color: var(--field-text-error);
+  color: var(--field-text-error, #ef4444);
 }
 
 .field-message--warning {
-  color: var(--warning-500);
+  color: var(--warning, #f59e0b);
 }
 
 .field-message--info {
-  color: var(--field-text-placeholder);
+  color: var(--field-text-placeholder, #9ca3af);
 }

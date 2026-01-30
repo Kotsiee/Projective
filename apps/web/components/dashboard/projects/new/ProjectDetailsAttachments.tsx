@@ -114,7 +114,7 @@ export default function ProjectDetailsAttachments({ files }: ProjectDetailsAttac
 
 								<button
 									type='button'
-									onClick={() => handleRemove(file.id)}
+									onClick={() => handleRemove(file.id as string)}
 									style={{
 										border: 'none',
 										background: 'transparent',

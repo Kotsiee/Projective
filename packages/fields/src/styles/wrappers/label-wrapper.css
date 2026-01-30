@@ -1,111 +1,55 @@
-/* --- Label Wrapper --- */
+/* #region 1. BLOCK: field-label */
 .field-label {
-	display: flex;
-	align-items: center;
-	font-family: var(--field-font-family);
-	font-size: var(--field-font-size);
-	color: var(--field-text-label);
-	margin-bottom: 4px;
-	transition: all var(--field-transition);
-	pointer-events: none;
-	transform-origin: top left;
-	line-height: 1.5;
-	order: -1;
+    display: flex;
+    align-items: center;
+    font-family: inherit;
+    font-size: var(--field-font-size, 14px);
+    color: var(--field-text-label, #4b5563);
+    margin-bottom: 4px;
+    transition: all var(--field-transition, 150ms ease);
+    pointer-events: none;
+    line-height: 1.5;
 }
 
-.field-label .help-tooltip {
-	pointer-events: auto;
-}
+/* #endregion */
 
-/* Positioning Modifiers */
-.field-label--pos-left {
-	margin-bottom: 0;
-	margin-right: 8px;
-	align-self: center;
-	order: initial;
-}
-
-.field-label--pos-right {
-	margin-bottom: 0;
-	margin-left: 8px;
-	align-self: center;
-	order: 1;
-}
-
-.field-label--pos-bottom {
-	margin-bottom: 0;
-	margin-top: 4px;
-	order: 1;
-}
-
-/* --- Floating Logic --- */
+/* #region 2. MODIFIER: field-label--floating */
 .field-label--floating {
-	position: absolute;
-	z-index: 10;
-	background-color: transparent;
-	padding: 0 4px;
-	margin-bottom: 0;
-	left: var(--field-padding-x);
-	top: 50%;
-	transform: translateY(-50%);
+    position: absolute;
+    z-index: 10;
+    left: var(--field-padding-x, 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent;
+    padding: 0 4px;
+    margin-bottom: 0;
 }
 
-.field-label--floating:not(.field-label--active) .help-tooltip {
-	opacity: 0;
-	visibility: hidden;
-	transition: opacity 0.1s;
-}
-
-.field-label--floating.field-label--active .help-tooltip {
-	opacity: 1;
-	visibility: visible;
-}
-
-.field-label--multiline.field-label--floating {
-	top: 8px; 
-	transform: none;
-}
-
-.field-label--floating:not(.field-label--active) {
-	color: var(--field-text-placeholder);
-}
-
+/**
+ * FIX: Active state background-color masks the field border.
+ * Added z-index to ensure it sits above the EffectWrapper.
+ */
 .field-label--active {
-	top: 0 !important;
-	transform: translateY(-50%) scale(0.85) !important;
-	left: calc(var(--field-padding-x) - 2px); 
-	color: var(--field-border-focus);
-	background-color: var(--field-bg);
+    top: 0 !important;
+    transform: translateY(-50%) scale(0.85) !important;
+    left: calc(var(--field-padding-x, 12px) - 2px);
+    color: var(--field-border-focus, #3b82f6);
+    background-color: var(--field-bg, #ffffff);
+    font-weight: 600;
+    z-index: 20;
 }
 
-.field-label--error { color: var(--field-text-error); }
-.field-label--disabled { color: var(--field-text-disabled); }
-.field-label__required { color: var(--error-500); margin-left: 2px; }
-
-/* --- Absolute Help Positioning --- */
-/* These classes are applied directly to the .help-tooltip element when outside */
-
-.help-tooltip--top-right {
-	position: absolute;
-	top: 0;
-	right: 0;
-	z-index: 20;
-	/* Offset padding to align nicely */
-	margin: 8px; 
+.field-label--error {
+    color: var(--field-text-error, #ef4444);
 }
 
-.help-tooltip--bottom-right {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	z-index: 20;
-	margin: 8px;
+.field-label--disabled {
+    color: var(--field-text-disabled, #9ca3af);
 }
 
-.help-tooltip--bottom-left {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	z-index: 20;
-	margin: 8px;
+.field-label__required {
+    color: var(--danger, #ef4444);
+    margin-left: 2px;
 }
+
+/* #endregion */

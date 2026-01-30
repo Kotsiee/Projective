@@ -24,14 +24,12 @@ export default function VerifyIsland({ email }: Props) {
 				body: JSON.stringify({ access_token, refresh_token }),
 			})
 				.then(async (r) => {
-					console.log('1 -----', r);
 					if (!r.ok) throw new Error((await r.json()).error?.message ?? 'Failed to set session');
-					console.log('2 -----', r);
+
 					setStatus('done');
 					globalThis.location.href = '/onboarding';
 				})
 				.catch((e) => {
-					console.log('error ------', e.message);
 					setErr(e.message);
 					setStatus('error');
 				});

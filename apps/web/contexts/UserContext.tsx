@@ -71,7 +71,7 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 	const switchTeam = async (teamId: string): Promise<boolean> => {
 		try {
 			const csrf = getCsrfToken();
-			console.log(csrf);
+
 			if (!csrf) return false;
 			const res = await fetch('/api/v1/auth/switch-team', {
 				method: 'POST',

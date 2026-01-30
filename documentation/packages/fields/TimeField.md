@@ -38,7 +38,7 @@ export default function MyForm() {
 		<TimeField
 			label='Start Time'
 			placeholder='HH:MM'
-			onChange={(time) => console.log('Selected:', time)}
+			onChange={(time) => 
 		/>
 	);
 }

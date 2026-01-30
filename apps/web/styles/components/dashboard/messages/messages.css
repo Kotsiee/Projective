@@ -1,32 +1,64 @@
 .project-chat-island {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-height: 0;
+    /* Ensure the island fills the parent pane's height */
+    min-height: 100%;
     width: 100%;
-    background-color: var(--bg-surface);
-    border-radius: var(--data-radius);
-    overflow: hidden;
     position: relative;
+    /* No overflow hidden here; let the parent pane scroll */
 }
 
-/* The scroll area must grow to fill space */
+/* The scroll area */
 .project-chat-island__messages {
     flex: 1;
     width: 100%;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Starts messages from bottom (optional, standard for chat) */
+
+    /* Remove the weird large margins */
+    /* padding: 1rem 0 2rem 0; */
+
+    /* Ensure it works with sticky children */
     contain: none !important;
-    margin: 15rem 0;
 }
 
 /* Input area pinned to bottom */
 .project-chat-island__input {
-    position: fixed;
-    bottom: 2.5rem;
-    left: calc(var(--messages-sidebar-width) + var(--side-nav-width) + 3rem);
-    height: 50px;
-    width: calc(100vw - var(--messages-sidebar-width) - var(--side-nav-width) - 4rem);
+    /* FIX: Sticky bottom to float inside the resizeable pane */
+    position: sticky;
+    bottom: 1rem;
+    /* Float slightly above the edge */
+
+    /* FIX: Remove manual width calculations */
+    width: 100%;
+    left: 0;
+    right: 0;
+
+    z-index: 20;
     display: flex;
+    justify-content: center;
+    /* Center the bar if max-width is used */
+
+    /* Add padding to the sides so it doesn't touch the splitter handle */
+    /* padding: 0 1rem; */
+
+    /* Create a backdrop so messages don't bleed through the spacing around the rounded input */
+    /* Optional: glassmorphism effect */
+    pointer-events: none;
+    /* Let clicks pass through the empty padding areas */
+}
+
+/* Re-enable pointer events for the actual input component inside */
+.project-chat-island__input>* {
+    pointer-events: auto;
+    /* Optional: max-width for readability on large screens */
+    max-width: 800px;
+    width: 100%;
+
+    /* Add shadow to pop it off the background */
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
 .messages__message-enter {

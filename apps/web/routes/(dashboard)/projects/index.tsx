@@ -1,6 +1,10 @@
 export default function Projects() {
 	return (
-		<div>
+		<div
+			style={{
+				minHeight: '500vh',
+			}}
+		>
 			<div>
 				<h1>Select a project</h1>
 				<p>

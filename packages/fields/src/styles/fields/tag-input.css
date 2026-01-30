@@ -1,4 +1,4 @@
-/* TagInput Styles */
+/* packages/fields/src/styles/fields/tag-input.css */
 
 .field-tag {
   display: flex;
@@ -13,68 +13,49 @@
   align-items: center;
   gap: 4px;
   position: relative;
-  background-color: var(--field-bg);
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  transition: all var(--field-transition);
-  min-height: var(--field-height);
-  padding: 4px var(--field-padding-x);
+  background-color: var(--field-bg, #ffffff);
+  border: 1px solid var(--field-border, #d1d5db);
+  border-radius: var(--field-radius, 8px);
+  transition: all var(--field-transition, 150ms ease);
+  min-height: var(--field-height, 2.5rem);
+  padding: 4px var(--field-padding-x, 0.75rem);
   cursor: text;
 }
 
 .field-tag__container:hover {
-  background-color: var(--field-bg-hover);
-  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+  border-color: var(--field-border-hover, #6b7280);
 }
 
 .field-tag__container--focused {
-  border-color: var(--field-border-focus);
-  background-color: var(--field-bg-active);
+  border-color: var(--field-border-focus, #3b82f6);
+  background-color: var(--field-bg-active, #ffffff);
 }
 
 .field-tag__container--error {
-  border-color: var(--field-border-error);
+  border-color: var(--field-border-error, #ef4444);
 }
 
 .field-tag__container--disabled {
-  background-color: var(--field-bg-disabled);
-  border-color: var(--field-border-disabled);
-  cursor: not-allowed;
-  opacity: 0.8;
+  background-color: var(--field-bg-disabled, #f3f4f6);
+  border-color: var(--field-border-disabled, #d1d5db);
 }
 
+/* Tag Chips */
 .field-tag__chip {
   display: flex;
   align-items: center;
-  background-color: var(--primary-100);
-  color: var(--primary-700);
-  border-radius: 16px;
+  background-color: var(--primary-surface, rgba(186, 57%, 36%, 0.12));
+  color: var(--text-brand, #1d4ed8);
+  border-radius: var(--border-radius__xlarge, 16px);
   padding: 2px 8px;
   font-size: 0.875em;
 }
 
-.field-tag__chip-remove {
-  margin-left: 4px;
-  cursor: pointer;
-  opacity: 0.6;
-}
-
-.field-tag__chip-remove:hover {
-  opacity: 1;
-}
-
 .field-tag__input {
-  flex: 1;
-  min-width: 60px;
-  border: none;
-  background: transparent;
-  font-family: var(--field-font-family);
-  font-size: var(--field-font-size);
-  color: var(--field-text);
-  outline: none;
-  padding: 4px 0;
+  color: var(--field-text, #111827);
 }
 
 .field-tag__input::placeholder {
-  color: var(--field-text-placeholder);
+  color: var(--field-text-placeholder, #6b7280);
 }

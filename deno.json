@@ -149,6 +149,7 @@
     "@contracts/": "./apps/web/contracts/",
     "@contexts/": "./apps/web/contexts/",
     "@hooks/": "./apps/web/hooks/",
+    "@services/": "./apps/web/services/",
     "@utils": "./apps/web/utils.ts",
     "zod": "npm:zod@^4.1.13"
   },

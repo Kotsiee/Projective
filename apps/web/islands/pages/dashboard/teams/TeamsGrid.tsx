@@ -89,7 +89,6 @@ export default function TeamsGrid() {
 					selectionMode='single'
 					renderItem={(team) => <TeamCard team={team} />}
 					onSelectionChange={(keys) => {
-						console.log('Selected Team:', Array.from(keys));
 					}}
 					interactive
 					scrollMode='window'

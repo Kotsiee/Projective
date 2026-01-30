@@ -70,7 +70,7 @@
             .search-page__options__sort button,
             .search-page__options__toggle-filter label {
                 border: 1px solid var(--text-medium);
-                color: var(--text);
+                color: var(--text-main);
                 padding: 0.5em 2em;
                 margin: 0;
                 font-size: 1rem;

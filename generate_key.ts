@@ -19,7 +19,3 @@ const payload = {
 };
 
 const token = await create({ alg: 'HS256', typ: 'JWT' }, payload, key);
-
-console.log('\nCopy this key into your .env file:\n');
-console.log(token);
-console.log('\n');

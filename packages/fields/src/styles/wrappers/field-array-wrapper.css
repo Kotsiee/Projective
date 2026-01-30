@@ -1,16 +1,21 @@
+/* packages/fields/src/styles/wrappers/field-array-wrapper.css */
+
 /* --- Field Array Wrapper --- */
 .field-array {
   display: flex;
   flex-direction: column;
-  gap: var(--field-gap);
+  gap: var(--field-gap, 8px);
+  /* cite: 1 */
 }
 
 .field-array__item {
   display: flex;
   align-items: flex-start;
-  gap: var(--field-gap);
+  gap: var(--field-gap, 8px);
+  /* cite: 1 */
 }
 
 .field-array__action {
-  margin-top: 4px; /* Align with input */
+  margin-top: 4px;
+  /* Manual alignment offset for standard field height cite: 1 */
 }

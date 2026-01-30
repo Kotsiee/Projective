@@ -107,8 +107,12 @@
 }
 
 .sidebar-details__list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     flex: 1;
     min-height: 0;
+    width: 100%;
 }
 
 /* --- Footer Actions --- */

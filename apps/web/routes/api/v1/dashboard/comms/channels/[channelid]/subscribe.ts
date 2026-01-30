@@ -30,7 +30,6 @@ export const handler = define.handlers({
 		const stream = new ReadableStream({
 			async start(controller) {
 				const encoder = new TextEncoder();
-				console.log(`[SSE] Client connected: ${channelid}`);
 
 				const result = await subscribeMessages(
 					channelid,
@@ -57,7 +56,6 @@ export const handler = define.handlers({
 				const { unsubscribe } = result.data;
 
 				ctx.req.signal.addEventListener('abort', async () => {
-					console.log(`[SSE] Client disconnected: ${channelid}`);
 					await unsubscribe();
 				});
 			},

@@ -1,49 +1,9 @@
 import { createContext } from 'preact';
 import { useContext, useEffect } from 'preact/hooks';
-import { Signal, useSignal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { ComponentChildren } from 'preact';
-import { ProjectPermission } from '@projective/types';
-
-export type ProjectRole = 'owner' | 'collaborator' | 'viewer';
-
-export interface ProjectStageSummary {
-	id: string;
-	name: string;
-	status: string;
-	stage_type: string;
-	unread: boolean;
-	last_updated?: string;
-}
-
-export interface ProjectDetails {
-	project_id: string;
-	title: string;
-	status: 'draft' | 'active' | 'on_hold' | 'completed' | 'cancelled';
-	banner_url: string | null;
-	is_starred: boolean;
-
-	owner: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-		type: 'business' | 'freelancer';
-	};
-
-	stages: ProjectStageSummary[];
-
-	viewer_context: {
-		role: ProjectRole;
-		permissions: ProjectPermission[];
-	};
-}
-
-export interface ProjectState {
-	project_id: Signal<string | undefined>;
-	project: Signal<ProjectDetails | null>;
-	isLoading: Signal<boolean>;
-	error: Signal<string | null>;
-	refresh: () => void;
-}
+import { ProjectsService } from '@services/dashboard/projects.ts';
+import { ProjectDetails, ProjectState } from '@contracts/dashboard/projects/Projects.ts';
 
 const ProjectContext = createContext<ProjectState | null>(null);
 
@@ -55,6 +15,7 @@ export function ProjectProvider(
 	const isLoading = useSignal(false);
 	const error = useSignal<string | null>(null);
 
+	// Reset state when ID changes props
 	if (projectId.value !== id) {
 		projectId.value = id;
 		project.value = null;
@@ -68,20 +29,21 @@ export function ProjectProvider(
 		error.value = null;
 
 		try {
-			const res = await fetch(`/api/v1/dashboard/projects/${projectId.value}`);
-			if (!res.ok) throw new Error(`Error ${res.status}`);
-			project.value = await res.json();
-			// deno-lint-ignore no-explicit-any
+			// Use the Service instead of raw fetch
+			const data = await ProjectsService.getProjectDetails(projectId.value);
+			project.value = data;
 		} catch (err: any) {
 			console.error('Project Fetch Error:', err);
-			error.value = err.message;
+			error.value = err.message || 'An unexpected error occurred.';
 		} finally {
 			isLoading.value = false;
 		}
 	};
 
 	useEffect(() => {
-		fetchProject();
+		if (projectId.value) {
+			fetchProject();
+		}
 	}, [projectId.value]);
 
 	return (

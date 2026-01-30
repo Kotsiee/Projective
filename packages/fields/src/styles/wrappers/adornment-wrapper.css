@@ -1,26 +1,27 @@
-/* --- Adornment Wrapper --- */
+/* packages/fields/src/styles/wrappers/adornment-wrapper.css */
+
 .field-adornment {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--field-text-placeholder);
-  min-width: var(--field-icon-size);
+  color: var(--field-text-placeholder, #9ca3af);
+  min-width: var(--field-icon-size, 20px);
 }
 
 .field-adornment--prefix {
-  margin-right: var(--field-gap);
+  margin-right: var(--field-gap, 8px);
 }
 
 .field-adornment--suffix {
-  margin-left: var(--field-gap);
+  margin-left: var(--field-gap, 8px);
 }
 
 .field-adornment--interactive {
   cursor: pointer;
   pointer-events: auto;
-  transition: color var(--field-transition);
+  transition: color var(--field-transition, 150ms ease);
 }
 
 .field-adornment--interactive:hover {
-  color: var(--field-text);
+  color: var(--field-text, #111827);
 }

@@ -6,8 +6,6 @@ const text = await Deno.readTextFile('deno.json');
 const config = JSON.parse(text);
 const workspaces = config.workspace || [];
 
-console.log('📦 Building workspaces...');
-
 // 2. Iterate through each workspace package
 for (const path of workspaces) {
 	try {
@@ -18,8 +16,6 @@ for (const path of workspaces) {
 
 		// 3. If the package has a "build" task, run it
 		if (packageConfig.tasks?.build) {
-			console.log(`\nhammer_and_wrench Building ${path}...`);
-
 			const command = new Deno.Command('deno', {
 				args: ['task', 'build'],
 				cwd: path,
@@ -34,7 +30,6 @@ for (const path of workspaces) {
 				Deno.exit(code);
 			}
 		} else {
-			console.log(`\n⏭️  Skipping ${path} (no build task)`);
 		}
 	} catch (error) {
 		// Ignore folder if no deno.json exists (or handle error)
@@ -43,5 +38,3 @@ for (const path of workspaces) {
 		}
 	}
 }
-
-console.log('\n✅ All packages built successfully.');

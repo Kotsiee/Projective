@@ -24,7 +24,7 @@ export default function LoginButton({ redirectTo = '/', email, password }: Props
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Login success:', data);
+
 				globalThis.location.href = data.redirectTo;
 			} else {
 				const c = await response.json();

@@ -1,15 +1,21 @@
-/* --- Root --- */
+/* #region 1. BLOCK: accordion */
+/**
+ * @file accordion.css
+ * @description Flexible accordion system utilizing shared HSL tokens and density scales.
+ */
 .accordion {
     display: flex;
     flex-direction: column;
     width: 100%;
     --accordion-padding-x: 1rem;
     --accordion-padding-y: 1rem;
-    --accordion-radius: var(--field-radius);
+    --accordion-radius: var(--field-radius, 8px);
+    /* cite: 13, 14 */
     --accordion-border-color: var(--field-border);
+    /* cite: 3, 14 */
 }
 
-/* --- Densities --- */
+/* Densities */
 .accordion--compact {
     --accordion-padding-y: 0.5rem;
     --accordion-padding-x: 0.75rem;
@@ -20,53 +26,63 @@
     --accordion-padding-x: 1.5rem;
 }
 
-/* --- Variants --- */
+/* #endregion */
 
-/* Outlined (Default) */
+/* #region 2. VARIANTS: Outlined, Filled, Ghost */
 .accordion--outlined {
     border: 1px solid var(--accordion-border-color);
+    /* cite: 14 */
     border-radius: var(--accordion-radius);
+    /* cite: 14 */
     background-color: var(--field-bg);
+    /* cite: 3 */
 }
 
 .accordion--outlined .accordion__item {
     border-bottom: 1px solid var(--accordion-border-color);
+    /* cite: 14 */
 }
 
 .accordion--outlined .accordion__item:last-child {
     border-bottom: none;
+    /* cite: 14 */
 }
 
-/* Filled */
 .accordion--filled {
-    background-color: var(--gray-50);
+    background-color: var(--input-bg);
+    /* cite: 3 */
     border-radius: var(--accordion-radius);
+    /* cite: 14 */
 }
 
 .accordion--filled .accordion__item--open {
-    background-color: var(--gray-0);
-    /* Highlight open items */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    background-color: var(--card);
+    /* cite: 3 */
+    /* Uses card background to lift open items visually */
+    box-shadow: 0 1px 2px hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+    /* cite: 14 */
     margin-bottom: 2px;
-    /* Visual separation */
     border-radius: var(--accordion-radius);
 }
 
-/* Ghost (Minimal) */
 .accordion--ghost {
     background-color: transparent;
     border: none;
 }
 
 .accordion--ghost .accordion__item {
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
+    /* cite: 3 */
 }
 
-/* --- Header & Trigger --- */
+/* #endregion */
+
+/* #region 3. ELEMENT: accordion__trigger */
 .accordion__header {
     margin: 0;
     padding: 0;
     display: flex;
+    /* cite: 14 */
 }
 
 .accordion__trigger {
@@ -74,33 +90,37 @@
     flex: 1;
     display: flex;
     align-items: center;
-    /* Center vertically */
     gap: 0.75rem;
+    /* cite: 14 */
     padding: var(--accordion-padding-y) var(--accordion-padding-x);
-    font-family: var(--field-font-family);
-    font-size: var(--field-font-size);
+    font-family: inherit;
+    font-size: var(--field-font-size, 14px);
     color: var(--field-text);
+    /* cite: 3 */
     background-color: transparent;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--fast);
+    /* cite: 13, 14 */
     min-height: 24px;
 }
 
-.accordion__trigger:hover {
+.accordion__trigger:hover:not(:disabled) {
     background-color: var(--field-bg-hover);
+    /* cite: 3 */
 }
 
 .accordion__trigger:focus-visible {
     outline: 2px solid var(--field-border-focus);
+    /* cite: 3, 14 */
     outline-offset: -2px;
     z-index: 1;
 }
 
-/* --- Trigger Layout --- */
 .accordion__start-icon {
     display: flex;
     align-items: center;
     color: var(--field-text-placeholder);
+    /* cite: 3 */
 }
 
 .accordion__trigger-text {
@@ -108,70 +128,70 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* cite: 14 */
 }
 
 .accordion__title {
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
 }
 
 .accordion__subtitle {
     font-size: 0.85em;
     color: var(--field-text-label);
+    /* cite: 3 */
     margin-top: 2px;
     font-weight: 400;
 }
 
-.accordion__end-section {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
+/* #endregion */
 
-.accordion__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* --- Chevron Icon --- */
-.accordion__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--field-text-placeholder);
-    transition: transform 0.2s cubic-bezier(0.87, 0, 0.13, 1);
-}
-
-.accordion__icon--rotated {
-    transform: rotate(180deg);
-}
-
-/* --- Content --- */
+/* #region 4. ELEMENT: accordion__content */
 .accordion__content {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.3s cubic-bezier(0.87, 0, 0.13, 1);
+    /* Standard pattern for CSS height transition cite: 14 */
+    transition: grid-template-rows var(--medium) cubic-bezier(0.87, 0, 0.13, 1);
+    /* cite: 13, 14 */
     background-color: inherit;
-    /* Match parent variant */
     visibility: hidden;
 }
 
 .accordion__content--open {
     grid-template-rows: 1fr;
     visibility: visible;
+    /* cite: 14 */
 }
 
 .accordion__content-inner {
     overflow: hidden;
     padding: 0 var(--accordion-padding-x) var(--accordion-padding-y) var(--accordion-padding-x);
+    /* cite: 14 */
     min-height: 0;
     color: var(--field-text-label);
+    /* cite: 3 */
     line-height: 1.5;
 }
 
-/* Disabled State */
 .accordion__item--disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     pointer-events: none;
+    /* cite: 14 */
 }
+
+.accordion__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--field-text-placeholder);
+    /* cite: 3 */
+    transition: transform var(--medium) cubic-bezier(0.87, 0, 0.13, 1);
+    /* cite: 13, 14 */
+}
+
+.accordion__icon--rotated {
+    transform: rotate(180deg);
+    /* cite: 14 */
+}
+
+/* #endregion */

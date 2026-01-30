@@ -75,7 +75,7 @@ import { IconEye, IconLock } from '@tabler/icons-preact';
 	label='Password'
 	prefix={<IconLock size={18} />}
 	suffix={<IconEye size={18} />}
-	onSuffixClick={() => console.log('Toggle visibility')}
+	onSuffixClick={() => 
 />;
 ```
 

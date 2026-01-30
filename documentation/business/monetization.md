@@ -61,6 +61,9 @@ limits are applied via paywalls:
 - **Active Project Volume**: Limits on the number of active projects a Business can manage
   simultaneously without an upgrade.
 
-````text // Revenue Forecast Focus Short-term: Transactional Service Fees (5%) Mid-term: Marketplace
-Commissions & Pro Subscriptions Long-term: Enterprise Licensing & AI Financial Services ```
-````
+```text
+// Revenue Forecast Focus 
+Short-term: Transactional Service Fees (5%) 
+Mid-term: Marketplace Commissions & Pro Subscriptions 
+Long-term: Enterprise Licensing & AI Financial Services
+```

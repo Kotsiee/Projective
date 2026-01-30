@@ -41,7 +41,7 @@ export default function OnboardingSubmit({
 			}
 
 			const data = await response.json();
-			console.log('Onboarding success:', data);
+
 			globalThis.location.href = '/dashboard';
 		} catch (err) {
 			console.error('Onboarding error:', err);

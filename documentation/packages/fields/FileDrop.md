@@ -39,7 +39,7 @@ export default function DocumentUpload() {
 			accept='.pdf,.jpg,.png'
 			multiple
 			maxSize={5 * 1024 * 1024} // 5MB
-			onChange={(files) => console.log('Files ready:', files)}
+			onChange={(files) => 
 		/>
 	);
 }

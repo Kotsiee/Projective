@@ -1,4 +1,4 @@
-/* TextField Styles */
+/* packages/fields/src/styles/fields/text-field.css */
 
 .field-text {
   display: flex;
@@ -11,95 +11,67 @@
   display: flex;
   align-items: center;
   position: relative;
-  background-color: var(--field-bg);
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  transition: all var(--field-transition);
-  min-height: var(--field-height);
+  background-color: var(--field-bg, #ffffff);
+  border: 1px solid var(--field-border, #d1d5db);
+  border-radius: var(--field-radius, 8px);
+  transition: all var(--field-transition, 150ms ease);
+  min-height: var(--field-height, 2.5rem);
   cursor: text;
 }
 
 .field-text__container:hover {
-  background-color: var(--field-bg-hover);
-  border-color: var(--field-border-hover);
+  background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+  border-color: var(--field-border-hover, #6b7280);
 }
 
 .field-text__container--focused {
-  border-color: var(--field-border-focus);
-  background-color: var(--field-bg-active);
+  border-color: var(--field-border-focus, #3b82f6);
+  background-color: var(--field-bg-active, #ffffff);
 }
 
 .field-text__container--error {
-  border-color: var(--field-border-error);
+  border-color: var(--field-border-error, #ef4444);
 }
 
 .field-text__container--disabled {
-  background-color: var(--field-bg-disabled);
-  border-color: var(--field-border-disabled);
+  background-color: var(--field-bg-disabled, #f3f4f6);
+  border-color: var(--field-border-disabled, #d1d5db);
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-/* Input & Textarea Shared Styles 
-  They share the same font and color inheritance.
-*/
 .field-text__input {
   flex: 1;
   width: 100%;
   height: 100%;
   border: none;
   background: transparent;
-  padding: 0 var(--field-padding-x);
-  font-family: var(--field-font-family);
-  font-size: var(--field-font-size);
-  color: var(--field-text);
+  padding: 0 var(--field-padding-x, 0.75rem);
+  font-family: inherit;
+  font-size: var(--field-font-size, 14px);
+  color: var(--field-text, #111827);
   outline: none;
   min-width: 0;
-  /* Flexbox fix */
-}
-
-/* Adjust padding if adornments are present */
-.field-text__container:has(.field-adornment--prefix) .field-text__input {
-  padding-left: 0;
-}
-
-.field-text__container:has(.field-adornment--suffix) .field-text__input {
-  padding-right: 0;
 }
 
 .field-text__input::placeholder {
-  color: var(--field-text-placeholder);
-  opacity: 1;
-  /* Firefox fix */
+  color: var(--field-text-placeholder, #6b7280);
 }
 
-/* Textarea Specifics 
-  Standard height is auto, but min-height matches field height
-*/
 textarea.field-text__input {
   padding-top: 8px;
   padding-bottom: 8px;
-  min-height: var(--field-height);
-  resize: vertical;
+  min-height: var(--field-height, 2.5rem);
   line-height: 1.5;
-  display: block;
 }
 
-/* When disabled */
-.field-text__input:disabled {
-  cursor: not-allowed;
-  color: var(--field-text-disabled);
-}
-
-/* Character Count */
 .field-text__count {
   align-self: flex-end;
   font-size: 0.75rem;
-  color: var(--field-text-placeholder);
+  color: var(--field-text-placeholder, #6b7280);
   margin-top: 4px;
-  font-variant-numeric: tabular-nums;
 }
 
 .field-text__count--limit {
-  color: var(--field-text-error);
+  color: var(--field-text-error, #ef4444);
 }

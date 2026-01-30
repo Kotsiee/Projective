@@ -20,7 +20,6 @@
   }
 
   .nav-bar-user__search {
-    /* background-color: blue; */
     width: calc(100% / 3);
     height: 100%;
     display: flex;
@@ -29,12 +28,33 @@
   }
 
   .nav-bar-user__actions {
-    /* background-color: green; */
     width: calc(100% / 3);
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: right;
     gap: 1rem;
+  }
+}
+
+.nav-bar-user__profile__btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+
+  transition: background-color var(--medium) ease-in-out;
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+
+  &.active,
+  &:active {
+    background-color: var(--primary-active);
   }
 }

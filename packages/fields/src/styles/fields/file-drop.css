@@ -1,5 +1,4 @@
-/* FileDrop Styles */
-
+/* #region 1. BLOCK: field-file */
 .field-file {
   display: flex;
   flex-direction: column;
@@ -7,6 +6,9 @@
   width: 100%;
 }
 
+/* #endregion */
+
+/* #region 2. ELEMENT: field-file__dropzone */
 .field-file__dropzone {
   display: flex;
   flex-direction: column;
@@ -19,6 +21,7 @@
   transition: all var(--field-transition);
   cursor: pointer;
   text-align: center;
+  min-height: 120px;
 }
 
 .field-file__dropzone:hover {
@@ -26,70 +29,35 @@
   border-color: var(--field-border-hover);
 }
 
-.field-file__dropzone--dragover {
-  background-color: var(--primary-50);
-  border-color: var(--primary-500);
+/* MATCHES LOGIC: field-file__dropzone--dragging */
+.field-file__dropzone--dragging {
+  background-color: var(--primary-surface);
+  border-color: var(--field-border-focus);
+  border-style: solid;
+}
+
+.field-file__dropzone--error {
+  border-color: var(--field-border-error);
 }
 
 .field-file__dropzone--disabled {
   background-color: var(--field-bg-disabled);
   border-color: var(--field-border-disabled);
   cursor: not-allowed;
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
-.field-file__icon {
-  color: var(--field-text-placeholder);
-  margin-bottom: 8px;
-}
+/* #endregion */
 
+/* #region 3. ELEMENTS: Content & Text */
 .field-file__text {
   font-size: var(--field-font-size);
   color: var(--field-text);
-}
-
-.field-file__subtext {
-  font-size: 0.875em;
-  color: var(--field-text-placeholder);
-  margin-top: 4px;
+  font-weight: 500;
 }
 
 .field-file__input {
   display: none;
 }
 
-/* File List */
-.field-file__list {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.field-file__item {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  background-color: var(--field-bg);
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-}
-
-.field-file__item-name {
-  flex: 1;
-  font-size: 0.875em;
-  color: var(--field-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.field-file__item-remove {
-  color: var(--field-text-placeholder);
-  cursor: pointer;
-  padding: 4px;
-}
-
-.field-file__item-remove:hover {
-  color: var(--error-500);
-}
+/* #endregion */

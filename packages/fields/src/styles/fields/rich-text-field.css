@@ -1,4 +1,8 @@
-/* Base Layout */
+/* #region 1. BLOCK: field-rich-text */
+/**
+ * @file rich-text-field.css
+ * @description Styles for the Quill-based rich text editor using semantic HSL tokens.
+ */
 .field-rich-text {
     display: flex;
     flex-direction: column;
@@ -10,7 +14,7 @@
     border: 1px solid var(--field-border);
     border-radius: var(--field-radius);
     background-color: var(--field-bg);
-    transition: border-color 0.2s;
+    transition: border-color var(--fast);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -31,10 +35,12 @@
 }
 
 .field-rich-text__container--warning {
-    border-color: var(--warning-500) !important;
+    border-color: var(--warning) !important;
 }
 
-/* Inline Variant */
+/* #endregion */
+
+/* #region 2. ELEMENT: field-rich-text--inline */
 .field-rich-text--inline .field-rich-text__container {
     border: none;
     background-color: transparent;
@@ -47,7 +53,7 @@
     padding: 0;
     padding-bottom: 8px;
     opacity: 0.6;
-    transition: opacity 0.2s;
+    transition: opacity var(--fast);
 }
 
 .field-rich-text--inline:focus-within .ql-toolbar.ql-snow,
@@ -64,11 +70,13 @@
     min-height: 0;
 }
 
-/* --- Quill Base Overrides --- */
+/* #endregion */
+
+/* #region 3. QUILL OVERRIDES: Toolbar & Container */
 .ql-toolbar.ql-snow {
     border: none;
-    border-bottom: 1px solid var(--border-subtle);
-    background-color: var(--bg-surface-subtle);
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--input-bg);
     font-family: inherit;
     padding: 8px;
     z-index: 2;
@@ -76,19 +84,16 @@
 
 .ql-container.ql-snow {
     border: none;
-    font-family: var(--field-font-family);
+    font-family: inherit;
     font-size: var(--field-font-size);
     color: var(--field-text);
-    /* Flex grow to allow max-height to work properly on the container if needed, 
-       but usually max-height is applied to .ql-editor */
 }
 
 .ql-editor {
     min-height: 100px;
     padding: 16px;
     line-height: 1.6;
-    /* Smooth scrolling */
-    overflow-y: auto; 
+    overflow-y: auto;
 }
 
 .ql-editor.ql-blank::before {
@@ -101,32 +106,33 @@
     left: 0;
 }
 
-/* Character Count */
+/* #endregion */
+
+/* #region 4. QUILL OVERRIDES: Status & ReadOnly */
 .field-rich-text__count {
     align-self: flex-end;
     font-size: 0.75rem;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     margin-top: 4px;
     font-variant-numeric: tabular-nums;
 }
 
 .field-rich-text__count--limit {
-    color: var(--text-error);
+    color: var(--field-text-error);
     font-weight: 500;
 }
 
-/* Read Only Mode */
 .field-rich-text--readonly .ql-toolbar {
     display: none;
     border-bottom: none;
 }
 
 .field-rich-text--readonly .field-rich-text__container {
-    background-color: var(--bg-surface-disabled);
+    background-color: var(--field-bg-disabled);
 }
 
 .field-rich-text--readonly .ql-container.ql-snow {
-    color: var(--field-text); 
+    color: var(--field-text-disabled);
     opacity: 0.8;
 }
 
@@ -143,18 +149,46 @@
     padding: 0;
 }
 
-/* Icons Colors */
-.ql-snow .ql-stroke { stroke: var(--text-secondary); }
-.ql-snow .ql-fill { fill: var(--text-secondary); }
-.ql-snow .ql-picker { color: var(--text-secondary); }
+/* #endregion */
 
-.ql-snow .ql-picker:hover, .ql-snow .ql-picker.ql-expanded { color: var(--text-primary); }
-.ql-snow .ql-picker-options {
-    background-color: var(--bg-overlay);
-    border-color: var(--border-default);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* #region 5. QUILL OVERRIDES: Icons & Pickers */
+.ql-snow .ql-stroke {
+    stroke: var(--text-muted);
 }
-.ql-snow .ql-picker-item:hover { color: var(--text-brand); }
-.ql-snow .ql-active .ql-stroke { stroke: var(--text-brand); }
-.ql-snow .ql-active .ql-fill { fill: var(--text-brand); }
-.ql-toolbar.ql-snow button { margin-right: 4px; }
+
+.ql-snow .ql-fill {
+    fill: var(--text-muted);
+}
+
+.ql-snow .ql-picker {
+    color: var(--text-muted);
+}
+
+.ql-snow .ql-picker:hover,
+.ql-snow .ql-picker.ql-expanded {
+    color: var(--text-main);
+}
+
+.ql-snow .ql-picker-options {
+    background-color: var(--card);
+    border-color: var(--field-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ql-snow .ql-picker-item:hover {
+    color: var(--primary);
+}
+
+.ql-snow .ql-active .ql-stroke {
+    stroke: var(--primary);
+}
+
+.ql-snow .ql-active .ql-fill {
+    fill: var(--primary);
+}
+
+.ql-toolbar.ql-snow button {
+    margin-right: 4px;
+}
+
+/* #endregion */

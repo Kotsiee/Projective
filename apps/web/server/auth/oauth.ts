@@ -24,8 +24,6 @@ export async function getProviderRedirectUrl(
 		} as any,
 	});
 
-	console.log({ provider, url: data?.url }, error);
-
 	if (error || !data?.url) {
 		throw new Error(error?.message || 'OAuth init failed');
 	}

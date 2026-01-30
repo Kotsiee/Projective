@@ -5,11 +5,11 @@ import { relative, resolve } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./documentation',
+	'./apps/web/styles/themes/variables',
 ];
 
 // 2. The existing file to REPLACE (This will be overwritten)
-const OUTPUT_FILE = 'codebase_context.md';
+const OUTPUT_FILE = 'variables.md';
 
 // 3. Filtering options
 const IGNORE_DIRS = ['.git', 'node_modules', '_fresh', '.vscode', 'cov_profile', 'docs', 'tests'];
@@ -26,8 +26,6 @@ const IGNORE_FILES = [
 const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.css', '.md', '.json', '.toml'];
 
 // ---------------------
-
-console.log('📦 Packing selected folders...');
 
 // Initialize output (This string effectively replaces the file content)
 let output = '# Selected Codebase Context\n\n';
@@ -100,8 +98,6 @@ for (const target of TARGET_PATHS) {
 			// Get path relative to project root for clarity in the output file
 			const relPath = relative('.', entry.path);
 
-			console.log(`Reading: ${relPath}`);
-
 			try {
 				const content = await Deno.readTextFile(entry.path);
 				output += `### File: ${relPath}\n\n`;
@@ -119,4 +115,3 @@ for (const target of TARGET_PATHS) {
 
 // Write (Overwrite) the file
 await Deno.writeTextFile(OUTPUT_FILE, output);
-console.log(`✅ Done! Content replaced in: ${OUTPUT_FILE}`);

@@ -39,7 +39,7 @@ export default function MyForm() {
 			label='Deadline'
 			placeholder='YYYY-MM-DD'
 			defaultValue={new DateTime()}
-			onChange={(date) => console.log('Selected:', date)}
+			onChange={(date) => 
 		/>
 	);
 }

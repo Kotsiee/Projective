@@ -1,0 +1,57 @@
+[data-tooltip] {
+    position: relative;
+    overflow: visible;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    color: var(--text-medium);
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--fast) ease, transform var(--fast) ease;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
+/* --- POSITIONS --- */
+
+/* Default (Bottom) - mirrors your original code */
+[data-tooltip]:not([data-tooltip-position])::after,
+[data-tooltip-position="bottom"]::after {
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 0.5rem);
+}
+
+/* Top */
+[data-tooltip-position="top"]::after {
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -0.5rem);
+}
+
+/* Right */
+[data-tooltip-position="right"]::after {
+    left: 100%;
+    top: 50%;
+    transform: translate(0.5rem, -50%);
+}
+
+/* Left */
+[data-tooltip-position="left"]::after {
+    right: 100%;
+    top: 50%;
+    transform: translate(-0.5rem, -50%);
+}

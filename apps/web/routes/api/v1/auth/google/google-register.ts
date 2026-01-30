@@ -9,7 +9,6 @@ export const handler = define.handlers({
 			const next = url.searchParams.get('next') || '/';
 
 			const redirect = await getProviderRedirectUrl('google', 'register', url, next);
-			console.log('redirect', redirect, url.href, next);
 
 			return new Response(null, {
 				status: 303,
@@ -17,7 +16,6 @@ export const handler = define.handlers({
 			});
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'OAuth init failed';
-			console.log('redirect error', msg);
 
 			return new Response(
 				JSON.stringify({ error: { code: 'oauth_init_failed', message: msg } }),

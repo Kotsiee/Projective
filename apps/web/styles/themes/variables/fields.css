@@ -1,0 +1,45 @@
+/* #region FIELD COMPONENT MAPPINGS */
+:root {
+    /* Move form-specific structural colors here */
+    --input-bg: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+    --disabled-bg: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.10);
+
+    /* Backgrounds */
+    --field-bg: var(--card);
+    --field-bg-hover: var(--input-bg);
+    --field-bg-disabled: var(--disabled-bg);
+    --field-bg-active: var(--card);
+
+    /* Borders */
+    --field-border: var(--border-color);
+    --field-border-hover: var(--text-muted);
+    --field-border-focus: var(--primary);
+    --field-border-error: var(--danger);
+    --field-border-disabled: var(--border-color);
+
+    /* Text */
+    --field-text: var(--text-main);
+    --field-text-placeholder: var(--text-muted);
+    --field-text-label: var(--text-main);
+    --field-text-disabled: var(--text-disabled);
+    --field-text-error: var(--danger);
+
+    /* Geometry & Transition (Mapped from ui.css) */
+    --field-height: var(--input-height);
+    --field-padding-x: var(--input-padding-x);
+    --field-radius: var(--border-radius);
+    --field-transition: var(--fast) cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Effects */
+    --field-ring-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.15);
+    --field-ripple-color: var(--primary-surface);
+}
+
+:root[data-theme="dark"] {
+    /* Higher contrast structural colors for dark mode */
+    --input-bg: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.08);
+    --field-bg: hsl(var(--bg-hue), var(--bg-saturation), 12%);
+    --field-ring-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.25);
+}
+
+/* #endregion */

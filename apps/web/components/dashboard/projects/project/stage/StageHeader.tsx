@@ -14,7 +14,6 @@ export default function StageHeader() {
 	}
 
 	useEffect(() => {
-		console.log(globalThis.location.href);
 	}, []);
 
 	return (

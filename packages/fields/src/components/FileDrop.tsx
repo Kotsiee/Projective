@@ -1,29 +1,31 @@
+/* #region Imports */
 import '../styles/fields/file-drop.css';
 import { JSX } from 'preact';
 import { Signal, useSignal } from '@preact/signals';
-import { FileFieldProps, FileWithMeta } from '../types/file.ts';
-import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
 import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
 import { useFileProcessor } from '../hooks/useFileProcessor.ts';
+import { FileWithMeta } from '@projective/types';
+import { FileFieldProps } from '../types/file.ts';
+/* #endregion */
 
+/**
+ * @function FileDrop
+ * @description A drag-and-drop file upload component that integrates with
+ * the projective design system and file processing pipeline.
+ */
 export function FileDrop(props: FileFieldProps) {
+	// #region State & Setup
 	const {
 		id,
 		label,
 		value,
-		defaultValue,
 		onChange,
 		accept,
 		multiple,
-		maxSize,
-		maxFiles,
 		disabled,
 		className,
 		style,
-		position,
-		floatingRule,
-		required,
-		floating,
 		processors,
 		onDrop,
 		error,
@@ -31,32 +33,32 @@ export function FileDrop(props: FileFieldProps) {
 		warning,
 		info,
 		dropzoneLabel,
+		required,
+		floatingRule = 'never', // Usually static for large dropzones
 	} = props;
 
-	// Internal state for files if not controlled
 	const internalFiles = useSignal<FileWithMeta[]>([]);
-
-	// Determine if controlled
 	const isControlled = value !== undefined;
 	const currentFiles = isControlled ? (value || []) : internalFiles.value;
 
 	const handleFilesChange = (newFiles: FileWithMeta[]) => {
-		if (!isControlled) {
-			internalFiles.value = newFiles;
-		}
+		if (!isControlled) internalFiles.value = newFiles;
 		onChange?.(newFiles);
 	};
 
-	const { addFiles, removeFile } = useFileProcessor(
+	const { addFiles } = useFileProcessor(
 		currentFiles,
 		processors,
 		handleFilesChange,
 	);
 
 	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const isError = error instanceof Signal ? error.value : error;
 	const inputRef = useSignal<HTMLInputElement | null>(null);
 	const isDragging = useSignal(false);
+	// #endregion
 
+	// #region Event Handlers
 	const handleDragOver = (e: DragEvent) => {
 		e.preventDefault();
 		if (isDisabled) return;
@@ -75,9 +77,8 @@ export function FileDrop(props: FileFieldProps) {
 
 		if (e.dataTransfer?.files) {
 			const dropped = Array.from(e.dataTransfer.files);
-			// TODO: Validate maxSize/maxFiles here before adding
 			addFiles(dropped);
-			onDrop?.(dropped, []); // TODO: Separate rejected
+			onDrop?.(dropped, []);
 		}
 	};
 
@@ -93,27 +94,25 @@ export function FileDrop(props: FileFieldProps) {
 			inputRef.value.click();
 		}
 	};
+	// #endregion
 
 	return (
 		<div className={`field-file ${className || ''}`} style={style}>
-			{
-				/* <LabelWrapper
+			<LabelWrapper
 				id={id}
 				label={label}
 				disabled={isDisabled}
-				position={position}
-				// FIX: Default to 'never' so label is static
-				floatingRule={floatingRule ?? 'never'}
 				required={required}
-				floating={floating}
-			/> */
-			}
+				error={!!isError}
+				floatingRule={floatingRule}
+			/>
 
 			<div
 				className={[
 					'field-file__dropzone',
 					isDragging.value && 'field-file__dropzone--dragging',
 					isDisabled && 'field-file__dropzone--disabled',
+					isError && 'field-file__dropzone--error',
 				].filter(Boolean).join(' ')}
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}
@@ -139,48 +138,6 @@ export function FileDrop(props: FileFieldProps) {
 					</div>
 				</div>
 			</div>
-
-			{/* File List */}
-			{
-				/* {currentFiles.length > 0 && (
-				<div className='field-file__list'>
-					{currentFiles.map((file) => (
-						<div key={file.id} className='field-file__item'>
-							<div className='field-file__item-info'>
-								<span className='field-file__item-name'>{file.file.name}</span>
-								<span className='field-file__item-size'>
-									{(file.file.size / 1024).toFixed(1)} KB
-								</span>
-							</div>
-
-							{file.status === 'processing' && (
-								<div className='field-file__progress'>
-									<div
-										className='field-file__progress-bar'
-										style={{ width: `${file.progress}%` }}
-									/>
-								</div>
-							)}
-
-							{file.status === 'error' && (
-								<div className='field-file__error'>
-									{file.errors[0]?.message}
-								</div>
-							)}
-
-							<button
-								type='button'
-								className='field-file__remove'
-								onClick={() => removeFile(file.id)}
-								disabled={!!isDisabled}
-							>
-								×
-							</button>
-						</div>
-					))}
-				</div>
-			)} */
-			}
 
 			<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
 		</div>
