@@ -1,13 +1,17 @@
 import { useSignal } from '@preact/signals';
-import {
-	IconArrowLeft,
-	IconCheck,
-	IconFileDescription,
-	IconListCheck,
-	IconUpload,
-} from '@tabler/icons-preact';
+import { IconCheck, IconFileDescription, IconListCheck, IconUpload } from '@tabler/icons-preact';
 
-import { Step, Stepper, StepperHeader, toast, useStepperContext } from '@projective/ui';
+import {
+	Step,
+	Stepper,
+	StepperHeader,
+	WizardFooter,
+	WizardForm,
+	WizardLayout,
+	WizardPreview,
+	WizardStage,
+} from '@projective/ui';
+
 import ProjectDetails from '@components/dashboard/projects/new/ProjectDetails.tsx';
 import ProjectLegal from '@components/dashboard/projects/new/ProjectLegal.tsx';
 import ProjectStages from '@components/dashboard/projects/new/ProjectStages.tsx';
@@ -17,42 +21,6 @@ import {
 	SaveDraftButton,
 } from '@components/dashboard/projects/new/ProjectActions.tsx';
 import { ProjectFormProvider } from '@contexts/NewProjectContext.tsx';
-
-// --- Updated Footer ---
-function ProjectStepperFooter() {
-	const { next, back, activeStep, totalSteps } = useStepperContext();
-	const isFirst = activeStep.value === 0;
-	const isLast = activeStep.value === totalSteps.value - 1;
-
-	return (
-		<div className='new-project__actions'>
-			<SaveDraftButton />
-
-			<div className='new-project__nav-buttons'>
-				<button
-					type='button'
-					className='btn btn--secondary'
-					onClick={back}
-					disabled={isFirst}
-				>
-					Back
-				</button>
-
-				{!isLast
-					? (
-						<button
-							type='button'
-							className='btn btn--primary'
-							onClick={next}
-						>
-							Next Step
-						</button>
-					)
-					: <PublishButton />}
-			</div>
-		</div>
-	);
-}
 
 export default function NewProjectIsland() {
 	const activeStep = useSignal(0);
@@ -74,48 +42,62 @@ export default function NewProjectIsland() {
 
 	return (
 		<ProjectFormProvider>
-			<div className='new-project'>
-				<div className='new-project__header'>
-					<h1 className='new-project__title'>
-						<IconArrowLeft />
-						Create New Project
-					</h1>
-				</div>
+			<WizardLayout
+				title='Create New Project'
+				backHref='/projects'
+			>
+				<Stepper
+					activeStep={activeStep.value}
+					onStepChange={(s) => activeStep.value = s}
+					linear
+					orientation='horizontal'
+					className='wizard__stepper'
+				>
+					<div className='wizard__stepper-header'>
+						<StepperHeader>
+							<Step
+								label='Details'
+								description='Basic Info'
+								icon={<IconFileDescription size={20} />}
+							/>
+							<Step label='Legal' description='IP & Screening' icon={<IconCheck size={20} />} />
+							<Step label='Stages' description='Workflow' icon={<IconListCheck size={20} />} />
+							<Step label='Publish' description='Finalize' icon={<IconUpload size={20} />} />
+						</StepperHeader>
+					</div>
 
-				<div className='new-project__content'>
-					<Stepper
-						activeStep={activeStep.value}
-						onStepChange={(s) => activeStep.value = s}
-						linear
-						orientation='horizontal'
-						style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-					>
-						<div className='new-project__stepper-container'>
-							<StepperHeader>
-								<Step
-									label='Details'
-									description='Basic Info'
-									icon={<IconFileDescription size={20} />}
-								/>
-								<Step label='Legal' description='IP & Screening' icon={<IconCheck size={20} />} />
-								<Step label='Stages' description='Workflow' icon={<IconListCheck size={20} />} />
-								<Step label='Publish' description='Finalize' icon={<IconUpload size={20} />} />
-							</StepperHeader>
-						</div>
+					<WizardStage>
+						{/* Left Side: Form */}
+						<WizardForm>
+							{renderStepContent(activeStep.value)}
+						</WizardForm>
 
-						<div className='new-project__content__stage'>
-							<div className='new-project__edit'>
-								{renderStepContent(activeStep.value)}
+						{/* Right Side: Preview (Placeholder for now) */}
+						<WizardPreview>
+							<div
+								style={{
+									height: '100%',
+									width: '100%',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									color: 'var(--text-disabled)',
+									background: 'var(--input-bg)',
+									borderRadius: 'var(--border-radius)',
+									border: '1px dashed var(--border-color)',
+								}}
+							>
+								Project Preview
 							</div>
-							<div className='new-project__preview'>
-								Live Preview Area
-							</div>
-						</div>
+						</WizardPreview>
+					</WizardStage>
 
-						<ProjectStepperFooter />
-					</Stepper>
-				</div>
-			</div>
+					<WizardFooter
+						finalAction={<PublishButton />}
+						secondaryAction={<SaveDraftButton />}
+					/>
+				</Stepper>
+			</WizardLayout>
 		</ProjectFormProvider>
 	);
 }

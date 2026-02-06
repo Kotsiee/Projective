@@ -86,15 +86,10 @@ CREATE POLICY "View budget rules" ON projects.stage_budget_rules
 
 DROP POLICY IF EXISTS "Users can view/manage own contracts" ON projects.maintenance_contracts;
 
+-- FIXED: Simplified check because freelancer_profile_id IS the user_id now
 CREATE POLICY "Users can view/manage own contracts" ON projects.maintenance_contracts FOR ALL TO public USING (
     (
-        freelancer_profile_id IN (
-            SELECT freelancer_profiles.id
-            FROM org.freelancer_profiles
-            WHERE (
-                    freelancer_profiles.user_id = auth.uid ()
-                )
-        )
+        freelancer_profile_id = auth.uid ()
     )
     OR (
         EXISTS (

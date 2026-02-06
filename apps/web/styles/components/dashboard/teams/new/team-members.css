@@ -1,0 +1,63 @@
+.team-members {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.team-members__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.team-members__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.team-members__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.team-members__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.team-members__action {
+    /* Align the button visually with the inputs */
+    padding-top: 0.125rem;
+}
+
+/* Custom override for the remove button color if not supported by prop directly */
+.team-members__remove-btn {
+    color: var(--text-muted);
+}
+
+.team-members__remove-btn:hover {
+    color: var(--danger);
+    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1);
+}
+
+.team-members__add {
+    align-self: flex-start;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

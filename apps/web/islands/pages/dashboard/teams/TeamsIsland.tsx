@@ -1,15 +1,16 @@
-import '@styles/components/dashboard/teams/team-grid.css';
+import '@styles/components/dashboard/teams/teams-island.css';
 
 import { useMemo } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { IconPlus, IconSearch } from '@tabler/icons-preact';
 import { DataDisplay, RestDataSource } from '@projective/data';
-import { SelectField } from '@projective/fields';
+import { SelectField, TextField } from '@projective/fields';
+import { Button } from '@projective/ui';
 import { DashboardTeam } from '@contracts/dashboard/teams/Teams.ts';
 import { SelectOption } from '@projective/types';
 import { TeamCard } from '@components/dashboard/teams/TeamCard.tsx';
 
-export default function TeamsGrid() {
+export default function TeamsIsland() {
 	const searchQuery = useSignal('');
 	const roleFilter = useSignal<'all' | 'owner' | 'member'>('all');
 
@@ -23,7 +24,6 @@ export default function TeamsGrid() {
 		return new RestDataSource<DashboardTeam, DashboardTeam>({
 			url: '/api/v1/dashboard/teams',
 			keyExtractor: (item) => item.team_id,
-
 			fetchOptions: {
 				credentials: 'include',
 			},
@@ -37,28 +37,35 @@ export default function TeamsGrid() {
 	}, [searchQuery.value, roleFilter.value]);
 
 	const handleSearchInput = (e: InputEvent) => {
-		searchQuery.value = (e.target as HTMLInputElement).value;
+		searchQuery.value = (e.currentTarget as HTMLInputElement).value;
 	};
 
 	return (
-		<div className='teams-grid'>
-			{/* Header / Controls */}
-			<div className='teams-grid__header'>
-				<div className='teams-grid__controls'>
-					<div className='teams-grid__search'>
-						<div className='teams-grid__search-icon'>
-							<IconSearch size={16} />
-						</div>
-						<input
-							type='text'
-							className='teams-grid__input'
+		<div className='teams-island'>
+			{/* Page Header */}
+			<div className='teams-island__page-header'>
+				<h1>Teams</h1>
+				<p>
+					Manage your agencies, collaborate with others, and view your active memberships.
+				</p>
+			</div>
+
+			{/* Controls Toolbar */}
+			<div className='teams-island__toolbar'>
+				<div className='teams-island__controls'>
+					<div className='teams-island__search'>
+						<TextField
+							name='team-search'
 							placeholder='Search teams...'
 							value={searchQuery}
 							onInput={handleSearchInput}
+							prefix={<IconSearch size={16} style={{ color: 'var(--text-muted)' }} />}
+							floating={false}
+							className='teams-island__search-input'
 						/>
 					</div>
 
-					<div className='teams-grid__filter'>
+					<div className='teams-island__filter'>
 						<SelectField
 							name='role-filter'
 							value={roleFilter}
@@ -67,19 +74,24 @@ export default function TeamsGrid() {
 							searchable={false}
 							multiple={false}
 							floating={false}
-							placeholder='Filter by Role'
+							placeholder='Filter'
 						/>
 					</div>
 				</div>
 
-				<a href='/teams/new' className='teams-grid__create-btn'>
-					<IconPlus size={18} className='teams-grid__create-icon' />
-					Create Team
-				</a>
+				<div className='teams-island__actions'>
+					<Button
+						href='/teams/new'
+						variant='primary'
+						startIcon={<IconPlus size={18} />}
+					>
+						Create Team
+					</Button>
+				</div>
 			</div>
 
 			{/* Data Grid */}
-			<div className='teams-grid__content'>
+			<div className='teams-island__content'>
 				<DataDisplay<DashboardTeam, DashboardTeam>
 					dataSource={dataSource}
 					mode='grid'
@@ -88,8 +100,6 @@ export default function TeamsGrid() {
 					pageSize={24}
 					selectionMode='single'
 					renderItem={(team) => <TeamCard team={team} />}
-					onSelectionChange={(keys) => {
-					}}
 					interactive
 					scrollMode='window'
 				/>

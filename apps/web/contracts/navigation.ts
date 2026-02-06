@@ -50,7 +50,7 @@ export const apps2: INavApp[] = [
 	{
 		icon: IconBuilding,
 		name: 'Businesses',
-		link: '/businesses',
+		link: '/business',
 	},
 ];
 

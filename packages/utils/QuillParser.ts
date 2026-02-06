@@ -183,4 +183,17 @@ export function markdownToQuillDelta(md: string): QuillDelta | Promise<QuillDelt
 	return new MarkdownParser().markdownToDelta(md);
 }
 
+export function deltaToPlainText(delta: QuillDelta): string {
+	const ops = Array.isArray(delta) ? delta : (delta?.ops ?? []);
+
+	return ops
+		.map((op) => {
+			if (typeof op.insert === 'string') {
+				return op.insert;
+			}
+			return '';
+		})
+		.join('');
+}
+
 // #endregion

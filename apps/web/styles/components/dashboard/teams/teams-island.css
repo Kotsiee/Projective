@@ -1,0 +1,89 @@
+.teams-island {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    box-sizing: border-box;
+    min-height: 100%;
+    background-color: var(--bg);
+}
+
+/* --- Page Header --- */
+.teams-island__page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.teams-island__page-header h1 {
+    font-size: 1.875rem;
+    /* 30px */
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.teams-island__page-header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 40rem;
+    line-height: 1.5;
+}
+
+/* --- Toolbar Layout --- */
+.teams-island__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .teams-island__toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* --- Controls Group (Search + Filter) --- */
+.teams-island__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    flex: 1;
+}
+
+@media (min-width: 768px) {
+    .teams-island__controls {
+        max-width: 32rem;
+    }
+}
+
+/* Search Field Wrapper */
+.teams-island__search {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Filter Field Wrapper */
+.teams-island__filter {
+    width: 10rem;
+    flex-shrink: 0;
+}
+
+/* --- Actions Group --- */
+.teams-island__actions {
+    flex-shrink: 0;
+}
+
+/* --- Content Area --- */
+.teams-island__content {
+    width: 100%;
+    position: relative;
+    min-height: 200px;
+}

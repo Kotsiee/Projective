@@ -22,6 +22,7 @@ export interface UserState {
 	refresh: () => Promise<void>;
 	logout: () => Promise<void>;
 	switchTeam: (teamId: string) => Promise<boolean>;
+	switchProfile: (profileId: string, type: 'freelancer' | 'business') => Promise<boolean>;
 }
 
 const UserContext = createContext<UserState | null>(null);
@@ -71,8 +72,8 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 	const switchTeam = async (teamId: string): Promise<boolean> => {
 		try {
 			const csrf = getCsrfToken();
-
 			if (!csrf) return false;
+
 			const res = await fetch('/api/v1/auth/switch-team', {
 				method: 'POST',
 				body: JSON.stringify({ teamId }),
@@ -84,11 +85,37 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 				throw new Error(err.error?.message || 'Failed to switch team');
 			}
 
-			// Refresh profile to update activeTeamId
 			await fetchUser();
 			return true;
 		} catch (err) {
 			console.error('Switch Team Error:', err);
+			return false;
+		}
+	};
+
+	const switchProfile = async (
+		profileId: string,
+		type: 'freelancer' | 'business',
+	): Promise<boolean> => {
+		try {
+			const csrf = getCsrfToken();
+			if (!csrf) return false;
+
+			const res = await fetch('/api/v1/auth/switch-profile', {
+				method: 'POST',
+				body: JSON.stringify({ profileId, type }),
+				headers: { 'Content-Type': 'application/json', 'X-CSRF': csrf },
+			});
+
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.error?.message || 'Failed to switch profile');
+			}
+
+			await fetchUser();
+			return true;
+		} catch (err) {
+			console.error('Switch Profile Error:', err);
 			return false;
 		}
 	};
@@ -107,6 +134,7 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 				refresh: fetchUser,
 				logout,
 				switchTeam,
+				switchProfile,
 			}}
 		>
 			{children}

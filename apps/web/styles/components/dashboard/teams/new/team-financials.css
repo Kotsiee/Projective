@@ -1,0 +1,49 @@
+.team-financials {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.team-financials__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.team-financials__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.team-financials__info-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--input-bg);
+    /* Subtle background */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-main);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.team-financials__info-box strong {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.team-financials__rules-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.team-financials__section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 1rem 0;
+}

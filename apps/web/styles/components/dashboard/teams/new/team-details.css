@@ -1,0 +1,99 @@
+.team-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 48rem;
+    /* 768px - comfortable reading width */
+}
+
+.team-details__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.team-details__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Avatar Section */
+.team-details__avatar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.team-details__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.team-details__avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    position: relative;
+    background-color: var(--card);
+}
+
+.team-details__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-details__avatar-remove {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.team-details__avatar-remove:hover {
+    background-color: var(--danger);
+}
+
+/* Custom Dropzone Content Styling */
+.team-details__dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    height: 100%;
+    min-height: 120px;
+}
+
+.team-details__dropzone-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Form Layout */
+.team-details__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .team-details__row {
+        grid-template-columns: 1fr 1fr;
+    }
+}

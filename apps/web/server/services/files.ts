@@ -55,21 +55,38 @@ export class FileService {
 	static async finalizeUpload(fileId: string) {
 		const supabase = await supabaseClient();
 
-		const { data, error } = await supabase.functions.invoke('scan-file', {
+		// 1. Trigger Edge Function to Scan & Move File
+		const { data: scanResult, error: scanError } = await supabase.functions.invoke('scan-file', {
 			body: { fileId },
 		});
 
-		if (error) {
-			console.error('Scan Function Failed:', error);
+		if (scanError) {
+			console.error('Scan Function Failed:', scanError);
 			throw new Error('File processing failed');
 		}
 
-		return data;
-	}
+		// 2. Fetch the file record to get the definitive target path
+		const { data: file, error: dbError } = await supabase
+			.schema('files')
+			.from('items')
+			.select('target_bucket, target_path')
+			.eq('id', fileId)
+			.single();
 
-	private static async mockVirusScan(bucket: string, path: string): Promise<boolean> {
-		// In real life, send to ClamAV or external service
-		// await new Promise(r => setTimeout(r, 500));
-		return true;
+		if (dbError || !file) {
+			throw new Error('File record not found during finalization');
+		}
+
+		// 3. Generate Authoritative Public URL
+		// This uses the server's Supabase config, ensuring the domain is correct.
+		const { data: publicUrlData } = supabase
+			.storage
+			.from(file.target_bucket)
+			.getPublicUrl(file.target_path);
+
+		return {
+			...scanResult,
+			publicUrl: publicUrlData.publicUrl,
+		};
 	}
 }

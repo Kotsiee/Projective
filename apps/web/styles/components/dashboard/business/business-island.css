@@ -1,0 +1,81 @@
+.business-island {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    box-sizing: border-box;
+    min-height: 100%;
+    background-color: var(--bg);
+}
+
+/* --- Page Header --- */
+.business-island__page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.business-island__page-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.business-island__page-header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 40rem;
+    line-height: 1.5;
+}
+
+/* --- Toolbar Layout --- */
+.business-island__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .business-island__toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* --- Controls Group --- */
+.business-island__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    flex: 1;
+}
+
+@media (min-width: 768px) {
+    .business-island__controls {
+        max-width: 24rem;
+    }
+}
+
+.business-island__search {
+    flex: 1;
+    min-width: 0;
+}
+
+/* --- Actions Group --- */
+.business-island__actions {
+    flex-shrink: 0;
+}
+
+/* --- Content Area --- */
+.business-island__content {
+    width: 100%;
+    position: relative;
+    min-height: 200px;
+}

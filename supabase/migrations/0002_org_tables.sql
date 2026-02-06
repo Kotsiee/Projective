@@ -7,73 +7,102 @@ CREATE TABLE org.skills (
     CONSTRAINT skills_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE org.attachments (
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    owner_profile_id uuid NOT NULL,
-    bucket text NOT NULL,
-    path text NOT NULL,
-    original_filename text NOT NULL,
-    display_name text NOT NULL,
-    mime_type text NOT NULL,
-    size_bytes bigint NOT NULL,
-    sha256 text,
-    status text NOT NULL DEFAULT 'draft'::text,
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
-    updated_at timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT attachments_pkey PRIMARY KEY (id)
-);
-
 CREATE TABLE org.users_public (
     user_id uuid NOT NULL,
-    avatar_url text,
-    country text,
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
-    headline text NOT NULL DEFAULT ''::text,
-    bio text NOT NULL DEFAULT ''::text,
-    languages text[] NOT NULL DEFAULT '{}'::text[],
-    timezone text,
-    visibility text NOT NULL DEFAULT 'unlisted'::text,
+    username text NOT NULL UNIQUE,
     first_name text,
     last_name text,
-    username text NOT NULL UNIQUE,
+    avatar_url text,
+    country text,
+    timezone text,
+    languages text[] NOT NULL DEFAULT '{}'::text[],
     dob date NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    visibility text NOT NULL DEFAULT 'public'::text,
+    description jsonb NOT NULL DEFAULT '{}'::jsonb,
+    headline text NOT NULL DEFAULT ''::text,
     CONSTRAINT users_public_pkey PRIMARY KEY (user_id),
     CONSTRAINT users_public_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+
+CREATE TABLE org.freelancer_profiles (
+    user_id uuid NOT NULL,
+    hourly_rate integer,
+    skills text[] NOT NULL DEFAULT '{}'::text[],
+    availability_status text DEFAULT 'available',
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT freelancer_profiles_pkey PRIMARY KEY (user_id),
+    CONSTRAINT freelancer_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE org.business_profiles (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     owner_user_id uuid NOT NULL,
     name text NOT NULL,
+    slug text NOT NULL UNIQUE,
     legal_name text,
     logo_url text,
+    banner_url text,
     country text,
     billing_email text NOT NULL,
     plan text NOT NULL DEFAULT 'free'::text,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
     headline text NOT NULL DEFAULT ''::text,
-    bio text NOT NULL DEFAULT ''::text,
+    description jsonb NOT NULL DEFAULT '{}'::jsonb,
     languages text[] NOT NULL DEFAULT '{}'::text[],
     timezone text,
-    default_currency text,
+    default_currency text DEFAULT 'USD',
+    tax_id text,
+    address_line_1 text,
+    address_city text,
+    address_zip text,
     CONSTRAINT business_profiles_pkey PRIMARY KEY (id),
     CONSTRAINT business_profiles_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES auth.users(id)
 );
 
-CREATE TABLE org.freelancer_profiles (
+-- NEW: Business Roles (Custom permissions within a business)
+CREATE TABLE org.business_roles (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL UNIQUE,
-    hourly_rate integer,
-    skills text[] NOT NULL DEFAULT '{}'::text[],
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
-    bio text NOT NULL DEFAULT ''::text,
-    headline text NOT NULL DEFAULT ''::text,
-    languages text[] NOT NULL DEFAULT '{}'::text[],
-    timezone text,
-    country text,
-    visibility text NOT NULL DEFAULT 'public'::text,
-    CONSTRAINT freelancer_profiles_pkey PRIMARY KEY (id),
-    CONSTRAINT freelancer_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+    business_id uuid NOT NULL,
+    title text NOT NULL, 
+    permissions jsonb NOT NULL DEFAULT '{}'::jsonb, 
+    CONSTRAINT business_roles_pkey PRIMARY KEY (id),
+    CONSTRAINT business_roles_business_id_fkey FOREIGN KEY (business_id) REFERENCES org.business_profiles(id)
+);
+
+-- NEW: Business Memberships (Staff list)
+
+
+CREATE TABLE org.business_memberships (
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    business_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    role text NOT NULL DEFAULT 'member'::text, 
+    status text NOT NULL DEFAULT 'active'::text, 
+    joined_at timestamp with time zone NOT NULL DEFAULT now(),
+    
+    CONSTRAINT business_memberships_pkey PRIMARY KEY (id),
+    CONSTRAINT business_memberships_business_id_fkey FOREIGN KEY (business_id) REFERENCES org.business_profiles(id),
+    CONSTRAINT business_memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+    CONSTRAINT business_memberships_unique_user_per_business UNIQUE (business_id, user_id) 
+);
+
+CREATE TABLE org.portfolios (
+    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    user_id uuid NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    cover_url text,
+    attachment_id uuid,
+    is_public boolean NOT NULL DEFAULT true,
+    created_at timestamp
+    with
+        time zone NOT NULL DEFAULT now(),
+        CONSTRAINT portfolios_pkey PRIMARY KEY (id),
+        CONSTRAINT portfolios_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.freelancer_profiles (user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE org.teams (
@@ -82,6 +111,8 @@ CREATE TABLE org.teams (
     name text NOT NULL,
     slug text NOT NULL UNIQUE, 
     avatar_url text,
+    banner_url text,
+    headline text DEFAULT ''::text,
     description text NOT NULL DEFAULT ''::text,
     visibility text NOT NULL DEFAULT 'invite_only'::text, 
     subscription_tier text NOT NULL DEFAULT 'free'::text, 
@@ -109,22 +140,6 @@ CREATE TABLE org.user_emails (
         CONSTRAINT user_emails_pkey PRIMARY KEY (id),
         CONSTRAINT user_emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
         CONSTRAINT user_emails_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES org.users_public (user_id)
-);
-
-CREATE TABLE org.portfolios (
-    id uuid NOT NULL DEFAULT gen_random_uuid (),
-    freelancer_profile_id uuid NOT NULL,
-    title text NOT NULL,
-    description text NOT NULL,
-    cover_url text,
-    attachment_id uuid,
-    is_public boolean NOT NULL DEFAULT true,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT portfolios_pkey PRIMARY KEY (id),
-        CONSTRAINT portfolios_freelancer_profile_id_fkey FOREIGN KEY (freelancer_profile_id) REFERENCES org.freelancer_profiles (id),
-        CONSTRAINT portfolios_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENCES org.attachments (id)
 );
 
 CREATE TABLE org.team_roles (
@@ -190,4 +205,14 @@ CREATE TABLE org.user_skills (
     CONSTRAINT user_skills_pkey PRIMARY KEY (user_id, skill_id),
     CONSTRAINT user_skills_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
     CONSTRAINT user_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES org.skills (id)
+);
+
+CREATE TABLE org.user_preferences (
+    user_id uuid NOT NULL,
+    theme text DEFAULT 'system',
+    notification_email boolean DEFAULT true,
+    notification_push boolean DEFAULT false,
+    locale text DEFAULT 'en-US',
+    CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id),
+    CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 );

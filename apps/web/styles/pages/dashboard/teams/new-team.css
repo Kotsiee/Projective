@@ -1,26 +1,31 @@
-.new-team__container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    max-height: calc(100vh - var(--header-height) - 5rem);
-    position: relative;
-    padding-top: 2rem;
-}
-
+/* Ensure the root element fills the container defined in styles.css exactly */
 .new-team {
-    margin: 0 2rem;
     width: 100%;
-    height: 100%;
+
+    /* FIX: Use 'height' instead of 'max-height'.
+       This forces the container to ALWAYS be this tall, pinning the footer 
+       to the bottom even if the step content is short.
+    */
+    height: calc(100vh - var(--header-height) - 2rem);
+
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+
+    /* Use padding instead of margin to stay within the 100% constraints */
+    padding: 2rem;
+
+    /* Prevent the page body from scrolling; scroll should happen inside the form area */
+    overflow: hidden;
 }
 
 .new-team__header {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 1rem;
+    min-height: 3rem;
 }
 
 .new-team__title {
@@ -29,59 +34,93 @@
     gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--field-text);
+    color: var(--text-main);
     margin: 0;
+    line-height: 1;
 }
 
+/* Main Card Container */
 .new-team__content {
-    border-radius: var(--border-radius__large, 12px);
-    padding: 2rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--card);
+    flex: 1;
+    /* Removed min-height: 50vh because the parent now forces full height */
+    min-height: 0;
+
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+
+    padding: 2rem;
+    border-radius: var(--border-radius__large, 12px);
+    border: 1px solid var(--border-color);
+    background-color: var(--card);
+}
+
+/* Wrapper class passed to the Stepper component. */
+.new-team__stepper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
     flex: 1;
-    overflow: hidden;
 }
 
 .new-team__stepper-container {
+    flex-shrink: 0;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
 
+/* Stage Area (Split View: Form | Preview) */
 .new-team__content__stage {
+    flex: 1;
+    /* This fills all available space between header and footer */
+    min-height: 0;
+    /* CRITICAL: Allows .new-team__edit to scroll */
+
     display: flex;
     gap: 2rem;
-    flex: 1;
     overflow: hidden;
+    margin-top: 1.5rem;
 }
 
+/* Scrollable Form Area */
 .new-team__edit {
     flex: 3;
+    height: 100%;
     overflow-y: auto;
+    /* Internal scrollbar appears here */
     padding-right: 1rem;
+
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 .new-team__preview {
     flex: 1;
+    display: none;
     border-left: 1px solid var(--border-color);
     padding-left: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--gray-50);
-    border-radius: 8px;
-    color: var(--gray-400);
-    font-size: 0.875rem;
+    overflow: hidden;
 }
 
+@media (min-width: 1024px) {
+    .new-team__preview {
+        display: block;
+    }
+}
+
+/* Footer Actions */
 .new-team__actions {
+    flex-shrink: 0;
+    /* Ensures footer never squishes */
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+    /* Pinned to bottom of card because __stage has flex: 1 */
 }
 
 .new-team__nav-buttons {
@@ -90,7 +129,11 @@
 }
 
 .btn-save {
-    background-color: var(--field-bg);
-    border: 1px solid var(--field-border);
-    color: var(--field-text);
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-save:hover {
+    background-color: var(--border-color);
 }

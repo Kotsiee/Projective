@@ -4,19 +4,20 @@ import { useContext } from 'preact/hooks';
 import { Signal, useSignal } from '@preact/signals';
 import { FileWithMeta, Visibility } from '@projective/types';
 
-// Types matching your DB schema needs
 export interface TeamFormState {
 	name: Signal<string>;
 	slug: Signal<string>;
-	description: Signal<any>; // Delta format for RichText
+	headline: Signal<string>; // NEW
+	description: Signal<any>;
 	avatar: Signal<FileWithMeta | undefined>;
+	banner: Signal<FileWithMeta | undefined>;
 	visibility: Signal<string>;
 
 	// Financials
 	payoutModel: Signal<string>;
-	treasuryPercent: Signal<number>; // For 'smart_split' defaults
+	treasuryPercent: Signal<number>;
 
-	// Members (Simple invite list for creation)
+	// Members
 	invites: Signal<Array<{ email: string; role: string }>>;
 }
 
@@ -24,12 +25,14 @@ export function useTeamFormState(): TeamFormState {
 	return {
 		name: useSignal(''),
 		slug: useSignal(''),
+		headline: useSignal(''), // NEW
 		description: useSignal(JSON.stringify({ ops: [{ insert: '\n' }] })),
 		avatar: useSignal<FileWithMeta | undefined>(undefined),
+		banner: useSignal<FileWithMeta | undefined>(undefined),
 		visibility: useSignal<string>(Visibility.InviteOnly),
 
 		payoutModel: useSignal('manager_discretion'),
-		treasuryPercent: useSignal(10), // Default 10% to treasury
+		treasuryPercent: useSignal(10),
 
 		invites: useSignal([{ email: '', role: 'member' }]),
 	};

@@ -12,6 +12,7 @@ export interface DashboardTeam {
 	name: string;
 	slug: string;
 	avatar_url: string | null;
+	banner_url: string | null;
 	description: string;
 	user_role: string;
 	member_count: number;

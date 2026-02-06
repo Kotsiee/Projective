@@ -1,11 +1,12 @@
-import { SwitchProfileRequest, SwitchTeamRequest } from '@contracts/auth/context.ts'; // Assumed path
-import { fail, ok, Result } from '../core/http/result.ts';
-import { normaliseSupabaseError, normaliseUnknownError } from '../core/errors/normalise.ts';
-import { supabaseClient } from '../core/clients/supabase.ts';
+import { SwitchProfileRequest, SwitchTeamRequest } from '@contracts/auth/context.ts';
+import { fail, ok, Result } from '@server/core/http/result.ts';
+import { normaliseSupabaseError, normaliseUnknownError } from '@server/core/errors/normalise.ts';
+import { supabaseClient } from '@server/core/clients/supabase.ts';
 import { Deps } from '../_shared/types.ts';
 
 /**
- * Switches the current user's active context to a specific team.
+ * Switches the current user's active context to a specific TEAM.
+ * STRICT: Clears active_profile_id and active_profile_type.
  */
 export async function switchActiveTeam(
 	{ teamId }: SwitchTeamRequest,
@@ -22,14 +23,10 @@ export async function switchActiveTeam(
 		const { data: { user }, error: authError } = await supabase.auth.getUser();
 
 		if (authError || !user) {
-			return fail(
-				'unauthorized',
-				'You must be signed in to switch teams.',
-				401,
-			);
+			return fail('unauthorized', 'You must be signed in to switch teams.', 401);
 		}
 
-		// 1. Verify Membership
+		// 1. Verify Membership (Security Guard)
 		const { data: membership, error: memberError } = await supabase
 			.schema('org')
 			.from('team_memberships')
@@ -40,18 +37,19 @@ export async function switchActiveTeam(
 			.single();
 
 		if (memberError || !membership) {
-			// We use 403 Forbidden to hide existence or purely deny access
 			return fail('forbidden', 'You are not an active member of this team.', 403);
 		}
 
-		// 2. Update Session Context
+		// 2. Update Session Context (Mutually Exclusive)
 		const { error: updateError } = await supabase
 			.schema('security')
 			.from('session_context')
 			.upsert(
 				{
 					user_id: user.id,
-					active_team_id: teamId,
+					active_team_id: teamId, // SET Team
+					active_profile_id: null, // CLEAR Profile
+					active_profile_type: null, // CLEAR Type
 					updated_at: new Date().toISOString(),
 				},
 				{ onConflict: 'user_id' },
@@ -70,7 +68,8 @@ export async function switchActiveTeam(
 }
 
 /**
- * Switches the current user's active context to a specific profile (Freelancer or Business).
+ * Switches the current user's active context to a specific PROFILE (Freelancer or Business).
+ * STRICT: Clears active_team_id.
  */
 export async function switchActiveProfile(
 	{ profileId, type }: SwitchProfileRequest,
@@ -87,16 +86,12 @@ export async function switchActiveProfile(
 		const { data: { user }, error: authError } = await supabase.auth.getUser();
 
 		if (authError || !user) {
-			return fail(
-				'unauthorized',
-				'You must be signed in to switch profiles.',
-				401,
-			);
+			return fail('unauthorized', 'You must be signed in to switch profiles.', 401);
 		}
 
-		// 1. Verify Ownership
+		// 1. Verify Ownership (Security Guard)
 		const table = type === 'freelancer' ? 'freelancer_profiles' : 'business_profiles';
-		// For business profiles, check owner_user_id. For freelancer, check user_id.
+		// Business = owner_user_id, Freelancer = user_id
 		const ownerCol = type === 'freelancer' ? 'user_id' : 'owner_user_id';
 
 		const { data: profile, error: profileError } = await supabase
@@ -111,17 +106,16 @@ export async function switchActiveProfile(
 			return fail('forbidden', 'You do not own this profile.', 403);
 		}
 
-		// 2. Update Session Context
-		// Note: Switching profiles clears the active team to avoid ambiguous states
+		// 2. Update Session Context (Mutually Exclusive)
 		const { error: updateError } = await supabase
 			.schema('security')
 			.from('session_context')
 			.upsert(
 				{
 					user_id: user.id,
-					active_profile_id: profileId,
-					active_profile_type: type,
-					active_team_id: null, // Clear team context
+					active_profile_id: profileId, // SET Profile
+					active_profile_type: type, // SET Type
+					active_team_id: null, // CLEAR Team
 					updated_at: new Date().toISOString(),
 				},
 				{ onConflict: 'user_id' },

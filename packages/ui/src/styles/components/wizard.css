@@ -1,0 +1,119 @@
+/* Root Container: Pinned to viewport height */
+.wizard {
+    width: 100%;
+    /* Pin height to fill space between header and bottom */
+    height: calc(100vh - var(--header-height) - 1rem);
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    padding: 2rem;
+    overflow: hidden;
+}
+
+/* Header Section */
+.wizard__header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3rem;
+}
+
+.wizard__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1;
+}
+
+/* Main Card */
+.wizard__card {
+    flex: 1;
+    min-height: 0;
+    /* Critical for nested scroll */
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    padding: 2rem;
+    border-radius: var(--border-radius__large, 12px);
+    border: 1px solid var(--border-color);
+    background-color: var(--card);
+}
+
+/* Stepper Constraint Wrapper */
+.wizard__stepper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+}
+
+.wizard__stepper-header {
+    flex-shrink: 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Split View Stage (Form | Preview) */
+.wizard__stage {
+    flex: 1;
+    min-height: 0;
+
+    display: flex;
+    gap: 2rem;
+    overflow: hidden;
+    margin-top: 1.5rem;
+}
+
+/* Scrollable Form Area */
+.wizard__form {
+    flex: 3;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 1rem;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* Preview Pane */
+.wizard__preview {
+    flex: 1;
+    display: none;
+    border-left: 1px solid var(--border-color);
+    padding-left: 2rem;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+    .wizard__preview {
+        display: block;
+    }
+}
+
+/* Footer */
+.wizard__footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.wizard__nav-buttons {
+    display: flex;
+    gap: 0.75rem;
+}

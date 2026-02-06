@@ -5,18 +5,22 @@ import { switchActiveTeam } from '@server/auth/context.ts';
 export const handler = define.handlers({
 	async POST(ctx) {
 		try {
-			const { teamId } = await ctx.req.json();
+			const body = await ctx.req.json();
+			const { teamId } = body;
 
 			if (!teamId || typeof teamId !== 'string') {
 				return new Response(
-					JSON.stringify({ error: { code: 'bad_request', message: 'Missing teamId' } }),
+					JSON.stringify({
+						error: { code: 'bad_request', message: 'Missing teamId' },
+					}),
 					{ status: 400, headers: { 'Content-Type': 'application/json' } },
 				);
 			}
 
-			const result = await switchActiveTeam({ teamId }, {
-				getClient: () => supabaseClient(ctx.req),
-			});
+			const result = await switchActiveTeam(
+				{ teamId },
+				{ getClient: () => supabaseClient(ctx.req) },
+			);
 
 			if (!result.ok) {
 				return new Response(JSON.stringify({ error: result.error }), {

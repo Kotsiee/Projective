@@ -19,6 +19,7 @@ const TeamInviteSchema = z.object({
 });
 
 export const CreateTeamSchema = z.object({
+	id: z.string().uuid().optional(),
 	name: z.string()
 		.min(3, 'Team name must be at least 3 characters')
 		.max(100, 'Team name is too long'),
@@ -28,9 +29,13 @@ export const CreateTeamSchema = z.object({
 		.max(50, 'Handle is too long')
 		.regex(/^[a-z0-9-]+$/, 'Handle can only contain lowercase letters, numbers, and hyphens'),
 
+	// NEW: Headline Validation
+	headline: z.string().max(120, 'Headline is too long').optional(),
+
 	description: QuillDeltaSchema.optional(),
 
 	avatar_url: z.string().url().optional().or(z.literal('')),
+	banner_url: z.string().url().optional().or(z.literal('')),
 
 	visibility: z.nativeEnum(Visibility).default(Visibility.InviteOnly),
 

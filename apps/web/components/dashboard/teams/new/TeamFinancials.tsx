@@ -1,3 +1,5 @@
+import '@styles/components/dashboard/teams/new/team-financials.css';
+
 import { SelectField, TextField } from '@projective/fields';
 import { useNewTeamContext } from '@contexts/NewTeamContext.tsx';
 
@@ -10,9 +12,11 @@ export default function TeamFinancials() {
 	];
 
 	return (
-		<div className='new-project__details'>
-			<h2>Financial Model</h2>
-			<p className='text-gray-500 mb-6'>How should project earnings be distributed?</p>
+		<div className='team-financials'>
+			<div className='team-financials__header'>
+				<h2>Financial Model</h2>
+				<p className='team-financials__subtitle'>How should project earnings be distributed?</p>
+			</div>
 
 			<SelectField
 				name='payout_model'
@@ -26,7 +30,7 @@ export default function TeamFinancials() {
 				required
 			/>
 
-			<div className='mt-4 p-4 bg-gray-50 rounded border border-gray-200 text-sm text-gray-600'>
+			<div className='team-financials__info-box'>
 				{state.payoutModel.value === 'manager_discretion'
 					? (
 						<p>
@@ -45,8 +49,8 @@ export default function TeamFinancials() {
 			</div>
 
 			{state.payoutModel.value === 'smart_split' && (
-				<div className='mt-6'>
-					<h4 className='text-base font-medium mb-2'>Default Rules</h4>
+				<div className='team-financials__rules-section'>
+					<h4 className='team-financials__section-title'>Default Rules</h4>
 					<div style={{ maxWidth: '50%' }}>
 						<TextField
 							label='Team Treasury Cut (%)'

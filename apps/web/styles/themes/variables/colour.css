@@ -1,7 +1,10 @@
 /* #region 1. LOGIC SETTINGS */
 :root {
-        --lightness-delta: -8%;
+        --hover-delta: -8%;
         --active-delta: -12%;
+
+        --darker-delta: -20%;
+        --lighter-delta: 20%;
 
         /* #region 2. BASE PALETTE (H/S/L) */
         --bg-hue: 0;
@@ -40,10 +43,16 @@
         /* #region 3. GENERATED COLORS */
         --bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
         --header: hsl(var(--header-hue), var(--header-saturation), var(--header-lightness));
+
         --card: hsl(var(--card-hue), var(--card-saturation), var(--card-lightness));
+        --card-hover: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--hover-delta)));
+        --card-active: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--active-delta)));
+        --card-dark: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--darker-delta)));
+        --card-light: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--lighter-delta)));
 
         --primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
-        --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--lightness-delta)));
+        --primary-half: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.25);
+        --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--hover-delta)));
         --primary-active: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--active-delta)));
         --primary-surface: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.12);
 
@@ -54,6 +63,8 @@
 
         /* #region 4. GLOBAL SEMANTICS */
         --text-main: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
+        --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 30%);
+        --text-secondary: hsl(var(--text-hue), var(--text-saturation), calc(var(--text-lightness) + var(--lighter-delta)));
         --text-muted: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.6);
         --text-disabled: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
         --text-tertiary: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
@@ -68,8 +79,11 @@
 }
 
 :root[data-theme="dark"] {
-        --lightness-delta: 8%;
-        --active-delta: 12%;
+        --hover-delta: 6%;
+        --active-delta: 10%;
+
+        --darker-delta: 20%;
+        --lighter-delta: -20%;
 
         --bg-lightness: 10%;
         --header-lightness: 8%;
@@ -82,6 +96,7 @@
 
         --scrollbar-bg: hsl(var(--bg-hue), var(--bg-saturation), 10%);
         --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
+        --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 90%);
 }
 
 /* #endregion */

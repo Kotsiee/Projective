@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 import { Signal } from '@preact/signals';
-import { useRipple } from '../hooks/useRipple.ts';
+import { useRipple } from '@projective/ui';
 import '../styles/wrappers/effect-wrapper.css';
 
 interface EffectWrapperProps {

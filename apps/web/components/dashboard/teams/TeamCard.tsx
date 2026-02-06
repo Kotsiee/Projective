@@ -1,28 +1,22 @@
 import '@styles/components/dashboard/teams/team-card.css';
-import {
-	IconArrowRight,
-	IconCurrencyDollar,
-	IconDotsVertical,
-	IconShield,
-	IconUsers,
-} from '@tabler/icons-preact';
+import { IconUsers } from '@tabler/icons-preact';
 import { DashboardTeam } from '@contracts/dashboard/teams/Teams.ts';
 import { useUserContext } from '@contexts/UserContext.tsx';
+import { Card, metaPosition } from '../../card/Card.tsx';
+import { VNode } from 'preact';
+import { deltaToPlainText } from '@projective/utils';
 
 interface TeamCardProps {
 	team: DashboardTeam;
 }
 
-// Helper to extract plain text from Quill Delta JSON or return string as-is
 function getShortDescription(desc: string): string {
 	if (!desc) return 'No description provided.';
 	try {
-		// Detect if it looks like the Delta JSON string from your logs
 		if (desc.startsWith('{') && desc.includes('"ops"')) {
 			const parsed = JSON.parse(desc);
 			if (Array.isArray(parsed.ops)) {
 				return parsed.ops
-					// deno-lint-ignore no-explicit-any
 					.map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
 					.join('')
 					.trim() || 'No description provided.';
@@ -37,91 +31,42 @@ function getShortDescription(desc: string): string {
 export function TeamCard({ team }: TeamCardProps) {
 	const { user, switchTeam } = useUserContext();
 	const isOwner = team.user_role === 'owner';
-	const description = getShortDescription(team.description);
+	const description = deltaToPlainText(JSON.parse(getShortDescription(team.description)));
 
 	const isActive = user.value?.activeTeamId === team.team_id;
 
-	const handleSwitch = async (e: Event) => {
-		e.stopPropagation();
+	const handleSwitch = async () => {
 		if (isActive) return;
 		await switchTeam(team.team_id);
 	};
 
+	const meta: Partial<Record<metaPosition, VNode>> = {
+		'bottom-left': (
+			<div class='team-card__stat'>
+				<IconUsers size={14} />
+				<span>{team.member_count} Members</span>
+			</div>
+		),
+	};
+
 	return (
 		<div className={`team-card ${isActive ? 'team-card--active' : ''}`}>
+			<Card
+				owner={{
+					profilePictureUrl: team.avatar_url ??
+						'https://images.unsplash.com/photo-1574169208507-84376144848b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGFic3RyYWN0fGVufDB8fDB8fHww',
+					name: team.name,
+					handle: team.slug,
+				}}
+				type='active'
+				onClick={handleSwitch}
+				title={team.name}
+				description={description}
+				tags={[{ label: 'Owner' }]}
+				bannerUrl={team.banner_url ??
+					'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGFic3RyYWN0fGVufDB8fDB8fHww'}
+				meta={meta}
+			/>
 		</div>
 	);
 }
-
-// <div className={`team-card ${isActive ? 'team-card--active' : ''}`}>
-// 	{/* Header / Avatar */}
-// 	<div className='team-card__header'>
-// 		<div className='team-card__identity'>
-// 			<div className='team-card__avatar'>
-// 				{team.avatar_url
-// 					? (
-// 						<img
-// 							src={team.avatar_url}
-// 							alt={team.name}
-// 						/>
-// 					)
-// 					: <IconUsers size={20} />}
-// 			</div>
-// 			<div className='team-card__info'>
-// 				<h3 className='team-card__name' title={team.name}>
-// 					{team.name}
-// 				</h3>
-// 				<p className='team-card__slug'>@{team.slug}</p>
-// 			</div>
-// 		</div>
-
-// 		{isActive && <span className='team-card__active-badge'>Active</span>}
-
-// 		<button className='team-card__menu-btn'>
-// 			<IconDotsVertical size={16} />
-// 		</button>
-// 	</div>
-
-// 	{/* Body / Description */}
-// 	<div className='team-card__content'>
-// 		<p className='team-card__description' title={description}>
-// 			{description}
-// 		</p>
-// 	</div>
-
-// 	{/* Tags / Info */}
-// 	<div className='team-card__tags'>
-// 		<span
-// 			className={`team-card__tag ${
-// 				isOwner ? 'team-card__tag--owner' : 'team-card__tag--member'
-// 			}`}
-// 		>
-// 			<IconShield size={10} />
-// 			{team.user_role.toUpperCase()}
-// 		</span>
-
-// 		{team.payout_model === 'smart_split' && (
-// 			<span className='team-card__tag team-card__tag--smart-split'>
-// 				<IconCurrencyDollar size={10} />
-// 				Smart Split
-// 			</span>
-// 		)}
-// 	</div>
-
-// 	{/* Footer / Meta */}
-// 	<div className='team-card__footer'>
-// 		<div className='team-card__stat'>
-// 			<IconUsers size={14} />
-// 			<span>{team.member_count} Members</span>
-// 		</div>
-
-// 		<button
-// 			className={`team-card__switch-btn ${isActive ? 'team-card__switch-btn--disabled' : ''}`}
-// 			onClick={handleSwitch}
-// 			disabled={isActive}
-// 		>
-// 			{isActive ? 'Current' : 'Switch'}
-// 			{!isActive && <IconArrowRight size={14} />}
-// 		</button>
-// 	</div>
-// </div>

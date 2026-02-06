@@ -1,0 +1,73 @@
+.team-review {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+}
+
+.team-review__header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.team-review__header p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.team-review__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .team-review__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.team-review__card {
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.team-review__card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.team-review__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.team-review__label {
+    color: var(--text-muted);
+}
+
+.team-review__value {
+    color: var(--text-main);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.team-review__icon {
+    margin-right: 0.25rem;
+    color: var(--text-muted);
+}

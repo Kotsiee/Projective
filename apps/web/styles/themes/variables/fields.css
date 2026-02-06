@@ -21,6 +21,7 @@
     --field-text: var(--text-main);
     --field-text-placeholder: var(--text-muted);
     --field-text-label: var(--text-main);
+    --field-text-secondary: var(--text-secondary);
     --field-text-disabled: var(--text-disabled);
     --field-text-error: var(--danger);
 

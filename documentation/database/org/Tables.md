@@ -10,17 +10,17 @@ profiles (freelancer and business), team structures, skill taxonomies, and cross
 Public-facing profile data mirrored from `auth.users`. This ensures that sensitive internal auth
 data remains isolated while providing a searchable directory for the platform.
 
-| Column       | Type | Notes                                      |
-| :----------- | :--- | :----------------------------------------- |
-| `user_id`    | uuid | PK, FK → `auth.users.id`.                  |
-| `username`   | text | Unique platform handle.                    |
-| `first_name` | text | User's legal/given name.                   |
-| `last_name`  | text | User's family name.                        |
-| `avatar_url` | text | Reference to storage object.               |
-| `headline`   | text | Short professional tagline.                |
-| `bio`        | text | Long-form professional summary.            |
-| `visibility` | text | Defaults to `unlisted`.                    |
-| `dob`        | date | Date of birth for verification/compliance. |
+| Column        | Type | Notes                                      |
+| :------------ | :--- | :----------------------------------------- |
+| `user_id`     | uuid | PK, FK → `auth.users.id`.                  |
+| `username`    | text | Unique platform handle.                    |
+| `first_name`  | text | User's legal/given name.                   |
+| `last_name`   | text | User's family name.                        |
+| `avatar_url`  | text | Reference to storage object.               |
+| `headline`    | text | Short professional tagline.                |
+| `description` | text | Long-form professional summary.            |
+| `visibility`  | text | Defaults to `unlisted`.                    |
+| `dob`         | date | Date of birth for verification/compliance. |
 
 ### `org.freelancer_profiles`
 
@@ -134,8 +134,8 @@ CREATE TABLE org.profile_links (
 
 ## 🚩 Refactor Notes & Suggestions
 
-- **DRY Violations**: `headline`, `bio`, `languages`, and `timezone` are currently duplicated across
-  `users_public`, `freelancer_profiles`, and `business_profiles`.
+- **DRY Violations**: `headline`, `description`, `languages`, and `timezone` are currently
+  duplicated across `users_public`, `freelancer_profiles`, and `business_profiles`.
   - _Suggestion_: Move shared attributes to `users_public` and only keep persona-specific data in
     the profiles.
 - **Team Roles**: The `org.team_roles` table uses `jsonb` for permissions. Ensure the Deno backend

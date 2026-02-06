@@ -54,7 +54,7 @@ BEGIN
   IF p_profile_type = 'freelancer' THEN
     -- Create Freelancer Profile
     INSERT INTO org.freelancer_profiles (
-      user_id, visibility, hourly_rate, bio, headline
+      user_id, visibility, hourly_rate, description, headline
     ) VALUES (
       v_user_id, 'public', NULL, '', ''
     ) RETURNING id INTO v_profile_id;

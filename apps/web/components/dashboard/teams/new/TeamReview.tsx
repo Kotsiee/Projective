@@ -1,4 +1,6 @@
-import { IconCheck, IconUsers, IconWallet } from '@tabler/icons-preact';
+import '@styles/components/dashboard/teams/new/team-review.css';
+
+import { IconUsers, IconWallet } from '@tabler/icons-preact';
 import { useNewTeamContext } from '@contexts/NewTeamContext.tsx';
 
 export default function TeamReview() {
@@ -6,47 +8,46 @@ export default function TeamReview() {
 	const inviteCount = state.invites.value.filter((i) => i.email).length;
 
 	return (
-		<div className='project-publish'>
-			{/* Reuse publish styling */}
-			<div className='project-publish__header'>
+		<div className='team-review'>
+			<div className='team-review__header'>
 				<h3>Review Team</h3>
 				<p>Ready to launch your agency?</p>
 			</div>
 
-			<div className='project-publish__grid'>
+			<div className='team-review__grid'>
 				{/* Overview */}
-				<div className='project-publish__card'>
-					<h4 className='project-publish__card-title'>Identity</h4>
-					<div className='project-publish__row'>
-						<span className='project-publish__label'>Name</span>
-						<span className='project-publish__value'>{state.name.value}</span>
+				<div className='team-review__card'>
+					<h4 className='team-review__card-title'>Identity</h4>
+					<div className='team-review__row'>
+						<span className='team-review__label'>Name</span>
+						<span className='team-review__value'>{state.name.value}</span>
 					</div>
-					<div className='project-publish__row'>
-						<span className='project-publish__label'>Handle</span>
-						<span className='project-publish__value'>@{state.slug.value}</span>
+					<div className='team-review__row'>
+						<span className='team-review__label'>Handle</span>
+						<span className='team-review__value'>@{state.slug.value}</span>
 					</div>
-					<div className='project-publish__row'>
-						<span className='project-publish__label'>Visibility</span>
-						<span className='project-publish__value' style={{ textTransform: 'capitalize' }}>
+					<div className='team-review__row'>
+						<span className='team-review__label'>Visibility</span>
+						<span className='team-review__value' style={{ textTransform: 'capitalize' }}>
 							{state.visibility.value}
 						</span>
 					</div>
 				</div>
 
 				{/* Configuration */}
-				<div className='project-publish__card'>
-					<h4 className='project-publish__card-title'>Configuration</h4>
-					<div className='project-publish__row'>
-						<span className='project-publish__label'>Payout Model</span>
-						<span className='project-publish__value'>
-							<IconWallet size={14} className='inline mr-1' />
+				<div className='team-review__card'>
+					<h4 className='team-review__card-title'>Configuration</h4>
+					<div className='team-review__row'>
+						<span className='team-review__label'>Payout Model</span>
+						<span className='team-review__value'>
+							<IconWallet size={14} className='team-review__icon' />
 							{state.payoutModel.value === 'smart_split' ? 'Smart Split' : 'Manager Discretion'}
 						</span>
 					</div>
-					<div className='project-publish__row'>
-						<span className='project-publish__label'>Invites</span>
-						<span className='project-publish__value'>
-							<IconUsers size={14} className='inline mr-1' />
+					<div className='team-review__row'>
+						<span className='team-review__label'>Invites</span>
+						<span className='team-review__value'>
+							<IconUsers size={14} className='team-review__icon' />
 							{inviteCount} Pending
 						</span>
 					</div>

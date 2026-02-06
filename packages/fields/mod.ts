@@ -12,7 +12,6 @@ export * from './src/wrappers/FieldArrayWrapper.tsx';
 
 // Hooks
 export * from './src/hooks/useInteraction.ts';
-export * from './src/hooks/useRipple.ts';
 export * from './src/hooks/useCurrencyMask.ts';
 
 // Components

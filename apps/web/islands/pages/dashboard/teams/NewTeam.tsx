@@ -1,54 +1,23 @@
 import { useSignal } from '@preact/signals';
-import {
-	IconArrowLeft,
-	IconBuildingStore,
-	IconCoin,
-	IconRocket,
-	IconUsers,
-} from '@tabler/icons-preact';
+import { IconBuildingStore, IconCoin, IconRocket, IconUsers } from '@tabler/icons-preact';
 
-import { Step, Stepper, StepperHeader, useStepperContext } from '@projective/ui';
+import {
+	Step,
+	Stepper,
+	StepperHeader,
+	WizardFooter,
+	WizardForm,
+	WizardLayout,
+	WizardPreview,
+	WizardStage,
+} from '@projective/ui';
+
 import TeamDetails from '@components/dashboard/teams/new/TeamDetails.tsx';
 import TeamMembers from '@components/dashboard/teams/new/TeamMembers.tsx';
 import TeamFinancials from '@components/dashboard/teams/new/TeamFinancials.tsx';
 import TeamReview from '@components/dashboard/teams/new/TeamReview.tsx';
 import { CreateTeamButton, SaveDraftButton } from '@components/dashboard/teams/new/TeamActions.tsx';
 import { TeamFormProvider } from '@contexts/NewTeamContext.tsx';
-
-function TeamStepperFooter() {
-	const { next, back, activeStep, totalSteps } = useStepperContext();
-	const isFirst = activeStep.value === 0;
-	const isLast = activeStep.value === totalSteps.value - 1;
-
-	return (
-		<div className='new-team__actions'>
-			<SaveDraftButton />
-
-			<div className='new-team__nav-buttons'>
-				<button
-					type='button'
-					className='btn btn--secondary'
-					onClick={back}
-					disabled={isFirst}
-				>
-					Back
-				</button>
-
-				{!isLast
-					? (
-						<button
-							type='button'
-							className='btn btn--primary'
-							onClick={next}
-						>
-							Next Step
-						</button>
-					)
-					: <CreateTeamButton />}
-			</div>
-		</div>
-	);
-}
 
 export default function NewTeamIsland() {
 	const activeStep = useSignal(0);
@@ -70,61 +39,66 @@ export default function NewTeamIsland() {
 
 	return (
 		<TeamFormProvider>
-			<div className='new-team'>
-				<div className='new-team__header'>
-					<h1 className='new-team__title'>
-						<IconArrowLeft />
-						Create New Team
-					</h1>
-				</div>
+			<WizardLayout
+				title='Create New Team'
+				backHref='/teams'
+			>
+				<Stepper
+					activeStep={activeStep.value}
+					onStepChange={(s) => activeStep.value = s}
+					linear
+					orientation='horizontal'
+					// 'wizard__stepper' class is defined in wizard.css (imported by Layout)
+					className='wizard__stepper'
+				>
+					<div className='wizard__stepper-header'>
+						<StepperHeader>
+							<Step
+								label='Identity'
+								description='Basic Info'
+								icon={<IconBuildingStore size={20} />}
+							/>
+							<Step label='Members' description='Invite Team' icon={<IconUsers size={20} />} />
+							<Step label='Finance' description='Payouts' icon={<IconCoin size={20} />} />
+							<Step label='Review' description='Launch' icon={<IconRocket size={20} />} />
+						</StepperHeader>
+					</div>
 
-				<div className='new-team__content'>
-					<Stepper
-						activeStep={activeStep.value}
-						onStepChange={(s) => activeStep.value = s}
-						linear
-						orientation='horizontal'
-						style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-					>
-						<div className='new-team__stepper-container'>
-							<StepperHeader>
-								<Step
-									label='Identity'
-									description='Basic Info'
-									icon={<IconBuildingStore size={20} />}
-								/>
-								<Step label='Members' description='Invite Team' icon={<IconUsers size={20} />} />
-								<Step label='Finance' description='Payouts' icon={<IconCoin size={20} />} />
-								<Step label='Review' description='Launch' icon={<IconRocket size={20} />} />
-							</StepperHeader>
-						</div>
+					<WizardStage>
+						{/* Left Side: Scrollable Form */}
+						<WizardForm>
+							{renderStepContent(activeStep.value)}
+						</WizardForm>
 
-						<div className='new-team__content__stage'>
-							<div className='new-team__edit'>
-								{renderStepContent(activeStep.value)}
+						{/* Right Side: Preview Pane */}
+						<WizardPreview>
+							<div
+								style={{
+									height: '100%',
+									width: '100%',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									color: 'var(--text-disabled)',
+									background: 'var(--input-bg)',
+									borderRadius: 'var(--border-radius)',
+									border: '1px dashed var(--border-color)',
+									flexDirection: 'column',
+									gap: '1rem',
+								}}
+							>
+								<strong>Team Preview</strong>
+								<span style={{ fontSize: '0.875rem' }}>Visual updates as you type</span>
 							</div>
-							<div className='new-team__preview'>
-								<div
-									style={{
-										height: '100%',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-										color: 'var(--gray-400)',
-										background: 'var(--gray-50)',
-										borderRadius: 'var(--radius-md)',
-										border: '1px dashed var(--gray-200)',
-									}}
-								>
-									Team Profile Preview
-								</div>
-							</div>
-						</div>
+						</WizardPreview>
+					</WizardStage>
 
-						<TeamStepperFooter />
-					</Stepper>
-				</div>
-			</div>
+					<WizardFooter
+						finalAction={<CreateTeamButton />}
+						secondaryAction={<SaveDraftButton />}
+					/>
+				</Stepper>
+			</WizardLayout>
 		</TeamFormProvider>
 	);
 }

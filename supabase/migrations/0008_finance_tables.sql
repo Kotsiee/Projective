@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS finance.wallets (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid (),
     owner_type text NOT NULL,
-    owner_id uuid NOT NULL,
+    owner_id uuid NOT NULL, -- UserID for Freelancers, BusinessID for Businesses
     currency text NOT NULL,
     balance_cents bigint NOT NULL DEFAULT 0 CHECK (balance_cents >= 0),
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -36,18 +36,12 @@ CREATE TABLE IF NOT EXISTS finance.escrows (
     project_stage_id uuid NOT NULL REFERENCES projects.project_stages (id) ON DELETE RESTRICT,
     payer_business_id uuid NOT NULL REFERENCES org.business_profiles (id) ON DELETE RESTRICT,
     payee_type assignment_type NOT NULL,
-    payee_id uuid NOT NULL,
+    payee_id uuid NOT NULL, -- Polymorphic: Can be Freelancer UserID OR Team ID
     amount_cents bigint NOT NULL CHECK (amount_cents > 0),
     currency text NOT NULL,
     status text NOT NULL DEFAULT 'funded',
     created_at timestamptz NOT NULL DEFAULT now()
 );
-
-ALTER TABLE finance.escrows
-ADD CONSTRAINT fk_escrows_payee_freelancer FOREIGN KEY (payee_id) REFERENCES org.freelancer_profiles (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
-
-ALTER TABLE finance.escrows
-ADD CONSTRAINT fk_escrows_payee_team FOREIGN KEY (payee_id) REFERENCES org.teams (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
 CREATE INDEX IF NOT EXISTS idx_escrows_stage ON finance.escrows (project_stage_id);
 
@@ -72,7 +66,7 @@ CREATE TABLE IF NOT EXISTS finance.invoices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid (),
     project_stage_id uuid NOT NULL REFERENCES projects.project_stages (id) ON DELETE CASCADE,
     issue_to_business_id uuid NOT NULL REFERENCES org.business_profiles (id) ON DELETE RESTRICT,
-    issue_from_profile uuid NOT NULL,
+    issue_from_profile uuid NOT NULL, -- Polymorphic
     amount_cents bigint NOT NULL CHECK (amount_cents > 0),
     currency text NOT NULL,
     status text NOT NULL DEFAULT 'draft',

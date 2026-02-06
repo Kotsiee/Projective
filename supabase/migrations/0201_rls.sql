@@ -2,7 +2,7 @@
 -- This ensures that by default, no data is accessible unless a policy exists.
 
 -- ORG SCHEMA
-ALTER TABLE org.attachments ENABLE ROW LEVEL SECURITY;
+-- [REMOVED] org.attachments (Deprecated in favor of files.items)
 
 ALTER TABLE org.business_profiles ENABLE ROW LEVEL SECURITY;
 
@@ -51,8 +51,12 @@ ALTER TABLE projects.stage_staffing_roles ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE projects.stage_submissions ENABLE ROW LEVEL SECURITY;
 
+-- NEW: Enable RLS on the link tables we updated to point to files.items
+ALTER TABLE projects.project_attachments ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE projects.submission_files ENABLE ROW LEVEL SECURITY;
+
 -- COMMS SCHEMA
--- Note: Some of these were false in your dump, enabled here for security.
 ALTER TABLE comms.channel_files ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE comms.device_tokens ENABLE ROW LEVEL SECURITY;

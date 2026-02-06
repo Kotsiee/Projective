@@ -5,8 +5,10 @@ import { switchActiveProfile } from '@server/auth/context.ts';
 export const handler = define.handlers({
 	async POST(ctx) {
 		try {
-			const { profileId, type } = await ctx.req.json();
+			const body = await ctx.req.json();
+			const { profileId, type } = body;
 
+			// Basic Input Validation
 			if (!profileId || !['freelancer', 'business'].includes(type)) {
 				return new Response(
 					JSON.stringify({
@@ -19,10 +21,11 @@ export const handler = define.handlers({
 				);
 			}
 
-			// 2. Perform Switch
-			const result = await switchActiveProfile({ profileId, type }, {
-				getClient: () => supabaseClient(ctx.req),
-			});
+			// Execute Service
+			const result = await switchActiveProfile(
+				{ profileId, type },
+				{ getClient: () => supabaseClient(ctx.req) },
+			);
 
 			if (!result.ok) {
 				return new Response(JSON.stringify({ error: result.error }), {

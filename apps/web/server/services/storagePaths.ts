@@ -1,5 +1,9 @@
 type PathContext =
 	| { type: 'profile_avatar'; userId: string }
+	| { type: 'team_avatar'; teamId: string }
+	| { type: 'team_banner'; teamId: string }
+	| { type: 'business_logo'; businessId: string }
+	| { type: 'business_banner'; businessId: string } // NEW
 	| { type: 'project_submission'; projectId: string; stageId: string; submissionId: string }
 	| { type: 'project_attachment'; projectId: string; channelId: string; attachmentId: string }
 	| { type: 'personal_library'; userId: string; folder?: string };
@@ -11,6 +15,31 @@ export class StoragePaths {
 				return {
 					bucket: 'public_assets',
 					path: `users/${context.userId}/avatar.webp`,
+				};
+
+			case 'team_avatar':
+				return {
+					bucket: 'public_assets',
+					path: `teams/${context.teamId}/avatar.webp`,
+				};
+
+			case 'team_banner':
+				return {
+					bucket: 'public_assets',
+					path: `teams/${context.teamId}/banner.webp`,
+				};
+
+			case 'business_logo':
+				return {
+					bucket: 'public_assets',
+					path: `businesses/${context.businessId}/logo.webp`,
+				};
+
+				// NEW
+			case 'business_banner':
+				return {
+					bucket: 'public_assets',
+					path: `businesses/${context.businessId}/banner.webp`,
 				};
 
 			case 'project_submission':

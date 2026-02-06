@@ -1,5 +1,8 @@
+import '@styles/components/dashboard/teams/new/team-members.css';
+
 import { IconTrash, IconUserPlus } from '@tabler/icons-preact';
 import { SelectField, TextField } from '@projective/fields';
+import { Button, IconButton } from '@projective/ui';
 import { useNewTeamContext } from '@contexts/NewTeamContext.tsx';
 
 export default function TeamMembers() {
@@ -26,20 +29,17 @@ export default function TeamMembers() {
 	];
 
 	return (
-		<div className='new-project__details'>
-			<h2>Initial Members</h2>
-			<p className='text-gray-500 mb-6'>
-				Invite your core team members now. You can always add more later.
-			</p>
+		<div className='team-members'>
+			<div className='team-members__header'>
+				<h2>Initial Members</h2>
+				<p className='team-members__subtitle'>
+					Invite your core team members now. You can always add more later.
+				</p>
+			</div>
 
-			<div className='screening-questions__list'>
-				{/* Reusing list style */}
+			<div className='team-members__list'>
 				{state.invites.value.map((invite, index) => (
-					<div
-						key={index}
-						className='screening-questions__item'
-						style={{ alignItems: 'flex-start' }}
-					>
+					<div key={index} className='team-members__item'>
 						<div style={{ flex: 2 }}>
 							<TextField
 								label='Email Address'
@@ -63,22 +63,36 @@ export default function TeamMembers() {
 						</div>
 
 						{state.invites.value.length > 1 && (
-							<button
-								type='button'
-								className='btn-remove'
-								onClick={() => removeInvite(index)}
-								style={{ marginTop: '0.5rem' }}
-							>
-								<IconTrash size={18} />
-							</button>
+							<div className='team-members__action'>
+								<IconButton
+									variant='primary'
+									size='medium'
+									onClick={() => removeInvite(index)}
+									aria-label='Remove invite'
+									outlined
+									ghost
+									className='team-members__remove-btn'
+								>
+									<IconTrash size={18} />
+								</IconButton>
+							</div>
 						)}
 					</div>
 				))}
 			</div>
 
-			<button type='button' className='btn-add' onClick={addInvite}>
-				<IconUserPlus size={16} /> Add Another Member
-			</button>
+			<div className='team-members__add'>
+				<Button
+					variant='primary'
+					startIcon={<IconUserPlus size={16} />}
+					onClick={addInvite}
+					style={{ borderStyle: 'dashed' }}
+					outlined
+					ghost
+				>
+					Add Another Member
+				</Button>
+			</div>
 		</div>
 	);
 }

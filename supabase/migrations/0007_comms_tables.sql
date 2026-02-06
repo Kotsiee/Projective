@@ -1,3 +1,4 @@
+-- 1. PREFERENCES
 CREATE TABLE comms.notification_prefs (
     user_id uuid NOT NULL,
     email boolean NOT NULL DEFAULT true,
@@ -9,6 +10,7 @@ CREATE TABLE comms.notification_prefs (
     CONSTRAINT notification_prefs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
 );
 
+-- 2. DEVICE TOKENS
 CREATE TABLE comms.device_tokens (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     user_id uuid NOT NULL,
@@ -21,6 +23,7 @@ CREATE TABLE comms.device_tokens (
         CONSTRAINT device_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
 );
 
+-- 3. NOTIFICATIONS
 CREATE TABLE comms.notifications (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     user_id uuid NOT NULL,
@@ -39,6 +42,7 @@ CREATE TABLE comms.notifications (
         CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
 );
 
+-- 4. DM THREADS
 CREATE TABLE comms.dm_threads (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     created_by_user_id uuid NOT NULL,
@@ -49,6 +53,7 @@ CREATE TABLE comms.dm_threads (
         CONSTRAINT dm_threads_created_by_user_id_fkey FOREIGN KEY (created_by_user_id) REFERENCES auth.users (id)
 );
 
+-- 5. DM PARTICIPANTS
 CREATE TABLE comms.dm_participants (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     thread_id uuid NOT NULL,
@@ -61,6 +66,7 @@ CREATE TABLE comms.dm_participants (
         CONSTRAINT dm_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
 );
 
+-- 6. DM MESSAGES
 CREATE TABLE comms.dm_messages (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     thread_id uuid NOT NULL,
@@ -78,6 +84,7 @@ CREATE TABLE comms.dm_messages (
         CONSTRAINT dm_messages_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES comms.dm_threads (id)
 );
 
+-- 7. PROJECT CHANNELS
 CREATE TABLE comms.project_channels (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
@@ -89,6 +96,7 @@ CREATE TABLE comms.project_channels (
     CONSTRAINT project_channels_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects(id)
 );
 
+-- 8. PROJECT MESSAGES
 CREATE TABLE comms.project_messages (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     channel_id uuid NOT NULL,
@@ -109,6 +117,7 @@ CREATE TABLE comms.project_messages (
         CONSTRAINT project_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES auth.users (id)
 );
 
+-- 9. CHANNEL PARTICIPANTS
 CREATE TABLE comms.project_channel_participants (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     channel_id uuid NOT NULL,
@@ -120,19 +129,24 @@ CREATE TABLE comms.project_channel_participants (
     CONSTRAINT project_channel_participants_channel_id_fkey FOREIGN KEY (channel_id) REFERENCES comms.project_channels(id)
 );
 
+-- 10. CHANNEL FILES (FIXED)
+
 CREATE TABLE comms.channel_files (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     channel_type text NOT NULL CHECK (
         channel_type IN ('project', 'dm')
     ),
     channel_id uuid NOT NULL,
-    attachment_id uuid NOT NULL,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT channel_files_pkey PRIMARY KEY (id),
-        CONSTRAINT channel_files_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENCES org.attachments (id)
+    attachment_id uuid NOT NULL, -- References files.items
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    
+    CONSTRAINT channel_files_pkey PRIMARY KEY (id),
+
+-- FIXED: Points to files.items
+CONSTRAINT channel_files_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENCES files.items (id)
 );
+
+-- 11. MESSAGE ATTACHMENTS (FIXED)
 
 CREATE TABLE comms.message_attachments (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
@@ -143,10 +157,11 @@ CREATE TABLE comms.message_attachments (
         )
     ),
     message_id uuid NOT NULL,
-    attachment_id uuid NOT NULL,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT message_attachments_pkey PRIMARY KEY (id),
-        CONSTRAINT message_attachments_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENCES org.attachments (id)
+    attachment_id uuid NOT NULL, -- References files.items
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    
+    CONSTRAINT message_attachments_pkey PRIMARY KEY (id),
+
+-- FIXED: Points to files.items
+CONSTRAINT message_attachments_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENCES files.items (id)
 );
