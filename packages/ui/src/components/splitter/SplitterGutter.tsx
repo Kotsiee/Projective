@@ -1,6 +1,6 @@
-import { JSX } from "preact";
-import { useSplitterContext } from "./Splitter.tsx";
-import { SplitterGutterProps } from "../../types/components/splitter.ts";
+import { JSX } from 'preact';
+import { useSplitterContext } from './Splitter.tsx';
+import { SplitterGutterProps } from '../../types/components/splitter.ts';
 
 export function SplitterGutter({ index, direction }: SplitterGutterProps) {
 	const { startResize, moveSplitter, toggleCollapse } = useSplitterContext();
@@ -38,15 +38,15 @@ export function SplitterGutter({ index, direction }: SplitterGutterProps) {
 
 		const val = e.shiftKey ? largeStep : step;
 
-		if (direction === "horizontal") {
-			if (e.key === "ArrowLeft") delta = -val;
-			if (e.key === "ArrowRight") delta = val;
+		if (direction === 'horizontal') {
+			if (e.key === 'ArrowLeft') delta = -val;
+			if (e.key === 'ArrowRight') delta = val;
 		} else {
-			if (e.key === "ArrowUp") delta = -val;
-			if (e.key === "ArrowDown") delta = val;
+			if (e.key === 'ArrowUp') delta = -val;
+			if (e.key === 'ArrowDown') delta = val;
 		}
 
-		if (e.key === "Enter" || e.key === " ") {
+		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			toggleCollapse(index);
 			return;
@@ -66,15 +66,15 @@ export function SplitterGutter({ index, direction }: SplitterGutterProps) {
 			onDblClick={handleDblClick}
 			onKeyDown={handleKeyDown}
 			// Accessibility
-			role="separator"
+			role='separator'
 			aria-orientation={direction}
-			aria-label="Resize Splitter"
+			aria-label='Resize Splitter'
 			aria-controls={`pane-${index} pane-${index + 1}`}
 			tabIndex={0}
 		>
-			<div className="splitter__gutter-handle" />
+			<div className='splitter__gutter-handle' />
 			{/* Invisible Hit Area for easier touch/mouse grabbing */}
-			<div className="splitter__gutter-hitbox" />
+			<div className='splitter__gutter-hitbox' />
 		</div>
 	);
 }

@@ -5,7 +5,7 @@ export default function ProjectStageSession(
 	{ stage, updateStage }: { stage: UIStage; updateStage: (f: keyof UIStage, v: any) => void },
 ) {
 	return (
-		<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+		<div className='form-grid'>
 			<TextField
 				label='Duration (Minutes)'
 				type='number'
@@ -13,7 +13,6 @@ export default function ProjectStageSession(
 				onChange={(v) => updateStage('session_duration_minutes', parseInt(v))}
 				floating
 			/>
-			{/* Session Count was not in new DB schema, might need to be added or stored in config JSONB */}
 			<TextField
 				label='Session Count'
 				type='number'

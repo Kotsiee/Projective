@@ -8,7 +8,8 @@
     "./packages/utils",
     "./packages/types",
     "./packages/fields",
-    "./packages/data"
+    "./packages/data",
+    "./packages/charts"
   ],
   "tasks": {
     "format": "deno fmt --check",
@@ -25,7 +26,7 @@
     "db:smoke": "supabase db query < db/scripts/test_db_smoke.sql",
     "coverage:lcov": "deno coverage coverage --lcov --output=coverage.lcov",
     "coverage:html": "deno coverage coverage --html",
-    "preview": "deno run -A main.ts"
+    "preview": "deno serve -A _fresh/server.js"
   },
   "fmt": {
     "files": {
@@ -123,15 +124,17 @@
     "@std/regexp": "jsr:@std/regexp@^1.0.1",
     "@std/testing": "jsr:@std/testing@^1.0.16",
     "@tabler/icons-preact": "npm:@tabler/icons-preact@^3.35.0",
+    "d3-scale": "npm:d3-scale@^4.0.2",
+    "d3-time": "npm:d3-time@^3.1.0",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "fresh": "jsr:@fresh/core@^2.2.0",
     "marked": "npm:marked@^17.0.1",
+    "pixi.js": "npm:pixi.js@^8.16.0",
     "preact": "npm:preact@^10.27.2",
     "quill": "npm:quill@^2.0.3",
     "quill-delta-to-html": "npm:quill-delta-to-html@^0.12.1",
     "supabase": "npm:supabase@^2.72.7",
     "supabaseClient": "npm:@supabase/supabase-js@2.76.1",
-
     "packages/": "./packages/",
     "@projective/shared": "./packages/shared/mod.ts",
     "@projective/backend": "./packages/backend/mod.ts",
@@ -140,7 +143,7 @@
     "@projective/types": "./packages/types/mod.ts",
     "@projective/fields": "./packages/fields/mod.ts",
     "@projective/data": "./packages/data/mod.ts",
-
+    "@projective/charts": "./packages/charts/mod.ts",
     "@/": "./apps/web/",
     "@components/": "./apps/web/components/",
     "@islands/": "./apps/web/islands/",

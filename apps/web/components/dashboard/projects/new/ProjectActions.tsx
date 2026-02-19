@@ -5,15 +5,8 @@ import { getCsrfToken } from '@projective/shared';
 import { useSignal } from '@preact/signals';
 
 export function SaveDraftButton() {
-	const state = useNewProjectContext();
-	const isLoading = useSignal(false);
-
-	const handleSave = async () => {
-		isLoading.value = true;
-		// Mock delay for UI feedback
-		await new Promise((r) => setTimeout(r, 800));
-		toast.success('Draft saved locally');
-		isLoading.value = false;
+	const handleSave = () => {
+		toast.success('Draft saved (Local state only for MVP)');
 	};
 
 	return (
@@ -21,7 +14,6 @@ export function SaveDraftButton() {
 			variant='secondary'
 			startIcon={<IconDeviceFloppy size={18} />}
 			onClick={handleSave}
-			loading={isLoading}
 		>
 			Save Draft
 		</Button>
@@ -33,27 +25,74 @@ export function PublishButton() {
 	const isLoading = useSignal(false);
 
 	const handlePublish = async () => {
-		// 1. Validation Logic
 		if (!state.title.value) {
 			toast.error('Project title is required');
 			return;
 		}
 
+		if (state.attachments.value.length > 10) {
+			toast.error('You can only upload a maximum of 10 attachments.');
+			return;
+		}
+
 		isLoading.value = true;
 
-		// 2. Submit Logic
 		const request = async () => {
 			try {
 				const csrf = getCsrfToken();
 				if (!csrf) throw new Error('Missing CSRF token');
 
-				// Mock API call
-				await new Promise((r) => setTimeout(r, 1500));
+				const payload = {
+					title: state.title.value,
+					description: state.description.value,
+					industry_category_id: state.category.value,
+					visibility: state.visibility.value,
+					currency: state.currency.value,
+					timeline_preset: state.timelinePreset.value,
+					target_project_start_date: state.targetStartDate.value,
 
-				// Actual fetch would go here
-				// const res = await fetch(...)
+					legal_and_screening: {
+						ip_ownership_mode: state.ipMode.value,
+						nda_required: state.ndaRequired.value === 'true',
+						portfolio_display_rights: state.portfolioRights.value,
+						location_restriction: state.locationRestriction.value
+							? [state.locationRestriction.value]
+							: [],
+						language_requirement: state.languageRequirement.value
+							? [state.languageRequirement.value]
+							: [],
+						screening_questions: state.screeningQuestions.value.filter((q) => q.trim().length > 0),
+					},
 
-				setTimeout(() => window.location.href = '/projects', 1000);
+					stages: state.stages.value,
+					tags: state.tags.value,
+
+					global_attachments: [],
+				};
+
+				const formData = new FormData();
+				formData.append('payload', JSON.stringify(payload));
+
+				if (state.thumbnail.value?.file) {
+					formData.append('thumbnail', state.thumbnail.value.file);
+				}
+
+				state.attachments.value.forEach((fileWithMeta) => {
+					if (fileWithMeta.file) {
+						formData.append('attachments', fileWithMeta.file);
+					}
+				});
+
+				const res = await fetch('/api/v1/dashboard/projects/publish', {
+					method: 'POST',
+					headers: { 'X-CSRF': csrf },
+					body: formData,
+				});
+
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error?.message || 'Failed to publish project');
+
+				setTimeout(() => window.location.href = data.redirectTo, 1000);
 				return 'Project published successfully!';
 			} finally {
 				isLoading.value = false;

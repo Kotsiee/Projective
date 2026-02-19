@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from 'preact/hooks';
 import {
 	IconAlertCircle,
 	IconAlertTriangle,
@@ -6,9 +6,9 @@ import {
 	IconInfoCircle,
 	IconLoader2,
 	IconX,
-} from "@tabler/icons-preact";
-import { toast } from "../../core/toast.ts";
-import { ToastData } from "../../types/components/toast.ts";
+} from '@tabler/icons-preact';
+import { toast } from '../../core/toast.ts';
+import { ToastData } from '../../types/components/toast.ts';
 
 interface ToastProps {
 	data: ToastData;
@@ -16,8 +16,7 @@ interface ToastProps {
 }
 
 export function Toast({ data, defaultDuration = 5000 }: ToastProps) {
-	const { id, type, title, message, duration, dismissible, icon, action } =
-		data;
+	const { id, type, title, message, duration, dismissible, icon, action } = data;
 	const [isPaused, setIsPaused] = useState(false);
 	const [swipeOffset, setSwipeOffset] = useState(0);
 	const [isSwiping, setIsSwiping] = useState(false);
@@ -87,16 +86,16 @@ export function Toast({ data, defaultDuration = 5000 }: ToastProps) {
 	const getIcon = () => {
 		if (icon) return icon;
 		switch (type) {
-			case "success":
+			case 'success':
 				return <IconCheck />;
-			case "error":
+			case 'error':
 				return <IconAlertCircle />;
-			case "warning":
+			case 'warning':
 				return <IconAlertTriangle />;
-			case "info":
+			case 'info':
 				return <IconInfoCircle />;
-			case "loading":
-				return <IconLoader2 className="stepper__spin" />;
+			case 'loading':
+				return <IconLoader2 className='stepper__spin' />;
 			default:
 				return null;
 		}
@@ -105,52 +104,56 @@ export function Toast({ data, defaultDuration = 5000 }: ToastProps) {
 	return (
 		<div
 			className={`toast toast--${type}`}
-			role="alert"
-			aria-live={type === "error" ? "assertive" : "polite"}
+			role='alert'
+			aria-live={type === 'error' ? 'assertive' : 'polite'}
 			onMouseEnter={() => setIsPaused(true)}
 			onMouseLeave={() => setIsPaused(false)}
 			onTouchStart={handleTouchStart}
 			onTouchMove={handleTouchMove}
 			onTouchEnd={handleTouchEnd}
 			style={{
-				transform: swipeOffset
-					? `translateX(${swipeOffset}px)`
-					: undefined,
+				transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined,
 				opacity: swipeOffset ? 1 - (swipeOffset / 300) : 1,
 			}}
 		>
-			<div className="toast__icon">
-				{getIcon()}
+			<div class='toast__header'>
+				<div className='toast__icon'>
+					{getIcon()}
+				</div>
+
+				<div className='toast__content'>
+					{title && <div className='toast__title'>{title}</div>}
+					<div className='toast__message'>{message}</div>
+				</div>
 			</div>
 
-			<div className="toast__content">
-				{title && <div className="toast__title">{title}</div>}
-				<div className="toast__message">{message}</div>
+			<div class='toast__actions'>
+				{action && (
+					<button
+						type='button'
+						className='toast__action'
+						onClick={(e) => {
+							e.stopPropagation();
+							action.onClick(e as any);
+							// Optional: dismiss on action click?
+							// toast.dismiss(id);
+						}}
+					>
+						{action.label}
+					</button>
+				)}
+
+				{dismissible && (
+					<button
+						type='button'
+						className='toast__close'
+						onClick={() => toast.dismiss(id)}
+						aria-label='Dismiss'
+					>
+						<IconX size={18} />
+					</button>
+				)}
 			</div>
-
-			{action && (
-				<button
-					className="toast__action"
-					onClick={(e) => {
-						e.stopPropagation();
-						action.onClick(e as any);
-						// Optional: dismiss on action click?
-						// toast.dismiss(id);
-					}}
-				>
-					{action.label}
-				</button>
-			)}
-
-			{dismissible && (
-				<button
-					className="toast__close"
-					onClick={() => toast.dismiss(id)}
-					aria-label="Dismiss"
-				>
-					<IconX size={18} />
-				</button>
-			)}
 		</div>
 	);
 }

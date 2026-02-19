@@ -1,6 +1,6 @@
-import { Signal, useSignal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
-import { StepperProps } from "../../../fields/src/types/components/stepper.ts";
+import { Signal, useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
+import { StepperProps } from '../../../fields/src/types/components/stepper.ts';
 
 export function useStepper({
 	activeStep,
@@ -11,12 +11,12 @@ export function useStepper({
 	linear = true,
 }: Pick<
 	StepperProps,
-	| "activeStep"
-	| "defaultActiveStep"
-	| "onStepChange"
-	| "onComplete"
-	| "linear"
-	| "beforeStepChange"
+	| 'activeStep'
+	| 'defaultActiveStep'
+	| 'onStepChange'
+	| 'onComplete'
+	| 'linear'
+	| 'beforeStepChange'
 >) {
 	const currentStep = useSignal(defaultActiveStep);
 	const totalSteps = useSignal(0);
@@ -58,7 +58,7 @@ export function useStepper({
 					const allowed = await result;
 					if (!allowed) return; // Blocked asynchronously
 				} catch (e) {
-					console.error("Step validation failed", e);
+					console.error('Step validation failed', e);
 					return; // Block on error
 				} finally {
 					isLoading.value = false;

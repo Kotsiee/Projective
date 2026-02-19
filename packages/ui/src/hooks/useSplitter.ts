@@ -1,6 +1,6 @@
-import { Signal, useSignal } from "@preact/signals";
-import { useCallback, useEffect, useRef } from "preact/hooks";
-import { SplitterDirection } from "../../../fields/src/types/components/splitter.ts";
+import { useSignal } from '@preact/signals';
+import { useCallback, useEffect, useRef } from 'preact/hooks';
+import { SplitterDirection } from '../types/components/splitter.ts';
 
 interface PaneConfig {
 	minSize?: number;
@@ -124,9 +124,7 @@ export function useSplitter({
 		const rect = containerRef.current.getBoundingClientRect();
 
 		// Handle 0 size container edge case
-		const containerSize = direction === "horizontal"
-			? rect.width
-			: rect.height;
+		const containerSize = direction === 'horizontal' ? rect.width : rect.height;
 		if (containerSize === 0) return;
 
 		const deltaPx = currentPos - startPos;
@@ -143,7 +141,7 @@ export function useSplitter({
 	// Listeners
 	const handleMove = useCallback((e: MouseEvent) => {
 		if (!dragRef.current) return;
-		const clientPos = direction === "horizontal" ? e.clientX : e.clientY;
+		const clientPos = direction === 'horizontal' ? e.clientX : e.clientY;
 		processDrag(clientPos);
 	}, [direction]);
 
@@ -151,9 +149,7 @@ export function useSplitter({
 		if (!dragRef.current) return;
 		e.preventDefault();
 		const touch = e.touches[0];
-		const clientPos = direction === "horizontal"
-			? touch.clientX
-			: touch.clientY;
+		const clientPos = direction === 'horizontal' ? touch.clientX : touch.clientY;
 		processDrag(clientPos);
 	}, [direction]);
 
@@ -161,13 +157,13 @@ export function useSplitter({
 		isResizing.value = false;
 		dragRef.current = null;
 
-		document.removeEventListener("mousemove", handleMove);
-		document.removeEventListener("mouseup", handleEnd);
-		document.removeEventListener("touchmove", handleTouchMove);
-		document.removeEventListener("touchend", handleEnd);
+		document.removeEventListener('mousemove', handleMove);
+		document.removeEventListener('mouseup', handleEnd);
+		document.removeEventListener('touchmove', handleTouchMove);
+		document.removeEventListener('touchend', handleEnd);
 
-		document.body.style.cursor = "";
-		document.body.style.userSelect = "";
+		document.body.style.cursor = '';
+		document.body.style.userSelect = '';
 
 		if (onResizeEnd) onResizeEnd(sizes.value);
 	}, [onResizeEnd, handleMove, handleTouchMove]);
@@ -175,7 +171,7 @@ export function useSplitter({
 	const startResize = useCallback(
 		(index: number, clientX: number, clientY: number) => {
 			isResizing.value = true;
-			const startPos = direction === "horizontal" ? clientX : clientY;
+			const startPos = direction === 'horizontal' ? clientX : clientY;
 
 			dragRef.current = {
 				index,
@@ -183,17 +179,15 @@ export function useSplitter({
 				startSizes: [...sizes.value],
 			};
 
-			document.addEventListener("mousemove", handleMove);
-			document.addEventListener("mouseup", handleEnd);
-			document.addEventListener("touchmove", handleTouchMove, {
+			document.addEventListener('mousemove', handleMove);
+			document.addEventListener('mouseup', handleEnd);
+			document.addEventListener('touchmove', handleTouchMove, {
 				passive: false,
 			});
-			document.addEventListener("touchend", handleEnd);
+			document.addEventListener('touchend', handleEnd);
 
-			document.body.style.cursor = direction === "horizontal"
-				? "col-resize"
-				: "row-resize";
-			document.body.style.userSelect = "none";
+			document.body.style.cursor = direction === 'horizontal' ? 'col-resize' : 'row-resize';
+			document.body.style.userSelect = 'none';
 		},
 		[sizes, direction, handleMove, handleTouchMove, handleEnd],
 	);

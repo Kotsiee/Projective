@@ -50,7 +50,7 @@ const StageOpenSeatSchema = z.object({
 });
 
 export const StageSchema = z.object({
-	id: z.string().uuid().optional(),
+	id: z.uuid().optional(),
 
 	title: z.string().min(1, 'Stage title is required').max(100),
 	description: z.union([z.string(), QuillDeltaSchema]),
@@ -60,7 +60,7 @@ export const StageSchema = z.object({
 
 	start_trigger_type: z.nativeEnum(StartTriggerType),
 	fixed_start_date: z.coerce.date().optional(),
-	start_dependency_stage_id: z.string().uuid().optional(),
+	start_dependency_stage_id: z.uuid().optional(),
 
 	file_revisions_allowed: z.number().int().min(0).optional(),
 	file_duration_mode: z.enum([
@@ -97,7 +97,7 @@ export const StageSchema = z.object({
 });
 
 export const CreateProjectSchema = z.object({
-	client_business_id: z.string().uuid().optional(),
+	client_business_id: z.uuid().optional(),
 
 	title: z.string().min(5, 'Title must be at least 5 characters').max(150),
 	description: QuillDeltaSchema,
@@ -118,7 +118,7 @@ export const CreateProjectSchema = z.object({
 
 	stages: z.array(StageSchema).min(1, 'Project must have at least one stage'),
 
-	global_attachments: z.array(z.string().uuid()).optional(),
+	global_attachments: z.array(z.uuid()).optional(),
 
 	tags: z.array(z.string()).max(10, 'Too many tags').optional(),
 });

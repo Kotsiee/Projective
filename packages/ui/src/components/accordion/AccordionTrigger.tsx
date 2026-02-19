@@ -1,8 +1,8 @@
-import { TargetedMouseEvent } from "preact";
-import { IconChevronDown } from "@tabler/icons-preact";
-import { useAccordionContext } from "./Accordion.tsx";
-import { useAccordionItemContext } from "./AccordionItem.tsx";
-import { AccordionTriggerProps } from "../../types/components/accordion.ts";
+import { TargetedMouseEvent } from 'preact';
+import { IconChevronDown } from '@tabler/icons-preact';
+import { useAccordionContext } from './Accordion.tsx';
+import { useAccordionItemContext } from './AccordionItem.tsx';
+import { AccordionTriggerProps } from '../../types/components/accordion.ts';
 
 export function AccordionTrigger({
 	children,
@@ -29,37 +29,35 @@ export function AccordionTrigger({
 	const chevron = icon === undefined ? <IconChevronDown size={18} /> : icon;
 
 	return (
-		<h3 className="accordion__header">
+		<h3 className='accordion__header'>
 			<button
-				type="button"
-				className={`accordion__trigger ${className || ""}`}
+				type='button'
+				className={`accordion__trigger ${className || ''}`}
 				style={style}
 				onClick={handleClick}
 				aria-expanded={isOpen.value}
 				disabled={disabled.value}
-				data-state={isOpen.value ? "open" : "closed"}
-				data-accordion-trigger="" // Hook for keyboard nav
+				data-state={isOpen.value ? 'open' : 'closed'}
+				data-accordion-trigger='' // Hook for keyboard nav
 			>
 				{/* 1. Start Icon */}
 				{startIcon && (
-					<span className="accordion__start-icon">
+					<span className='accordion__start-icon'>
 						{startIcon}
 					</span>
 				)}
 
 				{/* 2. Main Content */}
-				<div className="accordion__trigger-text">
-					<span className="accordion__title">{children}</span>
-					{subtitle && (
-						<span className="accordion__subtitle">{subtitle}</span>
-					)}
+				<div className='accordion__trigger-text'>
+					<span className='accordion__title'>{children}</span>
+					{subtitle && <span className='accordion__subtitle'>{subtitle}</span>}
 				</div>
 
 				{/* 3. Actions & Chevron */}
-				<div className="accordion__end-section">
+				<div className='accordion__end-section'>
 					{actions && (
 						<div
-							className="accordion__actions"
+							className='accordion__actions'
 							onClick={handleActionClick}
 							onKeyDown={(e) => e.stopPropagation()} // Stop Enter/Space from toggling accordion
 						>
@@ -70,11 +68,9 @@ export function AccordionTrigger({
 					{chevron && (
 						<span
 							className={`accordion__icon ${
-								rotateIcon && isOpen.value
-									? "accordion__icon--rotated"
-									: ""
+								rotateIcon && isOpen.value ? 'accordion__icon--rotated' : ''
 							}`}
-							aria-hidden="true"
+							aria-hidden='true'
 						>
 							{chevron}
 						</span>

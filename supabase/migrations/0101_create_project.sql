@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION projects.create_project(
 )
 RETURNS uuid
 LANGUAGE plpgsql
-SECURITY DEFINER -- Runs with permissions of the creator (allows writing to tables)
+SECURITY DEFINER
 AS $$
 DECLARE
   new_project_id uuid;
@@ -11,12 +11,12 @@ DECLARE
   new_stage_id uuid;
   role_record jsonb;
   seat_record jsonb;
-  skill_id text; -- UUIDs in JSON are text
   attachment_id text;
   
-  -- Variables for extraction to ensure types
+  _id uuid;
   _title text;
   _desc jsonb;
+  _thumb text; -- NEW
   _client_biz uuid;
   _industry uuid;
   _vis visibility;
@@ -27,8 +27,10 @@ DECLARE
   
 BEGIN
   -- 1. Extract Project Level Data
+  _id := COALESCE((payload->>'id')::uuid, gen_random_uuid());
   _title := payload->>'title';
   _desc := payload->'description';
+  _thumb := payload->>'thumbnail_url'; -- NEW
   _client_biz := (payload->>'client_business_id')::uuid;
   _industry := (payload->>'industry_category_id')::uuid;
   _vis := (payload->>'visibility')::visibility;
@@ -39,16 +41,17 @@ BEGIN
 
   -- 2. Insert Project Header
   INSERT INTO projects.projects (
-    owner_user_id, -- Security: Always force the current auth user
+    id,
+    owner_user_id,
     client_business_id,
     title,
     description,
+    thumbnail_url, -- NEW
     industry_category_id,
     visibility,
     currency,
     target_project_start_date,
     timeline_preset,
-    -- Legal Fields extracted from nested JSON
     ip_ownership_mode,
     nda_required,
     portfolio_display_rights,
@@ -57,10 +60,12 @@ BEGIN
     language_requirement
   )
   VALUES (
-    auth.uid(), -- The logged in user
+    _id,
+    auth.uid(),
     _client_biz,
     _title,
     _desc,
+    _thumb, -- NEW
     _industry,
     _vis,
     _curr,
@@ -75,7 +80,7 @@ BEGIN
   )
   RETURNING id INTO new_project_id;
 
-  -- 3. Insert Global Attachments (if any)
+  -- 3. Insert Global Attachments
   IF payload ? 'global_attachments' THEN
     FOR attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
     LOOP
@@ -84,10 +89,9 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- 4. Loop through Stages
+  -- 4. Loop through Stages (Logic remains unchanged)
   FOR stage_record IN SELECT * FROM jsonb_array_elements(payload->'stages')
   LOOP
-    -- Insert Stage
     INSERT INTO projects.project_stages (
       project_id,
       name,
@@ -96,7 +100,6 @@ BEGIN
       stage_type,
       start_trigger_type,
       fixed_start_date,
-      -- Configs
       file_revisions_allowed,
       file_duration_mode,
       file_duration_days,
@@ -115,8 +118,6 @@ BEGIN
       (stage_record->>'stage_type')::stage_type_enum,
       (stage_record->>'start_trigger_type')::start_trigger_type,
       (stage_record->>'fixed_start_date')::timestamp with time zone,
-      
-      -- Coerce optional fields
       (stage_record->>'file_revisions_allowed')::int,
       stage_record->>'file_duration_mode',
       (stage_record->>'file_duration_days')::int,
@@ -129,7 +130,7 @@ BEGIN
     )
     RETURNING id INTO new_stage_id;
 
-    -- 5. Insert Staffing Roles for this Stage
+    -- Insert Staffing Roles
     FOR role_record IN SELECT * FROM jsonb_array_elements(stage_record->'staffing_roles')
     LOOP
       INSERT INTO projects.stage_staffing_roles (
@@ -150,7 +151,7 @@ BEGIN
       );
     END LOOP;
 
-    -- 6. Insert Open Seats for this Stage
+    -- Insert Open Seats
     FOR seat_record IN SELECT * FROM jsonb_array_elements(stage_record->'open_seats')
     LOOP
       INSERT INTO projects.stage_open_seats (
@@ -168,7 +169,6 @@ BEGIN
         (seat_record->>'require_proposals')::boolean
       );
     END LOOP;
-
   END LOOP;
 
   RETURN new_project_id;

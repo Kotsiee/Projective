@@ -4,7 +4,7 @@ import { UserProvider } from '@contexts/UserContext.tsx';
 export default function Providers({ children }: { children: any }) {
 	return (
 		<UserProvider>
-			<ToastProvider />
+			<ToastProvider position='bottom-right' />
 			{children}
 		</UserProvider>
 	);

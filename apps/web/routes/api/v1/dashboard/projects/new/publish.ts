@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@server/core/clients/supabase.ts';
 import { CreateProjectSchema } from '@contracts/dashboard/projects/new/_validation.ts';
@@ -6,9 +7,31 @@ import { createProject } from '@server/dashboard/projects/create.ts';
 export const handler = define.handlers({
 	async POST(ctx) {
 		try {
-			const body = await ctx.req.json();
+			const contentType = ctx.req.headers.get('content-type') || '';
+			let body: any = {};
+			let thumbnailFile: File | undefined;
+			const attachmentFiles: File[] = [];
 
-			// 1. Validate Payload
+			if (contentType.includes('multipart/form-data')) {
+				const formData = await ctx.req.formData();
+				const payloadStr = formData.get('payload')?.toString();
+
+				if (!payloadStr) {
+					return new Response(JSON.stringify({ error: 'Missing payload' }), { status: 400 });
+				}
+				body = JSON.parse(payloadStr);
+
+				const thumb = formData.get('thumbnail');
+				if (thumb instanceof File) thumbnailFile = thumb;
+
+				const rawAttachments = formData.getAll('attachments');
+				rawAttachments.forEach((entry) => {
+					if (entry instanceof File) attachmentFiles.push(entry);
+				});
+			} else {
+				body = await ctx.req.json();
+			}
+
 			const validation = CreateProjectSchema.safeParse(body);
 
 			if (!validation.success) {
@@ -27,11 +50,16 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await createProject(validation.data, 'active', {
-				getClient,
-			});
+			const res = await createProject(
+				validation.data,
+				'active',
+				{
+					thumbnail: thumbnailFile,
+					attachments: attachmentFiles,
+				},
+				{ getClient },
+			);
 
-			// 3. Response
 			if (!res.ok) {
 				return new Response(JSON.stringify({ error: res.error }), {
 					status: res.error.status ?? 400,
@@ -50,7 +78,8 @@ export const handler = define.handlers({
 					headers: { 'Content-Type': 'application/json' },
 				},
 			);
-		} catch (_) {
+		} catch (e: any) {
+			console.error('Publish Error:', e);
 			return new Response(JSON.stringify({ error: 'Bad Request' }), { status: 400 });
 		}
 	},

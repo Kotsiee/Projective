@@ -1,27 +1,114 @@
-/* packages/fields/src/styles/fields/slider-field.css */
+/* #region SLIDER FIELD */
+.field-slider {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  gap: 4px;
+}
+
+.field-slider__control {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: var(--field-height, 2.5rem);
+}
 
 .field-slider__container {
-  height: var(--field-height, 2.5rem);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
 }
 
 .field-slider__track {
-  background-color: var(--field-bg-disabled, #f3f4f6);
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background-color: var(--field-bg-disabled, var(--border-color));
   border-radius: var(--border-radius__xsmall, 4px);
 }
 
 .field-slider__fill {
-  background-color: var(--primary, #3b82f6);
-  border-radius: var(--border-radius__xsmall, 4px);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
+/* #region MARKS */
+.field-slider__marks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.field-slider__mark {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centers the mark exactly over its percentage coordinate */
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.field-slider__mark-tick {
+  width: 2px;
+  height: 8px;
+  background-color: var(--text-muted);
+  border-radius: 1px;
+}
+
+.field-slider__mark-label {
+  position: absolute;
+  top: 100%;
+  /* Pushes label below the tick */
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* #endregion */
+
+/* #region THUMB */
 .field-slider__thumb {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
   background-color: var(--card, #ffffff);
-  border: 2px solid var(--primary, #3b82f6);
+  border: 2px solid var(--primary);
   border-radius: 50%;
-  transition: transform var(--fast, 100ms), box-shadow var(--fast, 100ms);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  transition: box-shadow var(--fast, 100ms);
+  z-index: 2;
+  outline: none;
 }
 
-.field-slider__thumb:active {
-  transform: translate(-50%, -50%) scale(1.2);
-  box-shadow: 0 0 0 4px var(--field-ring-color, rgba(29, 78, 216, 0.12));
+.field-slider__thumb:focus-visible {
+  box-shadow: var(--focus-ring);
 }
+
+.field-slider__thumb--active,
+.field-slider__thumb:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 6px var(--field-ring-color, hsla(186, 57%, 36%, 0.15));
+}
+
+/* #endregion */
+/* #endregion */

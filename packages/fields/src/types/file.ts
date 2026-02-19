@@ -1,6 +1,7 @@
 import { FileWithMeta } from '@projective/types';
 import { ValueFieldProps } from './core.ts';
 import { LabelWrapperProps, MessageWrapperProps } from './wrappers.ts';
+import { Signal } from '@preact/signals';
 
 export type FileStatus = 'pending' | 'processing' | 'ready' | 'error';
 
@@ -32,6 +33,10 @@ export interface FileFieldProps
 	dropzoneLabel?: string;
 	processors?: FileProcessor[];
 	onDrop?: (acceptedFiles: File[], rejectedFiles: FileWithMeta[]) => void;
-	value?: FileWithMeta[]; // Override base value to use FileWithMeta
+	value?: Signal<FileWithMeta[]>;
 	onChange?: (files: FileWithMeta[]) => void;
+	variant?: 'split' | 'single';
+	onLibraryClick?: () => void;
+	listPosition?: 'top' | 'bottom' | 'none';
+	actionPosition?: 'below' | 'overlay';
 }

@@ -1,0 +1,105 @@
+.gantt-timeline {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+/* #region HEADER */
+
+.gantt-timeline__header {
+    width: 100%;
+    height: 60px;
+    min-height: 60px;
+    background-color: var(--header);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: hidden;
+    /* Programmatically scrolled via JS */
+    overflow-y: hidden;
+    position: relative;
+}
+
+.gantt-header-content {
+    height: 100%;
+    position: relative;
+}
+
+.gantt-header-row {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    display: flex;
+}
+
+.gantt-header-row.top {
+    top: 0;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--card);
+}
+
+.gantt-header-row.bottom {
+    top: 50%;
+}
+
+/* #endregion */
+
+/* #region TIME BLOCKS */
+
+.gantt-time-block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    border-right: 1px solid var(--border-color);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* STICKY LABEL: Keeps "February 2026" visible while scrolling right */
+.gantt-sticky-label {
+    position: sticky;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    height: 100%;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    background-color: inherit;
+    z-index: 2;
+}
+
+.gantt-centered-label {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* #endregion */
+
+/* #region VIEWPORT */
+
+.gantt-timeline__viewport {
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.gantt-timeline__canvas {
+    position: relative;
+    min-height: 100%;
+}
+
+/* #endregion */

@@ -1,16 +1,13 @@
-import { createContext } from "preact";
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import {
-	StepperContextValue,
-	StepperProps,
-} from "../../types/components/stepper.ts";
-import { useStepper } from "../../hooks/useStepper.ts";
+import { createContext } from 'preact';
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
+import { StepperContextValue, StepperProps } from '../../types/components/stepper.ts';
+import { useStepper } from '../../hooks/useStepper.ts';
 
 const StepperContext = createContext<StepperContextValue | null>(null);
 
 export function useStepperContext() {
 	const ctx = useContext(StepperContext);
-	if (!ctx) throw new Error("Stepper components must be within <Stepper>");
+	if (!ctx) throw new Error('Stepper components must be within <Stepper>');
 	return ctx;
 }
 
@@ -18,8 +15,8 @@ export function Stepper({
 	children,
 	activeStep,
 	defaultActiveStep,
-	orientation = "horizontal",
-	variant = "circle",
+	orientation = 'horizontal',
+	variant = 'circle',
 	responsive, // New prop
 	linear = true,
 	keepMounted = true,
@@ -55,7 +52,7 @@ export function Stepper({
 	useEffect(() => {
 		if (!responsive || !containerRef.current) return;
 
-		const breakpoint = typeof responsive === "number" ? responsive : 600;
+		const breakpoint = typeof responsive === 'number' ? responsive : 600;
 
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
@@ -68,7 +65,7 @@ export function Stepper({
 	}, [responsive]);
 
 	// Calculate final orientation based on props + responsive state
-	const activeOrientation = isCompact ? "vertical" : orientation;
+	const activeOrientation = isCompact ? 'vertical' : orientation;
 
 	return (
 		<StepperContext.Provider
@@ -90,9 +87,7 @@ export function Stepper({
 		>
 			<div
 				ref={containerRef}
-				className={`stepper stepper--${activeOrientation} stepper--${variant} ${
-					className || ""
-				}`}
+				className={`stepper stepper--${activeOrientation} stepper--${variant} ${className || ''}`}
 				style={style}
 			>
 				{children}

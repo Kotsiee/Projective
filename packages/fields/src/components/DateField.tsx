@@ -1,15 +1,15 @@
-import "../styles/fields/date-field.css";
-import { computed, Signal, useSignal } from "@preact/signals";
-import { DateFieldProps, DateValue } from "../types/components/date-field.ts";
-import { useInteraction } from "../hooks/useInteraction.ts";
-import { useFieldState } from "../hooks/useFieldState.ts";
-import { AdornmentWrapper } from "../wrappers/AdornmentWrapper.tsx";
-import { MessageWrapper } from "../wrappers/MessageWrapper.tsx";
-import { DateTime } from "@projective/types";
-import { Popover } from "@projective/ui";
-import { Calendar } from "./datetime/Calendar.tsx";
-import { TextField } from "./TextField.tsx";
-import { IconCalendar } from "@tabler/icons-preact";
+import '../styles/fields/date-field.css';
+import { computed, Signal, useSignal } from '@preact/signals';
+import { DateFieldProps, DateValue } from '../types/components/date-field.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { useFieldState } from '../hooks/useFieldState.ts';
+import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { DateTime } from '@projective/types';
+import { Popover } from '@projective/ui';
+import { Calendar } from './datetime/Calendar.tsx';
+import { TextField } from './TextField.tsx';
+import { IconCalendar } from '@tabler/icons-preact';
 
 export function DateField(props: DateFieldProps) {
 	const {
@@ -20,7 +20,7 @@ export function DateField(props: DateFieldProps) {
 		onChange,
 		minDate,
 		maxDate,
-		format = "yyyy-MM-dd",
+		format = 'yyyy-MM-dd',
 		error,
 		disabled,
 		prefix,
@@ -36,8 +36,8 @@ export function DateField(props: DateFieldProps) {
 		hint,
 		warning,
 		info,
-		variant = "popup", // Default to existing behavior
-		selectionMode = "single",
+		variant = 'popup', // Default to existing behavior
+		selectionMode = 'single',
 		modifiers,
 	} = props;
 
@@ -59,24 +59,24 @@ export function DateField(props: DateFieldProps) {
 	// Computed string value for the input display
 	const displayValue = computed(() => {
 		const val = fieldState.value.value;
-		if (!val) return "";
+		if (!val) return '';
 
 		if (Array.isArray(val)) {
 			// Range
-			if (selectionMode === "range" && val.length === 2) {
-				const start = val[0] ? val[0].toFormat(format) : "...";
-				const end = val[1] ? val[1].toFormat(format) : "...";
+			if (selectionMode === 'range' && val.length === 2) {
+				const start = val[0] ? val[0].toFormat(format) : '...';
+				const end = val[1] ? val[1].toFormat(format) : '...';
 				return `${start} - ${end}`;
 			}
 			// Multiple
-			if (selectionMode === "multiple") {
+			if (selectionMode === 'multiple') {
 				return `${val.length} dates selected`;
 			}
 		}
 		// Single
 		if (val instanceof DateTime) return val.toFormat(format);
 
-		return "";
+		return '';
 	});
 
 	const handleDateSelect = (date: DateValue) => {
@@ -86,7 +86,7 @@ export function DateField(props: DateFieldProps) {
 		// Single: Close on select
 		// Range: Close if both start/end selected? Maybe keep open for adjustments.
 		// Multiple: Keep open.
-		if (selectionMode === "single") {
+		if (selectionMode === 'single') {
 			isOpen.value = false;
 			interaction.handleBlur();
 		}
@@ -94,10 +94,10 @@ export function DateField(props: DateFieldProps) {
 
 	// --- Render Logic Based on Variant ---
 
-	if (variant === "inline") {
+	if (variant === 'inline') {
 		return (
 			<div
-				className={`field-date field-date--inline ${className || ""}`}
+				className={`field-date field-date--inline ${className || ''}`}
 				style={style}
 			>
 				<Calendar
@@ -107,7 +107,7 @@ export function DateField(props: DateFieldProps) {
 					max={maxDate}
 					selectionMode={selectionMode}
 					modifiers={modifiers}
-					className="field-date__calendar--inline"
+					className='field-date__calendar--inline'
 				/>
 				<MessageWrapper
 					error={error}
@@ -121,7 +121,7 @@ export function DateField(props: DateFieldProps) {
 
 	// Default: Popup Mode
 	return (
-		<div className={`field-date ${className || ""}`} style={style}>
+		<div className={`field-date ${className || ''}`} style={style}>
 			<Popover
 				isOpen={isOpen.value}
 				onClose={() => {
@@ -131,8 +131,7 @@ export function DateField(props: DateFieldProps) {
 				// Forward position prop if we want manual control, otherwise let Popover auto-flip
 				trigger={
 					<div
-						onClick={() =>
-							!isDisabled && (isOpen.value = !isOpen.value)}
+						onClick={() => !isDisabled && (isOpen.value = !isOpen.value)}
 					>
 						<TextField
 							id={id}
@@ -148,7 +147,7 @@ export function DateField(props: DateFieldProps) {
 							readonly // Prevent manual typing for complex modes for now
 							suffix={
 								<AdornmentWrapper
-									position="suffix"
+									position='suffix'
 									onClick={(e) => {
 										e.stopPropagation();
 										!isDisabled &&

@@ -1,6 +1,6 @@
 import { DateTime, SelectOption } from '@projective/types';
 import { UIStage } from '../ProjectStages.tsx';
-import { DateField, MoneyField, SelectField, TextField } from '@projective/fields';
+import { DateField, SelectField, TextField } from '@projective/fields';
 
 export default function ProjectStageFile(
 	{ stage, updateStage }: { stage: UIStage; updateStage: (f: keyof UIStage, v: any) => void },
@@ -12,7 +12,7 @@ export default function ProjectStageFile(
 	];
 
 	return (
-		<div>
+		<div className='form-grid'>
 			<SelectField
 				name='duration-mode'
 				label='Duration Mode'
@@ -48,17 +48,13 @@ export default function ProjectStageFile(
 				/>
 			)}
 
-			<div
-				style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}
-			>
-				<TextField
-					label='Included Revisions'
-					type='number'
-					value={stage.file_revisions_allowed?.toString() || '0'}
-					onChange={(v) => updateStage('file_revisions_allowed', parseInt(v))}
-					floating
-				/>
-			</div>
+			<TextField
+				label='Included Revisions'
+				type='number'
+				value={stage.file_revisions_allowed?.toString() || '0'}
+				onChange={(v) => updateStage('file_revisions_allowed', parseInt(v))}
+				floating
+			/>
 		</div>
 	);
 }

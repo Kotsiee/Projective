@@ -39,7 +39,6 @@ export function SliderField(props: SliderFieldProps) {
 	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
 	const errorMessage = error instanceof Signal ? error.value : error;
 
-	// Unwrap signal value if present, or use raw value
 	const rawValue = value instanceof Signal ? value.value : (value ?? defaultValue);
 
 	const {
@@ -93,12 +92,14 @@ export function SliderField(props: SliderFieldProps) {
 						: valueToPercent(mark.value, min, max);
 					if (pct < 0 || pct > 100) return null;
 
-					const style = vertical
+					const markStyle = vertical
 						? { bottom: `${pct}%`, left: '50%' }
 						: { left: `${pct}%`, top: '50%' };
 
+					const markClass = ['field-slider__mark', mark.className].filter(Boolean).join(' ');
+
 					return (
-						<div key={i} className='field-slider__mark' style={style}>
+						<div key={i} className={markClass} style={markStyle}>
 							<div className='field-slider__mark-tick'></div>
 							{mark.label && <div className='field-slider__mark-label'>{mark.label}</div>}
 						</div>
@@ -126,27 +127,22 @@ export function SliderField(props: SliderFieldProps) {
 				label={label}
 				disabled={isDisabled}
 				position={position}
-				// FIX: Default to 'never' for sliders so label is static above
 				floatingRule={floatingRule ?? 'never'}
 				required={required}
 				floating={floating}
 			/>
 
-			{/* Control Wrapper */}
 			<div className='field-slider__control' style={wrapperStyle}>
 				<div
 					className='field-slider__container'
 					onClick={(e: MouseEvent) => handleTrackClick(e as PointerEvent)}
 				>
 					<div className='field-slider__track' ref={trackRef}>
-						{/* Fill */}
 						<div className='field-slider__fill' style={trackFillStyle.value}></div>
 
-						{/* Marks */}
 						{renderMarks()}
 
-						{/* Handles */}
-						{handleStyles.value.map((style, index) => {
+						{handleStyles.value.map((thumbStyle, index) => {
 							const isActive = activeHandleIdx.value === index;
 							const val = internalValues.value[index];
 
@@ -154,16 +150,22 @@ export function SliderField(props: SliderFieldProps) {
 								<div
 									key={index}
 									className={`field-slider__thumb ${isActive ? 'field-slider__thumb--active' : ''}`}
-									style={style}
+									style={thumbStyle}
 									tabIndex={isDisabled ? -1 : 0}
 									role='slider'
 									aria-orientation={vertical ? 'vertical' : 'horizontal'}
 									aria-valuemin={min}
 									aria-valuemax={max}
 									aria-valuenow={val}
-									onPointerDown={(e) => handlePointerDown(index, e)}
+									onPointerDown={(e) => {
+										(e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+										handlePointerDown(index, e);
+									}}
 									onPointerMove={handlePointerMove}
-									onPointerUp={handlePointerUp}
+									onPointerUp={(e) => {
+										(e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
+										handlePointerUp(e);
+									}}
 									onContextMenu={(e) => e.preventDefault()}
 								>
 								</div>

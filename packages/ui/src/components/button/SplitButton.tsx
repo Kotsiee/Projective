@@ -79,6 +79,7 @@ export function SplitButton(props: SplitButtonProps) {
 				content={
 					// Wrapper to close menu when an item is clicked
 
+
 						<div onClick={() => isOpen.value = false}>
 							{menu}
 						</div>

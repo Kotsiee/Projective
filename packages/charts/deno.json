@@ -1,0 +1,12 @@
+{
+  "name": "@projective/charts",
+  "version": "0.0.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check mod.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}

@@ -1,27 +1,27 @@
-import { createContext, toChildArray, VNode } from "preact";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { SplitterGutter } from "./SplitterGutter.tsx";
+import { createContext, toChildArray, VNode } from 'preact';
+import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
+import { SplitterGutter } from './SplitterGutter.tsx';
 import {
 	SplitterContextValue,
 	SplitterPaneProps,
 	SplitterProps,
-} from "../../types/components/splitter.ts";
+} from '../../types/components/splitter.ts';
 
-import { useSplitter } from "../../hooks/useSplitter.ts";
+import { useSplitter } from '../../hooks/useSplitter.ts';
 
 const SplitterContext = createContext<SplitterContextValue | null>(null);
 
 export function useSplitterContext() {
 	const ctx = useContext(SplitterContext);
 	if (!ctx) {
-		throw new Error("Splitter Sub-components must be within a <Splitter>");
+		throw new Error('Splitter Sub-components must be within a <Splitter>');
 	}
 	return ctx;
 }
 
 export function Splitter({
 	children,
-	direction = "horizontal",
+	direction = 'horizontal',
 	initialSizes,
 	minPaneSize = 10,
 	breakpoint = 0,
@@ -79,7 +79,7 @@ export function Splitter({
 		return () => observer.disconnect();
 	}, [breakpoint]);
 
-	const activeDirection = isResponsiveStack ? "vertical" : direction;
+	const activeDirection = isResponsiveStack ? 'vertical' : direction;
 
 	return (
 		<SplitterContext.Provider
@@ -95,15 +95,15 @@ export function Splitter({
 			<div
 				ref={containerRef}
 				className={`splitter splitter--${activeDirection} ${
-					isResizing.value ? "splitter--resizing" : ""
-				} ${className || ""}`}
+					isResizing.value ? 'splitter--resizing' : ''
+				} ${className || ''}`}
 				style={style}
 			>
 				{validChildren.map((child, index) => {
 					const isLast = index === count - 1;
 					// Force 100% size if stacked, else use calculated percentage
 					const sizeStyle = isResponsiveStack
-						? { flexBasis: "auto", flexGrow: 1 }
+						? { flexBasis: 'auto', flexGrow: 1 }
 						: { flexBasis: `${sizes.value[index]}%` };
 
 					// Hide if collapsed (size 0)
@@ -114,9 +114,7 @@ export function Splitter({
 						<>
 							<div
 								className={`splitter__pane-wrapper ${
-									isCollapsed
-										? "splitter__pane-wrapper--collapsed"
-										: ""
+									isCollapsed ? 'splitter__pane-wrapper--collapsed' : ''
 								}`}
 								style={sizeStyle}
 							>
@@ -130,9 +128,7 @@ export function Splitter({
 								/>
 							)}
 							{/* In stack mode, we might want a simple border instead of a resize handle */}
-							{!isLast && isResponsiveStack && (
-								<div className="splitter__divider-stack" />
-							)}
+							{!isLast && isResponsiveStack && <div className='splitter__divider-stack' />}
 						</>
 					);
 				})}

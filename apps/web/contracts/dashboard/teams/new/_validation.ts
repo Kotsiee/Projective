@@ -19,7 +19,7 @@ const TeamInviteSchema = z.object({
 });
 
 export const CreateTeamSchema = z.object({
-	id: z.string().uuid().optional(),
+	id: z.uuid().optional(),
 	name: z.string()
 		.min(3, 'Team name must be at least 3 characters')
 		.max(100, 'Team name is too long'),

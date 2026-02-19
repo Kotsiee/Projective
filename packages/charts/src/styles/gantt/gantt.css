@@ -1,0 +1,16 @@
+.gantt-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+}
+
+.gantt-controls {
+    display: flex;
+}
+
+.gantt-body {
+    display: flex;
+    gap: 1rem;
+    height: 100%;
+}

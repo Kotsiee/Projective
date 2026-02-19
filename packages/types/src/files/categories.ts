@@ -1,3 +1,38 @@
+/**
+ * Determines the specific FileCategory for a given File object.
+ * It checks the file extension first, then falls back to MIME type.
+ * * @param file - The browser File object
+ * @returns The matching FileCategory or 'Other' if not found.
+ */
+export function getFileCategory(file: File): FileCategory | 'Other' {
+	const extension = file.name.split('.').pop()?.toLowerCase() || '';
+	const mimeType = file.type.toLowerCase();
+
+	// 1. Iterate through all categories
+	for (const [category, definitions] of Object.entries(extensionCategories)) {
+		// 2. Iterate through definitions within a category
+		for (const def of definitions) {
+			// Priority A: Exact Extension Match
+			if (def.extension.toLowerCase() === extension) {
+				return category as FileCategory;
+			}
+
+			// Priority B: MIME Type Match (if extension didn't match)
+			if (def.validMimeTypes && def.validMimeTypes.includes(mimeType)) {
+				return category as FileCategory;
+			}
+		}
+	}
+
+	// 3. Fallback for generic types if not found in specific definitions
+	if (mimeType.startsWith('image/')) return 'Image';
+	if (mimeType.startsWith('video/')) return 'Video';
+	if (mimeType.startsWith('audio/')) return 'Audio';
+	if (mimeType.startsWith('text/')) return 'Document';
+
+	return 'Other';
+}
+
 export type FileCategory =
 	| 'Document'
 	| 'Presentation'

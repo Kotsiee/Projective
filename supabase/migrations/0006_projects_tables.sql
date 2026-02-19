@@ -5,6 +5,7 @@ CREATE TABLE projects.projects (
   owner_user_id uuid NOT NULL,
   title text NOT NULL,
   description jsonb NOT NULL DEFAULT '{}'::jsonb,
+  thumbnail_url text,
   status project_status NOT NULL DEFAULT 'draft'::project_status,
   industry_category_id uuid,
   visibility visibility NOT NULL DEFAULT 'public'::visibility,
@@ -44,6 +45,7 @@ start_trigger_type start_trigger_type NOT NULL DEFAULT 'on_project_start'::start
   start_dependency_stage_id uuid,
 
 -- Configuration
+
 file_revisions_allowed integer DEFAULT 0,
   file_duration_mode text,
   file_duration_days integer,
@@ -64,6 +66,7 @@ file_revisions_allowed integer DEFAULT 0,
 );
 
 -- 3. MAINTENANCE CONTRACTS
+
 
 CREATE TABLE projects.maintenance_contracts (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -146,6 +149,7 @@ CREATE TABLE projects.stage_submissions (
 
 -- 8. GLOBAL ATTACHMENTS (FIXED)
 
+
 CREATE TABLE projects.project_attachments (
     project_id uuid NOT NULL,
     attachment_id uuid NOT NULL, -- "attachment_id" is the ID from files.items
@@ -198,6 +202,7 @@ CREATE TABLE projects.stage_open_seats (
 
 -- 12. STAFFING ROLES
 
+
 CREATE TABLE projects.stage_staffing_roles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   project_stage_id uuid NOT NULL,
@@ -213,6 +218,7 @@ CREATE TABLE projects.stage_staffing_roles (
 );
 
 -- 13. SUBMISSION FILES (FIXED)
+
 
 CREATE TABLE projects.submission_files (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
@@ -238,6 +244,7 @@ CREATE TABLE projects.stage_budget_rules (
 );
 
 -- 15. REVISION REQUESTS
+
 
 CREATE TABLE projects.stage_revision_requests (
   id uuid NOT NULL DEFAULT gen_random_uuid(),

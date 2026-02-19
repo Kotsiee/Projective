@@ -1,63 +1,325 @@
-/* #region 1. BLOCK: field-file */
+/* #region 1. Container & Layout */
 .field-file {
   display: flex;
   flex-direction: column;
   position: relative;
   width: 100%;
+  gap: 0.75rem;
+  /* Gap between label, dropzone, and list */
+}
+
+.file-drop__container {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 140px;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  transition: all var(--field-transition);
+  overflow: hidden;
+}
+
+/* Error State */
+.file-drop__container--error {
+  border-color: var(--field-border-error);
+  background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.05);
+}
+
+/* Disabled State */
+.file-drop__container--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  background-color: var(--field-bg-disabled);
 }
 
 /* #endregion */
 
-/* #region 2. ELEMENT: field-file__dropzone */
-.field-file__dropzone {
+
+/* #region 2. The Split Actions (Left/Right) */
+.file-drop__split-action {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px;
-  border: 2px dashed var(--field-border);
-  border-radius: var(--field-radius);
-  background-color: var(--field-bg);
-  transition: all var(--field-transition);
   cursor: pointer;
-  text-align: center;
-  min-height: 120px;
+  padding: 1rem;
+  transition: background-color var(--fast) ease;
+  color: var(--field-text-secondary);
+  gap: 0.75rem;
 }
 
-.field-file__dropzone:hover {
+.file-drop__split-action:hover {
   background-color: var(--field-bg-hover);
-  border-color: var(--field-border-hover);
+  color: var(--primary);
 }
 
-/* MATCHES LOGIC: field-file__dropzone--dragging */
-.field-file__dropzone--dragging {
-  background-color: var(--primary-surface);
-  border-color: var(--field-border-focus);
-  border-style: solid;
-}
-
-.field-file__dropzone--error {
-  border-color: var(--field-border-error);
-}
-
-.field-file__dropzone--disabled {
+.file-drop__split-action:active {
   background-color: var(--field-bg-disabled);
-  border-color: var(--field-border-disabled);
-  cursor: not-allowed;
-  opacity: 0.6;
+}
+
+/* The vertical divider line */
+.file-drop__divider {
+  width: 1px;
+  background-color: var(--field-border);
+  margin: 1rem 0;
+}
+
+/* Typography for inner content */
+.file-drop__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+.file-drop__sub {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-align: center;
 }
 
 /* #endregion */
 
-/* #region 3. ELEMENTS: Content & Text */
-.field-file__text {
-  font-size: var(--field-font-size);
-  color: var(--field-text);
-  font-weight: 500;
+
+/* #region 3. The "Glow" Drop Overlay */
+.file-drop__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.05);
+  border: 2px dashed var(--primary);
+  border-radius: var(--field-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+  animation: fadeIn var(--fast) ease-out;
 }
 
-.field-file__input {
-  display: none;
+.file-drop__overlay-content {
+  color: var(--primary);
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* #endregion */
+
+
+/* #region 4. Simple/Avatar Variant (Not split) */
+.file-drop__container--single {
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-drop__container--single:hover {
+  border-color: var(--primary);
+}
+
+/* #endregion */
+
+
+/* #region 5. File List (List View) */
+.file-drop__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.file-drop__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  position: relative;
+  overflow: hidden;
+  /* Important for progress bar clipping */
+}
+
+.file-drop__item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  /* Enables text truncation */
+  z-index: 2;
+  position: relative;
+}
+
+.file-drop__preview-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--field-bg-disabled);
+  flex-shrink: 0;
+  border: 1px solid var(--field-border);
+}
+
+.file-drop__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-drop__filename {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--field-text);
+}
+
+.file-drop__filesize {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file-drop__remove {
+  border: none;
+  background: transparent;
+  color: var(--field-text-disabled);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--fast);
+  z-index: 2;
+  position: relative;
+}
+
+.file-drop__remove:hover {
+  color: var(--field-text-error);
+}
+
+/* Progress Bar Background */
+.file-drop__progress-bg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  background-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.1);
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+/* Spinner Animation */
+.file-drop__spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* #endregion */
+
+
+/* #region 6. Single Preview (Thumbnail/Banner Mode) */
+.file-drop__single-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--field-bg-disabled);
+  border-radius: var(--field-radius) var(--field-radius) 0 0;
+}
+
+/* Ensure the container doesn't have padding when showing preview */
+.file-drop__container:has(.file-drop__single-preview) {
+  padding: 0;
+  border: 1px solid var(--field-border);
+}
+
+.file-drop__single-img {
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- Remove Position: Overlay (Avatars) --- */
+.file-drop__single-preview--overlay {
+  border-radius: var(--field-radius);
+}
+
+.file-drop__change-btn {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity var(--fast) ease;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  backdrop-filter: blur(2px);
+}
+
+.file-drop__single-preview--overlay:hover .file-drop__change-btn {
+  opacity: 1;
+}
+
+/* --- Remove Position: Below (Banners) --- */
+.file-drop__remove-bar {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--field-bg);
+  border-top: 1px solid var(--field-border);
+  color: var(--field-text-error);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color var(--fast);
+}
+
+.file-drop__remove-bar:hover {
+  background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.05);
 }
 
 /* #endregion */

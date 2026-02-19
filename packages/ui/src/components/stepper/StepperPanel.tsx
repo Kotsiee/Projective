@@ -1,5 +1,5 @@
-import { StepperPanelProps } from "../../types/components/stepper.ts";
-import { useStepperContext } from "./Stepper.tsx";
+import { StepperPanelProps } from '../../types/components/stepper.ts';
+import { useStepperContext } from './Stepper.tsx';
 
 export function StepperPanel(
 	{ children, index, className, style }: StepperPanelProps,
@@ -11,14 +11,12 @@ export function StepperPanel(
 
 	return (
 		<div
-			className={`stepper__panel ${
-				isActive ? "stepper__panel--active" : ""
-			} ${className || ""}`}
+			className={`stepper__panel ${isActive ? 'stepper__panel--active' : ''} ${className || ''}`}
 			style={{
-				display: isActive ? "block" : "none",
+				display: isActive ? 'block' : 'none',
 				...style,
 			}}
-			role="tabpanel"
+			role='tabpanel'
 			aria-hidden={!isActive}
 		>
 			{children}

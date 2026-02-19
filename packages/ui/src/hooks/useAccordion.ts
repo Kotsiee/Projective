@@ -1,23 +1,23 @@
-import { Signal, useSignal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
-import { AccordionProps } from "../../../fields/src/types/components/accordion.ts";
+import { Signal, useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
+import { AccordionProps } from '../types/components/accordion.ts';
 
 interface UseAccordionProps extends
 	Pick<
 		AccordionProps,
-		| "value"
-		| "defaultValue"
-		| "onValueChange"
-		| "type"
-		| "collapsible"
-		| "disabled"
+		| 'value'
+		| 'defaultValue'
+		| 'onValueChange'
+		| 'type'
+		| 'collapsible'
+		| 'disabled'
 	> {}
 
 export function useAccordion({
 	value,
 	defaultValue,
 	onValueChange,
-	type = "single",
+	type = 'single',
 	collapsible = false,
 	disabled = false,
 }: UseAccordionProps) {
@@ -27,17 +27,13 @@ export function useAccordion({
 
 	// Sync disabled state
 	useEffect(() => {
-		isDisabled.value = disabled instanceof Signal
-			? disabled.value
-			: disabled;
+		isDisabled.value = disabled instanceof Signal ? disabled.value : disabled;
 	}, [disabled]);
 
 	// Initialize state (Uncontrolled)
 	useEffect(() => {
 		if (value === undefined && defaultValue !== undefined) {
-			const arr = Array.isArray(defaultValue)
-				? defaultValue
-				: [defaultValue];
+			const arr = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 			expandedValues.value = new Set(arr);
 		}
 	}, []);
@@ -61,9 +57,7 @@ export function useAccordion({
 	const emitChange = (nextSet: Set<string>) => {
 		expandedValues.value = nextSet;
 		if (onValueChange) {
-			const out = type === "single"
-				? (nextSet.values().next().value ?? "")
-				: Array.from(nextSet);
+			const out = type === 'single' ? (nextSet.values().next().value ?? '') : Array.from(nextSet);
 			onValueChange(out);
 		}
 	};
@@ -74,7 +68,7 @@ export function useAccordion({
 		const next = new Set(expandedValues.value);
 		const isOpen = next.has(itemValue);
 
-		if (type === "single") {
+		if (type === 'single') {
 			if (isOpen) {
 				if (collapsible) next.clear();
 				else return;
@@ -90,7 +84,7 @@ export function useAccordion({
 	};
 
 	const expandAll = (allValues: string[]) => {
-		if (isDisabled.value || type === "single") return;
+		if (isDisabled.value || type === 'single') return;
 		emitChange(new Set(allValues));
 	};
 
@@ -99,7 +93,7 @@ export function useAccordion({
 		// If single and not collapsible, we technically shouldn't collapse all,
 		// but usually collapseAll implies a reset.
 		// For strict compliance:
-		if (type === "single" && !collapsible) return;
+		if (type === 'single' && !collapsible) return;
 
 		emitChange(new Set());
 	};

@@ -1,5 +1,5 @@
-import { AccordionContentProps } from "../../types/components/accordion.ts";
-import { useAccordionItemContext } from "./AccordionItem.tsx";
+import { AccordionContentProps } from '../../types/components/accordion.ts';
+import { useAccordionItemContext } from './AccordionItem.tsx';
 
 export function AccordionContent({
 	children,
@@ -19,14 +19,14 @@ export function AccordionContent({
 
 	return (
 		<div
-			className={`accordion__content ${
-				isOpen.value ? "accordion__content--open" : ""
-			} ${className || ""}`}
+			className={`accordion__content ${isOpen.value ? 'accordion__content--open' : ''} ${
+				className || ''
+			}`}
 			style={style}
-			data-state={isOpen.value ? "open" : "closed"}
-			role="region"
+			data-state={isOpen.value ? 'open' : 'closed'}
+			role='region'
 		>
-			<div className="accordion__content-inner">
+			<div className='accordion__content-inner'>
 				{children}
 			</div>
 		</div>

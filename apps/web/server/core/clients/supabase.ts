@@ -1,9 +1,5 @@
-import {
-	createClient,
-	type SupabaseClient,
-	type SupabaseClientOptions,
-} from "supabaseClient";
-import { Config, getAuthCookies } from "@projective/backend";
+import { createClient, type SupabaseClient, type SupabaseClientOptions } from 'supabaseClient';
+import { Config, getAuthCookies } from '@projective/backend';
 
 let anonClient: SupabaseClient | null = null;
 
@@ -11,7 +7,7 @@ function getEnv() {
 	const SUPABASE_URL = Config.SUPABASE_URL;
 	const ANON_KEY = Config.SUPABASE_ANON_KEY;
 	if (!SUPABASE_URL || !ANON_KEY) {
-		throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+		throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
 	}
 	return { SUPABASE_URL, ANON_KEY };
 }
@@ -28,7 +24,7 @@ export async function supabaseClient(
 ): Promise<SupabaseClient> {
 	const { SUPABASE_URL, ANON_KEY } = getEnv();
 
-	const baseOptions: SupabaseClientOptions<"public"> = {
+	const baseOptions: SupabaseClientOptions<'public'> = {
 		auth: {
 			persistSession: false,
 			detectSessionInUrl: false,

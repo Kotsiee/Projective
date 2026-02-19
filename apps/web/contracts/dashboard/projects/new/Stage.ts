@@ -1,10 +1,5 @@
-import { QuillDelta } from "@projective/utils";
-import {
-	BudgetType,
-	DateTime,
-	StageType,
-	StartTriggerType,
-} from "@projective/types";
+import { QuillDelta } from '@projective/utils';
+import { BudgetType, DateTime, StageType, StartTriggerType } from '@projective/types';
 
 // Corresponds to table: projects.stage_staffing_roles
 export interface StageStaffingRole {
@@ -45,7 +40,7 @@ export interface Stage {
 
 	// File Based
 	file_revisions_allowed?: number;
-	file_duration_mode?: "fixed_deadline" | "relative_duration" | "no_due_date";
+	file_duration_mode?: 'fixed_deadline' | 'relative_duration' | 'no_due_date';
 	file_duration_days?: number; // Used if mode is relative_duration
 	file_due_date?: DateTime | string; // Used if mode is fixed_deadline
 
@@ -54,10 +49,10 @@ export interface Stage {
 	session_count?: number; // How many sessions included
 
 	// Management Based
-	management_contract_mode?: "fixed_dates" | "duration_from_start";
+	management_contract_mode?: 'fixed_dates' | 'duration_from_start';
 
 	// Maintenance Based
-	maintenance_cycle_interval?: "weekly" | "monthly";
+	maintenance_cycle_interval?: 'weekly' | 'monthly';
 
 	// Overrides
 	ip_ownership_override?: string;

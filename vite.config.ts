@@ -7,6 +7,17 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export default defineConfig({
 	root: 'apps/web',
 	plugins: [fresh()],
+
+	server: {
+		fs: {
+			// ALLOW ACCESS TO MONOREPO ROOT (Fixes "outside allow list" error)
+			allow: ['..', '../..'],
+		},
+		watch: {
+			ignored: ['**/coverage/**', '**/dist/**', '**/.git/**'],
+		},
+	},
+
 	resolve: {
 		alias: {
 			'@': r('./apps/web/'),
@@ -19,6 +30,7 @@ export default defineConfig({
 			'@types': r('./apps/web/types/'),
 			'@utils': r('./apps/web/utils.ts'),
 
+			// Monorepo Aliases
 			'@projective/shared': r('./packages/shared/mod.ts'),
 			'@projective/backend': r('./packages/backend/mod.ts'),
 			'@projective/ui': r('./packages/ui/mod.ts'),
@@ -26,10 +38,30 @@ export default defineConfig({
 			'@projective/types': r('./packages/types/mod.ts'),
 			'@projective/fields': r('./packages/fields/mod.ts'),
 			'@projective/data': r('./packages/data/mod.ts'),
+			'@projective/charts': r('./packages/charts/mod.ts'),
 		},
 	},
 
+	optimizeDeps: {
+		exclude: [
+			'@projective/ui',
+			'@projective/fields',
+			'@projective/shared',
+			'@projective/utils',
+			'@projective/types',
+			'@projective/data',
+			'@projective/charts',
+		],
+	},
+
+	// SSR CONFIG:
+	// Force bundling of ALL dependencies during SSR to resolve protocol issues.
+	ssr: {
+		noExternal: true,
+	},
+
 	build: {
+		sourcemap: false,
 		commonjsOptions: {
 			include: [/packages\//, /node_modules/],
 		},

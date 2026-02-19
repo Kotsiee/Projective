@@ -13,7 +13,7 @@ const QuillDeltaSchema = z.object({
 });
 
 export const CreateBusinessSchema = z.object({
-	id: z.string().uuid().optional(),
+	id: z.uuid().optional(),
 
 	// Identity
 	name: z.string()

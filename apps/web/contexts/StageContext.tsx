@@ -1,10 +1,10 @@
-import { createContext } from "preact";
-import { useContext, useEffect } from "preact/hooks";
-import { Signal, useSignal } from "@preact/signals";
-import { ComponentChildren } from "preact";
-import { StagePermission, StageType } from "@projective/types";
+import { createContext } from 'preact';
+import { useContext, useEffect } from 'preact/hooks';
+import { Signal, useSignal } from '@preact/signals';
+import { ComponentChildren } from 'preact';
+import { StagePermission, StageType } from '@projective/types';
 
-export type StageRole = "owner" | "assignee" | "viewer";
+export type StageRole = 'owner' | 'assignee' | 'viewer';
 
 export interface StageDetails {
 	stage_id: string;
@@ -15,23 +15,23 @@ export interface StageDetails {
 	sort_order: number;
 
 	status:
-		| "open"
-		| "assigned"
-		| "in_progress"
-		| "submitted"
-		| "approved"
-		| "revisions"
-		| "paid";
+		| 'open'
+		| 'assigned'
+		| 'in_progress'
+		| 'submitted'
+		| 'approved'
+		| 'revisions'
+		| 'paid';
 	stage_type: StageType;
 	ip_mode:
-		| "exclusive_transfer"
-		| "licensed_use"
-		| "internal_only"
-		| "template_only";
+		| 'exclusive_transfer'
+		| 'licensed_use'
+		| 'internal_only'
+		| 'template_only';
 	due_date: string | null;
 
 	budget: {
-		type: "fixed" | "hourly_cap" | "free";
+		type: 'fixed' | 'hourly_cap' | 'free';
 		amount_cents: number;
 		currency: string;
 	} | null;
@@ -40,8 +40,8 @@ export interface StageDetails {
 		profile_id: string;
 		name: string;
 		avatar_url: string | null;
-		type: "freelancer" | "team";
-		status: "invited" | "accepted";
+		type: 'freelancer' | 'team';
+		status: 'invited' | 'accepted';
 	} | null;
 
 	latest_submission: {
@@ -99,7 +99,7 @@ export function StageProvider(
 			stage.value = await res.json();
 			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
-			console.error("Stage Fetch Error:", err);
+			console.error('Stage Fetch Error:', err);
 			error.value = err.message;
 		} finally {
 			isLoading.value = false;
@@ -128,7 +128,7 @@ export function StageProvider(
 export function useStageContext() {
 	const ctx = useContext(StageContext);
 	if (!ctx) {
-		throw new Error("useStageContext must be used within StageProvider");
+		throw new Error('useStageContext must be used within StageProvider');
 	}
 	return ctx;
 }

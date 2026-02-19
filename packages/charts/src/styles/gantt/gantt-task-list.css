@@ -1,0 +1,47 @@
+@import './gantt-task-card.css';
+
+/* #region GANTT TASK LIST */
+.gantt-task-list {
+    width: 100%;
+    min-width: 200px;
+    max-width: 300px;
+    background-color: var(--header);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.gantt-task-list__header {
+    height: 60px;
+    min-height: 60px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    font-weight: 500;
+}
+
+.gantt-task-list__container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.gantt-task-list__container__tasks {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Allow children to dictate the height so the 15 virtualized rows aren't clipped */
+    height: max-content;
+    /* Force hardware acceleration for smooth 60fps scrolling */
+    will-change: transform;
+}
+
+/* #endregion */

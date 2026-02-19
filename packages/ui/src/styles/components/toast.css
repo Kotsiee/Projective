@@ -1,9 +1,11 @@
 /* #region 1. BLOCK: toast */
 .toast {
     pointer-events: auto;
+    /* Re-enable clicks on the actual toast */
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.75rem;
     padding: 1rem;
     background: var(--card, #ffffff);
@@ -13,6 +15,20 @@
     min-width: 300px;
     overflow: hidden;
     animation: toast-slide-in 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+.toast__header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.toast__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
 }
 
 .toast--success {
@@ -32,23 +48,113 @@
 }
 
 .toast__title {
-    font-weight: 700;
-    color: var(--text-main, #111827);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-main, #111);
 }
 
 .toast__message {
     font-size: 0.875rem;
-    color: var(--text-muted, rgba(17, 24, 39, 0.6));
+    color: var(--text-secondary, #555);
+    line-height: 1.4;
+}
+
+.toast__icon {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.toast--success .toast__icon {
+    color: var(--success, #43a047);
+}
+
+.toast--error .toast__icon {
+    color: var(--danger, #e53935);
+}
+
+.toast--warning .toast__icon {
+    color: var(--warning, #fb8c00);
+}
+
+.toast--info .toast__icon {
+    color: var(--primary, #186f7e);
 }
 
 .toast__action {
-    background-color: var(--primary-surface, rgba(24, 111, 126, 0.12));
-    color: var(--primary, #186f7e);
-    border: none;
-    border-radius: var(--border-radius__small, 4px);
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border-color);
     padding: 0.25rem 0.5rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    border-radius: 4px;
     cursor: pointer;
+    white-space: nowrap;
+}
+
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* #endregion */
+
+
+/* #region 2. BLOCK: toast-viewport (THE FIX) */
+.toast-viewport {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    pointer-events: none;
+    /* Click-through so it doesn't block the UI */
+    max-height: 100vh;
+    width: 100%;
+    max-width: 420px;
+    transition: all 0.3s ease;
+}
+
+/* Position Variants */
+.toast-viewport--top-left {
+    top: 0;
+    left: 0;
+}
+
+.toast-viewport--top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.toast-viewport--top-right {
+    top: 0;
+    right: 0;
+}
+
+.toast-viewport--bottom-left {
+    bottom: 0;
+    left: 0;
+}
+
+.toast-viewport--bottom-center {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.toast-viewport--bottom-right {
+    bottom: 0;
+    right: 0;
 }
 
 /* #endregion */

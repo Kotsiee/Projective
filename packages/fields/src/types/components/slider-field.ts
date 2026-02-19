@@ -7,6 +7,7 @@ import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
 export interface SliderMark {
 	value: number;
 	label?: string;
+	className?: string; // ADDED: Allows custom CSS targeting per mark type
 }
 
 /**
