@@ -1,0 +1,257 @@
+/* #region Main Form Pane (Left) */
+.project-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+    height: 100%;
+}
+
+.project-timeline__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-timeline__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.project-timeline__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.project-timeline__section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    flex: 1;
+    /* Allow gantt section to take remaining space */
+}
+
+.project-timeline__section--global {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    flex: 0 0 auto;
+}
+
+.project-timeline__section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-timeline__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .project-timeline__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.gantt-chart-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--input-bg);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+    min-height: 400px;
+}
+
+.gantt-chart-placeholder__sub {
+    font-size: 0.75rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
+}
+
+/* #endregion */
+
+/* #region Stage Inspector Pane (Right Preview) */
+.timeline-preview-empty {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-disabled);
+    background-color: var(--input-bg);
+    padding: 2rem;
+    text-align: center;
+}
+
+.timeline-stage-inspector {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--card);
+    border-radius: var(--border-radius);
+}
+
+.timeline-stage-inspector__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg);
+}
+
+.timeline-stage-inspector__badge {
+    background-color: var(--primary-surface);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius__xsmall);
+    text-transform: uppercase;
+}
+
+.timeline-stage-inspector__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.timeline-stage-inspector__content {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.timeline-stage-inspector__subtitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timeline-stage-inspector__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* #endregion */
+
+/* #region Shared Toggles */
+.timeline-stage-inspector__toggle-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.toggle-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.toggle-label__title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.toggle-label__desc {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+    max-width: 400px;
+    line-height: 1.4;
+}
+
+.toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-switch label {
+    display: block;
+    width: 44px;
+    height: 24px;
+    background-color: var(--border-color);
+    border-radius: 24px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color var(--fast);
+}
+
+.toggle-switch label::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform var(--fast);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked+label {
+    background-color: var(--primary);
+}
+
+.toggle-switch input[type="checkbox"]:checked+label::after {
+    transform: translateX(20px);
+}
+
+/* #endregion */
+
+/* Replace the gantt-chart-placeholder styles with this wrapper */
+
+.gantt-chart-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    /* Gives PIXI enough room to calculate bounds */
+    height: 100%;
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+/* Ensure the timeline fills the split pane accurately */
+.project-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 100%;
+    /* Important: Remove 800px max width so it spans the split pane */
+    height: 100%;
+}

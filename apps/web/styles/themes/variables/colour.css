@@ -76,6 +76,10 @@
         --in-progress: var(--warning);
         --complete: var(--primary);
         /* #endregion */
+
+        --scrollbar-bg: var(--bg);
+        --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 88%);
+        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 82%);
 }
 
 :root[data-theme="dark"] {
@@ -96,6 +100,7 @@
 
         --scrollbar-bg: hsl(var(--bg-hue), var(--bg-saturation), 10%);
         --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
+        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 12%);
         --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 90%);
 }
 

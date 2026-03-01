@@ -1,176 +1,67 @@
-CREATE OR REPLACE FUNCTION projects.create_project(
-  payload jsonb
-)
-RETURNS uuid
+-- 1. Create or Get Project Channel
+CREATE OR REPLACE FUNCTION comms.get_or_create_project_channel(
+    p_project_id uuid,
+    p_stage_id uuid,
+    p_name text
+) RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, comms, projects, org, auth
 AS $$
 DECLARE
-  new_project_id uuid;
-  stage_record jsonb;
-  new_stage_id uuid;
-  role_record jsonb;
-  seat_record jsonb;
-  attachment_id text;
-  
-  _id uuid;
-  _title text;
-  _desc jsonb;
-  _thumb text; -- NEW
-  _client_biz uuid;
-  _industry uuid;
-  _vis visibility;
-  _curr text;
-  _start_date timestamp with time zone;
-  _preset timeline_preset;
-  _legal_screening jsonb;
-  
+    v_channel_id uuid;
 BEGIN
-  -- 1. Extract Project Level Data
-  _id := COALESCE((payload->>'id')::uuid, gen_random_uuid());
-  _title := payload->>'title';
-  _desc := payload->'description';
-  _thumb := payload->>'thumbnail_url'; -- NEW
-  _client_biz := (payload->>'client_business_id')::uuid;
-  _industry := (payload->>'industry_category_id')::uuid;
-  _vis := (payload->>'visibility')::visibility;
-  _curr := payload->>'currency';
-  _start_date := (payload->>'target_project_start_date')::timestamp with time zone;
-  _preset := (payload->>'timeline_preset')::timeline_preset;
-  _legal_screening := payload->'legal_and_screening';
+    -- Try to find existing
+    SELECT id INTO v_channel_id
+    FROM comms.project_channels
+    WHERE project_id = p_project_id AND stage_id = p_stage_id
+    LIMIT 1;
 
-  -- 2. Insert Project Header
-  INSERT INTO projects.projects (
-    id,
-    owner_user_id,
-    client_business_id,
-    title,
-    description,
-    thumbnail_url, -- NEW
-    industry_category_id,
-    visibility,
-    currency,
-    target_project_start_date,
-    timeline_preset,
-    ip_ownership_mode,
-    nda_required,
-    portfolio_display_rights,
-    screening_questions,
-    location_restriction,
-    language_requirement
-  )
-  VALUES (
-    _id,
-    auth.uid(),
-    _client_biz,
-    _title,
-    _desc,
-    _thumb, -- NEW
-    _industry,
-    _vis,
-    _curr,
-    _start_date,
-    _preset,
-    (_legal_screening->>'ip_ownership_mode')::ip_option_mode,
-    (_legal_screening->>'nda_required')::boolean,
-    (_legal_screening->>'portfolio_display_rights')::portfolio_rights,
-    (_legal_screening->'screening_questions'),
-    (SELECT array_agg(x)::text[] FROM jsonb_array_elements_text(_legal_screening->'location_restriction') t(x)),
-    (SELECT array_agg(x)::text[] FROM jsonb_array_elements_text(_legal_screening->'language_requirement') t(x))
-  )
-  RETURNING id INTO new_project_id;
+    IF v_channel_id IS NOT NULL THEN
+        RETURN v_channel_id;
+    END IF;
 
-  -- 3. Insert Global Attachments
-  IF payload ? 'global_attachments' THEN
-    FOR attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
-    LOOP
-      INSERT INTO projects.project_attachments (project_id, attachment_id)
-      VALUES (new_project_id, attachment_id::uuid);
-    END LOOP;
-  END IF;
+    -- Create new
+    INSERT INTO comms.project_channels (project_id, stage_id, name)
+    VALUES (p_project_id, p_stage_id, p_name)
+    RETURNING id INTO v_channel_id;
 
-  -- 4. Loop through Stages (Logic remains unchanged)
-  FOR stage_record IN SELECT * FROM jsonb_array_elements(payload->'stages')
-  LOOP
-    INSERT INTO projects.project_stages (
-      project_id,
-      name,
-      description,
-      sort_order,
-      stage_type,
-      start_trigger_type,
-      fixed_start_date,
-      file_revisions_allowed,
-      file_duration_mode,
-      file_duration_days,
-      file_due_date,
-      session_duration_minutes,
-      session_count,
-      management_contract_mode,
-      maintenance_cycle_interval,
-      ip_ownership_override
-    )
-    VALUES (
-      new_project_id,
-      stage_record->>'title',
-      stage_record->'description',
-      (stage_record->>'sort_order')::int,
-      (stage_record->>'stage_type')::stage_type_enum,
-      (stage_record->>'start_trigger_type')::start_trigger_type,
-      (stage_record->>'fixed_start_date')::timestamp with time zone,
-      (stage_record->>'file_revisions_allowed')::int,
-      stage_record->>'file_duration_mode',
-      (stage_record->>'file_duration_days')::int,
-      (stage_record->>'file_due_date')::timestamp with time zone,
-      (stage_record->>'session_duration_minutes')::int,
-      COALESCE((stage_record->>'session_count')::int, 1),
-      stage_record->>'management_contract_mode',
-      stage_record->>'maintenance_cycle_interval',
-      (stage_record->>'ip_ownership_override')::ip_option_mode
-    )
-    RETURNING id INTO new_stage_id;
+    RETURN v_channel_id;
+END;
+$$;
 
-    -- Insert Staffing Roles
-    FOR role_record IN SELECT * FROM jsonb_array_elements(stage_record->'staffing_roles')
-    LOOP
-      INSERT INTO projects.stage_staffing_roles (
-        project_stage_id,
-        role_title,
-        quantity,
-        budget_type,
-        budget_amount_cents,
-        allow_proposals
-      )
-      VALUES (
-        new_stage_id,
-        role_record->>'role_title',
-        (role_record->>'quantity')::int,
-        (role_record->>'budget_type')::budget_type,
-        (role_record->>'budget_amount_cents')::bigint,
-        (role_record->>'allow_proposals')::boolean
-      );
-    END LOOP;
+-- 2. Create or Get DM Thread (Re-added)
+CREATE OR REPLACE FUNCTION comms.get_or_create_dm_thread(
+    target_user_id uuid
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, comms, org, auth
+AS $$
+DECLARE
+    v_current_user_id uuid := auth.uid();
+    v_thread_id uuid;
+BEGIN
+    -- Find existing thread where BOTH users are participants
+    SELECT t.id INTO v_thread_id
+    FROM comms.dm_threads t
+    JOIN comms.dm_participants p1 ON p1.thread_id = t.id AND p1.user_id = v_current_user_id
+    JOIN comms.dm_participants p2 ON p2.thread_id = t.id AND p2.user_id = target_user_id
+    LIMIT 1;
 
-    -- Insert Open Seats
-    FOR seat_record IN SELECT * FROM jsonb_array_elements(stage_record->'open_seats')
-    LOOP
-      INSERT INTO projects.stage_open_seats (
-        project_stage_id,
-        description_of_need,
-        budget_min_cents,
-        budget_max_cents,
-        require_proposals
-      )
-      VALUES (
-        new_stage_id,
-        seat_record->>'description_of_need',
-        (seat_record->>'budget_min_cents')::bigint,
-        (seat_record->>'budget_max_cents')::bigint,
-        (seat_record->>'require_proposals')::boolean
-      );
-    END LOOP;
-  END LOOP;
+    IF v_thread_id IS NOT NULL THEN
+        RETURN v_thread_id;
+    END IF;
 
-  RETURN new_project_id;
+    -- Create new thread
+    INSERT INTO comms.dm_threads (created_by_user_id)
+    VALUES (v_current_user_id)
+    RETURNING id INTO v_thread_id;
+
+    -- Insert participants
+    INSERT INTO comms.dm_participants (thread_id, user_id)
+    VALUES (v_thread_id, v_current_user_id), (v_thread_id, target_user_id);
+
+    RETURN v_thread_id;
 END;
 $$;

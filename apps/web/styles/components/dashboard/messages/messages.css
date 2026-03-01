@@ -1,63 +1,38 @@
 .project-chat-island {
     display: flex;
     flex-direction: column;
-    /* Ensure the island fills the parent pane's height */
-    min-height: 100%;
+
+    height: 100%;
     width: 100%;
     position: relative;
-    /* No overflow hidden here; let the parent pane scroll */
 }
 
-/* The scroll area */
+
 .project-chat-island__messages {
     flex: 1;
+    min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    /* Starts messages from bottom (optional, standard for chat) */
-
-    /* Remove the weird large margins */
-    /* padding: 1rem 0 2rem 0; */
-
-    /* Ensure it works with sticky children */
-    contain: none !important;
 }
 
-/* Input area pinned to bottom */
+
 .project-chat-island__input {
-    /* FIX: Sticky bottom to float inside the resizeable pane */
-    position: sticky;
-    bottom: 1rem;
-    /* Float slightly above the edge */
 
-    /* FIX: Remove manual width calculations */
+    flex-shrink: 0;
     width: 100%;
-    left: 0;
-    right: 0;
-
     z-index: 20;
     display: flex;
     justify-content: center;
-    /* Center the bar if max-width is used */
-
-    /* Add padding to the sides so it doesn't touch the splitter handle */
-    /* padding: 0 1rem; */
-
-    /* Create a backdrop so messages don't bleed through the spacing around the rounded input */
-    /* Optional: glassmorphism effect */
-    pointer-events: none;
-    /* Let clicks pass through the empty padding areas */
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
 }
 
-/* Re-enable pointer events for the actual input component inside */
 .project-chat-island__input>* {
-    pointer-events: auto;
-    /* Optional: max-width for readability on large screens */
+
     max-width: 800px;
     width: 100%;
 
-    /* Add shadow to pop it off the background */
     box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
 }
 

@@ -1,6 +1,6 @@
 import '@styles/components/dashboard/projects/new/new-project-details.css';
-import { DateTime, SelectOption, TimelinePreset, Visibility } from '@projective/types';
-import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
+import { SelectOption, Visibility } from '@projective/types';
+import { RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
 import ProjectDetailsThumbnail from './ProjectDetailsThumbnail.tsx';
 import ProjectDetailsAttachments from './ProjectDetailsAttachments.tsx';
 import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
@@ -15,58 +15,57 @@ export default function ProjectDetails() {
 	];
 
 	const visibilityOptions: SelectOption<string>[] = [
-		{ label: 'Public', value: Visibility.Public },
-		{ label: 'Invite Only', value: Visibility.InviteOnly },
-		{ label: 'Unlisted', value: Visibility.Unlisted },
+		{ label: 'Public - Visible on Marketplace', value: Visibility.Public },
+		{ label: 'Invite Only - Hidden from searches', value: Visibility.InviteOnly },
+		{ label: 'Unlisted - Anyone with link can view', value: Visibility.Unlisted },
 	];
 
 	const currencyOptions: SelectOption<string>[] = [
-		{ label: 'USD', value: 'USD' },
-		{ label: 'GBP', value: 'GBP' },
-	];
-
-	const timelinePresetOptions: SelectOption<string>[] = [
-		{ label: 'Sequential (Waterfall)', value: TimelinePreset.Sequential },
-		{ label: 'Simultaneous (All at once)', value: TimelinePreset.Simultaneous },
-		{ label: 'Staggered (Overlapping)', value: TimelinePreset.Staggered },
-		{ label: 'Custom', value: TimelinePreset.Custom },
+		{ label: 'USD ($)', value: 'USD' },
+		{ label: 'GBP (£)', value: 'GBP' },
+		{ label: 'EUR (€)', value: 'EUR' },
 	];
 
 	return (
 		<div className='new-project__details'>
-			<h2>Project Details</h2>
+			<div className='new-project__header'>
+				<h2>Project Details</h2>
+				<p className='new-project__subtitle'>
+					Define the core information, categorize your project, and upload essential briefs.
+				</p>
+			</div>
 
 			<ProjectDetailsThumbnail
 				value={state.thumbnail}
 			/>
 
-			<TextField
-				label='Title'
-				value={state.title}
-				onChange={(v) => state.title.value = v}
-				showCount
-				maxLength={100}
-				floating
-				required
-			/>
+			<div className='new-project__row'>
+				<TextField
+					label='Project Title'
+					value={state.title}
+					onChange={(v) => state.title.value = v}
+					showCount
+					maxLength={150}
+					floating
+					required
+				/>
+			</div>
 
-			<RichTextField
-				label='Description'
-				value={state.description}
-				onChange={(v) => state.description.value = v as string}
-				minHeight='120px'
-				toolbar='basic'
-				placeholder='Describe the project goals and requirements...'
-				variant='framed'
-				outputFormat='delta'
-				required
-			/>
+			<div className='new-project__row'>
+				<RichTextField
+					label='Description'
+					value={state.description}
+					onChange={(v) => state.description.value = v as string}
+					minHeight='180px'
+					toolbar='basic'
+					placeholder='Describe the project goals, requirements, and background...'
+					variant='framed'
+					outputFormat='delta'
+					required
+				/>
+			</div>
 
-			<ProjectDetailsAttachments
-				files={state.attachments}
-			/>
-
-			<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+			<div className='new-project__grid'>
 				<SelectField
 					name='industry_category'
 					label='Industry Category'
@@ -92,7 +91,7 @@ export default function ProjectDetails() {
 				/>
 			</div>
 
-			<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+			<div className='new-project__grid'>
 				<SelectField
 					name='currency'
 					label='Currency'
@@ -102,41 +101,25 @@ export default function ProjectDetails() {
 					searchable={false}
 					multiple={false}
 					floating
+					hint='Budgets across all stages will use this currency.'
 					required
 				/>
 
-				<DateField
-					label='Target Start Date'
-					value={state.targetStartDate.value}
-					onChange={(v) => state.targetStartDate.value = v}
-					minDate={new DateTime()}
-					format='dd/MM/yyyy'
+				<TagInput
+					name='tags'
+					label='Tags'
+					value={state.tags}
+					onChange={(v) => state.tags.value = v}
+					placeholder='Add tags (e.g., UI/UX, React)...'
 					floating
-					required
 				/>
 			</div>
 
-			<SelectField
-				name='timeline_preset'
-				label='Timeline Preset'
-				options={timelinePresetOptions}
-				value={state.timelinePreset.value}
-				onChange={(v) => state.timelinePreset.value = v as string}
-				searchable={false}
-				multiple={false}
-				floating
-				hint='Used to apply bulk settings initially.'
-				required
-			/>
-
-			<TagInput
-				name='tags'
-				label='Tags'
-				value={state.tags}
-				onChange={(v) => state.tags.value = v}
-				placeholder='Add tags...'
-				floating
-			/>
+			<div className='new-project__row'>
+				<ProjectDetailsAttachments
+					files={state.attachments}
+				/>
+			</div>
 		</div>
 	);
 }

@@ -3,9 +3,9 @@
 /* #region GANTT TASK LIST */
 .gantt-task-list {
     width: 100%;
-    min-width: 200px;
-    max-width: 300px;
-    background-color: var(--header);
+    min-width: 240px;
+    max-width: 320px;
+    background-color: var(--card);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -17,11 +17,18 @@
 .gantt-task-list__header {
     height: 60px;
     min-height: 60px;
+    background-color: var(--input-bg);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    padding: 0 1rem;
-    font-weight: 500;
+    padding: 0 1.5rem;
+
+    /* Matched to Wizard section headers */
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .gantt-task-list__container {
@@ -38,9 +45,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    /* Allow children to dictate the height so the 15 virtualized rows aren't clipped */
     height: max-content;
-    /* Force hardware acceleration for smooth 60fps scrolling */
     will-change: transform;
 }
 

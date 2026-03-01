@@ -18,75 +18,51 @@ export class GridRenderer extends BaseRenderer {
 		this.graphics.clear();
 
 		const cPrimary = getThemeColor('--primary');
-		const cSecondary = getThemeColor('--card');
+		const cSecondary = getThemeColor('--border-color');
 
-		// 1. Determine local X boundaries based on the current scroll position
 		const currentX = this.store.scrollX.value;
 		const width = this.store.containerWidth.value;
 		const days = this.store.visibleDays.value;
 
-		// Add a buffer so lines are drawn slightly off-screen before smoothly scrolling into view
 		const buffer = 500;
 		const renderStartX = -currentX - buffer;
 		const renderEndX = -currentX + width + buffer;
 
-		// 2. Map the visible pixel coordinates back to timestamps
 		const startDate = new DateTime(new Date(this.store.timeScale.xToDate(renderStartX)));
 		const endDate = new DateTime(new Date(this.store.timeScale.xToDate(renderEndX)));
 
-		const tier = getHeaderTier(days);
+		const tier = getHeaderTier(days, width);
 		const dateToX = (t: number) => this.store.timeScale.dateToX(t);
 
-		// 3. Generate dynamic header blocks for the exact window the user is looking at
-		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, dateToX);
-		const bottomRows = generateHeaderBlocks(startDate, endDate, tier.bottom, dateToX);
-
-		const totalHeight = Math.max(
-			this.store.rows.value.length * this.store.rowHeight.value,
-			this.store.containerHeight.value,
+		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, tier.topStep, dateToX);
+		const bottomRows = generateHeaderBlocks(
+			startDate,
+			endDate,
+			tier.bottom,
+			tier.bottomStep,
+			dateToX,
 		);
 
-		// Render secondary (bottom) vertical lines
-		this.graphics.context.beginPath();
+		// Calculate drawing boundaries relative to scroll to ensure lines reach bottom of viewport
+		const startY = this.store.scrollY.value;
+		const endY = startY + this.store.containerHeight.value;
+
+		// Render secondary (bottom) vertical lines using standard border color
+		this.graphics.beginPath();
 		for (const block of bottomRows) {
 			const x = block.x;
-			this.graphics.context.moveTo(x, 0);
-			this.graphics.context.lineTo(x, totalHeight);
+			this.graphics.moveTo(x, startY);
+			this.graphics.lineTo(x, endY);
 		}
-		this.graphics.context.stroke({ width: 1, color: cSecondary, alpha: 1 });
+		this.graphics.stroke({ width: 1, color: cSecondary, alpha: 0.3 });
 
-		// Render primary (top) vertical lines
-		this.graphics.context.beginPath();
+		// Render primary (top) vertical lines using accent
+		this.graphics.beginPath();
 		for (const block of topRows) {
 			const x = block.x;
-			this.graphics.context.moveTo(x, 0);
-			this.graphics.context.lineTo(x, totalHeight);
+			this.graphics.moveTo(x, startY);
+			this.graphics.lineTo(x, endY);
 		}
-		this.graphics.context.stroke({ width: 1, color: cPrimary, alpha: 0.5 });
-
-		// this.renderHorizontal();
-	}
-
-	private renderHorizontal() {
-		this.graphics.context.beginPath();
-
-		const currentX = this.store.scrollX.value;
-		const width = this.store.containerWidth.value;
-
-		// Because the entire PIXI container is physically moved by `scrollX`,
-		// drawing from `0` means the lines scroll off the screen.
-		// We must offset the start and end coordinates to match the inverse of the scroll.
-		const startX = -currentX;
-		const endX = -currentX + width;
-
-		for (const row of this.store.rows.value) {
-			const y = row.orderIndex * this.store.rowHeight.value;
-			this.graphics.context.moveTo(startX, y);
-			this.graphics.context.lineTo(endX, y);
-		}
-
-		// Pull your BEM semantic border color dynamically
-		const cBorder = getThemeColor('--border-color');
-		this.graphics.context.stroke({ width: 1, color: cBorder, alpha: 1 });
+		this.graphics.stroke({ width: 1, color: cPrimary, alpha: 0.2 });
 	}
 }

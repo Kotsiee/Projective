@@ -1,62 +1,140 @@
-/* #region Legal & Screening */
-.new-project__legal {
+/* #region Container & Header */
+.project-legal {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    padding: 1rem 0;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 2rem;
 }
 
-.new-project__legal h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
+.project-legal__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     margin-bottom: 0.5rem;
-    color: var(--text-main);
 }
 
-.new-project__legal .field-group {
+.project-legal__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.project-legal__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* #endregion */
+
+/* #region Layout Modifiers */
+.project-legal__section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.project-legal__section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.project-legal__row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-legal__grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .project-legal__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* #endregion */
+
+/* #region Screening Questions */
+.project-legal__questions-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-legal__questions-list {
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
-.screening-questions__header {
+.project-legal__question-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+    align-items: flex-start;
+    /* Aligns trash can with the input, not the floating label */
+    gap: 1rem;
+    width: 100%;
 }
 
-.new-project__legal .btn-add {
-    background: none;
-    border: 1px dashed var(--border-color);
-    color: var(--text-muted);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius__small);
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all var(--fast);
+.project-legal__question-input {
+    flex: 1;
 }
 
-.new-project__legal .btn-add:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background-color: var(--primary-surface);
-}
-
-.new-project__legal .btn-remove {
-    background: none;
+.project-legal__btn-remove {
+    background: transparent;
     border: none;
     color: var(--text-disabled);
     cursor: pointer;
     padding: 0.5rem;
+    margin-top: 0.25rem;
+    /* Optical alignment for floating label height */
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color var(--fast);
+    border-radius: var(--border-radius__small);
+    transition: all var(--fast);
 }
 
-.new-project__legal .btn-remove:hover {
+.project-legal__btn-remove:hover {
     color: var(--danger);
+    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1);
+}
+
+.project-legal__btn-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--fast);
+    width: 100%;
+    max-width: 300px;
+    margin-top: 0.5rem;
+}
+
+.project-legal__btn-add:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background-color: var(--primary-surface);
 }
 
 /* #endregion */

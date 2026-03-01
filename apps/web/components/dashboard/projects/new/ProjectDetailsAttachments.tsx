@@ -17,7 +17,7 @@ export default function ProjectDetailsAttachments({ files }: ProjectDetailsAttac
 	};
 
 	return (
-		<div className='project-attachments-section'>
+		<div className='project-files-section'>
 			<p className='project-thumbnail-section__title'>Attachments</p>
 			<p style={{ fontSize: '0.875rem', color: 'var(--gray-500)', marginBottom: '0.75rem' }}>
 				Add resources, briefs, or legal documents for freelancers (Max 10).

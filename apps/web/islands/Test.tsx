@@ -121,6 +121,7 @@ export default function TestIsland({ children }: { children?: any }) {
 			</div>
 
 			<div style={{ height: '500px', width: '90%' }}>
+				{/* @ts-ignore - Temporary bypass if strict type check still flags filtered arrays */}
 				<GanttChart initialData={mockData} />
 			</div>
 		</div>

@@ -1,51 +1,85 @@
-/* #region Project Details */
+/* #region Project Details Container */
 .new-project__details {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.new-project__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.new-project__header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.new-project__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* #endregion */
+
+/* #region Layout Modifiers */
+.new-project__row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.new-project__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .new-project__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* #endregion */
+
+/* #region Thumbnail Overrides */
+.project-thumbnail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.project-thumbnail-section__title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+    margin: 0;
 }
 
 .project-thumbnail-section__subtitle {
-    font-size: 0.875em;
+    font-size: 0.875rem;
     color: var(--text-muted);
-    margin: 0 0 0.75em 0;
+    margin: 0;
 }
 
-.action-grid-container {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    width: 100%;
-    max-width: 30rem;
-    height: 10rem;
-}
+/* #endregion */
 
-.action-card__library-button {
+/* #region Attachment Overrides */
+.project-files-section {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: var(--field-bg);
-    border: 2px dashed var(--field-border);
-    border-radius: var(--field-radius);
-    cursor: pointer;
-    transition: all var(--field-transition);
-    padding: 0;
-    color: var(--text-muted);
-}
-
-.action-card__library-button:hover {
-    background-color: var(--field-bg-hover);
-    border-color: var(--field-border-hover);
-    color: var(--text-main);
-}
-
-.action-card__library-button:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
 }
 
 /* #endregion */

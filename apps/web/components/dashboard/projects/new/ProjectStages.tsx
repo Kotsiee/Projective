@@ -1,32 +1,23 @@
 /**
  * @file ProjectStages.tsx
- * @description Manages the creation and configuration of project stages (milestones).
- * Uses a card-based accordion layout for better visual hierarchy.
+ * @description Step 3 of the Project Creation Engine.
+ * Manages the definition of atomic project stages (The "What"), stripping out temporal and financial concerns.
  */
+// deno-lint-ignore-file no-explicit-any
 import '@styles/components/dashboard/projects/new/new-project-stages.css';
-import { Signal, signal } from '@preact/signals';
+import { Signal, signal, useSignal } from '@preact/signals';
 import {
 	IconBriefcase,
-	IconCalendarEvent,
 	IconCheck,
+	IconChevronDown,
 	IconCircle,
-	IconClock,
 	IconPlus,
+	IconSettings,
 	IconTrash,
-	IconUsers,
 } from '@tabler/icons-preact';
 
-// Components
-import { DateField, MoneyField, RichTextField, SelectField, TextField } from '@projective/fields';
-import {
-	BudgetType,
-	DateTime,
-	FileWithMeta,
-	SelectOption,
-	StageType,
-	StartTriggerType,
-} from '@projective/types';
-
+import { RichTextField, SelectField, TextField } from '@projective/fields';
+import { IPOptionMode, SelectOption, StageType, StartTriggerType } from '@projective/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@projective/ui';
 
 import ProjectStageFile from './stages/ProjectStageFile.tsx';
@@ -35,15 +26,16 @@ import ProjectStageManagement from './stages/ProjectStageManagement.tsx';
 import ProjectStageSession from './stages/ProjectStageSession.tsx';
 import { Stage } from '@contracts/dashboard/projects/new/Stage.ts';
 import { useNewProjectContext } from '@contexts/NewProjectContext.tsx';
+import { FileWithMeta } from '@projective/types';
 
-// Extended type for UI state management
 export interface UIStage extends Stage {
 	_ui_model_type: 'defined_roles' | 'open_seats';
 	_attachments_temp: Signal<FileWithMeta[]>;
+	hire_trigger_active: boolean;
 }
 
 export default function ProjectStages() {
-	const state = useNewProjectContext(); // Shared State
+	const state = useNewProjectContext();
 
 	// #region Factory
 	function createDefaultStage(): UIStage {
@@ -54,32 +46,39 @@ export default function ProjectStages() {
 			status: 'open',
 			sort_order: state.stages.value.length,
 
+			// Initialized for Step 4
 			start_trigger_type: StartTriggerType.DependentOnStage,
+
+			// Initialized for Step 5
 			staffing_roles: [],
 			open_seats: [],
-
 			_ui_model_type: 'defined_roles',
+
 			_attachments_temp: signal([]),
 
+			// Defaults for Type-Specific configs
 			file_revisions_allowed: 1,
+			file_duration_mode: 'relative_duration',
+			file_duration_days: 7,
+			file_extensions_allowed: [],
+			file_max_size_mb: 2048, // 2GB default
+			file_max_count: 20,
+
 			session_duration_minutes: 60,
+			session_count: 1,
+			session_preferred_days: [],
+			hire_trigger_active: true,
 		};
 	}
 	// #endregion
 
-	// #region Helpers
+	// #region Helper Functions
 	const getStatusIcon = (status: string) => {
 		if (status.toLowerCase() === 'completed') {
 			return <IconCheck size={18} color='var(--success)' />;
 		}
 		if (status.toLowerCase() === 'in_progress') {
-			return (
-				<IconCircle
-					size={18}
-					color='var(--primary-500)'
-					fill='currentColor'
-				/>
-			);
+			return <IconCircle size={18} color='var(--primary-500)' fill='currentColor' />;
 		}
 		return <IconCircle size={18} color='var(--gray-400)' />;
 	};
@@ -96,14 +95,14 @@ export default function ProjectStages() {
 	return (
 		<div className='new-project__stages'>
 			<div className='stages-header'>
-				<h2>Project Stages</h2>
+				<h2>Define Stages (The "What")</h2>
+				<p className='stages-header__subtitle'>
+					Break your project down into modular deliverables or milestones. We will assign budgets
+					and timelines later.
+				</p>
 			</div>
 
-			<Accordion
-				type='multiple'
-				variant='outlined'
-				defaultValue={['0']}
-			>
+			<Accordion type='multiple' variant='outlined' defaultValue={['0']}>
 				{state.stages.value.map((stage, index) => (
 					<AccordionItem
 						key={index.toString()}
@@ -132,11 +131,7 @@ export default function ProjectStages() {
 				))}
 			</Accordion>
 
-			<button
-				type='button'
-				className='btn-add-dashed'
-				onClick={() => addStage()}
-			>
+			<button type='button' className='btn-add-dashed' onClick={addStage}>
 				<IconPlus size={18} /> Add New Stage
 			</button>
 		</div>
@@ -144,12 +139,12 @@ export default function ProjectStages() {
 }
 
 /**
- * Sub-component for individual stage editing.
- * Renders the form grid and manages section-specific updates.
+ * Sub-component for individual stage editing (Scope Definition only).
  */
 export function ProjectStage({ id }: { id: number }) {
 	const state = useNewProjectContext();
 	const stage = state.stages.value[id];
+	const isAdvancedOpen = useSignal(false);
 
 	if (!stage) return null;
 
@@ -161,16 +156,11 @@ export function ProjectStage({ id }: { id: number }) {
 		{ label: 'Maintenance Based (Recurring)', value: StageType.MaintenanceBased },
 	];
 
-	const staffingModels: SelectOption<string>[] = [
-		{ label: 'Defined Roles', value: 'defined_roles' },
-		{ label: 'Open Seats', value: 'open_seats' },
-	];
-
-	const startTriggers: SelectOption<string>[] = [
-		{ label: 'Fixed Date', value: StartTriggerType.FixedDate },
-		{ label: 'On Project Start', value: StartTriggerType.OnProjectStart },
-		{ label: 'On Hire Confirmed', value: StartTriggerType.OnHireConfirmed },
-		{ label: 'Dependent on Stage', value: StartTriggerType.DependentOnStage },
+	const ipOptions: SelectOption<string>[] = [
+		{ label: 'Use Project Default', value: 'default' },
+		{ label: 'Exclusive Transfer', value: IPOptionMode.ExclusiveTransfer },
+		{ label: 'Licensed Use', value: IPOptionMode.LicensedUse },
+		{ label: 'Shared Ownership', value: IPOptionMode.SharedOwnership },
 	];
 	// #endregion
 
@@ -182,11 +172,11 @@ export function ProjectStage({ id }: { id: number }) {
 
 	return (
 		<div className='stage-form'>
-			{/* SECTION 1: BASICS */}
+			{/* SECTION 1: CORE DEFINITION */}
 			<div className='stage-section'>
 				<div className='stage-section__header'>
 					<h4 className='stage-section__title'>
-						<IconBriefcase size={16} /> Basics
+						<IconBriefcase size={16} /> Scope Definition
 					</h4>
 				</div>
 
@@ -197,7 +187,7 @@ export function ProjectStage({ id }: { id: number }) {
 						onChange={(v) => updateStage('title', v)}
 						showCount
 						maxLength={100}
-						placeholder='e.g. Initial Design Phase'
+						placeholder='e.g. Initial UI/UX Design'
 						floating
 						required
 					/>
@@ -212,14 +202,15 @@ export function ProjectStage({ id }: { id: number }) {
 						floating
 						required
 					/>
+
 					<div className='form-grid--span-full'>
 						<RichTextField
-							label='Description'
+							label='Stage Requirements & Description'
 							value={stage.description.toString()}
 							onChange={(v) => updateStage('description', v)}
 							minHeight='120px'
 							toolbar='basic'
-							placeholder='Describe the project goals and requirements...'
+							placeholder='Describe exactly what needs to be delivered or accomplished...'
 							variant='framed'
 							outputFormat='delta'
 							required
@@ -228,252 +219,61 @@ export function ProjectStage({ id }: { id: number }) {
 				</div>
 			</div>
 
-			{/* SECTION 2: TIMELINE */}
+			{/* SECTION 2: ADVANCED SETTINGS (COLLAPSIBLE) */}
 			<div className='stage-section'>
-				<div className='stage-section__header'>
+				<button
+					type='button'
+					className='stage-section__header stage-section__header--interactive'
+					onClick={() => isAdvancedOpen.value = !isAdvancedOpen.value}
+				>
 					<h4 className='stage-section__title'>
-						<IconClock size={16} /> Timeline & Delivery
+						<IconSettings size={16} /> Advanced Settings & Constraints
 					</h4>
-				</div>
-
-				<div className='form-grid'>
-					<SelectField
-						name={`start-trigger-${id}`}
-						label='Start Trigger'
-						options={startTriggers}
-						value={stage.start_trigger_type}
-						onChange={(v) => updateStage('start_trigger_type', v as string)}
-						searchable={false}
-						multiple={false}
-						floating
-						required
+					<IconChevronDown
+						size={16}
+						className={`stage-section__chevron ${
+							isAdvancedOpen.value ? 'stage-section__chevron--open' : ''
+						}`}
 					/>
+				</button>
 
-					{stage.start_trigger_type === StartTriggerType.FixedDate && (
-						<DateField
-							label='Start Date'
-							value={stage.fixed_start_date
-								? new DateTime(stage.fixed_start_date.toString())
-								: undefined}
-							onChange={(v) => {
-								if (v instanceof DateTime) {
-									updateStage('fixed_start_date', v);
-								} else updateStage('fixed_start_date', undefined);
-							}}
-							format='dd/MM/yyyy'
-							floating
-							required
-						/>
-					)}
-				</div>
-
-				{/* Type Specific Forms inherit the parent's form-grid class if needed, or define their own */}
-				<div className='type-specific-config'>
-					{stage.stage_type === StageType.FileBased && (
-						<ProjectStageFile
-							stage={stage}
-							updateStage={updateStage}
-						/>
-					)}
-					{stage.stage_type === StageType.SessionBased && (
-						<ProjectStageSession
-							stage={stage}
-							updateStage={updateStage}
-						/>
-					)}
-					{stage.stage_type === StageType.ManagementBased && (
-						<ProjectStageManagement
-							stage={stage}
-							updateStage={updateStage}
-						/>
-					)}
-					{stage.stage_type === StageType.MaintenanceBased && (
-						<ProjectStageMaintenance
-							stage={stage}
-							updateStage={updateStage}
-						/>
-					)}
-				</div>
-			</div>
-
-			{/* SECTION 3: STAFFING */}
-			<div className='stage-section'>
-				<div className='stage-section__header'>
-					<h4 className='stage-section__title'>
-						<IconUsers size={16} /> Staffing Model
-					</h4>
-				</div>
-
-				<div className='form-grid'>
-					<div className='form-grid--span-full'>
-						<SelectField
-							name={`model-type-${id}`}
-							label='Model Type'
-							options={staffingModels}
-							value={stage._ui_model_type}
-							onChange={(v) => updateStage('_ui_model_type', v as string)}
-							searchable={false}
-							multiple={false}
-							floating
-							required
-						/>
-					</div>
-				</div>
-
-				{stage._ui_model_type === 'defined_roles'
-					? (
-						<div className='roles-config'>
-							{stage.staffing_roles.map((role, rIndex) => (
-								<div key={rIndex} className='role-card'>
-									<div className='role-header'>
-										<h5 className='role-title'>
-											Role #{rIndex + 1}
-										</h5>
-										<button
-											type='button'
-											className='btn-icon-danger'
-											title='Remove Role'
-											onClick={() => {
-												const newRoles = [...stage.staffing_roles];
-												newRoles.splice(rIndex, 1);
-												updateStage('staffing_roles', newRoles);
-											}}
-										>
-											<IconTrash size={16} />
-										</button>
-									</div>
-									<div className='form-grid'>
-										<TextField
-											label='Role Title'
-											value={role.role_title}
-											onChange={(v) => {
-												const newRoles = [...stage.staffing_roles];
-												newRoles[rIndex] = {
-													...newRoles[rIndex],
-													role_title: v,
-												};
-												updateStage('staffing_roles', newRoles);
-											}}
-											placeholder='e.g. Lead Designer'
-											floating
-											required
-										/>
-										<TextField
-											label='Quantity'
-											type='number'
-											value={role.quantity.toString()}
-											onChange={(v) => {
-												const newRoles = [...stage.staffing_roles];
-												newRoles[rIndex] = {
-													...newRoles[rIndex],
-													quantity: parseInt(v),
-												};
-												updateStage('staffing_roles', newRoles);
-											}}
-											floating
-											required
-										/>
-										<SelectField
-											name={`budget-type-${id}-${rIndex}`}
-											label='Budget Type'
-											options={[
-												{
-													label: 'Fixed Price',
-													value: BudgetType.FixedPrice,
-												},
-												{ label: 'Hourly Cap', value: BudgetType.HourlyCap },
-											]}
-											value={role.budget_type}
-											onChange={(v) => {
-												const newRoles = [...stage.staffing_roles];
-												newRoles[rIndex] = {
-													...newRoles[rIndex],
-													budget_type: v as BudgetType,
-												};
-												updateStage('staffing_roles', newRoles);
-											}}
-											searchable={false}
-											multiple={false}
-											floating
-											required
-										/>
-										<MoneyField
-											label='Budget Amount'
-											value={role.budget_amount_cents}
-											onChange={(v) => {
-												const newRoles = [...stage.staffing_roles];
-												newRoles[rIndex] = {
-													...newRoles[rIndex],
-													budget_amount_cents: v,
-												};
-												updateStage('staffing_roles', newRoles);
-											}}
-											floating
-											required
-										/>
-									</div>
-								</div>
-							))}
-							<button
-								type='button'
-								className='btn-add-dashed'
-								onClick={() => {
-									const newRoles = [...stage.staffing_roles, {
-										role_title: '',
-										quantity: 1,
-										budget_type: BudgetType.FixedPrice,
-										budget_amount_cents: 0,
-										allow_proposals: true,
-									}];
-									updateStage('staffing_roles', newRoles);
-								}}
-							>
-								<IconPlus size={16} /> Add Role
-							</button>
-						</div>
-					)
-					: (
-						<div className='open-seats-config form-grid'>
+				{isAdvancedOpen.value && (
+					<div className='stage-section__content'>
+						{/* Overrides block (Applies to all stage types) */}
+						<div className='form-grid' style={{ marginBottom: '1.25rem' }}>
 							<div className='form-grid--span-full'>
-								<TextField
-									label='Description of Need'
-									value={stage.open_seats[0]?.description_of_need || ''}
-									onChange={(v) => {
-										const seat = stage.open_seats[0] ||
-											{ require_proposals: true };
-										updateStage('open_seats', [{
-											...seat,
-											description_of_need: v,
-										}]);
-									}}
-									multiline
-									rows={2}
+								<SelectField
+									name={`ip-override-${id}`}
+									label='Stage IP Ownership Override'
+									options={ipOptions}
+									value={stage.ip_ownership_override || 'default'}
+									onChange={(v) =>
+										updateStage('ip_ownership_override', v === 'default' ? undefined : v)}
+									searchable={false}
+									multiple={false}
 									floating
-									required
+									hint='Overrides the global project IP ownership specifically for this deliverable.'
 								/>
 							</div>
-							<MoneyField
-								label='Min Budget'
-								value={stage.open_seats[0]?.budget_min_cents || 0}
-								onChange={(v) => {
-									const seat = stage.open_seats[0] ||
-										{ require_proposals: true, description_of_need: '' };
-									updateStage('open_seats', [{ ...seat, budget_min_cents: v }]);
-								}}
-								floating
-							/>
-							<MoneyField
-								label='Max Budget'
-								value={stage.open_seats[0]?.budget_max_cents || 0}
-								onChange={(v) => {
-									const seat = stage.open_seats[0] ||
-										{ require_proposals: true, description_of_need: '' };
-									updateStage('open_seats', [{ ...seat, budget_max_cents: v }]);
-								}}
-								floating
-							/>
 						</div>
-					)}
+
+						{/* Type Specific Advanced Config */}
+						<div className='type-specific-config'>
+							{stage.stage_type === StageType.FileBased && (
+								<ProjectStageFile stage={stage} updateStage={updateStage} />
+							)}
+							{stage.stage_type === StageType.SessionBased && (
+								<ProjectStageSession stage={stage} updateStage={updateStage} />
+							)}
+							{stage.stage_type === StageType.ManagementBased && (
+								<ProjectStageManagement stage={stage} updateStage={updateStage} />
+							)}
+							{stage.stage_type === StageType.MaintenanceBased && (
+								<ProjectStageMaintenance stage={stage} updateStage={updateStage} />
+							)}
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

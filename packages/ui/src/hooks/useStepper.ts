@@ -1,6 +1,6 @@
-import { Signal, useSignal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { StepperProps } from '../../../fields/src/types/components/stepper.ts';
+import { StepperProps } from '../types/components/stepper.ts';
 
 export function useStepper({
 	activeStep,
@@ -23,7 +23,6 @@ export function useStepper({
 	const isLoading = useSignal(false);
 	const stepErrors = useSignal<Set<number>>(new Set());
 
-	// Sync controlled prop
 	useEffect(() => {
 		if (activeStep !== undefined) {
 			currentStep.value = activeStep;
@@ -39,27 +38,25 @@ export function useStepper({
 
 	const changeStep = async (newStep: number) => {
 		if (newStep < 0 || newStep >= totalSteps.value) return;
-		if (isLoading.value) return; // Prevent double clicks
+		if (isLoading.value) return;
 
-		// Linear constraints
 		if (linear && newStep > currentStep.value + 1) {
 			return;
 		}
 
-		// Guard Clause (Async Validation)
 		if (beforeStepChange) {
-			const result = beforeStepChange(newStep, currentStep.value);
+			const result = beforeStepChange(currentStep.value, newStep);
 
-			if (result === false) return; // Blocked synchronously
+			if (result === false) return;
 
 			if (result instanceof Promise) {
 				isLoading.value = true;
 				try {
 					const allowed = await result;
-					if (!allowed) return; // Blocked asynchronously
+					if (!allowed) return;
 				} catch (e) {
 					console.error('Step validation failed', e);
-					return; // Block on error
+					return;
 				} finally {
 					isLoading.value = false;
 				}
@@ -74,19 +71,12 @@ export function useStepper({
 		if (currentStep.value < totalSteps.value - 1) {
 			changeStep(currentStep.value + 1);
 		} else {
-			// Validate final step before completing?
-			// Usually onComplete handles final submission
 			if (!isLoading.value) onComplete?.();
 		}
 	};
 
 	const back = () => {
-		// Usually we don't validate going back, but we can if needed.
-		// For now, allow free back travel without async guard unless strictly required.
 		if (currentStep.value > 0) {
-			// Bypass async guard for back? Usually yes for UX.
-			// If we want guard on back, call changeStep.
-			// Here we just set logic directly to avoid 'saving' when cancelling.
 			currentStep.value = currentStep.value - 1;
 			onStepChange?.(currentStep.value);
 		}

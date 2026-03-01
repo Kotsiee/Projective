@@ -18,6 +18,10 @@
     cursor: row-resize;
 }
 
+.splitter__pane {
+    height: 100%;
+}
+
 .splitter__pane-wrapper {
     flex-grow: 0;
     flex-shrink: 0;

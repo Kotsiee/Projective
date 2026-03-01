@@ -23,9 +23,6 @@ export interface HeaderData {
 	totalWidth: number;
 }
 
-/**
- * The Central Nervous System of the Gantt Chart.
- */
 export class GanttStore {
 	public rows: Signal<GanttRow[]>;
 	public tasks: Signal<GanttTask[]>;
@@ -41,6 +38,17 @@ export class GanttStore {
 	public isMouseDown: Signal<boolean>;
 	public isShiftDown: Signal<boolean>;
 
+	// Hover & Tooltip State
+	public hoveredTask: Signal<GanttTask | null>;
+	public pointerPos: Signal<{ x: number; y: number }>;
+
+	// Interaction Overrides
+	public hoveredScrollbar: Signal<boolean>;
+
+	// Selection State
+	public selectedRowId: Signal<string | null>;
+	public onRowSelect?: (rowId: string) => void;
+
 	public containerWidth: Signal<number>;
 	public containerHeight: Signal<number>;
 
@@ -48,8 +56,9 @@ export class GanttStore {
 	public rowGap: Signal<number>;
 
 	public timelineStart: Signal<number>;
-
 	public timeScale: GanttTimeScale;
+
+	public themeTrigger: Signal<number>;
 
 	constructor(options: GanttStoreOptions) {
 		this.rows = signal([]);
@@ -65,11 +74,18 @@ export class GanttStore {
 		this.isMouseDown = signal(false);
 		this.isShiftDown = signal(false);
 
+		this.hoveredTask = signal(null);
+		this.pointerPos = signal({ x: 0, y: 0 });
+		this.hoveredScrollbar = signal(false);
+
+		this.selectedRowId = signal(null);
+
 		this.containerWidth = signal(options.visibleWidth);
 		this.containerHeight = signal(options.visibleHeight);
 
 		this.rowHeight = signal(60);
 		this.rowGap = signal(40);
+		this.themeTrigger = signal(0);
 
 		this.timelineStart = signal(options.startDate);
 
@@ -78,6 +94,13 @@ export class GanttStore {
 			width: options.visibleWidth,
 			startDate: options.startDate,
 		});
+	}
+
+	public selectRow(rowId: string) {
+		this.selectedRowId.value = rowId;
+		if (this.onRowSelect) {
+			this.onRowSelect(rowId);
+		}
 	}
 
 	public contentHeight = computed(() => {
@@ -93,9 +116,7 @@ export class GanttStore {
 	}
 
 	public resize(width: number, height: number) {
-		// IMPORTANT: Update pure class instances BEFORE mutating reactive signals.
 		this.timeScale.update(this.visibleDays.value, width, this.timelineStart.value);
-
 		batch(() => {
 			this.containerWidth.value = width;
 			this.containerHeight.value = height;
@@ -104,11 +125,7 @@ export class GanttStore {
 
 	public setVisibleDays(days: number) {
 		const validDays = Math.max(1, days);
-
-		// Update time scale math FIRST so when visibleDays triggers component
-		// re-renders, the math reflects the new zoom level instantly.
 		this.timeScale.update(validDays, this.containerWidth.value, this.timelineStart.value);
-
 		this.visibleDays.value = validDays;
 	}
 
@@ -128,7 +145,7 @@ export class GanttStore {
 		const width = this.containerWidth.value;
 		const startMs = this.timelineStart.value;
 
-		const tier = getHeaderTier(days);
+		const tier = getHeaderTier(days, width);
 
 		const startDT = new DateTime(new Date(startMs));
 		const endDT = startDT.add(days, 'days').endOf('day');
@@ -136,8 +153,8 @@ export class GanttStore {
 		this.timeScale.update(days, width, startMs);
 		const dateToX = (t: number) => this.timeScale.dateToX(t);
 
-		const topRows = generateHeaderBlocks(startDT, endDT, tier.top, dateToX);
-		const bottomRows = generateHeaderBlocks(startDT, endDT, tier.bottom, dateToX);
+		const topRows = generateHeaderBlocks(startDT, endDT, tier.top, tier.topStep, dateToX);
+		const bottomRows = generateHeaderBlocks(startDT, endDT, tier.bottom, tier.bottomStep, dateToX);
 
 		return {
 			topRows,

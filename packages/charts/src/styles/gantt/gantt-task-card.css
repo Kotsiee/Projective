@@ -2,76 +2,70 @@
     height: var(--task-height, 60px);
     min-height: var(--task-height, 60px);
     max-height: var(--task-height, 60px);
-    width: calc(100% - 2rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-}
-
-.gantt-task-card {
-    height: 100%;
     width: 100%;
     display: flex;
     align-items: center;
-
-    &:hover {
-
-        .gantt-task-card__grip {
-            width: 24px;
-            opacity: 1;
-            margin-right: 0.5rem;
-        }
-
-        .gantt-task-card__content {
-            background-color: var(--card);
-
-        }
-    }
+    justify-content: center;
+    padding: 0 0.5rem;
 }
 
-.gantt-task-card__grip {
-    /* Instead of display: none */
-    width: 0;
-    opacity: 0;
-    overflow: hidden;
+.gantt-task-card {
+    height: calc(100% - 0.5rem);
+    width: 100%;
     display: flex;
     align-items: center;
-    cursor: grab;
-
-    /* Transition the width and opacity */
-    transition: width 200ms ease-in-out, opacity 200ms ease-in-out, margin 200ms ease-in-out;
-
-    &:active {
-        cursor: grabbing;
-    }
+    padding: 0 0.5rem;
 }
 
 .gantt-task-card__content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.125rem;
     width: 100%;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius__small);
+    border: 1px solid transparent;
     cursor: pointer;
-    padding: 0.5rem;
-    transition: all 200ms ease-in-out;
+    padding: 0.5rem 0.75rem;
+    transition: all var(--fast);
     flex: 1;
+}
+
+.gantt-task-card:hover .gantt-task-card__content {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+}
+
+.gantt-task-card[data-selected="true"] .gantt-task-card__content {
+    background-color: var(--primary-surface);
+    border-color: var(--primary);
 }
 
 .gantt-task-card__title {
     margin: 0;
     padding: 0;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gantt-task-card__meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.gantt-task-card__type {
+    text-transform: capitalize;
 }
 
 .gantt-task-card__date {
-    text-align: center;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }

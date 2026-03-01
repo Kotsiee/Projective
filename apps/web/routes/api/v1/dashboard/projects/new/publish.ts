@@ -35,6 +35,9 @@ export const handler = define.handlers({
 			const validation = CreateProjectSchema.safeParse(body);
 
 			if (!validation.success) {
+				// Server-side logging for quick debugging
+				console.error('[publish.ts] Zod Validation Error:', validation.error.flatten());
+
 				return new Response(
 					JSON.stringify({
 						error: {

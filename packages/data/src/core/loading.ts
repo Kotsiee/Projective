@@ -7,7 +7,6 @@ import type { Range } from './types.ts';
 export function mergeRanges(ranges: Range[]): Range[] {
 	if (ranges.length === 0) return [];
 
-	// Sort by start index
 	const sorted = [...ranges].sort((a, b) => a.start - b.start);
 	const merged: Range[] = [];
 
@@ -16,9 +15,7 @@ export function mergeRanges(ranges: Range[]): Range[] {
 	for (let i = 1; i < sorted.length; i++) {
 		const next = sorted[i];
 
-		// If overlaps or touches (next.start <= current.end + 1)
 		if (next.start <= (current.start + current.length)) {
-			// Extend current
 			const newEnd = Math.max(
 				current.start + current.length,
 				next.start + next.length,
@@ -58,7 +55,6 @@ export function findGaps(
 		}
 	}
 
-	// Close final gap
 	if (currentStart !== -1) {
 		gaps.push({ start: currentStart, length: neededEnd - currentStart + 1 });
 	}

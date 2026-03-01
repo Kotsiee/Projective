@@ -9,3 +9,4 @@ export { useVirtual } from './src/hooks/useVirtual.ts';
 export { useDataManager } from './src/hooks/useDataManager.ts';
 export { useSelection } from './src/hooks/useSelection.ts';
 export { ChatList } from './src/components/displays/ChatList.tsx';
+export type { DisplayMode } from './src/types/DataDisplayProps.ts';

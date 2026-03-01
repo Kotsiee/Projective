@@ -74,6 +74,7 @@ export const handler = define.handlers({
 		let attachments: string[] = [];
 		let files: File[] = [];
 		let targetUserId: string | undefined;
+		let targetStageId: string | undefined;
 
 		const contentType = ctx.req.headers.get('content-type') || '';
 
@@ -82,6 +83,7 @@ export const handler = define.handlers({
 				const formData = await ctx.req.formData();
 				message = formData.get('message')?.toString() || '';
 				targetUserId = formData.get('targetUserId')?.toString();
+				targetStageId = formData.get('targetStageId')?.toString();
 
 				const formFiles = formData.getAll('files');
 				files = formFiles.filter((f): f is File => f instanceof File);
@@ -93,6 +95,7 @@ export const handler = define.handlers({
 				message = body.message || '';
 				attachments = body.attachments || [];
 				targetUserId = body.targetUserId;
+				targetStageId = body.targetStageId;
 			}
 		} catch (e) {
 			return new Response(
@@ -104,7 +107,6 @@ export const handler = define.handlers({
 			);
 		}
 
-		// Validation: Ensure we have EITHER a message OR attachments OR files
 		if (
 			(!message || !message.trim()) && files.length === 0 &&
 			attachments.length === 0
@@ -131,6 +133,7 @@ export const handler = define.handlers({
 				attachments,
 				files,
 				targetUserId,
+				targetStageId,
 			}, {
 				getClient,
 			});

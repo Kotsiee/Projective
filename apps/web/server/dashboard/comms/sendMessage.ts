@@ -14,6 +14,7 @@ interface SendMessageOptions {
 	attachments?: string[];
 	files?: File[];
 	targetUserId?: string;
+	targetStageId?: string; // NEW: Passed from frontend when lazily creating a stage channel
 }
 
 export async function sendMessage(
@@ -34,6 +35,7 @@ export async function sendMessage(
 			attachments = [],
 			files = [],
 			targetUserId,
+			targetStageId,
 		} = options;
 
 		if (message) {
@@ -45,23 +47,46 @@ export async function sendMessage(
 
 		let finalChannelId = channel_id;
 
+		// --- 1. HANDLE LAZY CHANNEL/DM CREATION ---
 		if (type === 'dm' && (channel_id === 'new' || !channel_id)) {
-			if (!targetUserId) {
-				return fail('400', 'Target user required for new DM', 400);
-			}
-			const { data: threadId, error: rpcError } = await supabase.rpc(
-				'get_or_create_dm_thread',
-				{
-					target_user_id: targetUserId,
-				},
-			);
+			if (!targetUserId) return fail('400', 'Target user required for new DM', 400);
+
+			const { data: threadId, error: rpcError } = await supabase
+				.schema('comms')
+				.rpc('get_or_create_dm_thread', { target_user_id: targetUserId });
+
 			if (rpcError) {
-				const n = normaliseSupabaseError(rpcError);
-				return fail(n.code, n.message, n.status);
+				return fail(normaliseSupabaseError(rpcError).code, 'Failed to create DM thread', 400);
 			}
 			finalChannelId = threadId;
+		} else if (type === 'channel' && (channel_id === 'new' || !channel_id)) {
+			if (!targetStageId) return fail('400', 'Target stage required for new channel', 400);
+
+			// Get parent project ID for the channel
+			const { data: stageInfo, error: stageErr } = await supabase
+				.schema('projects')
+				.from('project_stages')
+				.select('project_id, name')
+				.eq('id', targetStageId)
+				.single();
+
+			if (stageErr || !stageInfo) return fail('400', 'Invalid stage', 400);
+
+			const { data: newChannelId, error: rpcError } = await supabase
+				.schema('comms')
+				.rpc('get_or_create_project_channel', {
+					p_project_id: stageInfo.project_id,
+					p_stage_id: targetStageId,
+					p_name: stageInfo.name,
+				});
+
+			if (rpcError) {
+				return fail(normaliseSupabaseError(rpcError).code, 'Failed to create channel', 400);
+			}
+			finalChannelId = newChannelId;
 		}
 
+		// --- 2. PREPARE UPLOADS & INSERT ---
 		const table = type === 'dm' ? 'dm_messages' : 'project_messages';
 		const channelCol = type === 'dm' ? 'thread_id' : 'channel_id';
 
@@ -70,33 +95,16 @@ export async function sendMessage(
 			const supabaseUrl = Config.SUPABASE_URL;
 
 			if (!serviceRoleKey || !supabaseUrl) {
-				console.error(
-					'Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL',
-				);
-				return fail(
-					'500',
-					'Server configuration error: Uploads disabled',
-					500,
-				);
+				return fail('500', 'Server configuration error: Uploads disabled', 500);
 			}
 
-			const adminClient = createClient(
-				Config.SUPABASE_URL,
-				Config.SUPABASE_SERVICE_ROLE_KEY,
-				{
-					auth: {
-						persistSession: false,
-						autoRefreshToken: false,
-						detectSessionInUrl: false,
-					},
-				},
-			);
+			const adminClient = createClient(Config.SUPABASE_URL, Config.SUPABASE_SERVICE_ROLE_KEY, {
+				auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+			});
 
 			let projectId = '';
 			if (type === 'channel') {
-				const { data } = await supabase.schema('comms').from(
-					'project_channels',
-				).select(
+				const { data } = await supabase.schema('comms').from('project_channels').select(
 					'project_id',
 				).eq('id', finalChannelId).single();
 				if (data) projectId = data.project_id;
@@ -112,21 +120,14 @@ export async function sendMessage(
 						channelId: finalChannelId,
 						attachmentId: fileId,
 					}
-					: {
-						type: 'personal_library',
-						userId: user.id,
-						folder: 'dms',
-					};
+					: { type: 'personal_library', userId: user.id, folder: 'dms' };
 
-				const { bucket: targetBucket, path: targetPath } = StoragePaths
-					.generate(
-						file.name,
-						context,
-					);
+				const { bucket: targetBucket, path: targetPath } = StoragePaths.generate(
+					file.name,
+					context,
+				);
 
-				const { error: dbError } = await supabase.schema('files').from(
-					'items',
-				).insert({
+				const { error: dbError } = await supabase.schema('files').from('items').insert({
 					id: fileId,
 					owner_user_id: user.id,
 					display_name: file.name,
@@ -141,31 +142,17 @@ export async function sendMessage(
 				});
 				if (dbError) throw dbError;
 
-				const { error: uploadError } = await supabase.storage.from(
-					'quarantine',
-				).upload(
+				const { error: uploadError } = await supabase.storage.from('quarantine').upload(
 					quarantinePath,
 					file,
 					{ contentType: file.type, upsert: false },
 				);
 				if (uploadError) throw uploadError;
 
-				await supabase.schema('files').from('items').select('id').eq(
-					'id',
-					fileId,
-				).single();
-
-				const { error: scanError } = await adminClient.functions.invoke(
-					'scan-file',
-					{
-						body: { fileId },
-					},
-				);
-
-				if (scanError) {
-					console.error('Scan invocation failed:', scanError);
-					throw scanError;
-				}
+				const { error: scanError } = await adminClient.functions.invoke('scan-file', {
+					body: { fileId },
+				});
+				if (scanError) throw scanError;
 
 				return fileId;
 			});
@@ -174,31 +161,18 @@ export async function sendMessage(
 				const newIds = await Promise.all(uploadPromises);
 				attachments.push(...newIds);
 			} catch (err: any) {
-				console.error('Server-side upload failed:', err);
-				return fail(
-					'500',
-					`Failed to process attachments: ${err.message}`,
-					500,
-				);
+				return fail('500', `Failed to process attachments: ${err.message}`, 500);
 			}
 		}
 
-		const { data: msg, error: msgError } = await supabase
-			.schema('comms')
-			.from(table)
-			.insert({
-				[channelCol]: finalChannelId,
-				sender_user_id: user.id,
-				body: message || '',
-				has_attachments: attachments.length > 0,
-			})
-			.select()
-			.single();
+		const { data: msg, error: msgError } = await supabase.schema('comms').from(table).insert({
+			[channelCol]: finalChannelId,
+			sender_user_id: user.id,
+			body: message || '',
+			has_attachments: attachments.length > 0,
+		}).select().single();
 
-		if (msgError) {
-			const n = normaliseSupabaseError(msgError);
-			return fail(n.code, n.message, n.status);
-		}
+		if (msgError) return fail(normaliseSupabaseError(msgError).code, msgError.message, 400);
 
 		if (attachments.length > 0) {
 			const links = attachments.map((id) => ({
@@ -207,28 +181,12 @@ export async function sendMessage(
 				attachment_id: id,
 			}));
 
-			const { error: linkError } = await supabase
-				.schema('comms')
-				.from('message_attachments')
+			const { error: linkError } = await supabase.schema('comms').from('message_attachments')
 				.insert(links);
-
-			if (linkError) {
-				console.error('Failed to link attachments:', linkError);
-
-				const n = normaliseSupabaseError(linkError);
-				return fail(
-					n.code,
-					'Message created but attachments failed: ' + n.message,
-					n.status,
-				);
-			}
+			if (linkError) return fail('500', 'Message created but attachments failed', 500);
 		}
 
-		return ok({
-			id: msg.id,
-			channelId: finalChannelId,
-			timestamp: msg.created_at,
-		});
+		return ok({ id: msg.id, channelId: finalChannelId, timestamp: msg.created_at });
 	} catch (err) {
 		const n = normaliseUnknownError(err);
 		return fail(n.code, n.message, 500);

@@ -15,7 +15,6 @@ export function ProjectProvider(
 	const isLoading = useSignal(false);
 	const error = useSignal<string | null>(null);
 
-	// Reset state when ID changes props
 	if (projectId.value !== id) {
 		projectId.value = id;
 		project.value = null;
@@ -29,9 +28,9 @@ export function ProjectProvider(
 		error.value = null;
 
 		try {
-			// Use the Service instead of raw fetch
 			const data = await ProjectsService.getProjectDetails(projectId.value);
 			project.value = data;
+			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
 			console.error('Project Fetch Error:', err);
 			error.value = err.message || 'An unexpected error occurred.';

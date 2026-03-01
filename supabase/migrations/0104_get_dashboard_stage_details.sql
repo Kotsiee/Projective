@@ -12,6 +12,7 @@ RETURNS TABLE (
   stage_type text,
   ip_mode text,
   due_date timestamptz,
+  scheduling jsonb, 
   channel_id uuid,
   budget jsonb,
   assignee jsonb,
@@ -41,7 +42,8 @@ BEGIN
     CASE 
       WHEN p.owner_user_id = v_user_id OR EXISTS(SELECT 1 FROM org.business_profiles bp WHERE bp.id = p.client_business_id AND bp.owner_user_id = v_user_id) THEN 'owner'
       
-      WHEN sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id IN (SELECT id FROM org.freelancer_profiles WHERE user_id = v_user_id) THEN 'assignee'
+      -- FIXED: Removed the ambiguous freelancer subquery entirely
+      WHEN sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id = v_user_id THEN 'assignee'
       
       WHEN sa.assignee_type = 'team' AND sa.team_id IN (
           SELECT tm.team_id 
@@ -65,10 +67,25 @@ BEGIN
     ps.description,
     ps.sort_order,
     ps.status::text,
-    ps.stage_type::text, -- FIX: Explicit cast to text
-    ps.ip_mode::text,    -- FIX: Explicit cast to text (preventative)
+    ps.stage_type::text, 
+    ps.ip_mode::text,    
     ps.file_due_date AS due_date,
     
+    jsonb_build_object(
+      'start_trigger_type', ps.start_trigger_type,
+      'fixed_start_date', ps.fixed_start_date,
+      'start_dependency_stage_id', ps.start_dependency_stage_id,
+      'start_dependency_lag_days', ps.start_dependency_lag_days,
+      'file_duration_mode', ps.file_duration_mode,
+      'file_duration_days', ps.file_duration_days,
+      'file_due_date', ps.file_due_date,
+      'session_count', ps.session_count,
+      'session_preferred_days', ps.session_preferred_days,
+      'session_end_date', ps.session_end_date,
+      'maintenance_cycle_interval', ps.maintenance_cycle_interval,
+      'hire_trigger_active', ps.hire_trigger_active
+    ) as scheduling,
+
     -- Channel ID Lookup
     (
       SELECT pc.id 
@@ -106,7 +123,7 @@ BEGIN
       )
       FROM projects.stage_assignments sa
       LEFT JOIN org.teams t ON t.id = sa.team_id
-      LEFT JOIN org.freelancer_profiles fp ON fp.id = sa.freelancer_profile_id
+      LEFT JOIN org.freelancer_profiles fp ON fp.user_id = sa.freelancer_profile_id
       LEFT JOIN org.users_public upa ON upa.user_id = fp.user_id
       WHERE sa.project_stage_id = ps.id
       LIMIT 1

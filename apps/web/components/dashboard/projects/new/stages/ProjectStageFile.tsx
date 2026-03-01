@@ -1,13 +1,17 @@
-import { DateTime, SelectOption } from '@projective/types';
+/**
+ * @file ProjectStageFile.tsx
+ * @description Advanced settings specifically for File-Based (CREATE/RUN) stages.
+ */
+import { SelectOption } from '@projective/types';
 import { UIStage } from '../ProjectStages.tsx';
-import { DateField, SelectField, TextField } from '@projective/fields';
+import { SelectField, TagInput, TextField } from '@projective/fields';
 
 export default function ProjectStageFile(
 	{ stage, updateStage }: { stage: UIStage; updateStage: (f: keyof UIStage, v: any) => void },
 ) {
 	const durationModes: SelectOption<string>[] = [
-		{ label: 'Fixed Deadline', value: 'fixed_deadline' },
-		{ label: 'Relative Duration', value: 'relative_duration' },
+		{ label: 'Relative Duration (Days to complete once started)', value: 'relative_duration' },
+		{ label: 'Fixed Deadline (Hard calendar date)', value: 'fixed_deadline' },
 		{ label: 'No Due Date', value: 'no_due_date' },
 	];
 
@@ -15,9 +19,9 @@ export default function ProjectStageFile(
 		<div className='form-grid'>
 			<SelectField
 				name='duration-mode'
-				label='Duration Mode'
+				label='Timeline Execution Mode'
 				options={durationModes}
-				value={stage['file_duration_mode'] || 'fixed_deadline'}
+				value={stage['file_duration_mode'] || 'relative_duration'}
 				onChange={(v) => updateStage('file_duration_mode' as any, v as string)}
 				searchable={false}
 				multiple={false}
@@ -25,25 +29,14 @@ export default function ProjectStageFile(
 				required
 			/>
 
-			{stage['file_duration_mode'] === 'fixed_deadline' && (
-				<DateField
-					label='Due Date'
-					value={stage.file_due_date as DateTime || new DateTime()}
-					onChange={(v) => updateStage('file_due_date' as any, v)}
-					minDate={new DateTime()}
-					format='dd/MM/yyyy'
-					floating
-					required
-				/>
-			)}
-
 			{stage['file_duration_mode'] === 'relative_duration' && (
 				<TextField
-					label='Duration (Days)'
+					label='Target Duration (Days)'
 					type='number'
-					value={stage['file_duration_days']?.toString()}
+					value={stage['file_duration_days']?.toString() || '7'}
 					onChange={(v) => updateStage('file_duration_days' as any, parseInt(v))}
 					floating
+					hint='How many days they have to complete this once the stage starts.'
 					required
 				/>
 			)}
@@ -51,10 +44,63 @@ export default function ProjectStageFile(
 			<TextField
 				label='Included Revisions'
 				type='number'
-				value={stage.file_revisions_allowed?.toString() || '0'}
+				value={stage.file_revisions_allowed?.toString() || '1'}
 				onChange={(v) => updateStage('file_revisions_allowed', parseInt(v))}
 				floating
+				hint='Number of revision rounds included in the initial contract.'
 			/>
+
+			<div
+				className='form-grid--span-full'
+				style={{
+					borderTop: '1px solid var(--border-color)',
+					paddingTop: '1.25rem',
+					marginTop: '0.5rem',
+				}}
+			>
+				<p
+					style={{
+						fontSize: '0.75rem',
+						fontWeight: 600,
+						color: 'var(--text-main)',
+						marginBottom: '1rem',
+						textTransform: 'uppercase',
+					}}
+				>
+					Deliverable Constraints
+				</p>
+				<div className='form-grid'>
+					<div className='form-grid--span-full'>
+						<TagInput
+							name='allowed-extensions'
+							label='Allowed File Types (Optional)'
+							value={stage.file_extensions_allowed || []}
+							onChange={(v) => updateStage('file_extensions_allowed', v)}
+							placeholder='e.g. .pdf, .fig, .png'
+							floating
+							hint='Leave blank to allow any file type.'
+						/>
+					</div>
+
+					<TextField
+						label='Max File Size (MB)'
+						type='number'
+						value={stage.file_max_size_mb?.toString() || '2048'}
+						onChange={(v) => updateStage('file_max_size_mb', parseInt(v))}
+						floating
+						hint='Maximum size allowed per individual file.'
+					/>
+
+					<TextField
+						label='Max File Count'
+						type='number'
+						value={stage.file_max_count?.toString() || '20'}
+						onChange={(v) => updateStage('file_max_count', parseInt(v))}
+						floating
+						hint='Maximum number of files per final submission.'
+					/>
+				</div>
+			</div>
 		</div>
 	);
 }

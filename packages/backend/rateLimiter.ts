@@ -8,7 +8,7 @@ type BucketInfo = {
 // For now, this is "per-isolate" limiting.
 const buckets = new Map<string, BucketInfo>();
 
-export function rateLimitByIP(ip: string, limit = 20, windowMs = 60_000) {
+export function rateLimitByIP(ip: string, limit = 100, windowMs = 10_000) {
 	const now = Date.now();
 	const bucket = buckets.get(ip);
 
@@ -17,13 +17,24 @@ export function rateLimitByIP(ip: string, limit = 20, windowMs = 60_000) {
 			count: 1,
 			resetAt: now + windowMs,
 		});
-		return { allowed: true, remaining: limit - 1 };
+
+		return {
+			allowed: true,
+			remaining: limit - 1,
+		};
 	}
 
 	if (bucket.count >= limit) {
-		return { allowed: false, remaining: 0 };
+		return {
+			allowed: false,
+			remaining: 0,
+		};
 	}
 
 	bucket.count += 1;
-	return { allowed: true, remaining: limit - bucket.count };
+
+	return {
+		allowed: true,
+		remaining: limit - bucket.count,
+	};
 }

@@ -5,6 +5,7 @@ import {
 
 interface ChatMessageProps {
 	message: ChatMessageData;
+	onRetry?: (tempId: string) => void;
 }
 
 function formatBytes(bytes: number, decimals = 1) {
@@ -110,10 +111,13 @@ const FileAttachment = (
 	);
 };
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+export default function ChatMessage({ message, onRetry }: ChatMessageProps) {
 	const isSelf = message.isSelf;
-	const hasAttachments = message.attachments &&
-		message.attachments.length > 0;
+	const hasAttachments = message.attachments && message.attachments.length > 0;
+
+	// Evaluate status
+	const isSending = message.status === 'sending';
+	const isError = message.status === 'error';
 
 	return (
 		<div
@@ -123,6 +127,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 				padding: '8px 16px',
 				width: '100%',
 				boxSizing: 'border-box',
+				// Fade out the entire block slightly if it hasn't reached the server yet
+				opacity: isSending ? 0.6 : 1,
+				transition: 'opacity 0.2s ease-in-out',
 			}}
 		>
 			<div
@@ -160,15 +167,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 					}}
 				>
 					{hasAttachments && (
-						<div
-							style={{ display: 'flex', flexDirection: 'column' }}
-						>
+						<div style={{ display: 'flex', flexDirection: 'column' }}>
 							{message.attachments!.map((att) => (
-								<FileAttachment
-									key={att.id}
-									file={att}
-									isSelf={isSelf}
-								/>
+								<FileAttachment key={att.id} file={att} isSelf={isSelf} />
 							))}
 						</div>
 					)}
@@ -186,20 +187,59 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 						</div>
 					)}
 
-					<div
-						style={{
-							fontSize: '0.7rem',
-							marginTop: '4px',
-							opacity: 0.8,
-							textAlign: 'right',
-						}}
-					>
+					<div style={{ fontSize: '0.7rem', marginTop: '4px', opacity: 0.8, textAlign: 'right' }}>
 						{new Date(message.timestamp).toLocaleTimeString([], {
 							hour: '2-digit',
 							minute: '2-digit',
 						})}
 					</div>
 				</div>
+
+				{/* Status Indicators */}
+				{isSending && (
+					<div
+						style={{
+							fontSize: '0.7rem',
+							color: '#6b7280',
+							marginTop: '4px',
+							display: 'flex',
+							justifyContent: 'flex-end',
+						}}
+					>
+						Sending...
+					</div>
+				)}
+
+				{isError && (
+					<div
+						style={{
+							fontSize: '0.7rem',
+							color: '#ef4444',
+							marginTop: '4px',
+							display: 'flex',
+							justifyContent: 'flex-end',
+							alignItems: 'center',
+							gap: '6px',
+						}}
+					>
+						Failed to send
+						<button
+							type='button'
+							onClick={() => onRetry?.(message.tempId!)}
+							style={{
+								background: 'none',
+								border: 'none',
+								color: '#ef4444',
+								textDecoration: 'underline',
+								cursor: 'pointer',
+								padding: 0,
+								fontSize: '0.7rem',
+							}}
+						>
+							Retry
+						</button>
+					</div>
+				)}
 			</div>
 		</div>
 	);

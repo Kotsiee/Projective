@@ -2,12 +2,10 @@ import '@styles/components/dashboard/projects/project/project-sidebar-details.cs
 import { useProjectContext } from '@contexts/ProjectContext.tsx';
 import { IconArrowLeft, IconLogout, IconSettings, IconUsers } from '@tabler/icons-preact';
 import ProjectSidebarStageItem from './ProjectSidebarStageItem.tsx';
+import { IconButton } from '@projective/ui';
 
 export default function ProjectSidebarDetails() {
-	// 1. Consume the Context
 	const { project, isLoading, error } = useProjectContext();
-
-	// 2. Handle Loading & Error States locally
 	if (isLoading.value && !project.value) {
 		return <div class='sidebar-details--loading'>Loading Project...</div>;
 	}
@@ -18,14 +16,12 @@ export default function ProjectSidebarDetails() {
 
 	if (!project.value) return null;
 
-	// 3. Render using context data
 	const data = project.value;
 
 	return (
 		<div class='sidebar-details'>
-			{/* Header Section */}
 			<div class='sidebar-details__header'>
-				<a href='/projects' class='sidebar-details__back-link'>
+				<a href='/projects' class='sidebar-details__back-link' f-client-nav={false}>
 					<IconArrowLeft size={16} />
 					Back to List
 				</a>
@@ -43,18 +39,25 @@ export default function ProjectSidebarDetails() {
 				</div>
 
 				<div class='sidebar-details__nav'>
-					<a href={`/projects/${data.project_id}/team`} class='sidebar-details__nav-link'>
+					<IconButton
+						href={`/projects/${data.project_id}/team`}
+						variant='secondary'
+						size='small'
+						aria-label='Show Members'
+					>
 						<IconUsers size={18} />
-						<span>Team</span>
-					</a>
-					<a href={`/projects/${data.project_id}/settings`} class='sidebar-details__nav-link'>
+					</IconButton>
+					<IconButton
+						href={`/projects/${data.project_id}/settings`}
+						variant='secondary'
+						size='small'
+						aria-label='Settings'
+					>
 						<IconSettings size={18} />
-						<span>Settings</span>
-					</a>
+					</IconButton>
 				</div>
 			</div>
 
-			{/* Stages List (Scrollable) */}
 			<div class='sidebar-details__stages'>
 				<h3 class='sidebar-details__section-title'>Project Stages</h3>
 				<div class='sidebar-details__list-wrapper'>
@@ -72,9 +75,8 @@ export default function ProjectSidebarDetails() {
 				</div>
 			</div>
 
-			{/* Footer Actions */}
 			<div class='sidebar-details__footer'>
-				<button class='sidebar-details__action sidebar-details__action--leave'>
+				<button type='button' class='sidebar-details__action sidebar-details__action--leave'>
 					<IconLogout size={18} />
 					<span>Leave Project</span>
 				</button>

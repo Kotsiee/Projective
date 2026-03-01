@@ -100,7 +100,7 @@ export async function getMessages(
 		const { data: profiles } = await supabase
 			.schema('org')
 			.from('users_public')
-			.select('user_id, display_name, avatar_url')
+			.select('user_id, username, first_name, last_name, avatar_url')
 			.in('user_id', userIds);
 
 		const profileMap = new Map(
@@ -110,6 +110,11 @@ export async function getMessages(
 
 		const items = messages.map((msg: any) => {
 			const profile = profileMap.get(msg.sender_user_id) || {};
+			const displayName = profile?.username
+				? profile?.username
+				: profile?.first_name
+				? `${profile.first_name} ${profile.last_name || ''}`.trim()
+				: 'Unknown User';
 
 			const fileData = attachmentMap.get(msg.id) || [];
 
@@ -134,7 +139,7 @@ export async function getMessages(
 				isSelf: msg.sender_user_id === userId,
 				sender: {
 					id: msg.sender_user_id,
-					name: profile.display_name || 'Unknown User',
+					name: displayName,
 					avatarUrl: profile.avatar_url,
 				},
 				attachments: mappedAttachments,

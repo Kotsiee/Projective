@@ -14,6 +14,7 @@ CREATE TABLE projects.projects (
   target_project_start_date timestamp with time zone,
 
 -- Legal & Settings
+
 ip_ownership_mode ip_option_mode NOT NULL DEFAULT 'exclusive_transfer'::ip_option_mode,
   nda_required boolean NOT NULL DEFAULT false,
   portfolio_display_rights portfolio_rights NOT NULL DEFAULT 'allowed'::portfolio_rights,
@@ -26,7 +27,7 @@ ip_ownership_mode ip_option_mode NOT NULL DEFAULT 'exclusive_transfer'::ip_optio
   
   CONSTRAINT projects_pkey PRIMARY KEY (id),
   CONSTRAINT projects_client_business_id_fkey FOREIGN KEY (client_business_id) REFERENCES org.business_profiles(id),
-  CONSTRAINT projects_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES auth.users(id)
+  CONSTRAINT projects_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES org.users_public(id)
 );
 
 -- 2. STAGES
@@ -39,10 +40,12 @@ CREATE TABLE projects.project_stages (
   stage_type stage_type_enum NOT NULL,
   status stage_status NOT NULL DEFAULT 'open'::stage_status,
 
--- Timing
+-- Timing & Triggers
 start_trigger_type start_trigger_type NOT NULL DEFAULT 'on_project_start'::start_trigger_type,
   fixed_start_date timestamp with time zone,
   start_dependency_stage_id uuid,
+  start_dependency_lag_days integer DEFAULT 0, -- NEW: Enables staggered offsets
+  hire_trigger_active boolean NOT NULL DEFAULT true, -- NEW: Contractual lock
 
 -- Configuration
 
@@ -52,6 +55,8 @@ file_revisions_allowed integer DEFAULT 0,
   file_due_date timestamp with time zone,
   session_duration_minutes integer,
   session_count integer DEFAULT 1,
+  session_preferred_days text[], -- NEW: Array of days (e.g., ['monday', 'tuesday'])
+  session_end_date timestamp with time zone, -- NEW: Hard fallback for unstructured sessions
   management_contract_mode text,
   maintenance_cycle_interval text,
   ip_ownership_override ip_option_mode,
@@ -80,7 +85,6 @@ CREATE TABLE projects.maintenance_contracts (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   
   CONSTRAINT maintenance_contracts_pkey PRIMARY KEY (id),
-  -- FIXED: References user_id (Freelancer) and id (Business)
   CONSTRAINT maintenance_contracts_freelancer_profile_id_fkey FOREIGN KEY (freelancer_profile_id) REFERENCES org.freelancer_profiles(user_id),
   CONSTRAINT maintenance_contracts_business_profile_id_fkey FOREIGN KEY (business_profile_id) REFERENCES org.business_profiles(id)
 );
@@ -96,7 +100,7 @@ CREATE TABLE projects.project_activity (
   entity_id uuid NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT project_activity_pkey PRIMARY KEY (id),
-  CONSTRAINT project_activity_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES auth.users(id)
+  CONSTRAINT project_activity_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES org.users_public(id)
 );
 
 -- 5. PARTICIPANTS
@@ -127,10 +131,9 @@ CREATE TABLE projects.stage_assignments (
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT stage_assignments_pkey PRIMARY KEY (id),
         CONSTRAINT stage_assignments_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages (id),
-        -- FIXED: References user_id
         CONSTRAINT stage_assignments_freelancer_profile_id_fkey FOREIGN KEY (freelancer_profile_id) REFERENCES org.freelancer_profiles (user_id),
         CONSTRAINT stage_assignments_team_id_fkey FOREIGN KEY (team_id) REFERENCES org.teams (id),
-        CONSTRAINT stage_assignments_assigned_by_fkey FOREIGN KEY (assigned_by) REFERENCES auth.users (id)
+        CONSTRAINT stage_assignments_assigned_by_fkey FOREIGN KEY (assigned_by) REFERENCES org.users_public (id)
 );
 
 -- 7. SUBMISSIONS
@@ -144,22 +147,16 @@ CREATE TABLE projects.stage_submissions (
   status text DEFAULT 'pending_review'::text,
   CONSTRAINT stage_submissions_pkey PRIMARY KEY (id),
   CONSTRAINT stage_submissions_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages(id),
-  CONSTRAINT stage_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES auth.users(id)
+  CONSTRAINT stage_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES org.users_public(id)
 );
 
--- 8. GLOBAL ATTACHMENTS (FIXED)
-
-
+-- 8. GLOBAL ATTACHMENTS
 CREATE TABLE projects.project_attachments (
     project_id uuid NOT NULL,
-    attachment_id uuid NOT NULL, -- "attachment_id" is the ID from files.items
-    
+    attachment_id uuid NOT NULL,
     CONSTRAINT project_attachments_pkey PRIMARY KEY (project_id, attachment_id),
     CONSTRAINT project_attachments_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id),
-
--- FIXED: Now points to files.items instead of org.attachments
--- NOTE: Requires files.items to exist (Run 0008_files_tables.sql BEFORE this file)
-CONSTRAINT project_attachments_file_fkey FOREIGN KEY (attachment_id) REFERENCES files.items (id) ON DELETE CASCADE
+    CONSTRAINT project_attachments_file_fkey FOREIGN KEY (attachment_id) REFERENCES files.items (id) ON DELETE CASCADE
 );
 
 -- 9. REQUIRED SKILLS
@@ -181,7 +178,7 @@ CREATE TABLE projects.user_preferences (
     with
         time zone DEFAULT now(),
         CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id, project_id),
-        CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
+        CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id),
         CONSTRAINT user_preferences_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id)
 );
 
@@ -217,19 +214,14 @@ CREATE TABLE projects.stage_staffing_roles (
   CONSTRAINT stage_staffing_roles_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages(id)
 );
 
--- 13. SUBMISSION FILES (FIXED)
-
-
+-- 13. SUBMISSION FILES
 CREATE TABLE projects.submission_files (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     submission_id uuid NOT NULL,
-    file_id uuid NOT NULL, -- Renamed from file_item_id for clarity
-    
+    file_id uuid NOT NULL,
     CONSTRAINT submission_files_pkey PRIMARY KEY (id),
     CONSTRAINT fk_sub_file_submission FOREIGN KEY (submission_id) REFERENCES projects.stage_submissions (id) ON DELETE CASCADE,
-
--- FIXED: Now points to files.items
-CONSTRAINT fk_sub_file_item FOREIGN KEY (file_id) REFERENCES files.items (id) ON DELETE CASCADE
+    CONSTRAINT fk_sub_file_item FOREIGN KEY (file_id) REFERENCES files.items (id) ON DELETE CASCADE
 );
 
 -- 14. BUDGET RULES
@@ -257,5 +249,5 @@ CREATE TABLE projects.stage_revision_requests (
   resolved_at timestamp with time zone,
   
   CONSTRAINT stage_revision_requests_pkey PRIMARY KEY (id),
-  CONSTRAINT stage_revision_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES auth.users(id)
+  CONSTRAINT stage_revision_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES org.users_public(id)
 );

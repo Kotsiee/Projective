@@ -1,4 +1,4 @@
-import { ComponentChildren, JSX } from 'preact';
+import { ComponentChildren, CSSProperties, JSX } from 'preact';
 import { Signal } from '@preact/signals';
 
 export type SplitterDirection = 'horizontal' | 'vertical';
@@ -10,7 +10,7 @@ export interface SplitterProps {
 	minPaneSize?: number;
 	breakpoint?: number;
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 	onResizeEnd?: (sizes: number[]) => void;
 	onCollapse?: (index: number, collapsed: boolean) => void;
 }
@@ -18,7 +18,7 @@ export interface SplitterProps {
 export interface SplitterPaneProps {
 	children: ComponentChildren;
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 	minSize?: number;
 	maxSize?: number;
 	collapsible?: boolean;
@@ -35,7 +35,6 @@ export interface SplitterContextValue {
 	direction: SplitterDirection;
 	sizes: Signal<number[]>;
 	startResize: (index: number, clientX: number, clientY: number) => void;
-	// New: Generalized move handler for keyboard
 	moveSplitter: (index: number, deltaPercent: number) => void;
 	toggleCollapse: (index: number) => void;
 	isResizing: Signal<boolean>;

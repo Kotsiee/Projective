@@ -7,7 +7,7 @@ CREATE TABLE comms.notification_prefs (
     digest boolean NOT NULL DEFAULT false,
     quiet_hours tstzrange,
     CONSTRAINT notification_prefs_pkey PRIMARY KEY (user_id),
-    CONSTRAINT notification_prefs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+    CONSTRAINT notification_prefs_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id)
 );
 
 -- 2. DEVICE TOKENS
@@ -20,7 +20,7 @@ CREATE TABLE comms.device_tokens (
     with
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT device_tokens_pkey PRIMARY KEY (id),
-        CONSTRAINT device_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+        CONSTRAINT device_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id)
 );
 
 -- 3. NOTIFICATIONS
@@ -39,7 +39,7 @@ CREATE TABLE comms.notifications (
     with
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT notifications_pkey PRIMARY KEY (id),
-        CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+        CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id)
 );
 
 -- 4. DM THREADS
@@ -50,7 +50,7 @@ CREATE TABLE comms.dm_threads (
     with
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT dm_threads_pkey PRIMARY KEY (id),
-        CONSTRAINT dm_threads_created_by_user_id_fkey FOREIGN KEY (created_by_user_id) REFERENCES auth.users (id)
+        CONSTRAINT dm_threads_created_by_user_id_fkey FOREIGN KEY (created_by_user_id) REFERENCES org.users_public (id)
 );
 
 -- 5. DM PARTICIPANTS
@@ -63,7 +63,7 @@ CREATE TABLE comms.dm_participants (
         time zone NOT NULL DEFAULT now(),
         CONSTRAINT dm_participants_pkey PRIMARY KEY (id),
         CONSTRAINT dm_participants_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES comms.dm_threads (id),
-        CONSTRAINT dm_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id)
+        CONSTRAINT dm_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id)
 );
 
 -- 6. DM MESSAGES
@@ -80,7 +80,7 @@ CREATE TABLE comms.dm_messages (
     with
         time zone,
         CONSTRAINT dm_messages_pkey PRIMARY KEY (id),
-        CONSTRAINT dm_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES auth.users (id),
+        CONSTRAINT dm_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES org.users_public (id),
         CONSTRAINT dm_messages_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES comms.dm_threads (id)
 );
 
@@ -114,7 +114,7 @@ CREATE TABLE comms.project_messages (
         time zone,
         CONSTRAINT project_messages_pkey PRIMARY KEY (id),
         CONSTRAINT project_messages_channel_id_fkey FOREIGN KEY (channel_id) REFERENCES comms.project_channels (id),
-        CONSTRAINT project_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES auth.users (id)
+        CONSTRAINT project_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES org.users_public (id)
 );
 
 -- 9. CHANNEL PARTICIPANTS
@@ -130,6 +130,7 @@ CREATE TABLE comms.project_channel_participants (
 );
 
 -- 10. CHANNEL FILES (FIXED)
+
 
 CREATE TABLE comms.channel_files (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
@@ -147,6 +148,7 @@ CONSTRAINT channel_files_attachment_id_fkey FOREIGN KEY (attachment_id) REFERENC
 );
 
 -- 11. MESSAGE ATTACHMENTS (FIXED)
+
 
 CREATE TABLE comms.message_attachments (
     id uuid NOT NULL DEFAULT gen_random_uuid (),

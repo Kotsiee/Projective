@@ -42,7 +42,8 @@ BEGIN
     LEFT JOIN projects.user_preferences up ON up.project_id = p.id AND up.user_id = v_user_id
     LEFT JOIN projects.project_participants pp ON pp.project_id = p.id
     LEFT JOIN projects.stage_assignments sa ON sa.assigned_by = v_user_id
-      OR (sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id IN (SELECT id FROM org.freelancer_profiles WHERE user_id = v_user_id))
+      -- FIXED: freelancer_profile_id IS the user_id, so we can avoid the subquery entirely
+      OR (sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id = v_user_id)
       OR (sa.assignee_type = 'team' AND sa.team_id IN (
           SELECT tm.team_id 
           FROM org.team_memberships tm 
@@ -51,8 +52,10 @@ BEGIN
     WHERE 
       (
         p.owner_user_id = v_user_id
-        OR pp.profile_id IN (SELECT id FROM org.business_profiles WHERE owner_user_id = v_user_id)
-        OR pp.profile_id IN (SELECT id FROM org.freelancer_profiles WHERE user_id = v_user_id)
+        -- FIXED: Explicitly aliased `bp.id` to avoid ambiguity
+        OR pp.profile_id IN (SELECT bp.id FROM org.business_profiles bp WHERE bp.owner_user_id = v_user_id)
+        -- FIXED: Avoid subquery, check user ID directly
+        OR (pp.profile_type = 'freelancer' AND pp.profile_id = v_user_id) 
       )
       AND (p_category <> 'team' OR (
         EXISTS (

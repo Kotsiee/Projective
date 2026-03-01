@@ -1,0 +1,60 @@
+.gantt-tooltip {
+    position: absolute;
+    pointer-events: none; /* Crucial: Stops the tooltip from blocking mouse events to the canvas */
+    z-index: 100;
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    will-change: transform;
+}
+
+.gantt-tooltip__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: -0.25rem;
+}
+
+.gantt-tooltip__type {
+    background-color: var(--primary-surface);
+    color: var(--primary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--border-radius__xsmall);
+}
+
+.gantt-tooltip__title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.gantt-tooltip__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-main);
+}
+
+.gantt-tooltip__meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.gantt-tooltip__meta-label {
+    font-weight: 500;
+    color: var(--text-muted);
+}

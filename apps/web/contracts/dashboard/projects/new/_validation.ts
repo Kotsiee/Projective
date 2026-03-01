@@ -9,7 +9,7 @@ import {
 	Visibility,
 } from '@projective/types';
 
-const QuillDeltaSchema = z.object({
+export const QuillDeltaSchema = z.object({
 	ops: z.array(
 		z.object({
 			insert: z.union([
@@ -21,7 +21,7 @@ const QuillDeltaSchema = z.object({
 	),
 });
 
-const LegalAndScreeningSchema = z.object({
+export const LegalAndScreeningSchema = z.object({
 	ip_ownership_mode: z.nativeEnum(IPOptionMode),
 	nda_required: z.boolean(),
 	portfolio_display_rights: z.nativeEnum(PortfolioDisplayRights),
@@ -30,7 +30,7 @@ const LegalAndScreeningSchema = z.object({
 	language_requirement: z.array(z.string()),
 });
 
-const StageStaffingRoleSchema = z.object({
+export const StageStaffingRoleSchema = z.object({
 	role_title: z.string().min(1, 'Role title is required').max(100),
 	quantity: z.number().int().min(1),
 	budget_type: z.nativeEnum(BudgetType),
@@ -39,7 +39,7 @@ const StageStaffingRoleSchema = z.object({
 	allow_proposals: z.boolean(),
 });
 
-const StageOpenSeatSchema = z.object({
+export const StageOpenSeatSchema = z.object({
 	description_of_need: z.string().min(
 		10,
 		'Please describe the need in detail',
@@ -60,7 +60,11 @@ export const StageSchema = z.object({
 
 	start_trigger_type: z.nativeEnum(StartTriggerType),
 	fixed_start_date: z.coerce.date().optional(),
-	start_dependency_stage_id: z.uuid().optional(),
+
+	start_dependency_stage_id: z.string().optional(),
+
+	start_dependency_lag_days: z.number().int().optional(),
+	hire_trigger_active: z.boolean().optional(),
 
 	file_revisions_allowed: z.number().int().min(0).optional(),
 	file_duration_mode: z.enum([
@@ -70,13 +74,16 @@ export const StageSchema = z.object({
 	]).optional(),
 	file_duration_days: z.number().int().min(1).optional(),
 	file_due_date: z.coerce.date().optional(),
+	file_extensions_allowed: z.array(z.string()).optional(),
+	file_max_size_mb: z.number().int().min(1).optional(),
+	file_max_count: z.number().int().min(1).optional(),
 
 	session_duration_minutes: z.number().int().min(1).optional(),
 	session_count: z.number().int().min(1).optional(),
+	session_preferred_days: z.array(z.string()).optional(),
+	session_end_date: z.coerce.date().optional(),
 
-	management_contract_mode: z.enum(['fixed_dates', 'duration_from_start'])
-		.optional(),
-
+	management_contract_mode: z.enum(['fixed_dates', 'duration_from_start']).optional(),
 	maintenance_cycle_interval: z.enum(['weekly', 'monthly']).optional(),
 
 	ip_ownership_override: z.string().optional(),

@@ -94,6 +94,7 @@
     padding-left: 2rem;
     overflow: hidden;
     flex-direction: column;
+    height: 100%;
 }
 
 @media (min-width: 1024px) {

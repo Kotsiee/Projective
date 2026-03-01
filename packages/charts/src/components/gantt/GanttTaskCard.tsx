@@ -1,25 +1,29 @@
 import { GanttRow } from '../../types/gantt.ts';
-import { IconGripVertical } from '@tabler/icons-preact';
 import { GanttStore } from './../../core/gantt/store.ts';
+import { DateTime } from '@projective/types';
 
 interface GanttTaskCardProps {
 	row: GanttRow;
-	isActive?: boolean;
 	store: GanttStore;
 }
 
-export function GanttTaskCard({ row, isActive, store }: GanttTaskCardProps) {
+export function GanttTaskCard({ row, store }: GanttTaskCardProps) {
+	const startDt = new DateTime(new Date(row.data?.startMs || Date.now()));
+	const endDt = new DateTime(new Date(row.data?.endMs || Date.now() + 86400000));
+	const dateStr = `${startDt.toFormat('dd/MM/yy')} - ${endDt.toFormat('dd/MM/yy')}`;
+
+	const isSelected = store.selectedRowId.value === row.id;
+
 	return (
 		<div
 			class='gantt-task-card__container'
-			data-active={isActive}
 			style={`--task-height: ${store.rowHeight.value}px`}
 		>
-			<div class='gantt-task-card' data-active={isActive}>
-				<div class='gantt-task-card__grip'>
-					<IconGripVertical size={18} />
-				</div>
-
+			<div
+				class='gantt-task-card'
+				data-selected={isSelected}
+				onClick={() => store.selectRow(row.id)}
+			>
 				<div class='gantt-task-card__content'>
 					<div>
 						<h4 class='gantt-task-card__title'>{row.label}</h4>
@@ -27,10 +31,10 @@ export function GanttTaskCard({ row, isActive, store }: GanttTaskCardProps) {
 
 					<div class='gantt-task-card__meta'>
 						<span class='gantt-task-card__type'>
-							{row.type}
+							{row.data?.originalType?.replace('_', ' ') || row.type}
 						</span>
 						<span class='gantt-task-card__date'>
-							27/02/25 - 04/03/25
+							{dateStr}
 						</span>
 					</div>
 				</div>

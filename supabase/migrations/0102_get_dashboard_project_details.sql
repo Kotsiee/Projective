@@ -4,9 +4,11 @@ CREATE OR REPLACE FUNCTION projects.get_project_details(
 RETURNS TABLE (
   project_id uuid,
   title text,
-  status text, -- This return variable causes the collision
+  status text,
   banner_url text,
   is_starred boolean,
+  target_project_start_date timestamptz,
+  timeline_preset text,
   owner jsonb,
   viewer_context jsonb,
   stages jsonb
@@ -32,8 +34,10 @@ BEGIN
         SELECT 1 FROM projects.project_participants pp 
         WHERE pp.project_id = p.id 
         AND (
-           (pp.profile_type = 'freelancer' AND pp.profile_id IN (SELECT id FROM org.freelancer_profiles WHERE user_id = v_user_id)) OR
-           (pp.profile_type = 'business' AND pp.profile_id IN (SELECT id FROM org.business_profiles WHERE owner_user_id = v_user_id))
+           -- FIXED: Removed freelancer subquery trap
+           (pp.profile_type = 'freelancer' AND pp.profile_id = v_user_id) OR
+           -- FIXED: Explicit bp.id alias 
+           (pp.profile_type = 'business' AND pp.profile_id IN (SELECT bp.id FROM org.business_profiles bp WHERE bp.owner_user_id = v_user_id))
         )
       ) THEN 'collaborator'
       -- Check if assigned to any stage (Freelancer or Team Member)
@@ -42,8 +46,8 @@ BEGIN
         JOIN projects.project_stages ps ON ps.id = sa.project_stage_id
         WHERE ps.project_id = p.id
         AND (
-           (sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id IN (SELECT id FROM org.freelancer_profiles WHERE user_id = v_user_id)) OR
-           -- FIX: Aliased team_memberships to 'tm' and used 'tm.status'
+           -- FIXED: Removed freelancer subquery trap
+           (sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id = v_user_id) OR
            (sa.assignee_type = 'team' AND sa.team_id IN (
               SELECT tm.team_id 
               FROM org.team_memberships tm 
@@ -70,6 +74,8 @@ BEGIN
     p.status::text,
     NULL::text as banner_url,
     COALESCE(pref.is_starred, false),
+    p.target_project_start_date,
+    p.timeline_preset::text,     
 
     jsonb_build_object(
       'id', COALESCE(bp.id, p.owner_user_id),
@@ -82,18 +88,18 @@ BEGIN
     ) as owner,
 
     jsonb_build_object(
-  'role', v_user_role,
-  'permissions', (
-    SELECT jsonb_agg(perm)
-    FROM (
-      SELECT 'manage_settings' WHERE v_is_owner
-      UNION ALL
-      SELECT 'manage_members' WHERE v_is_owner
-      UNION ALL
-      SELECT 'view_financials' WHERE v_is_owner
-    ) as p(perm)
-  )
-) as viewer_context,
+      'role', v_user_role,
+      'permissions', (
+        SELECT jsonb_agg(perm)
+        FROM (
+          SELECT 'manage_settings' WHERE v_is_owner
+          UNION ALL
+          SELECT 'manage_members' WHERE v_is_owner
+          UNION ALL
+          SELECT 'view_financials' WHERE v_is_owner
+        ) as pr(perm)
+      )
+    ) as viewer_context,
 
     (
       SELECT jsonb_agg(
@@ -102,6 +108,20 @@ BEGIN
           'name', ps.name,
           'status', ps.status,
           'stage_type', ps.stage_type,
+          
+          'start_trigger_type', ps.start_trigger_type,
+          'fixed_start_date', ps.fixed_start_date,
+          'start_dependency_stage_id', ps.start_dependency_stage_id,
+          'start_dependency_lag_days', ps.start_dependency_lag_days,
+          'file_duration_mode', ps.file_duration_mode,
+          'file_duration_days', ps.file_duration_days,
+          'file_due_date', ps.file_due_date,
+          'session_count', ps.session_count,
+          'session_preferred_days', ps.session_preferred_days,
+          'session_end_date', ps.session_end_date,
+          'maintenance_cycle_interval', ps.maintenance_cycle_interval,
+          'hire_trigger_active', ps.hire_trigger_active,
+
           'unread', EXISTS(
              SELECT 1 FROM comms.notifications n 
              WHERE n.user_id = v_user_id AND n.read_at IS NULL AND n.entity_id = ps.id

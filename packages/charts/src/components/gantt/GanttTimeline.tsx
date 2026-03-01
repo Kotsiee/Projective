@@ -4,6 +4,7 @@ import { GanttStore } from '../../core/gantt/store.ts';
 import { GanttManager } from '../../core/gantt/gantt-manager.ts';
 import { generateHeaderBlocks, getHeaderTier } from '../../core/gantt/header-utils.ts';
 import { DateTime } from '@projective/types';
+import { GanttTooltip } from './GanttTooltip.tsx';
 import '../../styles/gantt/gantt-timeline.css';
 
 interface GanttTimelineProps {
@@ -24,7 +25,6 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 
 		const dispose = effect(() => {
 			const x = store.scrollX.value;
-
 			const targetLeft = VIRTUAL_OFFSET - x;
 
 			if (headerScrollRef.current) {
@@ -43,7 +43,6 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 
 	const onScroll = (e: Event) => {
 		const target = e.target as HTMLDivElement;
-
 		const newX = VIRTUAL_OFFSET - target.scrollLeft;
 
 		if (Math.abs(store.scrollX.value - newX) > 1) {
@@ -63,21 +62,27 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 		const startDate = new DateTime(new Date(store.timeScale.xToDate(renderStartX)));
 		const endDate = new DateTime(new Date(store.timeScale.xToDate(renderEndX)));
 
-		const tier = getHeaderTier(days);
+		const tier = getHeaderTier(days, width);
 		const dateToX = (t: number) => store.timeScale.dateToX(t);
 
-		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, dateToX);
-		const bottomRows = generateHeaderBlocks(startDate, endDate, tier.bottom, dateToX);
+		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, tier.topStep, dateToX);
+		const bottomRows = generateHeaderBlocks(
+			startDate,
+			endDate,
+			tier.bottom,
+			tier.bottomStep,
+			dateToX,
+		);
 
 		return {
 			topRows,
 			bottomRows,
 			tier,
-
 			totalWidth: VIRTUAL_OFFSET * 2,
 		};
 	});
 
+	// deno-lint-ignore no-explicit-any
 	const renderBlock = (block: any, content: string, isTop: boolean) => {
 		const domLeft = VIRTUAL_OFFSET + block.x;
 
@@ -137,6 +142,7 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 					class='gantt-timeline__canvas'
 					ref={canvasRootRef}
 				/>
+				<GanttTooltip store={store} />
 			</div>
 		</section>
 	);

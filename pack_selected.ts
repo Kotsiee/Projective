@@ -5,7 +5,8 @@ import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./packages/charts',
+	'./packages/data',
+	'./packages/fields',
 ];
 
 // 2. The existing file to REPLACE (This will be overwritten)
@@ -28,7 +29,7 @@ const IGNORE_FILES = [
 const IGNORE_EXTS = ['.snap', '.log'];
 
 // Only these extensions are allowed through
-const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml', '.css'];
+const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml'];
 
 // ---------------------
 

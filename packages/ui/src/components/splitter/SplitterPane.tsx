@@ -1,4 +1,4 @@
-import { SplitterPaneProps } from '../../types/components/splitter';
+import { SplitterPaneProps } from '../../types/components/splitter.ts';
 
 export function SplitterPane(
 	{ children, className, style }: SplitterPaneProps,

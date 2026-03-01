@@ -7,10 +7,15 @@
 
 .gantt-controls {
     display: flex;
+    flex: 0 0 auto;
 }
 
 .gantt-body {
     display: flex;
-    gap: 1rem;
     height: 100%;
+    min-height: 0;
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }

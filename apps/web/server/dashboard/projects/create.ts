@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
 import { fail, ok, Result } from '@server/core/http/result.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '@server/core/errors/normalise.ts';
@@ -28,10 +27,8 @@ export async function createProject(
 			return fail('unauthorized', 'You must be signed in to create a project.', 401);
 		}
 
-		// 1. Generate ID upfront
 		const projectId = crypto.randomUUID();
 
-		// 2. Setup Admin Client for Scanning
 		const serviceRoleKey = Config.SUPABASE_SERVICE_ROLE_KEY;
 		const supabaseUrl = Config.SUPABASE_URL;
 		let adminClient: any = null;
@@ -46,7 +43,6 @@ export async function createProject(
 			});
 		}
 
-		// 3. Helper: Upload File
 		const processFile = async (
 			file: File,
 			contextType: 'project_thumbnail' | 'project_global_attachment',
@@ -60,7 +56,6 @@ export async function createProject(
 				{ type: contextType, projectId, attachmentId: fileId },
 			);
 
-			// A. Insert File Record
 			const { error: dbError } = await supabase.schema('files').from('items').insert({
 				id: fileId,
 				owner_user_id: user.id,
@@ -76,19 +71,16 @@ export async function createProject(
 			});
 			if (dbError) throw dbError;
 
-			// B. Upload
 			const { error: uploadError } = await supabase.storage
 				.from('quarantine')
 				.upload(quarantinePath, file, { contentType: file.type, upsert: false });
 			if (uploadError) throw uploadError;
 
-			// C. Scan
 			const { error: scanError } = await adminClient.functions.invoke('scan-file', {
 				body: { fileId },
 			});
 			if (scanError) throw scanError;
 
-			// D. Get URL (only needed for public assets like thumbnail)
 			let url;
 			if (targetBucket === 'public_assets') {
 				const { data: publicUrlData } = supabase
@@ -104,7 +96,6 @@ export async function createProject(
 		let thumbnail_url = undefined;
 		const attachment_ids: string[] = [];
 
-		// 4. Process Thumbnail
 		if (files.thumbnail) {
 			try {
 				const res = await processFile(files.thumbnail, 'project_thumbnail');
@@ -115,7 +106,6 @@ export async function createProject(
 			}
 		}
 
-		// 5. Process Attachments
 		if (files.attachments && files.attachments.length > 0) {
 			try {
 				const uploads = await Promise.all(
@@ -128,8 +118,6 @@ export async function createProject(
 			}
 		}
 
-		// 6. Call RPC
-		// Merge any existing global_attachments IDs passed from frontend (if reusing library files)
 		const existingAttachments = data.global_attachments || [];
 		const finalAttachments = [...existingAttachments, ...attachment_ids];
 

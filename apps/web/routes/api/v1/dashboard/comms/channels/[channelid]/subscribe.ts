@@ -31,6 +31,14 @@ export const handler = define.handlers({
 			async start(controller) {
 				const encoder = new TextEncoder();
 
+				const pingInterval = setInterval(() => {
+					try {
+						controller.enqueue(encoder.encode(': ping\n\n'));
+					} catch (e) {
+						clearInterval(pingInterval);
+					}
+				}, 15000);
+
 				const result = await subscribeMessages(
 					channelid,
 					{
@@ -46,6 +54,7 @@ export const handler = define.handlers({
 
 				if (!result.ok) {
 					console.error('[SSE] Subscription failed:', result.error);
+					clearInterval(pingInterval);
 					controller.enqueue(
 						encoder.encode(`event: error\ndata: ${JSON.stringify(result.error)}\n\n`),
 					);
@@ -56,6 +65,7 @@ export const handler = define.handlers({
 				const { unsubscribe } = result.data;
 
 				ctx.req.signal.addEventListener('abort', async () => {
+					clearInterval(pingInterval);
 					await unsubscribe();
 				});
 			},
@@ -66,6 +76,7 @@ export const handler = define.handlers({
 				'Content-Type': 'text/event-stream',
 				'Cache-Control': 'no-cache',
 				'Connection': 'keep-alive',
+				'X-Accel-Buffering': 'no',
 			},
 		});
 	},

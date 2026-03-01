@@ -6,12 +6,6 @@ export interface ChatMessageSender {
 	avatarUrl?: string;
 }
 
-export interface ChatMessageSender {
-	id: string;
-	name: string;
-	avatarUrl?: string;
-}
-
 export interface ChatMessageAttachment {
 	id: string;
 	name: string;
@@ -27,7 +21,15 @@ export interface ChatMessageData {
 	timestamp: string;
 	isSelf: boolean;
 	attachments?: ChatMessageAttachment[];
+	status?: 'sending' | 'error' | 'sent';
+	tempId?: string;
 }
+
+export interface ChatRealtimeEvent {
+	type: 'INSERT' | 'UPDATE' | 'DELETE';
+	data: ChatMessageData | { id: string };
+}
+
 export class ChatNetworkSource extends DataSource<ChatMessageData> {
 	private channelId: string;
 	private currentUserId: string | null = null;
@@ -52,43 +54,48 @@ export class ChatNetworkSource extends DataSource<ChatMessageData> {
 		return `/api/v1/dashboard/comms/channels/${this.channelId}/subscribe?type=channel`;
 	}
 
-	/**
-	 * Subscribes using Server-Sent Events (EventSource)
-	 */
-	subscribe(onMessage: (msg: ChatMessageData) => void): () => void {
-		console.log(
-			'Connecting to EventSource:',
-			this.getSubscriptionEndpoint(),
-		);
+	subscribe(onMessage: (event: ChatRealtimeEvent) => void): () => void {
+		console.log('[SSE] Attempting to connect to EventSource at:', this.getSubscriptionEndpoint());
 
 		const eventSource = new EventSource(this.getSubscriptionEndpoint());
 
-		console.log('EventSource connected:', eventSource);
+		eventSource.onopen = () => {
+			console.log('[SSE] Connection successfully opened!');
+		};
 
 		eventSource.onmessage = (event) => {
+			console.log('[SSE] Raw event string received:', event.data);
 			try {
-				const data = JSON.parse(event.data);
+				const parsed = JSON.parse(event.data);
 
-				if (this.currentUserId) {
+				let type = parsed.type;
+				let data = parsed.data;
+
+				if (!type) {
+					type = 'INSERT';
+					data = parsed;
+				}
+
+				if (this.currentUserId && data.sender) {
 					data.isSelf = data.sender.id === this.currentUserId;
 				}
 
-				console.log('Received SSE message:', data);
-
-				onMessage(data);
+				console.log('[SSE] Successfully parsed and dispatching:', { type, data });
+				onMessage({ type, data });
 			} catch (e) {
-				console.error('Error parsing SSE message', e);
+				console.error('[SSE] Error parsing SSE message payload:', e);
 			}
 		};
 
 		eventSource.onerror = (err) => {
-			console.error('EventSource failed:', err);
+			console.error('[SSE] EventSource Error state triggered:', err);
 			if (eventSource.readyState === EventSource.CLOSED) {
-				// Handle closed connection
+				console.warn('[SSE] Connection permanently closed.');
 			}
 		};
 
 		return () => {
+			console.log('[SSE] Closing EventSource connection.');
 			eventSource.close();
 		};
 	}
@@ -96,13 +103,13 @@ export class ChatNetworkSource extends DataSource<ChatMessageData> {
 	async getMeta(): Promise<{ totalCount: number }> {
 		try {
 			const response = await fetch(
-				`${this.getEndpoint()}?countOnly=true`,
+				`${this.getEndpoint()}?countOnly=true&type=channel`,
 			);
 			if (!response.ok) throw new Error('Failed to fetch meta');
 			const data = await response.json();
 			return data.meta || { totalCount: 0 };
 		} catch (error) {
-			console.error('Failed to init chat:', error);
+			console.error('[HTTP] Failed to init chat meta:', error);
 			return { totalCount: 0 };
 		}
 	}
@@ -115,20 +122,13 @@ export class ChatNetworkSource extends DataSource<ChatMessageData> {
 				type: 'channel',
 			});
 
-			const response = await fetch(
-				`${this.getEndpoint()}?${params.toString()}`,
-			);
-			if (!response.ok) {
-				throw new Error(`API Error: ${response.statusText}`);
-			}
-			const data = await response.json();
+			const response = await fetch(`${this.getEndpoint()}?${params.toString()}`);
+			if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
-			return {
-				items: data.items || [],
-				meta: data.meta || { totalCount: 0 },
-			};
+			const data = await response.json();
+			return { items: data.items || [], meta: data.meta || { totalCount: 0 } };
 		} catch (error) {
-			console.error('Failed to fetch chat messages:', error);
+			console.error('[HTTP] Failed to fetch chat chunk:', error);
 			return { items: [], meta: { totalCount: 0 } };
 		}
 	}

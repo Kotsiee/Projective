@@ -1,3 +1,11 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE comms.project_messages;
+
+ALTER PUBLICATION supabase_realtime ADD TABLE comms.dm_messages;
+
+ALTER TABLE comms.project_messages REPLICA IDENTITY DEFAULT;
+
+ALTER TABLE comms.dm_messages REPLICA IDENTITY DEFAULT;
+
 DROP POLICY IF EXISTS "view_attachments_if_member" ON comms.message_attachments;
 
 CREATE POLICY "view_attachments_if_member" ON comms.message_attachments

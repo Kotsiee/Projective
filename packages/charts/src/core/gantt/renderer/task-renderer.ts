@@ -4,6 +4,7 @@ import { BaseRenderer } from './base-renderer.ts';
 import { GanttStore } from '../store.ts';
 import { DateTime } from '@projective/types';
 import { getThemeColor } from '../../../utils/theme-bridge.ts';
+import { GanttTask } from '../../../types/gantt.ts';
 
 export class TaskRenderer extends BaseRenderer {
 	constructor(store: GanttStore) {
@@ -20,24 +21,24 @@ export class TaskRenderer extends BaseRenderer {
 		const rowMap = new Map<string, number>();
 		rows.forEach((row, index) => rowMap.set(row.id, index));
 
-		const cBody = getThemeColor('--card');
+		const cBg = getThemeColor('--bg');
 		const cAccent = getThemeColor('--primary');
 		const cTextMain = getThemeColor('--text-main');
 		const cTextMuted = getThemeColor('--text-muted');
-		const cBorder = getThemeColor('--border-color');
 		const cMilestone = getThemeColor('--warning');
 
 		const titleStyle = new PIXI.TextStyle({
 			fontFamily: 'Inter, system-ui, sans-serif',
 			fontSize: 12,
 			fill: cTextMain,
-			fontWeight: '500',
+			fontWeight: '600',
 		});
 
 		const dateStyle = new PIXI.TextStyle({
 			fontFamily: 'Inter, system-ui, sans-serif',
 			fontSize: 10,
 			fill: cTextMuted,
+			fontWeight: '500',
 		});
 
 		for (const task of tasks) {
@@ -46,20 +47,28 @@ export class TaskRenderer extends BaseRenderer {
 
 			const coords = this.store.getTaskCoordinates(task);
 
-			const margin = 8;
+			const margin = 12;
 			const barHeight = rowHeight - (margin * 2);
 			const y = (rowIndex * rowHeight) + margin;
 
+			// Check if this task's row is currently selected
+			const isSelected = task.rowId === this.store.selectedRowId.value;
+
 			if (task.isMilestone) {
-				this.renderMilestone(coords.x, y, barHeight, { cBody, cAccent, cBorder, cMilestone });
+				this.renderMilestone(task, isSelected, coords.x, y, barHeight, {
+					cBg,
+					cMilestone,
+					cAccent,
+				});
 			} else {
 				this.renderTaskBar(
 					task,
+					isSelected,
 					coords.x,
 					coords.width,
 					y,
 					barHeight,
-					{ cBody, cAccent, cBorder },
+					{ cAccent },
 					{ titleStyle, dateStyle },
 				);
 			}
@@ -67,12 +76,13 @@ export class TaskRenderer extends BaseRenderer {
 	}
 
 	private renderTaskBar(
-		task: any,
+		task: GanttTask,
+		isSelected: boolean,
 		x: number,
 		width: number,
 		y: number,
 		height: number,
-		colors: { cBody: number; cAccent: number; cBorder: number },
+		colors: { cAccent: number },
 		styles: { titleStyle: PIXI.TextStyle; dateStyle: PIXI.TextStyle },
 	): void {
 		const group = new PIXI.Container();
@@ -80,57 +90,56 @@ export class TaskRenderer extends BaseRenderer {
 		group.y = y;
 
 		const bg = new PIXI.Graphics();
-		const radius = 6;
+		const radius = 4;
+
+		const strokeAlpha = isSelected ? 1 : 0.4;
+		const strokeWidth = isSelected ? 2 : 1;
 
 		bg.roundRect(0, 0, width, height, radius);
-		bg.fill(colors.cBody);
+		bg.fill({ color: colors.cAccent, alpha: 0.15 });
+		bg.stroke({ width: strokeWidth, color: colors.cAccent, alpha: strokeAlpha });
 
-		const linePadY = 4;
-		const linePadX = 4;
-		const stripWidth = 6;
 		bg.beginPath();
-		bg.roundRect(linePadX, linePadY, stripWidth, height - (linePadY * 2), 4);
-		bg.fill(colors.cAccent);
+		bg.roundRect(0, 0, 4, height, radius);
+		bg.fill({ color: colors.cAccent, alpha: 1 });
 
 		group.addChild(bg);
 
+		const textPadX = 12;
 		if (width > 40) {
 			const title = new PIXI.Text({ text: task.name, style: styles.titleStyle });
-			title.x = 10 + linePadX;
-			title.y = 4;
+			title.x = textPadX;
+			title.y = 5;
 			group.addChild(title);
 		}
 
 		if (width > 120) {
-			const dateStr = `${new DateTime(task.startAt).toFormat('dd/MM')} - ${
-				new DateTime(task.endAt).toFormat('dd/MM')
+			const dateStr = `${new DateTime(new Date(task.startAt)).toFormat('dd/MM')} - ${
+				new DateTime(new Date(task.endAt)).toFormat('dd/MM')
 			}`;
 			const dateText = new PIXI.Text({ text: dateStr, style: styles.dateStyle });
-			dateText.x = 10 + linePadX;
+			dateText.x = textPadX;
 			dateText.y = 20;
 			group.addChild(dateText);
 		}
 
+		this.bindInteraction(group, task);
 		this.container.addChild(group);
 	}
 
 	private renderMilestone(
+		task: GanttTask,
+		isSelected: boolean,
 		x: number,
 		y: number,
 		size: number,
-		colors: { cBody: number; cAccent: number; cBorder: number; cMilestone: number },
+		colors: { cBg: number; cMilestone: number; cAccent: number },
 	): void {
 		const graphics = new PIXI.Graphics();
 
-		const halfSize = size / 2;
-		const xStart = x - halfSize;
-
-		graphics.roundRect(xStart, y, size, size, 6);
-		graphics.fill(colors.cBody);
-
 		const centerX = x;
-		const centerY = y + halfSize;
-		const diamondRadius = size / 3.5;
+		const centerY = y + size / 2;
+		const diamondRadius = 10;
 
 		graphics.beginPath();
 		graphics.moveTo(centerX, centerY - diamondRadius);
@@ -139,8 +148,37 @@ export class TaskRenderer extends BaseRenderer {
 		graphics.lineTo(centerX - diamondRadius, centerY);
 		graphics.closePath();
 
-		graphics.fill(colors.cMilestone);
+		graphics.fill({ color: colors.cMilestone, alpha: 1 });
 
+		// If selected, highlight the stroke with the primary accent color instead of cutting it out
+		const strokeColor = isSelected ? colors.cAccent : colors.cBg;
+		graphics.stroke({ width: 3, color: strokeColor, alpha: 1 });
+
+		this.bindInteraction(graphics, task);
 		this.container.addChild(graphics);
+	}
+
+	private bindInteraction(element: PIXI.Container, task: GanttTask) {
+		element.eventMode = 'static';
+		element.cursor = 'pointer';
+
+		element.on('pointerenter', (e) => {
+			this.store.hoveredTask.value = task;
+			this.store.pointerPos.value = { x: e.global.x, y: e.global.y };
+		});
+
+		element.on('pointermove', (e) => {
+			if (this.store.hoveredTask.value?.id === task.id) {
+				this.store.pointerPos.value = { x: e.global.x, y: e.global.y };
+			}
+		});
+
+		element.on('pointerleave', () => {
+			this.store.hoveredTask.value = null;
+		});
+
+		element.on('pointerdown', () => {
+			this.store.selectRow(task.rowId);
+		});
 	}
 }

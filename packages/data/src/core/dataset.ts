@@ -49,13 +49,12 @@ export function createEmptyDataset<T>(): Dataset<T> {
 	};
 }
 
-// Add this helper
 export function createSkeletonItem<T>(index: number): NormalizedItem<T> {
 	return {
 		key: `skeleton-${index}`,
-		data: {} as T, // Empty data for skeletons
+		data: {} as T,
 		selected: false,
 		isSkeleton: true,
-		layout: { estimatedHeight: 50 }, // Default height
+		layout: { estimatedHeight: 50 },
 	};
 }

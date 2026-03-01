@@ -1,7 +1,6 @@
 import { QuillDelta } from '@projective/utils';
 import { BudgetType, DateTime, StageType, StartTriggerType } from '@projective/types';
 
-// Corresponds to table: projects.stage_staffing_roles
 export interface StageStaffingRole {
 	id?: string;
 	role_title: string;
@@ -11,7 +10,6 @@ export interface StageStaffingRole {
 	allow_proposals: boolean;
 }
 
-// Corresponds to table: projects.stage_open_seats
 export interface StageOpenSeat {
 	id?: string;
 	description_of_need: string;
@@ -24,40 +22,29 @@ export interface Stage {
 	id?: string;
 	project_id?: string;
 
-	// Basics
 	title: string;
-	description: string | QuillDelta; // JSONB
+	description: string | QuillDelta;
 	stage_type: StageType;
 	status: string;
 	sort_order: number;
 
-	// Timeline (General)
 	start_trigger_type: StartTriggerType;
 	fixed_start_date?: DateTime | string;
 	start_dependency_stage_id?: string;
-
-	// --- Type Specific Configuration ---
-
-	// File Based
+	start_dependency_lag_days?: number;
 	file_revisions_allowed?: number;
 	file_duration_mode?: 'fixed_deadline' | 'relative_duration' | 'no_due_date';
-	file_duration_days?: number; // Used if mode is relative_duration
-	file_due_date?: DateTime | string; // Used if mode is fixed_deadline
-
-	// Session Based
+	file_duration_days?: number;
+	file_due_date?: DateTime | string;
+	file_extensions_allowed?: string[];
+	file_max_size_mb?: number;
+	file_max_count?: number;
 	session_duration_minutes?: number;
-	session_count?: number; // How many sessions included
-
-	// Management Based
+	session_count?: number;
+	session_preferred_days?: string[];
 	management_contract_mode?: 'fixed_dates' | 'duration_from_start';
-
-	// Maintenance Based
 	maintenance_cycle_interval?: 'weekly' | 'monthly';
-
-	// Overrides
 	ip_ownership_override?: string;
-
-	// Relationships (Loaded via joins)
 	staffing_roles: StageStaffingRole[];
 	open_seats: StageOpenSeat[];
 }
