@@ -1,6 +1,6 @@
 import { define } from '@utils';
 import { onboarding } from '@server/auth/onboarding.ts';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {

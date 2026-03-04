@@ -1,0 +1,16 @@
+{
+  "name": "@projective/features/",
+  "version": "0.0.0",
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check mod.ts"
+  },
+  "exports": {
+    "./shared": "./shared/index.ts",
+    "./dashboard/projects": "./dashboard/projects/index.ts",
+    "./public/explore": "./public/explore/index.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}

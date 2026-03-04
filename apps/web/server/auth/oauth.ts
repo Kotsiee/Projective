@@ -1,4 +1,4 @@
-import { supabaseClient } from '../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 
 export type OAuthProvider = 'google' | 'github';
 export type OAuthIntent = 'login' | 'register';

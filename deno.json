@@ -9,7 +9,8 @@
     "./packages/types",
     "./packages/fields",
     "./packages/data",
-    "./packages/charts"
+    "./packages/charts",
+    "./packages/features"
   ],
   "tasks": {
     "format": "deno fmt --check",
@@ -144,6 +145,7 @@
     "@projective/fields": "./packages/fields/mod.ts",
     "@projective/data": "./packages/data/mod.ts",
     "@projective/charts": "./packages/charts/mod.ts",
+    "@projective/features/": "./packages/features/",
     "@/": "./apps/web/",
     "@components/": "./apps/web/components/",
     "@islands/": "./apps/web/islands/",

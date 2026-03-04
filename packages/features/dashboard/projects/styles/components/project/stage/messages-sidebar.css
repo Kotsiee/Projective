@@ -1,0 +1,16 @@
+.layout-messages__sidebar {
+    background-color: var(--header);
+    height: calc(100% - 1.5rem);
+    width: 100%;
+    padding: 1rem;
+    position: relative;
+    border-radius: var(--border-radius__large);
+}
+
+.layout-messages__sidebar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 2rem;
+}

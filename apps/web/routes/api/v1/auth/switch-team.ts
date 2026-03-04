@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { switchActiveTeam } from '@server/auth/context.ts';
 
 export const handler = define.handlers({

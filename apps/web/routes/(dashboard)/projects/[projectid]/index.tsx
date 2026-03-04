@@ -1,11 +1,10 @@
 import { PageProps } from 'fresh';
-import ProjectIsland from '@islands/pages/dashboard/projects/project/Project.tsx';
+import ProjectIslandWrapper from '../(_islands)/project/Index.island.tsx';
 
 export default function Project(props: PageProps) {
 	return (
 		<>
-			<h1>Huh</h1>
-			<ProjectIsland />
+			<ProjectIslandWrapper />
 		</>
 	);
 }

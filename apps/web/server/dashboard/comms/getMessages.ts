@@ -1,8 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
 import { Deps } from '../../_shared/types.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
-import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { fail, ok, Result } from '../../core/http/result.ts';
+import {
+	fail,
+	normaliseSupabaseError,
+	normaliseUnknownError,
+	ok,
+	Result,
+	supabaseClient,
+} from '@projective/backend';
 
 interface GetMessagesOptions {
 	type?: 'dm' | 'channel';

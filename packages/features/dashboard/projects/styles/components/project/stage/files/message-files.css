@@ -1,0 +1,102 @@
+/* #region Project Files Island */
+.project-files {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg);
+    overflow: hidden;
+}
+
+/* #region Filters Header */
+.project-files__filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--header);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.project-files__search {
+    display: flex;
+    align-items: center;
+    background-color: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    padding: 0 0.25rem 0 0.75rem;
+    flex: 1;
+    max-width: 320px;
+    height: var(--field-height);
+    transition: border-color var(--field-transition), box-shadow var(--field-transition);
+}
+
+.project-files__search:focus-within {
+    border-color: var(--field-border-focus);
+    box-shadow: 0 0 0 2px var(--field-ring-color);
+}
+
+.project-files__search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--field-text);
+    padding: 0;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.875rem;
+    width: 100%;
+}
+
+.project-files__search-input::placeholder {
+    color: var(--field-text-placeholder);
+}
+
+.project-files__search-icon {
+    color: var(--text-muted);
+}
+
+.project-files__category {
+    min-width: 180px;
+}
+
+/* Using :global or deep selectors if needed to override the inner SelectField height to match standard */
+.project-files__category .field-select__container {
+    margin: 0;
+    /* Resets any wrapper margins if present */
+}
+
+.project-files__display-type {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* #endregion */
+
+/* #region Content Area */
+.project-files__content {
+    flex: 1;
+    min-height: 0;
+    /* Critical for flex child containing a scrollable area */
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    /* DataDisplay ScrollPane handles the internal overflow */
+}
+
+/* If you need to adjust the internal grid gap injected by DataDisplay, 
+  you can target it securely here. 
+*/
+.project-files__content .data-grid__row {
+    margin-bottom: 1rem;
+}
+
+.project-files__content .data-grid__cell {
+    padding-right: 1rem;
+}
+
+/* #endregion */
+/* #endregion */

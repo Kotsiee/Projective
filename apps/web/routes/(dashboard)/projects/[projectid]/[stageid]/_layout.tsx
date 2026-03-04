@@ -1,14 +1,14 @@
 import { define } from '@utils';
-import StageLayout from '@islands/pages/dashboard/projects/project/stage/StageLayout.tsx';
+import StageLayoutIslandWrapper from '../../(_islands)/project/stage/Layout.island.tsx';
 
 export default define.layout(function App(ctx) {
 	const { projectid, stageid } = ctx.params;
 
 	return (
 		<>
-			<StageLayout projectId={projectid} stageId={stageid}>
+			<StageLayoutIslandWrapper projectId={projectid} stageId={stageid}>
 				<ctx.Component />
-			</StageLayout>
+			</StageLayoutIslandWrapper>
 		</>
 	);
 });

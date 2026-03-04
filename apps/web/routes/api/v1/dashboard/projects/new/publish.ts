@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { CreateProjectSchema } from '@contracts/dashboard/projects/new/_validation.ts';
-import { createProject } from '@server/dashboard/projects/create.ts';
+import { supabaseClient } from '@projective/backend';
+import { ProjectsBackendService } from 'packages/features/dashboard/projects/services/ProjectsServiceBackend.ts';
+import { CreateProjectSchema } from 'packages/features/dashboard/projects/contracts/new/_validation.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {
@@ -53,7 +53,7 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await createProject(
+			const res = await ProjectsBackendService.createProject(
 				validation.data,
 				'active',
 				{

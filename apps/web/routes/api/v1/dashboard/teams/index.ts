@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { CreateTeamSchema } from '@contracts/dashboard/teams/new/_validation.ts';
 import { createTeam } from '@server/dashboard/teams/create.ts';
 import { getDashboardTeams } from '@server/dashboard/teams/getTeams.ts';

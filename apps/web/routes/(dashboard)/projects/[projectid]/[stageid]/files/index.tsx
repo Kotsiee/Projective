@@ -1,6 +1,5 @@
-export default function ProjectStageAttachments() {
-	return (
-		<div>
-		</div>
-	);
+import ProjectStageFilesWrapper from '../../../(_islands)/project/stage/files/Index.tsx';
+
+export default function ProjectStageFiles() {
+	return <ProjectStageFilesWrapper />;
 }

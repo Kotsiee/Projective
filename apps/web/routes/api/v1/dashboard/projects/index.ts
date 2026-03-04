@@ -1,6 +1,6 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getDashboardProjects } from '@server/dashboard/projects/getProjects.ts';
+import { supabaseClient } from '@projective/backend';
+import { ProjectsBackendService } from 'packages/features/dashboard/projects/index.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
@@ -18,9 +18,10 @@ export const handler = define.handlers({
 
 		try {
 			const getClient = () =>
+				// deno-lint-ignore no-explicit-any
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await getDashboardProjects(params, {
+			const res = await ProjectsBackendService.getDashboardProjects(params, {
 				getClient,
 			});
 

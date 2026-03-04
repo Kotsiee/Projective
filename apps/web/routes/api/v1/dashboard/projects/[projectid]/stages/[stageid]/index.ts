@@ -1,6 +1,6 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getStage } from '@server/dashboard/projects/getStage.ts';
+import { supabaseClient } from '@projective/backend';
+import { ProjectsBackendService } from 'packages/features/dashboard/projects/services/ProjectsServiceBackend.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
@@ -18,7 +18,7 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await getStage(project_id, stage_id, {
+			const res = await ProjectsBackendService.getStage(project_id, stage_id, {
 				getClient,
 			});
 

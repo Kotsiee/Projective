@@ -2,7 +2,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
 import { fail, ok, Result } from '@server/core/http/result.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '@server/core/errors/normalise.ts';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { Deps } from '../../_shared/types.ts';
 import { CreateBusinessInput } from '@contracts/dashboard/business/new/_validation.ts';
 import { Config } from '@projective/backend';

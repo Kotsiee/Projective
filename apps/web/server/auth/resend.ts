@@ -1,5 +1,5 @@
 import { Config } from '@projective/backend';
-import { supabaseClient } from '../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { normaliseSupabaseError, normaliseUnknownError } from '../core/errors/normalise.ts';
 import { fail, ok, Result } from '../core/http/result.ts';
 

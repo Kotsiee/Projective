@@ -10,11 +10,15 @@ export default defineConfig({
 
 	server: {
 		fs: {
-			// ALLOW ACCESS TO MONOREPO ROOT (Fixes "outside allow list" error)
 			allow: ['..', '../..'],
 		},
 		watch: {
-			ignored: ['**/coverage/**', '**/dist/**', '**/.git/**'],
+			ignored: [
+				'**/coverage/**',
+				'**/dist/**',
+				'**/.git/**',
+				'!**/packages/**',
+			],
 		},
 	},
 
@@ -30,7 +34,6 @@ export default defineConfig({
 			'@types': r('./apps/web/types/'),
 			'@utils': r('./apps/web/utils.ts'),
 
-			// Monorepo Aliases
 			'@projective/shared': r('./packages/shared/mod.ts'),
 			'@projective/backend': r('./packages/backend/mod.ts'),
 			'@projective/ui': r('./packages/ui/mod.ts'),
@@ -39,6 +42,7 @@ export default defineConfig({
 			'@projective/fields': r('./packages/fields/mod.ts'),
 			'@projective/data': r('./packages/data/mod.ts'),
 			'@projective/charts': r('./packages/charts/mod.ts'),
+			'@projective/features/': r('./packages/features/'),
 		},
 	},
 
@@ -51,11 +55,10 @@ export default defineConfig({
 			'@projective/types',
 			'@projective/data',
 			'@projective/charts',
+			'@projective/features',
 		],
 	},
 
-	// SSR CONFIG:
-	// Force bundling of ALL dependencies during SSR to resolve protocol issues.
 	ssr: {
 		noExternal: true,
 	},

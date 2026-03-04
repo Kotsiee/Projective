@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { subscribeMessages } from '@server/dashboard/comms/subscribeMessages.ts';
 import { getAuthCookies } from '@projective/backend';
 

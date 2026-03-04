@@ -1,6 +1,6 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
-import { getProject } from '@server/dashboard/projects/getProject.ts';
+import { supabaseClient } from '@projective/backend';
+import { ProjectsBackendService } from 'packages/features/dashboard/projects/services/ProjectsServiceBackend.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
@@ -17,7 +17,7 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await getProject(project_id, {
+			const res = await ProjectsBackendService.getProject(project_id, {
 				getClient,
 			});
 

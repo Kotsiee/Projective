@@ -1,3 +1,6 @@
 export default function Explore() {
-	return <div></div>;
+	return (
+		<div>
+		</div>
+	);
 }

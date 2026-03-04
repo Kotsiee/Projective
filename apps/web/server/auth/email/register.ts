@@ -1,5 +1,5 @@
 import { RegisterWithEmailRequest } from '@contracts/auth/register.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { fail, ok, Result } from '../../core/http/result.ts';
 import { isLikelyEmail } from '../../core/validation/email.ts';
 import { Deps, RegisterOptions, SignUpData } from '../../_shared/types.ts';

@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 
 export const handler = define.handlers({
 	async GET(ctx) {

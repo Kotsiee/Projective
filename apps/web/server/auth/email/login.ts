@@ -1,5 +1,5 @@
 import { LoginWithEmailRequest } from '@contracts/auth/login.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { fail, ok, Result } from '../../core/http/result.ts';
 import { isLikelyEmail } from '../../core/validation/email.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';

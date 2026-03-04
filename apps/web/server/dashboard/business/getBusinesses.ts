@@ -1,6 +1,6 @@
 import { fail, ok, Result } from '@server/core/http/result.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '@server/core/errors/normalise.ts';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { Deps } from '../../_shared/types.ts';
 import { BusinessFilterParams, DashboardBusiness } from '@contracts/dashboard/business/Business.ts';
 

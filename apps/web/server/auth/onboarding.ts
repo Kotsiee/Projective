@@ -2,7 +2,7 @@
 import { OnboardingRequest } from '@contracts/auth/onboading.ts';
 import { fail, ok, Result } from '../core/http/result.ts';
 import { normaliseSupabaseError, normaliseUnknownError } from '../core/errors/normalise.ts';
-import { supabaseClient } from '../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { Deps } from '../_shared/types.ts';
 
 export async function onboarding(

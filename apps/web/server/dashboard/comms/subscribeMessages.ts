@@ -1,9 +1,15 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
 import { Deps } from '../../_shared/types.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
-import { normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { fail, ok, Result } from '../../core/http/result.ts';
 import { Config } from '@projective/backend';
+
+import {
+	fail,
+	normaliseSupabaseError,
+	normaliseUnknownError,
+	ok,
+	Result,
+	supabaseClient,
+} from '@projective/backend';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface SubscribeOptions {

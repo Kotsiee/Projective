@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { supabaseClient } from '@server/core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 import { getMessages } from '@server/dashboard/comms/getMessages.ts';
 import { sendMessage } from '@server/dashboard/comms/sendMessage.ts';
 

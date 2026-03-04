@@ -1,12 +1,17 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
 import { Deps } from '../../_shared/types.ts';
-import { supabaseClient } from '../../core/clients/supabase.ts';
-import { normaliseSupabaseError, normaliseUnknownError } from '../../core/errors/normalise.ts';
-import { fail, ok, Result } from '../../core/http/result.ts';
 import { ModerationService } from '../../services/moderation.ts';
 import { StoragePaths } from '../../services/storagePaths.ts';
 import { Config } from '@projective/backend';
+import {
+	fail,
+	normaliseSupabaseError,
+	normaliseUnknownError,
+	ok,
+	Result,
+	supabaseClient,
+} from '@projective/backend';
 
 interface SendMessageOptions {
 	type?: 'dm' | 'channel';

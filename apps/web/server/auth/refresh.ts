@@ -1,5 +1,5 @@
 import { getAuthCookies } from '@projective/backend';
-import { supabaseClient } from '../core/clients/supabase.ts';
+import { supabaseClient } from '@projective/backend';
 
 type RefreshResult = { access: string; refresh: string } | null;
 
