@@ -31,7 +31,7 @@ export function Popover({
 		if (isOpen && containerRef.current && contentRef.current) {
 			const rect = containerRef.current.getBoundingClientRect();
 			const contentHeight = 350; // Approx max height of calendar
-			const spaceBelow = window.innerHeight - rect.bottom;
+			const spaceBelow = globalThis.innerHeight - rect.bottom;
 
 			// If explicit override is not set, calculate
 			if (!position) {

@@ -1,7 +1,7 @@
 import {
 	ChatMessageAttachment,
 	ChatMessageData,
-} from '@islands/pages/dashboard/projects/project/stage/ChatNetworkSource.ts';
+} from '../../../../islands/project/stage/ChatNetworkSource.ts';
 
 interface ChatMessageProps {
 	message: ChatMessageData;

@@ -157,7 +157,7 @@ export function PublishButton() {
 					throw new Error(data.error?.message || 'Failed to publish project');
 				}
 
-				setTimeout(() => window.location.href = data.redirectTo, 1000);
+				setTimeout(() => globalThis.location.href = data.redirectTo, 1000);
 				return 'Project published successfully!';
 			} finally {
 				isLoading.value = false;

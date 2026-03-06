@@ -6,7 +6,6 @@ import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
 	'./packages/data',
-	'./packages/fields',
 ];
 
 // 2. The existing file to REPLACE (This will be overwritten)

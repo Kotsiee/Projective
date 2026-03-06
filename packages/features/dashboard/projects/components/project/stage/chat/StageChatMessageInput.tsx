@@ -1,4 +1,4 @@
-import '../../../styles/components/project/stage/chat/message-input.css';
+import '../../../../styles/components/project/stage/chat/message-input.css';
 import { useState } from 'preact/hooks';
 import { IconFile, IconMicrophone, IconMoodSmileBeam, IconSend, IconX } from '@tabler/icons-preact';
 import ChatMessageInputAttach from './StageChatMessageInputAttach.tsx';

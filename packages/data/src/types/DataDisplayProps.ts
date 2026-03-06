@@ -48,6 +48,12 @@ export interface DataDisplayProps<TOut, TIn = unknown> {
 	gridColumns?: number;
 
 	/**
+	 * Fixed width of a grid item (in pixels). If provided, gridColumns is ignored
+	 * and the number of columns is calculated dynamically based on container width.
+	 */
+	gridItemWidth?: number;
+
+	/**
 	 * Column definitions for 'table' mode.
 	 */
 	columns?: ColumnDef<TOut>[];

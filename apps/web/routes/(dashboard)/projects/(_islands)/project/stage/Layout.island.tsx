@@ -1,4 +1,4 @@
-import { StageLayoutIsland } from 'packages/features/dashboard/projects/index.ts';
+import { StageLayoutIsland } from 'packages/features/dashboard/projects/client.ts';
 import { ComponentChildren } from 'preact';
 
 type StageLayoutProps = {

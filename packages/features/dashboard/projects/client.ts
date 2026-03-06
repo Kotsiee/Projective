@@ -7,7 +7,7 @@ export { default as ProjectIsland } from './islands/project/Project.tsx';
 export { default as StageLayoutIsland } from './islands/project/stage/StageLayout.tsx';
 // export { default as ProjectFileIsland } from './islands/project/stage/ProjectFileIsland.tsx';
 export { default as ProjectFilesIsland } from './islands/project/stage/ProjectFilesIsland.tsx';
+export { default as ProjectFileIsland } from './islands/project/stage/ProjectFileIsland.tsx';
 export { default as ProjectChatIsland } from './islands/project/stage/ProjectChatIsland.tsx';
 
-export * from './services/ProjectsServiceBackend.ts';
 export * from './contracts/new/_validation.ts';

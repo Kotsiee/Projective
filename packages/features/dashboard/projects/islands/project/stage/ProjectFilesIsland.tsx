@@ -1,17 +1,18 @@
 /* #region Imports */
 import '../../../styles/components/project/stage/files/message-files.css';
 import { JSX } from 'preact';
-import { useEffect, useMemo } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { IconGridDots, IconList, IconSearch } from '@tabler/icons-preact';
 import { ButtonGroup, IconButton } from '@projective/ui';
 import { DataDisplay, DisplayMode, RestDataSource } from '@projective/data';
 import { SelectField } from '@projective/fields';
 import { SelectOption } from '@projective/types';
+import { useProjectContext } from '../../../contexts/ProjectContext.tsx';
 import { useStageContext } from '../../../contexts/StageContext.tsx';
 import { ChatMessageAttachment, ChatMessageData } from './ChatNetworkSource.ts';
-import StageFilesFooter from '../../../components/project/stage/StageFilesFooter.tsx';
-import { StageFilesItem } from '../../../components/project/stage/StageFilesItem.tsx';
+import StageFilesFooter from '../../../components/project/stage/files/StageFilesFooter.tsx';
+import { StageFilesItem } from '../../../components/project/stage/files/StageFilesItem.tsx';
 /* #endregion */
 
 /* #region Interfaces */
@@ -33,13 +34,18 @@ export interface StageFileItem {
  * @returns {JSX.Element}
  */
 export default function ProjectFilesIsland(): JSX.Element {
-	const { footer, stage } = useStageContext();
+	const { project_id } = useProjectContext();
+	const { footer, stage, stage_id } = useStageContext();
 
 	// State Signals
 	const searchQuery = useSignal('');
 	const displayMode = useSignal<DisplayMode>('grid');
 	const selectedCategory = useSignal('all');
 	const selectedFile = useSignal<StageFileItem | null>(null);
+
+	// Click Tracking Refs
+	const lastClickTime = useRef<number>(0);
+	const lastClickedId = useRef<string | null>(null);
 
 	const fileCategories: SelectOption<string>[] = [
 		{ value: 'all', label: 'All Files' },
@@ -48,6 +54,42 @@ export default function ProjectFilesIsland(): JSX.Element {
 		{ value: 'video', label: 'Videos' },
 	];
 
+	const getFileUrl = (fileId: string): string | undefined => {
+		const pid = project_id.value;
+		const sid = stage_id.value;
+		if (pid && sid && fileId) {
+			return `/projects/${pid}/${sid}/files/${fileId}`;
+		}
+		return undefined;
+	};
+
+	const handleItemAction = (item: StageFileItem, e: Event) => {
+		// Stop propagation so the background click listener doesn't immediately deselect it
+		e.stopPropagation();
+
+		const now = Date.now();
+		const isSameItem = lastClickedId.current === item.id;
+		const isDoubleClick = isSameItem && (now - lastClickTime.current < 300);
+
+		if (isDoubleClick) {
+			// Do NOT prevent default. Let the anchor navigation (and f-partial) execute natively.
+			lastClickTime.current = 0;
+			lastClickedId.current = null;
+		} else {
+			// Single click: Prevent navigation and handle selection state internally
+			e.preventDefault();
+			lastClickTime.current = now;
+			lastClickedId.current = item.id;
+
+			if (selectedFile.value?.id === item.id) {
+				selectedFile.value = null;
+				lastClickedId.current = null;
+			} else {
+				selectedFile.value = item;
+			}
+		}
+	};
+
 	// Sync Footer with selected file
 	useEffect(() => {
 		if (selectedFile.value) {
@@ -55,6 +97,7 @@ export default function ProjectFilesIsland(): JSX.Element {
 				<StageFilesFooter
 					attachment={selectedFile.value.attachment}
 					message={selectedFile.value.message}
+					openUrl={getFileUrl(selectedFile.value.id)}
 				/>
 			);
 		} else {
@@ -64,7 +107,7 @@ export default function ProjectFilesIsland(): JSX.Element {
 		return () => {
 			footer.value = null;
 		};
-	}, [selectedFile.value]);
+	}, [selectedFile.value, project_id.value, stage_id.value]);
 
 	const dataSource = useMemo(() => {
 		if (!stage.value?.channel_id) return [];
@@ -144,10 +187,18 @@ export default function ProjectFilesIsland(): JSX.Element {
 				</div>
 			</div>
 
-			<div class='project-files__content'>
+			<div
+				class='project-files__content'
+				onClick={() => {
+					// Clicking the empty space background deselects any active item
+					selectedFile.value = null;
+					lastClickedId.current = null;
+				}}
+			>
 				<DataDisplay<StageFileItem, StageFileItem>
 					dataSource={dataSource}
 					mode={displayMode.value}
+					gridItemWidth={156}
 					gridColumns={4}
 					estimateHeight={displayMode.value === 'grid' ? 160 : 72}
 					pageSize={30}
@@ -157,7 +208,8 @@ export default function ProjectFilesIsland(): JSX.Element {
 							attachment={item.attachment}
 							message={item.message}
 							isSelected={selectedFile.value?.id === item.id}
-							onClick={() => selectedFile.value = item}
+							openUrl={getFileUrl(item.id)}
+							onAction={(e) => handleItemAction(item, e)}
 						/>
 					)}
 					interactive={false}

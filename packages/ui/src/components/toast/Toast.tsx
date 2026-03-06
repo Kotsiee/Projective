@@ -76,7 +76,7 @@ export function Toast({ data, defaultDuration = 5000 }: ToastProps) {
 		if (!isSwiping) return;
 		setIsSwiping(false);
 		if (swipeOffset > 100) {
-			setSwipeOffset(window.innerWidth);
+			setSwipeOffset(globalThis.innerWidth);
 			setTimeout(() => toast.dismiss(id), 200);
 		} else {
 			setSwipeOffset(0);

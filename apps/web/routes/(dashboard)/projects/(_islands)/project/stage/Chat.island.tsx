@@ -1,4 +1,4 @@
-import { ProjectChatIsland } from 'packages/features/dashboard/projects/index.ts';
+import { ProjectChatIsland } from 'packages/features/dashboard/projects/client.ts';
 
 export default function ProjectChatIslandWrapper() {
 	return <ProjectChatIsland />;

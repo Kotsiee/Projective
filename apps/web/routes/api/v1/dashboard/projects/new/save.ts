@@ -1,9 +1,7 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import {
-	CreateProjectSchema,
-	ProjectsBackendService,
-} from 'packages/features/dashboard/projects/index.ts';
+import { ProjectsBackendService } from 'packages/features/dashboard/projects/server.ts';
+import { CreateProjectSchema } from 'packages/features/dashboard/projects/contracts/new/_validation.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {

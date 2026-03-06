@@ -24,6 +24,7 @@ export function DataDisplay<TOut, TIn>({
 	scrollMode = 'container',
 	scrollToBottom = false,
 	gridColumns = 3,
+	gridItemWidth,
 	columns,
 	estimateHeight = 50,
 	pageSize = 50,
@@ -49,6 +50,25 @@ export function DataDisplay<TOut, TIn>({
 	});
 
 	const [tableState, setTableState] = useState<TableState>(() => initTableState(columns || []));
+	const [containerWidth, setContainerWidth] = useState(0);
+	const wrapperRef = useRef<HTMLDivElement>(null);
+
+	// Dynamically track the container width to adjust grid columns
+	useLayoutEffect(() => {
+		if (!wrapperRef.current) return;
+		const observer = new ResizeObserver((entries) => {
+			if (entries[0]) {
+				setContainerWidth(entries[0].contentRect.width);
+			}
+		});
+		observer.observe(wrapperRef.current);
+		return () => observer.disconnect();
+	}, []);
+
+	// Calculate how many columns fit. Fallback to gridColumns if no width provided or tracking fails.
+	const activeColumns = gridItemWidth && containerWidth > 0
+		? Math.max(1, Math.floor(containerWidth / gridItemWidth))
+		: gridColumns;
 
 	const activeOrder = useMemo(() => {
 		const d = manager.dataset.value;
@@ -62,7 +82,7 @@ export function DataDisplay<TOut, TIn>({
 	}, [manager.dataset.value, tableState.sort, isLocal, columns]);
 
 	const totalCount = manager.dataset.value.totalCount ?? (activeOrder.length + 100);
-	const virtualRowCount = mode === 'grid' ? Math.ceil(totalCount / gridColumns) : totalCount;
+	const virtualRowCount = mode === 'grid' ? Math.ceil(totalCount / activeColumns) : totalCount;
 
 	const previousTotalCount = useRef(totalCount);
 	useLayoutEffect(() => {
@@ -94,18 +114,18 @@ export function DataDisplay<TOut, TIn>({
 			let end = endRow;
 
 			if (mode === 'grid') {
-				start = startRow * gridColumns;
-				end = (endRow + 1) * gridColumns - 1;
+				start = startRow * activeColumns;
+				end = (endRow + 1) * activeColumns - 1;
 			}
 
 			manager.setVisibleRange(start, end);
 		}
-	}, [virtualItems, mode, gridColumns, manager]);
+	}, [virtualItems, mode, activeColumns, manager]);
 
 	const safeRenderItem = (item: TOut, index: number) => renderItem(item, index);
 
 	return (
-		<div className={`data-display ${className ?? ''}`} style={style}>
+		<div ref={wrapperRef} className={`data-display ${className ?? ''}`} style={style}>
 			{manager.isFetching.value && <div className='data-display__loader'>Loading...</div>}
 
 			<ScrollPane ref={parentRef} mode={scrollMode} className='data-display__scroll-pane'>
@@ -133,7 +153,7 @@ export function DataDisplay<TOut, TIn>({
 							virtualItems={virtualItems}
 							virtualizer={virtualizer}
 							renderItem={safeRenderItem}
-							columnCount={gridColumns}
+							columnCount={activeColumns}
 							onItemClick={handleItemClick}
 						/>
 					)}

@@ -1,4 +1,4 @@
-import { ProjectsLayoutIsland } from 'packages/features/dashboard/projects/index.ts';
+import { ProjectsLayoutIsland } from 'packages/features/dashboard/projects/client.ts';
 import { ComponentChildren } from 'preact';
 
 type ProjectsLayoutProps = {

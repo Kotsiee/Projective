@@ -68,5 +68,8 @@ export default defineConfig({
 		commonjsOptions: {
 			include: [/packages\//, /node_modules/],
 		},
+		rollupOptions: {
+			external: [/node:/, 'node:process'],
+		},
 	},
 });

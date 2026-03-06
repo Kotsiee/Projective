@@ -33,6 +33,7 @@ export function Button(props: ButtonProps) {
 		className,
 		style,
 		href,
+		'f-partial': fPartial,
 		onClick,
 		...rest
 	} = props;
@@ -96,6 +97,7 @@ export function Button(props: ButtonProps) {
 		return (
 			<a
 				href={href}
+				f-partial={fPartial}
 				className={classes}
 				style={style}
 				onClick={handleClick}

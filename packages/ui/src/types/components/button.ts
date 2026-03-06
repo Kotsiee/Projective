@@ -79,6 +79,7 @@ export interface ButtonProps {
 
 	// #region Polymorphic Props
 	href?: string;
+	'f-partial'?: string;
 	target?: string;
 	rel?: string;
 	download?: string | boolean;

@@ -1,13 +1,11 @@
 {
-  "name": "@projective/features/",
+  "name": "@projective/features",
   "version": "0.0.0",
-  "tasks": {
-    "check": "deno fmt --check && deno lint && deno check mod.ts"
-  },
   "exports": {
-    "./shared": "./shared/index.ts",
-    "./dashboard/projects": "./dashboard/projects/index.ts",
-    "./public/explore": "./public/explore/index.ts"
+    "./dashboard/projects/client": "./dashboard/projects/client.ts",
+    "./dashboard/projects/server": "./dashboard/projects/server.ts",
+    "./shared/client": "./shared/client.ts",
+    "./shared/server": "./shared/server.ts"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

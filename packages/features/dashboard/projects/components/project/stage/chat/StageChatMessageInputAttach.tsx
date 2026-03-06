@@ -1,4 +1,5 @@
-import '../../../styles/components/project/stage/chat/message-input-attach.css';
+// deno-lint-ignore-file no-explicit-any
+import '../../../../styles/components/project/stage/chat/message-input-attach.css';
 import { IconPlus } from '@tabler/icons-preact';
 import { useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';

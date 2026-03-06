@@ -68,7 +68,7 @@ export function ComboboxField<T = string>(props: ComboboxFieldProps<T>) {
 	useEffect(() => {
 		if (isOpen.value && containerRef.current) {
 			const rect = containerRef.current.getBoundingClientRect();
-			const spaceBelow = window.innerHeight - rect.bottom;
+			const spaceBelow = globalThis.innerHeight - rect.bottom;
 			menuPosition.value = spaceBelow < 250 ? 'up' : 'down';
 		}
 	}, [isOpen.value]);

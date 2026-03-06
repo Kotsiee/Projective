@@ -75,7 +75,7 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 	useEffect(() => {
 		if (isOpen.value && containerRef.current) {
 			const rect = containerRef.current.getBoundingClientRect();
-			const spaceBelow = window.innerHeight - rect.bottom;
+			const spaceBelow = globalThis.innerHeight - rect.bottom;
 			if (containerRef.current.classList.contains('field-select--up')) {
 				if (spaceBelow > 250) containerRef.current.classList.remove('field-select--up');
 			} else {

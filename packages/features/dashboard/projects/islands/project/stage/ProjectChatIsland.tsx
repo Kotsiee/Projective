@@ -1,6 +1,6 @@
 import '../../../styles/components/project/stage/chat/messages.css';
-import ChatMessageInput from '../../../components/project/stage/StageChatMessageInput.tsx';
-import ChatMessage from '../../../components/project/stage/StageChatMessage.tsx';
+import ChatMessageInput from '../../../components/project/stage/chat/StageChatMessageInput.tsx';
+import ChatMessage from '../../../components/project/stage/chat/StageChatMessage.tsx';
 import { ChatMessageData, ChatNetworkSource } from './ChatNetworkSource.ts';
 import { ChatList } from '@projective/data';
 import { useStageContext } from '../../../contexts/StageContext.tsx';
