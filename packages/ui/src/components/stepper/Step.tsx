@@ -25,22 +25,21 @@ export function Step({
 		if (isClickable) goTo(index);
 	};
 
-	// --- Icon Logic ---
+	// #region Icon Logic
 	let statusIcon = icon;
 
-	// If variant is 'dot', we don't render numbers inside, just specific icons for states
 	if (variant === 'dot') {
 		if (hasError) statusIcon = <IconExclamationCircle size={14} />;
 		else if (isCompleted) statusIcon = <IconCheck size={12} />;
-		else statusIcon = null; // Just a dot
+		else statusIcon = null;
 	} else {
-		// Standard 'circle' variant
 		if (!statusIcon) {
 			if (hasError) statusIcon = <IconExclamationCircle size={20} />;
 			else if (isCompleted) statusIcon = <IconCheck size={18} />;
 			else statusIcon = <span className='stepper__step-number'>{index + 1}</span>;
 		}
 	}
+	// #endregion
 
 	const classes = [
 		'stepper__step',
@@ -54,6 +53,11 @@ export function Step({
 
 	return (
 		<div className={classes} style={style} onClick={handleClick}>
+			{/* The line connector is now placed relatively inside the step for better vertical flow */}
+			{!isLast && (
+				<div className={`stepper__connector ${isCompleted ? 'stepper__connector--active' : ''}`} />
+			)}
+
 			<div className='stepper__step-indicator'>
 				{statusIcon}
 			</div>
@@ -65,10 +69,6 @@ export function Step({
 				</div>
 				{description && <div className='stepper__step-desc'>{description}</div>}
 			</div>
-
-			{!isLast && (
-				<div className={`stepper__connector ${isCompleted ? 'stepper__connector--active' : ''}`} />
-			)}
 		</div>
 	);
 }

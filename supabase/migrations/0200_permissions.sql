@@ -121,24 +121,37 @@ GRANT ALL ON SEQUENCES TO authenticated,
 service_role;
 
 -- -----------------------------------------------------------------------------
--- RESTRICTED SCHEMAS (Admin/Postgres Only)
+-- Schema: SEARCH
+-- Note: Requires public access because the Explore/Search pages are 
+-- available to unauthenticated guests for SEO and discovery.
+-- service_role is included so Edge Functions can update vector embeddings.
 -- -----------------------------------------------------------------------------
--- The following schemas explicitly have NO permissions for anon/authenticated/service_role
--- based on the "false" flags in the configuration. They are accessible only by the
--- superuser (postgres) or via direct SQL editor execution.
+GRANT USAGE ON SCHEMA search TO anon, authenticated, service_role;
 
--- analytics
--- finance
--- integrations
--- marketplace
--- ops
--- search
--- security
+GRANT ALL ON ALL TABLES IN SCHEMA search TO anon,
+authenticated,
+service_role;
 
--- -----------------------------------------------------------------------------
--- SYSTEM SCHEMAS (Reference Only - Managed by Platform)
--- -----------------------------------------------------------------------------
--- api          -> Anon, Auth, Service
--- auth         -> Anon, Auth, Service
--- storage      -> Anon, Auth, Service
--- realtime     -> Anon, Auth, Service
+GRANT ALL ON ALL SEQUENCES IN SCHEMA search TO anon,
+authenticated,
+service_role;
+
+-- Ensure future tables/indexes also inherit these permissions
+ALTER DEFAULT PRIVILEGES IN SCHEMA search
+GRANT ALL ON TABLES TO anon,
+authenticated,
+service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA search
+GRANT ALL ON SEQUENCES TO anon,
+authenticated,
+service_role;
+
+-- Grant execute permissions on all current and future Search RPCs
+ALTER DEFAULT PRIVILEGES IN SCHEMA search
+GRANT EXECUTE ON ROUTINES TO anon,
+authenticated,
+service_role;
+
+-- (Optional but recommended) Explicitly grant execute on existing RPCs
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA search TO anon, authenticated, service_role;

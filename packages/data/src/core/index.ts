@@ -6,3 +6,5 @@ export * from './table.ts';
 export * from './types.ts';
 export * from './virtualizer.ts';
 export * from './restdatasource.ts';
+export * from './masonry.ts';
+export * from './masonry-virtualizer.ts';

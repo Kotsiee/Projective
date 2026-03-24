@@ -12,7 +12,7 @@ import {
 	TimelinePreset,
 	Visibility,
 } from '@projective/types';
-import { UIStage } from '@components/dashboard/projects/new/ProjectStages.tsx';
+import { UIStage } from '../components/new/ProjectStages.tsx';
 
 export interface ProjectFormState {
 	currentStep: Signal<number>;

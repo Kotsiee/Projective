@@ -1,0 +1,59 @@
+/* #region Masonry Base Styles */
+.data-masonry-wrapper {
+	width: 100%;
+	display: block;
+}
+
+.data-masonry {
+	position: relative;
+	width: 100%;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.data-masonry__item {
+	/* hardware acceleration is moved inline to prevent bundler stripping */
+}
+
+.data-masonry__item--interactive {
+	cursor: pointer;
+}
+
+.data-masonry__item--selected {
+	outline: var(--focus-ring);
+	outline-offset: 2px;
+	border-radius: var(--border-radius);
+}
+/* #endregion */
+
+/* #region Animations */
+@keyframes masonry-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.data-masonry__item--animate-in {
+	/* FIX: We ONLY animate opacity now. Animating transform here destroys the absolute X/Y coordinates */
+	animation: masonry-fade-in 0.5s ease-out both;
+	animation-delay: calc(min(var(--stagger-idx, 0), 20) * 40ms);
+}
+/* #endregion */
+
+/* #region Accessibility Utils */
+.data-masonry__sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+/* #endregion */

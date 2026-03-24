@@ -1,12 +1,18 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+--------------------------------------------------------
+-- SCHEMA: ORG (Execute First)
+--------------------------------------------------------
+
+-- 1. SKILLS
 CREATE TABLE org.skills (
-    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     slug text NOT NULL UNIQUE,
     label text NOT NULL,
     CONSTRAINT skills_pkey PRIMARY KEY (id)
 );
 
+-- 2. PUBLIC USERS
 CREATE TABLE org.users_public (
     user_id uuid NOT NULL,
     username text NOT NULL UNIQUE,
@@ -26,6 +32,7 @@ CREATE TABLE org.users_public (
     CONSTRAINT users_public_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
 
+-- 3. FREELANCER PROFILES
 CREATE TABLE org.freelancer_profiles (
     user_id uuid NOT NULL,
     hourly_rate integer,
@@ -37,6 +44,7 @@ CREATE TABLE org.freelancer_profiles (
     CONSTRAINT freelancer_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
+-- 4. BUSINESS PROFILES
 CREATE TABLE org.business_profiles (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     owner_user_id uuid NOT NULL,
@@ -63,7 +71,7 @@ CREATE TABLE org.business_profiles (
     CONSTRAINT business_profiles_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES auth.users(id)
 );
 
--- NEW: Business Roles (Custom permissions within a business)
+-- 5. BUSINESS ROLES
 CREATE TABLE org.business_roles (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     business_id uuid NOT NULL,
@@ -73,9 +81,7 @@ CREATE TABLE org.business_roles (
     CONSTRAINT business_roles_business_id_fkey FOREIGN KEY (business_id) REFERENCES org.business_profiles(id)
 );
 
--- NEW: Business Memberships (Staff list)
-
-
+-- 6. BUSINESS MEMBERSHIPS
 CREATE TABLE org.business_memberships (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     business_id uuid NOT NULL,
@@ -83,28 +89,27 @@ CREATE TABLE org.business_memberships (
     role text NOT NULL DEFAULT 'member'::text, 
     status text NOT NULL DEFAULT 'active'::text, 
     joined_at timestamp with time zone NOT NULL DEFAULT now(),
-    
     CONSTRAINT business_memberships_pkey PRIMARY KEY (id),
     CONSTRAINT business_memberships_business_id_fkey FOREIGN KEY (business_id) REFERENCES org.business_profiles(id),
     CONSTRAINT business_memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
     CONSTRAINT business_memberships_unique_user_per_business UNIQUE (business_id, user_id) 
 );
 
+-- 7. PORTFOLIOS
 CREATE TABLE org.portfolios (
-    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
     title text NOT NULL,
     description text NOT NULL,
     cover_url text,
     attachment_id uuid,
     is_public boolean NOT NULL DEFAULT true,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT portfolios_pkey PRIMARY KEY (id),
-        CONSTRAINT portfolios_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.freelancer_profiles (user_id) ON DELETE CASCADE
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT portfolios_pkey PRIMARY KEY (id),
+    CONSTRAINT portfolios_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.freelancer_profiles (user_id) ON DELETE CASCADE
 );
 
+-- 8. TEAMS
 CREATE TABLE org.teams (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     owner_user_id uuid NOT NULL,
@@ -126,22 +131,20 @@ CREATE TABLE org.teams (
     CONSTRAINT teams_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES auth.users(id)
 );
 
+-- 9. USER EMAILS
 CREATE TABLE org.user_emails (
-    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
     email text NOT NULL,
     is_primary boolean NOT NULL DEFAULT false,
-    verified_at timestamp
-    with
-        time zone,
-        created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT user_emails_pkey PRIMARY KEY (id),
-        CONSTRAINT user_emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
-        CONSTRAINT user_emails_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES org.users_public (user_id)
+    verified_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT user_emails_pkey PRIMARY KEY (id),
+    CONSTRAINT user_emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id),
+    CONSTRAINT user_emails_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES org.users_public (user_id)
 );
 
+-- 10. TEAM ROLES
 CREATE TABLE org.team_roles (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     team_id uuid NOT NULL,
@@ -151,7 +154,7 @@ CREATE TABLE org.team_roles (
     CONSTRAINT team_roles_team_id_fkey FOREIGN KEY (team_id) REFERENCES org.teams(id)
 );
 
-
+-- 11. TEAM MEMBERSHIPS
 CREATE TABLE org.team_memberships (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     team_id uuid NOT NULL,
@@ -162,7 +165,6 @@ CREATE TABLE org.team_memberships (
     invited_by uuid, 
     joined_at timestamp with time zone NOT NULL DEFAULT now(),
     created_at timestamp with time zone NOT NULL DEFAULT now(),
-    
     CONSTRAINT team_memberships_pkey PRIMARY KEY (id),
     CONSTRAINT team_memberships_team_id_fkey FOREIGN KEY (team_id) REFERENCES org.teams(id),
     CONSTRAINT team_memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
@@ -170,6 +172,7 @@ CREATE TABLE org.team_memberships (
     CONSTRAINT team_memberships_unique_user_per_team UNIQUE (team_id, user_id) 
 );
 
+-- 12. ORG INVITATIONS
 CREATE TABLE org.org_invitations (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     inviter_user_id uuid NOT NULL,
@@ -185,19 +188,19 @@ CREATE TABLE org.org_invitations (
     CONSTRAINT org_invitations_business_profile_id_fkey FOREIGN KEY (business_profile_id) REFERENCES org.business_profiles(id)
 );
 
+-- 13. PROFILE LINKS
 CREATE TABLE org.profile_links (
-    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     profile_type text NOT NULL,
     profile_id uuid NOT NULL,
     kind text NOT NULL,
     url text NOT NULL,
     is_public boolean NOT NULL DEFAULT true,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT profile_links_pkey PRIMARY KEY (id)
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT profile_links_pkey PRIMARY KEY (id)
 );
 
+-- 14. USER SKILLS
 CREATE TABLE org.user_skills (
     user_id uuid NOT NULL,
     skill_id uuid NOT NULL,
@@ -207,12 +210,15 @@ CREATE TABLE org.user_skills (
     CONSTRAINT user_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES org.skills (id)
 );
 
+-- 15. USER PREFERENCES
 CREATE TABLE org.user_preferences (
     user_id uuid NOT NULL,
     theme text DEFAULT 'system',
     notification_email boolean DEFAULT true,
     notification_push boolean DEFAULT false,
-    locale text DEFAULT 'en-US',
+    locale text DEFAULT 'en-GB',
     CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id),
     CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 );
+
+

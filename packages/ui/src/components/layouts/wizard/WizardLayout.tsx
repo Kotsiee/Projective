@@ -1,6 +1,6 @@
+import '../../../styles/components/wizard.css';
 import { ComponentChildren } from 'preact';
 import { IconArrowLeft } from '@tabler/icons-preact';
-import '../../../styles/components/wizard.css';
 import { IconButton } from '../../button/IconButton.tsx';
 
 interface WizardLayoutProps {

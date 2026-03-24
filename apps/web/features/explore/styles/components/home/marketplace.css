@@ -1,0 +1,55 @@
+/* #region Marketplace Item */
+.marketplace-item {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--card);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+	box-shadow: 0 4px 6px hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+	transition: transform var(--fast) cubic-bezier(0.4, 0, 0.2, 1), box-shadow var(--fast) ease;
+	height: 100%;
+}
+
+.marketplace-item:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 10px 15px hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
+}
+
+.marketplace-item__image-wrapper {
+	position: relative;
+	width: 100%;
+	background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+	/* The height is driven dynamically by inline aspect-ratio to prevent layout jumps */
+}
+
+.marketplace-item__image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.marketplace-item__content {
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.marketplace-item__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-main);
+	line-height: 1.4;
+}
+
+.marketplace-item__price {
+	margin: 0;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--primary);
+}
+/* #endregion */

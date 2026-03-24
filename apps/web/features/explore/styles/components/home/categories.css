@@ -1,0 +1,38 @@
+/* #region Explore Categories Island */
+
+.explore-home-categories {
+	width: 100%;
+	padding: 2rem 0;
+}
+
+.explore-home-category {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100px;
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	text-decoration: none;
+	color: var(--text-main);
+	font-weight: 600;
+	transition: border-color var(--fast), background-color var(--fast), color var(--fast);
+	box-sizing: border-box;
+	/* Prevent text selection while dragging the carousel */
+	user-select: none;
+}
+
+.explore-home-category:hover,
+.explore-home-category:focus-visible {
+	border-color: var(--primary);
+	background-color: var(--primary-surface);
+	color: var(--primary);
+	outline: none;
+}
+
+.explore-home-category:active {
+	background-color: var(--primary-active);
+	color: var(--card);
+}
+
+/* #endregion */

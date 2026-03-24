@@ -1,3 +1,7 @@
+--------------------------------------------------------
+-- SCHEMA: PROJECTS (Execute Second)
+--------------------------------------------------------
+
 -- 1. PROJECTS
 CREATE TABLE projects.projects (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -13,9 +17,8 @@ CREATE TABLE projects.projects (
   timeline_preset timeline_preset NOT NULL DEFAULT 'sequential'::timeline_preset,
   target_project_start_date timestamp with time zone,
 
--- Legal & Settings
-
-ip_ownership_mode ip_option_mode NOT NULL DEFAULT 'exclusive_transfer'::ip_option_mode,
+  -- Legal & Settings
+  ip_ownership_mode ip_option_mode NOT NULL DEFAULT 'exclusive_transfer'::ip_option_mode,
   nda_required boolean NOT NULL DEFAULT false,
   portfolio_display_rights portfolio_rights NOT NULL DEFAULT 'allowed'::portfolio_rights,
   location_restriction text[] DEFAULT '{}'::text[],
@@ -27,7 +30,7 @@ ip_ownership_mode ip_option_mode NOT NULL DEFAULT 'exclusive_transfer'::ip_optio
   
   CONSTRAINT projects_pkey PRIMARY KEY (id),
   CONSTRAINT projects_client_business_id_fkey FOREIGN KEY (client_business_id) REFERENCES org.business_profiles(id),
-  CONSTRAINT projects_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES org.users_public(id)
+  CONSTRAINT projects_owner_user_id_fkey FOREIGN KEY (owner_user_id) REFERENCES org.users_public(user_id)
 );
 
 -- 2. STAGES
@@ -40,23 +43,22 @@ CREATE TABLE projects.project_stages (
   stage_type stage_type_enum NOT NULL,
   status stage_status NOT NULL DEFAULT 'open'::stage_status,
 
--- Timing & Triggers
-start_trigger_type start_trigger_type NOT NULL DEFAULT 'on_project_start'::start_trigger_type,
+  -- Timing & Triggers
+  start_trigger_type start_trigger_type NOT NULL DEFAULT 'on_project_start'::start_trigger_type,
   fixed_start_date timestamp with time zone,
   start_dependency_stage_id uuid,
-  start_dependency_lag_days integer DEFAULT 0, -- NEW: Enables staggered offsets
-  hire_trigger_active boolean NOT NULL DEFAULT true, -- NEW: Contractual lock
+  start_dependency_lag_days integer DEFAULT 0,
+  hire_trigger_active boolean NOT NULL DEFAULT true,
 
--- Configuration
-
-file_revisions_allowed integer DEFAULT 0,
+  -- Configuration
+  file_revisions_allowed integer DEFAULT 0,
   file_duration_mode text,
   file_duration_days integer,
   file_due_date timestamp with time zone,
   session_duration_minutes integer,
   session_count integer DEFAULT 1,
-  session_preferred_days text[], -- NEW: Array of days (e.g., ['monday', 'tuesday'])
-  session_end_date timestamp with time zone, -- NEW: Hard fallback for unstructured sessions
+  session_preferred_days text[],
+  session_end_date timestamp with time zone,
   management_contract_mode text,
   maintenance_cycle_interval text,
   ip_ownership_override ip_option_mode,
@@ -71,8 +73,6 @@ file_revisions_allowed integer DEFAULT 0,
 );
 
 -- 3. MAINTENANCE CONTRACTS
-
-
 CREATE TABLE projects.maintenance_contracts (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   project_id uuid NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE projects.project_activity (
   entity_id uuid NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT project_activity_pkey PRIMARY KEY (id),
-  CONSTRAINT project_activity_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES org.users_public(id)
+  CONSTRAINT project_activity_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES org.users_public(user_id)
 );
 
 -- 5. PARTICIPANTS
@@ -110,11 +110,9 @@ CREATE TABLE projects.project_participants (
     profile_type profile_type NOT NULL,
     profile_id uuid NOT NULL,
     role text NOT NULL,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT project_participants_pkey PRIMARY KEY (id),
-        CONSTRAINT project_participants_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id)
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT project_participants_pkey PRIMARY KEY (id),
+    CONSTRAINT project_participants_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id)
 );
 
 -- 6. ASSIGNMENTS
@@ -126,14 +124,12 @@ CREATE TABLE projects.stage_assignments (
     team_id uuid,
     assigned_by uuid NOT NULL,
     status text NOT NULL,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT stage_assignments_pkey PRIMARY KEY (id),
-        CONSTRAINT stage_assignments_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages (id),
-        CONSTRAINT stage_assignments_freelancer_profile_id_fkey FOREIGN KEY (freelancer_profile_id) REFERENCES org.freelancer_profiles (user_id),
-        CONSTRAINT stage_assignments_team_id_fkey FOREIGN KEY (team_id) REFERENCES org.teams (id),
-        CONSTRAINT stage_assignments_assigned_by_fkey FOREIGN KEY (assigned_by) REFERENCES org.users_public (id)
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT stage_assignments_pkey PRIMARY KEY (id),
+    CONSTRAINT stage_assignments_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages (id),
+    CONSTRAINT stage_assignments_freelancer_profile_id_fkey FOREIGN KEY (freelancer_profile_id) REFERENCES org.freelancer_profiles (user_id),
+    CONSTRAINT stage_assignments_team_id_fkey FOREIGN KEY (team_id) REFERENCES org.teams (id),
+    CONSTRAINT stage_assignments_assigned_by_fkey FOREIGN KEY (assigned_by) REFERENCES org.users_public (user_id)
 );
 
 -- 7. SUBMISSIONS
@@ -147,7 +143,7 @@ CREATE TABLE projects.stage_submissions (
   status text DEFAULT 'pending_review'::text,
   CONSTRAINT stage_submissions_pkey PRIMARY KEY (id),
   CONSTRAINT stage_submissions_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages(id),
-  CONSTRAINT stage_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES org.users_public(id)
+  CONSTRAINT stage_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES org.users_public(user_id)
 );
 
 -- 8. GLOBAL ATTACHMENTS
@@ -174,12 +170,10 @@ CREATE TABLE projects.user_preferences (
     project_id uuid NOT NULL,
     is_starred boolean DEFAULT false,
     is_archived boolean DEFAULT false,
-    last_viewed_at timestamp
-    with
-        time zone DEFAULT now(),
-        CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id, project_id),
-        CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (id),
-        CONSTRAINT user_preferences_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id)
+    last_viewed_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id, project_id),
+    CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES org.users_public (user_id),
+    CONSTRAINT user_preferences_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects (id)
 );
 
 -- 11. OPEN SEATS
@@ -190,16 +184,12 @@ CREATE TABLE projects.stage_open_seats (
     budget_min_cents bigint,
     budget_max_cents bigint,
     require_proposals boolean NOT NULL DEFAULT true,
-    created_at timestamp
-    with
-        time zone NOT NULL DEFAULT now(),
-        CONSTRAINT stage_open_seats_pkey PRIMARY KEY (id),
-        CONSTRAINT stage_open_seats_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages (id)
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT stage_open_seats_pkey PRIMARY KEY (id),
+    CONSTRAINT stage_open_seats_project_stage_id_fkey FOREIGN KEY (project_stage_id) REFERENCES projects.project_stages (id)
 );
 
 -- 12. STAFFING ROLES
-
-
 CREATE TABLE projects.stage_staffing_roles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   project_stage_id uuid NOT NULL,
@@ -236,8 +226,6 @@ CREATE TABLE projects.stage_budget_rules (
 );
 
 -- 15. REVISION REQUESTS
-
-
 CREATE TABLE projects.stage_revision_requests (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   project_stage_id uuid NOT NULL,
@@ -249,5 +237,5 @@ CREATE TABLE projects.stage_revision_requests (
   resolved_at timestamp with time zone,
   
   CONSTRAINT stage_revision_requests_pkey PRIMARY KEY (id),
-  CONSTRAINT stage_revision_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES org.users_public(id)
+  CONSTRAINT stage_revision_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES org.users_public(user_id)
 );

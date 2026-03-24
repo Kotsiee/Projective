@@ -1,110 +1,175 @@
-/* #region 1. BLOCK: stepper */
+/* #region BASE & CONTEXT */
 .stepper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 1.5rem;
-}
+	--step-color: var(--text-disabled);
+	--step-active: var(--primary);
+	--step-error: var(--danger);
+	--step-bg: var(--card);
 
-.stepper__header {
-    display: flex;
-    position: relative;
+	display: flex;
+	width: 100%;
 }
-
-.stepper__step-title {
-    position: relative;
-    font-weight: 600;
-    color: var(--field-text-muted, #4b5563);
-    margin: 0;
-    padding: 0;
-    font-size: 1rem;
-    bottom: 0.45rem;
-}
-
-.stepper__step-desc {
-    position: relative;
-    font-weight: 400;
-    font-size: 0.75rem;
-    color: var(--field-text-disabled, #4b5563);
-    margin: 0;
-    padding: 0;
-}
-
-.stepper__step {
-    display: flex;
-    align-items: center;
-    position: relative;
-    flex: 1;
-    gap: 0.75rem;
-    padding-bottom: 0.5rem;
-}
-
-.stepper__step--clickable {
-    cursor: pointer;
-}
-
 /* #endregion */
 
-/* #region 2. ELEMENT: stepper__step-indicator */
-.stepper__step-indicator {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--field-bg, #ffffff);
-    border: 2px solid var(--field-border, hsla(0, 0%, 10%, 0.15));
-    color: var(--field-text-disabled, #4b5563);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    z-index: 2;
-    transition: all var(--medium, 200ms) ease;
-    flex-shrink: 0;
+/* #region VERTICAL LAYOUT (The "Wizard Sidebar" Mode) */
+.stepper--vertical {
+	display: grid;
+	grid-template-columns: 280px minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr) auto;
+
+	/* Make it perfectly fluid to fill its parent container */
+	width: 100%;
+	height: 100%;
+	min-height: 0; /* Removed the 100vh calculation */
+
+	background-color: transparent;
+	overflow: hidden;
+}
+
+.stepper--vertical .stepper__header {
+	grid-column: 1;
+	grid-row: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 2rem;
+	border-right: 1px solid var(--border-color);
+	background-color: transparent;
+	overflow-y: auto;
+}
+
+.stepper--vertical .stepper__content {
+	grid-column: 2;
+	grid-row: 1;
+	padding: 3rem; /* The form gets its padding here now */
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* Allow the form to stretch the full width of the right column */
+.stepper--vertical .stepper__content > * {
+	width: 100%;
+	margin: 0;
+}
+
+.stepper--vertical .stepper__footer {
+	grid-column: 2;
+	grid-row: 2;
+	padding: 1.5rem 3rem;
+
+	/* Inherit the card background so it blends perfectly */
+	background-color: transparent;
+	border-top: 1px solid var(--border-color);
+
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 1rem;
+	z-index: 10;
+}
+/* #endregion */
+
+/* #region STEP ITEM (Vertical specific styling) */
+.stepper__step {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding-bottom: 2rem; /* Space between steps */
+	opacity: 0.6;
+	transition: var(--fast) ease;
 }
 
 .stepper__step--active {
+	opacity: 1;
+}
 
-    .stepper__step-indicator {
-        color: var(--primary, #186f7e);
-        border-color: var(--primary, #186f7e);
-        background-color: var(--card, rgba(24, 111, 126, 0.12));
-        transform: scale(1.1);
-    }
+.stepper__step--completed {
+	opacity: 1;
+}
 
-    .stepper__step-title,
-    .stepper__step-desc {
-        color: var(--field-text-label, #4b5563);
-    }
+.stepper__step--clickable {
+	cursor: pointer;
+}
+
+.stepper__step--clickable:hover {
+	opacity: 1;
+}
+
+/* #region INDICATOR (The Circle/Dot) */
+.stepper__step-indicator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background-color: transparent;
+	border: 2px solid var(--step-color);
+	color: var(--step-color);
+	font-weight: 600;
+	font-size: 0.875rem;
+	z-index: 2; /* Sit above the connector line */
+	background-color: var(--step-bg);
+	transition: var(--fast) ease;
+}
+
+.stepper__step--active .stepper__step-indicator {
+	border-color: var(--step-active);
+	color: var(--step-active);
+	box-shadow: var(--focus-ring);
 }
 
 .stepper__step--completed .stepper__step-indicator {
-    background-color: var(--primary, #186f7e);
-    border-color: var(--primary, #186f7e);
-    color: var(--text-on-brand, #ffffff);
+	background-color: var(--step-active);
+	border-color: var(--step-active);
+	color: white;
 }
-
-.stepper__step--error .stepper__step-indicator {
-    border-color: var(--danger, #e53935);
-    color: var(--danger, #e53935);
-    background-color: hsla(var(--danger-hue, 0), var(--danger-saturation, 70%), var(--danger-lightness, 55%), 0.12);
-}
-
 /* #endregion */
 
-/* #region 3. ELEMENT: stepper__connector */
-.stepper__connector {
-    position: absolute;
-    top: 16px;
-    left: 40px;
-    right: -10px;
-    height: 2px;
-    background-color: var(--field-border, hsla(0, 0%, 10%, 0.15));
-    z-index: 1;
-    transition: background-color var(--medium, 200ms);
+/* #region CONNECTOR LINE (Vertical Drop) */
+.stepper--vertical .stepper__connector {
+	position: absolute;
+	top: 32px; /* Start below the indicator */
+	left: 15px; /* Center with the 32px indicator */
+	bottom: 0; /* Stretch down to the next item's padding */
+	width: 2px;
+	background-color: var(--border-color);
+	z-index: 1;
+	transition: background-color var(--medium) ease;
 }
 
-.stepper__step--completed .stepper__connector {
-    background-color: var(--primary, #186f7e);
+.stepper--vertical .stepper__connector--active {
+	background-color: var(--step-active);
 }
+/* #endregion */
+
+/* #region TEXT CONTENT */
+.stepper__step-content {
+	display: flex;
+	flex-direction: column;
+	padding-top: 4px; /* Align text with center of indicator */
+}
+
+.stepper__step-title {
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--text-main);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.stepper__step-desc {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	margin-top: 0.25rem;
+}
+
+.stepper__step-optional {
+	font-size: 0.75rem;
+	font-weight: 400;
+	color: var(--text-tertiary);
+}
+/* #endregion */
 
 /* #endregion */

@@ -18,7 +18,6 @@ import {
 
 import { RichTextField, SelectField, TextField } from '@projective/fields';
 import { IPOptionMode, SelectOption, StageType, StartTriggerType } from '@projective/types';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@projective/ui';
 
 import ProjectStageFile from './stages/ProjectStageFile.tsx';
 import ProjectStageMaintenance from './stages/ProjectStageMaintenance.tsx';
@@ -36,6 +35,8 @@ export interface UIStage extends Stage {
 
 export default function ProjectStages() {
 	const state = useNewProjectContext();
+	// Local state to track which tab is currently open
+	const activeTabIndex = useSignal(0);
 
 	// #region Factory
 	function createDefaultStage(): UIStage {
@@ -45,25 +46,17 @@ export default function ProjectStages() {
 			stage_type: StageType.FileBased,
 			status: 'open',
 			sort_order: state.stages.value.length,
-
-			// Initialized for Step 4
 			start_trigger_type: StartTriggerType.DependentOnStage,
-
-			// Initialized for Step 5
 			staffing_roles: [],
 			open_seats: [],
 			_ui_model_type: 'defined_roles',
-
 			_attachments_temp: signal([]),
-
-			// Defaults for Type-Specific configs
 			file_revisions_allowed: 1,
 			file_duration_mode: 'relative_duration',
 			file_duration_days: 7,
 			file_extensions_allowed: [],
-			file_max_size_mb: 2048, // 2GB default
+			file_max_size_mb: 2048,
 			file_max_count: 20,
-
 			session_duration_minutes: 60,
 			session_count: 1,
 			session_preferred_days: [],
@@ -75,20 +68,26 @@ export default function ProjectStages() {
 	// #region Helper Functions
 	const getStatusIcon = (status: string) => {
 		if (status.toLowerCase() === 'completed') {
-			return <IconCheck size={18} color='var(--success)' />;
+			return <IconCheck size={16} color='var(--success)' />;
 		}
 		if (status.toLowerCase() === 'in_progress') {
-			return <IconCircle size={18} color='var(--primary-500)' fill='currentColor' />;
+			return <IconCircle size={16} color='var(--primary)' fill='currentColor' />;
 		}
-		return <IconCircle size={18} color='var(--gray-400)' />;
+		return <IconCircle size={16} color='currentColor' style={{ opacity: 0.5 }} />;
 	};
 
 	const addStage = () => {
 		state.stages.value = [...state.stages.value, createDefaultStage()];
+		// Instantly switch to the newly created stage
+		activeTabIndex.value = state.stages.value.length - 1;
 	};
 
 	const removeStage = (index: number) => {
 		state.stages.value = state.stages.value.filter((_, i) => i !== index);
+		// Ensure active tab doesn't point out of bounds after deletion
+		if (activeTabIndex.value >= state.stages.value.length) {
+			activeTabIndex.value = Math.max(0, state.stages.value.length - 1);
+		}
 	};
 	// #endregion
 
@@ -102,44 +101,51 @@ export default function ProjectStages() {
 				</p>
 			</div>
 
-			<Accordion type='multiple' variant='outlined' defaultValue={['0']}>
-				{state.stages.value.map((stage, index) => (
-					<AccordionItem
-						key={index.toString()}
-						value={index.toString()}
-						className='accordion-item'
-					>
-						<AccordionTrigger
-							startIcon={getStatusIcon(stage.status)}
-							subtitle={stage.stage_type.replace('_', ' ')}
+			{/* TABBED NAVIGATION */}
+			<div className='stages-tabs-wrapper'>
+				<div className='stages-tabs'>
+					{state.stages.value.map((stage, index) => (
+						<button
+							key={index.toString()}
+							type='button'
+							className={`stages-tab ${activeTabIndex.value === index ? 'stages-tab--active' : ''}`}
+							onClick={() => activeTabIndex.value = index}
 						>
-							{stage.title.length > 0 ? stage.title : `Stage ${index + 1}`}
-						</AccordionTrigger>
-						<AccordionContent>
-							<ProjectStage id={index} />
-							<div className='stage-footer'>
-								<button
-									type='button'
-									className='btn-remove-stage'
-									onClick={() => removeStage(index)}
-								>
-									<IconTrash size={16} /> Remove Stage
-								</button>
-							</div>
-						</AccordionContent>
-					</AccordionItem>
-				))}
-			</Accordion>
+							{getStatusIcon(stage.status)}
+							<span className='stages-tab__label'>
+								{stage.title || `Stage ${index + 1}`}
+							</span>
+						</button>
+					))}
+					<button type='button' className='stages-tab-add' onClick={addStage} title='Add Stage'>
+						<IconPlus size={18} />
+					</button>
+				</div>
+			</div>
 
-			<button type='button' className='btn-add-dashed' onClick={addStage}>
-				<IconPlus size={18} /> Add New Stage
-			</button>
+			{/* ACTIVE STAGE CONTENT PANEL */}
+			{state.stages.value.length > 0 && (
+				<div className='stages-content-panel'>
+					<ProjectStage id={activeTabIndex.value} />
+
+					<div className='stage-footer'>
+						<button
+							type='button'
+							className='btn-remove-stage'
+							onClick={() => removeStage(activeTabIndex.value)}
+						>
+							<IconTrash size={16} /> Remove Stage
+						</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
 
 /**
  * Sub-component for individual stage editing (Scope Definition only).
+ * (Unchanged, just nested inside the new Content Panel)
  */
 export function ProjectStage({ id }: { id: number }) {
 	const state = useNewProjectContext();
@@ -148,7 +154,6 @@ export function ProjectStage({ id }: { id: number }) {
 
 	if (!stage) return null;
 
-	// #region Options
 	const stageTypes: SelectOption<string>[] = [
 		{ label: 'File Based (Deliverable)', value: StageType.FileBased },
 		{ label: 'Session Based (Call/Workshop)', value: StageType.SessionBased },
@@ -162,7 +167,6 @@ export function ProjectStage({ id }: { id: number }) {
 		{ label: 'Licensed Use', value: IPOptionMode.LicensedUse },
 		{ label: 'Shared Ownership', value: IPOptionMode.SharedOwnership },
 	];
-	// #endregion
 
 	const updateStage = (field: keyof UIStage, value: any) => {
 		const newStages = [...state.stages.value];
@@ -219,7 +223,7 @@ export function ProjectStage({ id }: { id: number }) {
 				</div>
 			</div>
 
-			{/* SECTION 2: ADVANCED SETTINGS (COLLAPSIBLE) */}
+			{/* SECTION 2: ADVANCED SETTINGS */}
 			<div className='stage-section'>
 				<button
 					type='button'
@@ -239,7 +243,6 @@ export function ProjectStage({ id }: { id: number }) {
 
 				{isAdvancedOpen.value && (
 					<div className='stage-section__content'>
-						{/* Overrides block (Applies to all stage types) */}
 						<div className='form-grid' style={{ marginBottom: '1.25rem' }}>
 							<div className='form-grid--span-full'>
 								<SelectField
@@ -257,7 +260,6 @@ export function ProjectStage({ id }: { id: number }) {
 							</div>
 						</div>
 
-						{/* Type Specific Advanced Config */}
 						<div className='type-specific-config'>
 							{stage.stage_type === StageType.FileBased && (
 								<ProjectStageFile stage={stage} updateStage={updateStage} />

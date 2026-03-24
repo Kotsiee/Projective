@@ -4,173 +4,182 @@
  * @description Refactored Select component using strict semantic tokens.
  */
 .field-select {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	width: 100%;
 }
 
 /* #endregion */
 
 /* #region 2. ELEMENT: field-select__container */
 .field-select__container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  background-color: var(--field-bg);
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  transition: all var(--field-transition);
-  min-height: var(--field-height);
-  cursor: pointer;
-  padding-right: 8px;
-  /* Room for arrow */
+	display: flex;
+	align-items: center;
+	position: relative;
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-radius: var(--field-radius);
+	transition: all var(--field-transition);
+	min-height: var(--field-height);
+	cursor: pointer;
+	padding-right: 8px;
+	/* Room for arrow */
 }
 
 .field-select__container:hover {
-  background-color: var(--field-bg-hover);
-  border-color: var(--field-border-hover);
+	background-color: var(--field-bg-hover);
+	border-color: var(--field-border-hover);
 }
 
 .field-select__container--focused {
-  border-color: var(--field-border-focus);
-  background-color: var(--field-bg-active);
+	border-color: var(--field-border-focus);
+	background-color: var(--field-bg-active);
 }
 
 .field-select__container--error {
-  border-color: var(--field-border-error);
+	border-color: var(--field-border-error);
 }
 
 .field-select__container--disabled {
-  background-color: var(--field-bg-disabled);
-  border-color: var(--field-border-disabled);
-  cursor: not-allowed;
-  opacity: 0.8;
+	background-color: var(--field-bg-disabled);
+	border-color: var(--field-border-disabled);
+	cursor: not-allowed;
+	opacity: 0.8;
 }
 
 /* #endregion */
 
 /* #region 3. ELEMENT: field-select__content & input */
 .field-select__content {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  padding: 4px var(--field-padding-x);
-  min-height: var(--field-height);
+	flex: 1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	padding: 0 var(--field-padding-x);
+	min-height: var(--field-height);
 }
 
 .field-select__input {
-  border: none;
-  background: transparent;
-  font-family: inherit;
-  font-size: var(--field-font-size);
-  color: var(--field-text);
-  outline: none;
-  padding: 0;
-  margin: 0;
-  min-width: 60px;
-  flex: 1;
+	border: none;
+	background: transparent;
+	font-family: inherit;
+	font-size: var(--field-font-size);
+	color: var(--field-text);
+	outline: none;
+	padding: 0;
+	margin: 0;
+	min-width: 60px;
+	flex: 1;
 }
 
 /* #endregion */
 
 /* #region 4. ELEMENT: field-select__chip */
 .field-select__chip {
-  display: flex;
-  align-items: center;
-  background-color: var(--primary-surface);
-  border-radius: var(--border-radius__small);
-  padding: 2px 6px;
-  font-size: 0.85em;
-  gap: 4px;
-  color: var(--text-main);
+	display: flex;
+	align-items: center;
+	background-color: var(--primary-surface);
+	border-radius: var(--border-radius__small);
+	padding: 2px 6px;
+	font-size: 0.85em;
+	gap: 4px;
+	color: var(--text-main);
 }
 
 .field-select__chip-remove {
-  cursor: pointer;
-  opacity: 0.5;
-  display: flex;
-  align-items: center;
-  transition: opacity var(--fast);
+	cursor: pointer;
+	opacity: 0.5;
+	display: flex;
+	align-items: center;
+	transition: opacity var(--fast);
 }
 
 .field-select__chip-remove:hover {
-  opacity: 1;
-  color: var(--danger);
+	opacity: 1;
+	color: var(--danger);
 }
 
 /* #endregion */
 
 /* #region 5. BLOCK: field-select__menu & options */
 .field-select__menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background-color: var(--card);
-  border: 1px solid var(--field-border);
-  border-radius: var(--field-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  max-height: 250px;
-  overflow-y: auto;
-  opacity: 0;
-  transform: translateY(-5px);
-  pointer-events: none;
-  transition: all var(--fast);
-  display: flex;
-  flex-direction: column;
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	background-color: var(--card);
+	border: 1px solid var(--field-border);
+	border-radius: var(--field-radius);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	z-index: 50;
+	max-height: 250px;
+	overflow-y: auto;
+	opacity: 0;
+	transform: translateY(-5px);
+	pointer-events: none;
+	transition: all var(--fast);
+	display: flex;
+	flex-direction: column;
 }
 
 .field-select__menu--open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
 }
 
 .field-select__option {
-  padding: 8px 12px;
-  cursor: pointer;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  transition: background-color var(--fast);
+	padding: 8px 12px;
+	cursor: pointer;
+	color: var(--text-main);
+	display: flex;
+	align-items: center;
+	transition: background-color var(--fast);
 }
 
 .field-select__option:hover,
 .field-select__option--highlighted {
-  background-color: var(--field-bg-hover);
+	background-color: var(--field-bg-hover);
 }
 
 .field-select__option--selected {
-  background-color: var(--primary-surface);
-  color: var(--text-brand);
-  font-weight: 500;
+	background-color: var(--primary-surface);
+	color: var(--text-brand);
+	font-weight: 500;
 }
 
 .field-select__option--group {
-  font-weight: 600;
-  color: var(--text-muted);
-  background-color: var(--bg-surface-subtle);
+	font-weight: 600;
+	color: var(--text-muted);
+	background-color: var(--bg-surface-subtle);
 }
 
 .field-select__action-bar {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--field-border);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--primary);
-  font-weight: 500;
-  font-size: 0.9em;
-  transition: background-color var(--fast);
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--field-border);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--primary);
+	font-weight: 500;
+	font-size: 0.9em;
+	transition: background-color var(--fast);
 }
 
 .field-select__action-bar:hover {
-  background-color: var(--input-bg);
+	background-color: var(--input-bg);
 }
 
+.field-select__arrow {
+	transition: transform 150ms;
+}
+
+.field-select__container--open {
+	.field-select__arrow {
+		transform: rotate(180deg);
+	}
+}
 /* #endregion */

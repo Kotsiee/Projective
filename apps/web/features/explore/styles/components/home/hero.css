@@ -1,0 +1,29 @@
+.explore-home-hero {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.explore-home-hero__header {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.explore-home-hero__header__context {
+	width: 65%;
+}
+.explore-home-hero__header__context__title {}
+.explore-home-hero__header__context__subtitle {}
+.explore-home-hero__header__search {}
+.explore-home-hero__header__search__input {
+	display: flex;
+}
+.explore-home-hero__header__search__suggested {}
+
+.explore-home-hero__promotion {
+	height: 100%;
+	min-height: calc(75vh - var(--header-height) - 2rem);
+	width: 35%;
+	border: 1px solid red;
+}

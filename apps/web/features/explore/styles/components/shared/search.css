@@ -1,0 +1,152 @@
+/* #region 1. CONTAINER & LAYOUT */
+.explore-search-input {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 3rem;
+	margin: 0 auto;
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-radius: var(--border-radius);
+	padding: 0.25rem 0.5rem 0.25rem 1.5rem;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+	transition: var(--field-transition);
+
+	.field-select__container--focused,
+	.field-select__container:hover {
+		background-color: initial;
+		border: none;
+	}
+
+	.field-focus-ring {
+		box-shadow: none;
+	}
+}
+
+.explore-search-input:focus-within {
+	border-color: var(--field-border-focus);
+	box-shadow: var(--focus-ring);
+}
+/* #endregion */
+
+/* #region 2. INPUT GROUP (LEFT SIDE) */
+.explore-search-input__input-group {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	height: 100%;
+	position: relative;
+	gap: 0.75rem;
+}
+
+.explore-search-input__input {
+	flex: 1;
+	height: 100%;
+	border: none;
+	background: transparent;
+	outline: none;
+	color: var(--text-main);
+	font-family: var(--font-sans);
+	font-size: 1rem;
+	z-index: 2;
+}
+
+/* Layout wrapper for the UI Library component */
+.explore-search-input__clear {
+	z-index: 3;
+}
+/* #endregion */
+
+/* #region 3. ANIMATED PLACEHOLDER */
+.explore-search-input__placeholder {
+	position: absolute;
+	left: 0;
+	right: 2rem;
+	top: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	pointer-events: none;
+	overflow: hidden;
+	z-index: 1;
+}
+
+.explore-search-input__placeholder-item {
+	position: absolute;
+	width: 100%;
+	color: var(--text-muted);
+	font-size: 1rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition:
+		transform var(--medium) cubic-bezier(0.4, 0, 0.2, 1),
+		opacity var(--medium) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.explore-search-input__placeholder-item--active {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.explore-search-input__placeholder-item--prev {
+	transform: translateY(-100%);
+	opacity: 0;
+}
+
+.explore-search-input__placeholder-item--next {
+	transform: translateY(100%);
+	opacity: 0;
+}
+/* #endregion */
+
+/* #region 4. DIVIDER & DROPDOWN (RIGHT SIDE) */
+.explore-search-input__divider {
+	width: 1px;
+	height: 2rem;
+	background-color: var(--field-border);
+	margin: 0 0.5rem;
+}
+
+.explore-search-input__dropdown {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	min-width: 140px;
+}
+
+/* SelectField Overrides for Inline Search Integration */
+.explore-search-input__dropdown .field-select {
+	width: 100%;
+	margin: 0;
+	--field-bg: transparent;
+	--field-border: transparent;
+	--field-border-focus: transparent;
+	--field-border-hover: transparent;
+	--field-bg-hover: var(--input-bg);
+}
+
+.explore-search-input__dropdown .field-select__container {
+	height: 100%;
+	min-height: 2.5rem;
+	box-shadow: none !important;
+}
+
+.explore-search-input__dropdown .field-select__single {
+	font-weight: 500;
+}
+
+.explore-search-input__dropdown .field-label-wrapper,
+.explore-search-input__dropdown .field-message-wrapper {
+	display: none !important;
+}
+/* #endregion */
+
+/* #region 5. SUBMIT ACTION */
+/* Layout wrapper for the UI Library component */
+.explore-search-input__submit {
+	flex-shrink: 0;
+	margin-left: 0.5rem;
+}
+/* #endregion */

@@ -1,49 +1,53 @@
 /* #region 1. Variables & Base */
 .btn {
-    /* -- Local Vars -- */
-    --btn-height-sm: 2rem;
-    --btn-height-md: var(--input-height, 2.5rem);
-    --btn-height-lg: 3rem;
-    --btn-radius: var(--border-radius, 8px);
-    --btn-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --btn-border-width: 1px;
+	/* -- Local Vars -- */
+	--btn-height-sm: 2rem;
+	--btn-height-md: var(--input-height, 2.5rem);
+	--btn-height-lg: 3rem;
+	--btn-radius: var(--border-radius, 8px);
+	--btn-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	--btn-border-width: 1px;
 
-    /* -- Defaults (Primary) -- */
-    --btn-bg: var(--primary);
-    --btn-text: #ffffff;
-    --btn-border: transparent;
+	/* -- Defaults (Primary) -- */
+	--btn-bg: var(--primary);
+	--btn-text: #ffffff;
+	--btn-border: transparent;
 
-    /* -- Layout -- */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    height: var(--btn-height-md);
-    padding: 0 1rem;
+	/* -- Layout -- */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+	height: var(--btn-height-md);
+	padding: 0 1rem;
 
-    /* -- Style -- */
-    border: var(--btn-border-width) solid var(--btn-border);
-    border-radius: var(--btn-radius);
-    background-color: var(--btn-bg);
-    color: var(--btn-text);
+	/* -- Style -- */
+	border: var(--btn-border-width) solid var(--btn-border);
+	border-radius: var(--btn-radius);
+	background-color: var(--btn-bg);
+	color: var(--btn-text);
 
-    font-family: var(--font-sans);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    transition: all var(--btn-transition);
-    outline: none;
-    vertical-align: middle;
+	font-family: var(--font-sans);
+	font-size: 0.875rem;
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	user-select: none;
+	transition: all var(--btn-transition);
+	outline: none;
+	vertical-align: middle;
+}
+
+.btn--outline {
+	outline: 1px solid var(--border-color);
 }
 
 /* Focus */
 .btn:focus-visible {
-    z-index: 10;
-    box-shadow: var(--focus-ring, 0 0 0 3px rgba(66, 153, 225, 0.5));
+	z-index: 10;
+	box-shadow: var(--focus-ring, 0 0 0 3px rgba(66, 153, 225, 0.5));
 }
 
 /* #endregion */
@@ -52,119 +56,119 @@
 
 /* Primary */
 .btn--primary {
-    --btn-bg: var(--primary);
-    --btn-text: #ffffff;
-    --btn-border: transparent;
+	--btn-bg: var(--primary);
+	--btn-text: #ffffff;
+	--btn-border: transparent;
 }
 
 .btn--primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
+	background-color: var(--primary-hover);
 }
 
 .btn--primary:active:not(:disabled) {
-    background-color: var(--primary-active);
+	background-color: var(--primary-active);
 }
 
 /* Secondary */
 .btn--secondary {
-    --btn-bg: var(--input-bg, rgba(0, 0, 0, 0.05));
-    --btn-text: var(--text-main);
-    --btn-border: transparent;
+	--btn-bg: var(--input-bg, rgba(0, 0, 0, 0.05));
+	--btn-text: var(--text-main);
+	--btn-border: transparent;
 }
 
 .btn--secondary:hover:not(:disabled) {
-    background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
+	background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
 }
 
 .btn--secondary:active:not(:disabled) {
-    background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15);
+	background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15);
 }
 
 /* Success */
 .btn--success {
-    --btn-bg: var(--success);
-    --btn-text: #ffffff;
-    --btn-border: transparent;
+	--btn-bg: var(--success);
+	--btn-text: #ffffff;
+	--btn-border: transparent;
 }
 
 .btn--success:hover:not(:disabled) {
-    filter: brightness(0.95);
+	filter: brightness(0.95);
 }
 
 /* Warning */
 .btn--warning {
-    --btn-bg: var(--warning);
-    --btn-text: #ffffff;
-    --btn-border: transparent;
+	--btn-bg: var(--warning);
+	--btn-text: #ffffff;
+	--btn-border: transparent;
 }
 
 .btn--warning:hover:not(:disabled) {
-    filter: brightness(0.95);
+	filter: brightness(0.95);
 }
 
 /* Danger */
 .btn--danger {
-    --btn-bg: var(--danger);
-    --btn-text: #ffffff;
-    --btn-border: transparent;
+	--btn-bg: var(--danger);
+	--btn-text: #ffffff;
+	--btn-border: transparent;
 }
 
 .btn--danger:hover:not(:disabled) {
-    filter: brightness(0.9);
+	filter: brightness(0.9);
 }
 
 /* Link */
 .btn--link {
-    --btn-bg: transparent;
-    --btn-text: var(--primary);
-    --btn-border: transparent;
-    text-decoration: underline;
-    height: auto;
-    padding: 0;
+	--btn-bg: transparent;
+	--btn-text: var(--primary);
+	--btn-border: transparent;
+	text-decoration: underline;
+	height: auto;
+	padding: 0;
 }
 
 .btn--link:hover:not(:disabled) {
-    color: var(--primary-hover);
+	color: var(--primary-hover);
 }
 
 /* #endregion */
 
 /* #region 3. Sizes & Shape Modifiers */
 .btn--small {
-    height: var(--btn-height-sm);
-    padding: 0 0.75rem;
-    font-size: 0.75rem;
+	height: var(--btn-height-sm);
+	padding: 0 0.75rem;
+	font-size: 0.75rem;
 }
 
 .btn--large {
-    height: var(--btn-height-lg);
-    padding: 0 1.5rem;
-    font-size: 1rem;
+	height: var(--btn-height-lg);
+	padding: 0 1.5rem;
+	font-size: 1rem;
 }
 
 /* Rounded (Pill / Circle) */
 .btn--rounded {
-    border-radius: 9999px !important;
+	border-radius: 9999px !important;
 }
 
 /* Icon Only - Strictly Square */
 .btn--icon-only {
-    padding: 0;
-    width: var(--btn-height-md);
-    height: var(--btn-height-md);
-    /* Explicit height to match width */
-    flex-shrink: 0;
-    /* Prevent squishing */
+	padding: 0;
+	width: var(--btn-height-md);
+	height: var(--btn-height-md);
+	/* Explicit height to match width */
+	flex-shrink: 0;
+	/* Prevent squishing */
 }
 
 .btn--small.btn--icon-only {
-    width: var(--btn-height-sm);
-    height: var(--btn-height-sm);
+	width: var(--btn-height-sm);
+	height: var(--btn-height-sm);
 }
 
 .btn--large.btn--icon-only {
-    width: var(--btn-height-lg);
-    height: var(--btn-height-lg);
+	width: var(--btn-height-lg);
+	height: var(--btn-height-lg);
 }
 
 /* #endregion */
@@ -173,235 +177,247 @@
 
 /* -- Outline -- */
 .btn--outline {
-    background-color: transparent;
-    border-color: currentColor;
+	background-color: transparent;
+	border-color: currentColor;
 }
 
 /* Specific text coloring for Outline */
 .btn--outline.btn--primary {
-    color: var(--primary);
+	color: var(--primary);
 }
 
 .btn--outline.btn--secondary {
-    color: var(--text-main);
-    border-color: var(--border-color);
+	color: var(--text-main);
+	border-color: var(--border-color);
 }
 
 .btn--outline.btn--danger {
-    color: var(--danger);
+	color: var(--danger);
 }
 
 .btn--outline.btn--success {
-    color: var(--success);
+	color: var(--success);
 }
 
 .btn--outline:hover:not(:disabled) {
-    background-color: var(--input-bg);
+	background-color: var(--input-bg);
 }
 
 /* -- Ghost -- */
 /* 1. Base Ghost Reset */
 .btn--ghost {
-    background-color: transparent !important;
-    border-color: transparent !important;
+	background-color: transparent !important;
+	border-color: transparent !important;
 }
 
 /* 2. Ghost Variant Coloring & Hover States */
 
 /* Primary Ghost */
 .btn--ghost.btn--primary {
-    color: var(--primary);
+	color: var(--primary);
 }
 
 .btn--ghost.btn--primary:hover:not(:disabled) {
-    background-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.12) !important;
+	background-color: hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.12
+	) !important;
 }
 
 /* Secondary Ghost */
 .btn--ghost.btn--secondary {
-    color: var(--text-main);
+	color: var(--text-main);
 }
 
 .btn--ghost.btn--secondary:hover:not(:disabled) {
-    background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1) !important;
+	background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1)
+		!important;
 }
 
 /* Danger Ghost */
 .btn--ghost.btn--danger {
-    color: var(--danger);
+	color: var(--danger);
 }
 
 .btn--ghost.btn--danger:hover:not(:disabled) {
-    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1) !important;
+	background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1)
+		!important;
 }
 
 /* Success Ghost */
 .btn--ghost.btn--success {
-    color: var(--success);
+	color: var(--success);
 }
 
 .btn--ghost.btn--success:hover:not(:disabled) {
-    background-color: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.15) !important;
+	background-color: hsla(
+		var(--success-hue),
+		var(--success-saturation),
+		var(--success-lightness),
+		0.15
+	) !important;
 }
 
 /* #endregion */
 
 /* #region 5. States */
 .btn--loading {
-    cursor: wait;
-    opacity: 0.8;
+	cursor: wait;
+	opacity: 0.8;
 }
 
 .btn:disabled,
 .btn--disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-    pointer-events: none;
-    background-color: var(--disabled-bg, rgba(0, 0, 0, 0.1)) !important;
-    color: var(--text-disabled) !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
+	cursor: not-allowed;
+	opacity: 0.6;
+	pointer-events: none;
+	background-color: var(--disabled-bg, rgba(0, 0, 0, 0.1)) !important;
+	color: var(--text-disabled) !important;
+	border-color: transparent !important;
+	box-shadow: none !important;
 }
 
 .btn--outline.btn--disabled,
 .btn--ghost.btn--disabled {
-    background-color: transparent !important;
-    border-color: var(--border-color) !important;
+	background-color: transparent !important;
+	border-color: var(--border-color) !important;
 }
 
 .btn--ghost.btn--disabled {
-    border-color: transparent !important;
+	border-color: transparent !important;
 }
 
 /* #endregion */
 
 /* #region 6. Button Group */
 .btn-group {
-    display: inline-flex;
-    flex-direction: row;
-    border-radius: var(--btn-radius);
-    vertical-align: middle;
-    isolation: isolate;
+	display: inline-flex;
+	flex-direction: row;
+	border-radius: var(--btn-radius);
+	vertical-align: middle;
+	isolation: isolate;
 }
 
 .btn-group--vertical {
-    flex-direction: column;
+	flex-direction: column;
 }
 
 .btn-group--full-width {
-    display: flex;
-    width: 100%;
+	display: flex;
+	width: 100%;
 }
 
 .btn-group--full-width .btn {
-    flex: 1;
+	flex: 1;
 }
 
-.btn-group>.btn {
-    border-radius: 0;
+.btn-group > .btn {
+	border-radius: 0;
 }
 
-.btn-group:not(.btn-group--vertical)>.btn:first-child {
-    border-top-left-radius: var(--btn-radius);
-    border-bottom-left-radius: var(--btn-radius);
+.btn-group:not(.btn-group--vertical) > .btn:first-child {
+	border-top-left-radius: var(--btn-radius);
+	border-bottom-left-radius: var(--btn-radius);
 }
 
-.btn-group:not(.btn-group--vertical)>.btn:last-child {
-    border-top-right-radius: var(--btn-radius);
-    border-bottom-right-radius: var(--btn-radius);
+.btn-group:not(.btn-group--vertical) > .btn:last-child {
+	border-top-right-radius: var(--btn-radius);
+	border-bottom-right-radius: var(--btn-radius);
 }
 
-.btn-group:not(.btn-group--vertical)>.btn:not(:first-child) {
-    margin-left: -1px;
+.btn-group:not(.btn-group--vertical) > .btn:not(:first-child) {
+	margin-left: -1px;
 }
 
-.btn-group>.btn:not(:disabled):not(.btn--disabled):hover,
-.btn-group>.btn:not(:disabled):not(.btn--disabled):focus-visible {
-    z-index: 5;
+.btn-group > .btn:not(:disabled):not(.btn--disabled):hover,
+.btn-group > .btn:not(:disabled):not(.btn--disabled):focus-visible {
+	z-index: 5;
 }
 
 /* #endregion */
 
 /* #region 7. Internal Elements */
 .btn__content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    z-index: 2;
-    width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	z-index: 2;
+	width: 100%;
 }
 
 .btn__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 0;
-    flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+	flex-shrink: 0;
 }
 
 .btn__icon svg {
-    display: block;
+	display: block;
 }
 
 .btn__spinner {
-    animation: btn-spin 1s linear infinite;
-    display: block;
+	animation: btn-spin 1s linear infinite;
+	display: block;
 }
 
 @keyframes btn-spin {
-    from {
-        transform: rotate(0deg);
-    }
+	from {
+		transform: rotate(0deg);
+	}
 
-    to {
-        transform: rotate(360deg);
-    }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .btn__ripple {
-    position: absolute;
-    border-radius: 50%;
-    background-color: currentColor;
-    opacity: 0.25;
-    transform: scale(0);
-    animation: btn-ripple 600ms linear;
-    pointer-events: none;
-    width: 20px;
-    height: 20px;
-    margin-left: -10px;
-    margin-top: -10px;
-    z-index: 1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: currentColor;
+	opacity: 0.25;
+	transform: scale(0);
+	animation: btn-ripple 600ms linear;
+	pointer-events: none;
+	width: 20px;
+	height: 20px;
+	margin-left: -10px;
+	margin-top: -10px;
+	z-index: 1;
 }
 
 @keyframes btn-ripple {
-    to {
-        transform: scale(20);
-        opacity: 0;
-    }
+	to {
+		transform: scale(20);
+		opacity: 0;
+	}
 }
 
 .btn__badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.25rem;
-    height: 1.25rem;
-    padding: 0 0.25rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    border-radius: 999px;
-    margin-left: 0.5rem;
-    background-color: var(--badge-bg, var(--primary));
-    color: #fff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.25rem;
+	height: 1.25rem;
+	padding: 0 0.25rem;
+	font-size: 0.7rem;
+	font-weight: 700;
+	border-radius: 999px;
+	margin-left: 0.5rem;
+	background-color: var(--badge-bg, var(--primary));
+	color: #fff;
 }
 
 .btn__badge--danger {
-    --badge-bg: var(--danger);
+	--badge-bg: var(--danger);
 }
 
 .btn__badge--neutral {
-    --badge-bg: var(--text-muted);
+	--badge-bg: var(--text-muted);
 }
 
 /* #endregion */

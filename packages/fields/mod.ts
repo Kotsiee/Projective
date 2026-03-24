@@ -1,6 +1,6 @@
 // Types
 export * from './src/types/core.ts';
-// export * from './src/types/form.ts';
+export * from './src/types/components/select-field.ts';
 
 // Wrappers
 export * from './src/wrappers/LabelWrapper.tsx';

@@ -3,7 +3,12 @@ import { VNode } from 'preact';
 
 export type metaPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
+/**
+ * @interface CardProps
+ */
 export interface CardProps {
+	/** Controls the layout flow. Defaults to 'grid' */
+	layout?: 'grid' | 'list' | 'masonry';
 	owner?: {
 		url?: string;
 		profilePictureUrl?: string;
@@ -32,12 +37,24 @@ export interface CardProps {
 	}[];
 }
 
+/**
+ * @function Card
+ * @description A multi-use card component for displaying entities like Teams, Products, and Services.
+ */
 export function Card(props: CardProps) {
+	const { layout = 'grid' } = props;
+
+	const classes = [
+		'card',
+		props.type,
+		layout === 'list' && 'card--list',
+	].filter(Boolean).join(' ');
+
 	return (
-		<div class={`card ${props.type}`}>
+		<div class={classes} onClick={props.onClick}>
 			<div class='card__header'>
 				<div class='card__header__actions'>
-					<a class='card__owner' href={props.owner?.url}>
+					<a class='card__owner' href={props.owner?.url} onClick={(e) => e.stopPropagation()}>
 						<img
 							class='card__owner__avatar'
 							src={props.owner?.profilePictureUrl}
@@ -54,13 +71,16 @@ export function Card(props: CardProps) {
 								type='button'
 								key={action.label}
 								class='card__action'
-								onClick={action.action}
+								onClick={(e) => {
+									e.stopPropagation();
+									action.action();
+								}}
 							>
 								{action.icon}
 							</button>
 						))}
 						{props.menuActions && (
-							<div class='card__menu'>
+							<div class='card__menu' onClick={(e) => e.stopPropagation()}>
 								<button type='button' class='card__menu-button'>
 									⋮
 								</button>
@@ -110,7 +130,10 @@ export function Card(props: CardProps) {
 											type='button'
 											key={tag.label}
 											class='card__tag'
-											onClick={tag.action}
+											onClick={(e) => {
+												e.stopPropagation();
+												tag.action?.();
+											}}
 										>
 											{tag.label}
 										</button>

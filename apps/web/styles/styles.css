@@ -1,69 +1,79 @@
-@import "themes/variables/colour.css";
-@import "themes/variables/font.css";
-@import "themes/variables/ui.css";
-@import "themes/variables/fields.css";
-@import "themes/utils/tooltip.css";
-
+@import 'themes/variables/colour.css';
+@import 'themes/variables/font.css';
+@import 'themes/variables/ui.css';
+@import 'themes/variables/fields.css';
+@import 'themes/utils/tooltip.css';
 
 body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 
-  main {
-    position: relative;
-    margin: 0;
-    padding: 0;
-  }
+	main {
+		position: relative;
+		margin: 0;
+		padding: 0;
+		display: flex;
+	}
 }
 
 .container {
-  position: relative;
-  height: calc(100vh - (var(--header-height) + 1rem));
-  width: calc(100vw - (var(--side-nav-width) + 2.1rem));
-  top: calc(var(--header-height) + 1rem);
-  left: calc(var(--side-nav-width) + 1rem);
-  transition: width var(--medium), left var(--medium);
+	position: relative;
+	height: calc(100vh - (var(--header-height) + 1rem));
+	width: calc(100vw - (var(--side-nav-width) + 2.1rem));
+	top: calc(var(--header-height) + 1rem);
+	left: calc(var(--side-nav-width) + 1rem);
+	transition: width var(--medium), left var(--medium);
+	display: flex;
+}
+
+.page {
+	position: relative;
+	height: calc(100% - (var(--header-height) + 1rem));
+	width: 100%;
+	padding: 2rem;
+	transition: width var(--medium), left var(--medium);
 }
 
 a {
-  text-decoration: none;
-  color: inherit;
+	text-decoration: none;
+	color: inherit;
 }
 
 input,
 button {
-  font-family: inherit;
-  border: none;
-  background: none;
-  color: inherit;
-  outline: none;
-  border: none;
+	font-family: inherit;
+	border: none;
+	background: none;
+	color: inherit;
+	outline: none;
+	border: none;
 }
 
 button {
-  cursor: pointer;
-  transition: all var(--fast);
+	cursor: pointer;
+	transition: all var(--fast);
 }
 
 /* width */
 ::-webkit-scrollbar {
-  width: 8px;
-  border-radius: 10px;
+	width: 8px;
+	height: 8px;
+	border-radius: 10px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-bg);
+	background: var(--scrollbar-bg);
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 10px;
+	background: var(--scrollbar-thumb);
+	border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+	background: var(--scrollbar-thumb-hover);
 }

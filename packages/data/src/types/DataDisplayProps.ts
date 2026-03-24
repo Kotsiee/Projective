@@ -2,7 +2,7 @@ import type { CSSProperties, VNode } from 'preact';
 import type { DataSource } from '../core/datasource.ts';
 import type { ColumnDef } from '../core/table.ts';
 
-export type DisplayMode = 'list' | 'grid' | 'table';
+export type DisplayMode = 'list' | 'grid' | 'table' | 'masonry';
 export type ScrollMode = 'container' | 'window';
 
 export interface DataDisplayProps<TOut, TIn = unknown> {
@@ -22,7 +22,7 @@ export interface DataDisplayProps<TOut, TIn = unknown> {
 	renderSkeleton?: (index: number) => VNode;
 
 	/**
-	 * Layout mode: 'list', 'grid', or 'table'.
+	 * Layout mode: 'list', 'grid', 'table', or 'masonry'.
 	 * Default: 'list'
 	 */
 	mode?: DisplayMode;
@@ -42,16 +42,22 @@ export interface DataDisplayProps<TOut, TIn = unknown> {
 	scrollToBottom?: boolean;
 
 	/**
-	 * Number of columns for 'grid' mode.
+	 * Number of columns for 'grid' and 'masonry' modes.
 	 * Default: 3
 	 */
 	gridColumns?: number;
 
 	/**
-	 * Fixed width of a grid item (in pixels). If provided, gridColumns is ignored
-	 * and the number of columns is calculated dynamically based on container width.
+	 * Target width for responsive columns in 'masonry' mode.
+	 * If provided, overrides gridColumns to auto-fit the container.
 	 */
-	gridItemWidth?: number;
+	columnWidth?: number;
+
+	/**
+	 * The gap between items in pixels (used in masonry).
+	 * Default: 16
+	 */
+	gap?: number;
 
 	/**
 	 * Column definitions for 'table' mode.

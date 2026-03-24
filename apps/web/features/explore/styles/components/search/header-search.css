@@ -1,0 +1,28 @@
+.explore-search-header-search {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+	width: 100%;
+}
+
+.explore-search-header-search__header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.explore-search-header-search__title {
+	font-size: 3rem;
+	padding: 0;
+	margin: 0;
+}
+
+.explore-search-header-search__related {
+	font-size: 0.8rem;
+}
+
+.explore-search-header-search__input {
+	width: 100%;
+	display: flex;
+}

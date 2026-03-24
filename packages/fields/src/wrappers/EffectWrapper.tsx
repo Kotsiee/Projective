@@ -6,7 +6,7 @@ import '../styles/wrappers/effect-wrapper.css';
 interface EffectWrapperProps {
 	focused?: boolean | Signal<boolean>;
 	disabled?: boolean | Signal<boolean>;
-	children?: JSX.Element | JSX.Element[]; // To allow wrapping content if needed, though usually it's an overlay
+	children?: JSX.Element | JSX.Element[];
 }
 
 export function EffectWrapper(props: EffectWrapperProps) {
@@ -16,18 +16,6 @@ export function EffectWrapper(props: EffectWrapperProps) {
 	const { ripples } = useRipple();
 
 	if (isDisabled) return null;
-
-	// We attach the click listener to the parent in the Field component usually,
-	// but here we just render the visual effects.
-	// The consumer of EffectWrapper should call addRipple.
-	// Actually, to make it self-contained, we might need to attach to parent,
-	// but for now let's expose the ripple mechanism or assume the parent handles the click
-	// and we just render the ripples.
-
-	// Wait, the requirement says "Handle Ripple effects".
-	// Usually this is an overlay that captures clicks or is absolutely positioned.
-	// Let's make it an overlay that passes through clicks but registers ripples.
-
 	return (
 		<>
 			<div

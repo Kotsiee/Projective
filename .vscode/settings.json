@@ -14,7 +14,7 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "cSpell.words": ["normalise", "PORJECTIVE", "supabase", "tabler"],
+  "cSpell.words": ["normalise", "PROJECTIVE", "supabase", "tabler"],
   "deno.enable": true,
   "deno.lint": true,
   "deno.unstable": [
@@ -35,5 +35,6 @@
   "editor.defaultFormatter": "denoland.vscode-deno",
   "files.exclude": {
     "node_modules": true
-  }
+  },
+  "editor.formatOnSave": true
 }

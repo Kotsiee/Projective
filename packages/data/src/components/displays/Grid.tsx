@@ -9,6 +9,7 @@ interface GridProps<T> {
 	virtualizer: Virtualizer;
 	renderItem: (item: T, index: number) => preact.VNode;
 	columnCount: number;
+	gap?: number;
 	onItemClick?: (key: string, e: MouseEvent) => void;
 }
 
@@ -18,10 +19,9 @@ export function Grid<T>({
 	virtualizer,
 	renderItem,
 	columnCount,
+	gap = 16,
 	onItemClick,
 }: GridProps<T>) {
-	const itemWidth = `${100 / columnCount}%`;
-
 	return (
 		<>
 			{virtualItems.map((virtualRow) => {
@@ -43,18 +43,30 @@ export function Grid<T>({
 						virtualizer={virtualizer}
 						className='data-grid__row'
 					>
-						<div style={{ display: 'flex', width: '100%', height: '100%' }}>
+						<div
+							style={{
+								// Native CSS Grid replaces the manual percentage math
+								display: 'grid',
+								gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+								gap: `${gap}px`,
+								width: '100%',
+								height: '100%',
+								// Applies vertical spacing that the virtualizer naturally measures
+								paddingBottom: `${gap}px`,
+							}}
+						>
 							{rowItems.map((item, colIndex) => (
 								<div
 									key={item.key}
 									className='data-grid__cell'
-									style={{ width: itemWidth }}
+									style={{ minWidth: 0 }} // Prevents blowout from large inner content
 								>
 									<div
 										className={`data-grid__card ${
 											onItemClick ? 'data-grid__card--interactive' : ''
 										} ${item.selected ? 'data-grid__card--selected' : ''}`}
 										onClick={(e) => onItemClick?.(item.key, e)}
+										style={{ height: '100%' }}
 									>
 										{renderItem(item.data, startItemIndex + colIndex)}
 									</div>
