@@ -1,6 +1,6 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { SearchBackendService } from '../../../../../features/explore/services/SearchServiceBackend.ts';
+import { SearchBackendService } from '@features/public/explore/services/SearchServiceBackend.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
@@ -31,7 +31,7 @@ export const handler = define.handlers({
 			return new Response(JSON.stringify(res.data), {
 				headers: { 'Content-Type': 'application/json' },
 			});
-		} catch (err) {
+		} catch (_) {
 			return new Response(JSON.stringify({ error: 'Failed to execute search' }), { status: 500 });
 		}
 	},

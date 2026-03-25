@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { getProviderRedirectUrl } from '@server/auth/oauth.ts';
+import { getProviderRedirectUrl } from '@features/auth/services/oauth.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {

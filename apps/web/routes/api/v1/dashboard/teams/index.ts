@@ -1,9 +1,8 @@
-// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { CreateTeamSchema } from '@contracts/dashboard/teams/new/_validation.ts';
-import { createTeam } from '@server/dashboard/teams/create.ts';
-import { getDashboardTeams } from '@server/dashboard/teams/getTeams.ts';
+import { getDashboardTeams } from '@features/dashboard/teams/services/getTeams.ts';
+import { CreateTeamSchema } from '@features/dashboard/teams/contracts/new/_validation.ts';
+import { createTeam } from '@features/dashboard/teams/services/create.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
@@ -51,7 +50,6 @@ export const handler = define.handlers({
 			let avatarFile: File | undefined;
 			let bannerFile: File | undefined;
 
-			// 1. Parse Input (JSON or FormData)
 			if (contentType.includes('multipart/form-data')) {
 				const formData = await ctx.req.formData();
 				const payloadStr = formData.get('payload')?.toString();
@@ -77,11 +75,9 @@ export const handler = define.handlers({
 				const banner = formData.get('banner');
 				if (banner instanceof File) bannerFile = banner;
 			} else {
-				// Fallback for JSON-only requests (no files)
 				body = await ctx.req.json();
 			}
 
-			// 2. Validate Data
 			const validation = CreateTeamSchema.safeParse(body);
 
 			if (!validation.success) {
@@ -100,7 +96,6 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			// 3. Execute Service
 			const res = await createTeam(
 				validation.data,
 				{

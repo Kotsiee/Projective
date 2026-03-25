@@ -1,0 +1,65 @@
+// apps/web/islands/auth/OnboardingSubmit.tsx
+import { useCallback, useState } from 'preact/hooks';
+import { getCsrfToken } from '@projective/utils';
+import { OnboardingRequest } from '../contracts/onboading.ts';
+
+export default function OnboardingSubmit({
+	firstName,
+	lastName,
+	username,
+	dob,
+	type,
+}: OnboardingRequest) {
+	const [loading, setLoading] = useState(false);
+
+	const handleClick = useCallback(async () => {
+		if (loading) return;
+		setLoading(true);
+
+		try {
+			const csrf = getCsrfToken();
+
+			if (!csrf) {
+				setLoading(false);
+				return;
+			}
+
+			const response = await fetch('/api/v1/auth/onboarding', {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'X-CSRF': csrf,
+				},
+				body: JSON.stringify({ firstName, lastName, username, dob, type }),
+			});
+
+			if (!response.ok) {
+				const errorBody = await response.json().catch(() => null);
+				console.error('Onboarding failed:', errorBody ?? response.statusText);
+				return;
+			}
+
+			const data = await response.json();
+
+			globalThis.location.href = '/dashboard';
+		} catch (err) {
+			console.error('Onboarding error:', err);
+		} finally {
+			setLoading(false);
+		}
+	}, [loading, firstName, lastName, username, dob, type]);
+
+	return (
+		<button
+			type='button'
+			class='onboarding-submit'
+			onClick={handleClick}
+			disabled={loading}
+			aria-busy={loading}
+			aria-label='Create Profile'
+		>
+			{loading ? 'Saving…' : 'Continue'}
+		</button>
+	);
+}

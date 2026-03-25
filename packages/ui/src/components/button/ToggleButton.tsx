@@ -19,7 +19,6 @@ export function ToggleButton(props: ToggleButtonProps) {
 	} = props;
 
 	const handleClick = (e: MouseEvent) => {
-		// Toggle state logic
 		onChange?.(!selected, value);
 		rest.onClick?.(e);
 	};
@@ -34,7 +33,7 @@ export function ToggleButton(props: ToggleButtonProps) {
 
 	return (
 		<Button
-			variant={variant}
+			variant={variant as any}
 			className={classes}
 			aria-pressed={selected}
 			onClick={handleClick}

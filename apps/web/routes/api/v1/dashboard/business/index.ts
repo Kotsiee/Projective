@@ -1,13 +1,11 @@
-// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { CreateBusinessSchema } from '@contracts/dashboard/business/new/_validation.ts';
-import { createBusiness } from '@server/dashboard/business/create.ts';
-import { getDashboardBusinesses } from '@server/dashboard/business/getBusinesses.ts';
+import { getDashboardBusinesses } from '@features/dashboard/business/services/getBusinesses.ts';
+import { CreateBusinessSchema } from '@features/dashboard/business/contracts/new/_validation.ts';
+import { createBusiness } from '@features/dashboard/business/services/create.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
-		// ... (GET handler remains unchanged)
 		const url = new URL(ctx.req.url);
 		const params = {
 			search: url.searchParams.get('search') || '',
@@ -74,11 +72,9 @@ export const handler = define.handlers({
 				const banner = formData.get('banner');
 				if (banner instanceof File) bannerFile = banner;
 			} else {
-				// Fallback
 				body = await ctx.req.json();
 			}
 
-			// 1. Validate Input (Zod)
 			const validation = CreateBusinessSchema.safeParse(body);
 
 			if (!validation.success) {
@@ -97,7 +93,6 @@ export const handler = define.handlers({
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			// 2. Execute Service
 			const res = await createBusiness(
 				validation.data,
 				{

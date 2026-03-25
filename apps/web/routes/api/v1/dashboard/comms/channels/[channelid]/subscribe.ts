@@ -1,7 +1,7 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { subscribeMessages } from '@server/dashboard/comms/subscribeMessages.ts';
 import { getAuthCookies } from '@projective/backend';
+import { subscribeMessages } from '@features/shared/services/comms/subscribeMessages.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {

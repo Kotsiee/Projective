@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { onboarding } from '@server/auth/onboarding.ts';
+import { onboarding } from '@features/auth/services/onboarding.ts';
 import { supabaseClient } from '@projective/backend';
 
 export const handler = define.handlers({

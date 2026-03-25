@@ -1,6 +1,6 @@
 import { define } from '@utils';
-import { registerWithEmail } from '@server/auth/email/register.ts';
 import { setCookie } from '@std/http/cookie';
+import { registerWithEmail } from '@features/auth/services/email/register.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {

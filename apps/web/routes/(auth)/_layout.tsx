@@ -1,12 +1,12 @@
 import { define } from '@utils';
-import AuthLayout from '@islands/pages/auth/authLayout.tsx';
+import AuthLayoutWrapper from './(_islands)/AuthLayoutWrapper.tsx';
 
 export default define.layout(function App(props) {
 	const { Component } = props;
 
 	return (
-		<AuthLayout>
+		<AuthLayoutWrapper>
 			<Component />
-		</AuthLayout>
+		</AuthLayoutWrapper>
 	);
 });

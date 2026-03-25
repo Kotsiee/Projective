@@ -1,7 +1,7 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { getMessages } from '@server/dashboard/comms/getMessages.ts';
-import { sendMessage } from '@server/dashboard/comms/sendMessage.ts';
+import { getMessages } from '@features/shared/services/comms/getMessages.ts';
+import { sendMessage } from '@features/shared/services/comms/sendMessage.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {

@@ -1,5 +1,6 @@
-import { ExploreProvider } from '../../../../features/explore/contexts/ExploreContext.tsx';
-import ExploreSearchIsland from '../../../../features/explore/islands/ExploreSearchIsland.tsx';
+import { ExploreProvider } from '@features/public/explore/contexts/ExploreContext.tsx';
+import ExploreSearchIsland from '@features/public/explore/islands/ExploreSearchIsland.tsx';
+
 /**
  * @interface ExploreSearchWrapperProps
  */

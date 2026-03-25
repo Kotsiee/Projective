@@ -1,6 +1,5 @@
 import { define } from '@utils';
-import { FileService } from '@server/services/files.ts';
-import { supabaseClient } from '@projective/backend';
+import { FileService, supabaseClient } from '@projective/backend';
 
 export const handler = define.handlers({
 	async POST(ctx) {
@@ -15,7 +14,6 @@ export const handler = define.handlers({
 				return new Response('Unauthorized', { status: 401 });
 			}
 
-			// Call the service to generate signed URL
 			const result = await FileService.initUpload(
 				user.id,
 				filename,

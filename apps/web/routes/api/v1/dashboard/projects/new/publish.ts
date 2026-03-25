@@ -1,8 +1,7 @@
-// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { ProjectsBackendService } from 'packages/features/dashboard/projects/services/ProjectsServiceBackend.ts';
-import { CreateProjectSchema } from 'packages/features/dashboard/projects/contracts/new/_validation.ts';
+import { CreateProjectSchema } from '@features/dashboard/projects/contracts/new/_validation.ts';
+import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {
@@ -35,7 +34,6 @@ export const handler = define.handlers({
 			const validation = CreateProjectSchema.safeParse(body);
 
 			if (!validation.success) {
-				// Server-side logging for quick debugging
 				console.error('[publish.ts] Zod Validation Error:', validation.error.flatten());
 
 				return new Response(

@@ -1,6 +1,6 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { switchActiveProfile } from '@server/auth/context.ts';
+import { switchActiveProfile } from '@features/auth/services/context.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {

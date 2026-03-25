@@ -1,5 +1,5 @@
 import { Head } from 'fresh/runtime';
-import VerifyIsland from '@islands/pages/auth/Verify.tsx';
+import VerifyIsland from '@features/auth/islands/Verify.tsx';
 import { State } from '@utils';
 import { getCookies } from '@std/http/cookie';
 import { RenderableProps } from 'preact';

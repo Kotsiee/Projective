@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import { resendVerificationEmail } from '@server/auth/resend.ts';
+import { resendVerificationEmail } from '@features/auth/services/resend.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {

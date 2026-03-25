@@ -1,5 +1,5 @@
-import NewTeamIsland from '@islands/pages/dashboard/teams/NewTeam.tsx';
+import NewTeamIslandWrapper from '../(_islands)/new/NewTeamIslandWrapper.tsx';
 
 export default function NewTeam() {
-	return <NewTeamIsland />;
+	return <NewTeamIslandWrapper />;
 }

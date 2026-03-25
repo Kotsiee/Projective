@@ -1,4 +1,4 @@
-import { NewProjectIsland } from 'packages/features/dashboard/projects/client.ts';
+import NewProjectIsland from '@features/dashboard/projects/islands/NewProject.tsx';
 
 export default function NewProjectIslandWrapper() {
 	return <NewProjectIsland />;

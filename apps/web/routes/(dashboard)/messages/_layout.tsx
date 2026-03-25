@@ -1,5 +1,5 @@
 import { define } from '@utils';
-import MessagesLayout from '@islands/pages/dashboard/messages/MessagesLayout.tsx';
+import MessagesLayout from '@features/dashboard/messages/islands/MessagesLayout.tsx';
 
 export default define.layout(function App({ Component }) {
 	return (

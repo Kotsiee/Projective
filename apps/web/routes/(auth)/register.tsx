@@ -1,5 +1,5 @@
 import { Head } from 'fresh/runtime';
-import RegisterIsland from '@islands/pages/auth/Register.tsx';
+import RegisterIsland from '@features/auth/islands/Register.tsx';
 
 export default function Login() {
 	return (

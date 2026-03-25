@@ -1,7 +1,7 @@
 /* #region Imports */
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { getFiles } from '@server/dashboard/comms/getFiles.ts';
+import { getFiles } from '@features/shared/services/comms/getFiles.ts';
 /* #endregion */
 
 /* #region Route Handler */

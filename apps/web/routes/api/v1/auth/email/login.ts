@@ -1,7 +1,7 @@
 import { define } from '@utils';
-import { loginWithEmail } from '@server/auth/email/login.ts';
 import { setCookie } from '@std/http/cookie';
 import { setAuthCookies } from '@projective/backend';
+import { loginWithEmail } from '@features/auth/services/email/login.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {
@@ -11,7 +11,6 @@ export const handler = define.handlers({
 		const reqUrl = new URL(ctx.req.url);
 		const verifyUrl = new URL('/verify', reqUrl).href;
 
-		// IMPORTANT: keep a single Headers instance and append cookies to it.
 		const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
 
 		if (!res.ok) {
@@ -19,7 +18,6 @@ export const handler = define.handlers({
 			return new Response(JSON.stringify({ error: res.error }), { status, headers });
 		}
 
-		// If the user isn’t verified, set a short-lived helper cookie and tell the client to go to /verify.
 		const user = res.data.user;
 		const unverified = user && !(user.email_confirmed_at ?? user.confirmed_at);
 
@@ -36,14 +34,12 @@ export const handler = define.handlers({
 					maxAge: 10 * 60,
 				});
 			}
-			// Don’t replace headers—reuse the same instance so previously appended Set-Cookie aren’t lost.
 			return new Response(JSON.stringify({ ok: true, redirectTo: verifyUrl }), {
 				status: 200,
 				headers,
 			});
 		}
 
-		// If we have a session, persist tokens via cookies (append both, plus CSRF).
 		if (res.data.session) {
 			const { access_token, refresh_token } = res.data.session;
 			if (!access_token || !refresh_token) {
@@ -55,7 +51,6 @@ export const handler = define.handlers({
 					},
 				);
 			}
-			// Derive secure + naming from the request URL/host inside the helper.
 			setAuthCookies(headers, {
 				accessToken: access_token,
 				refreshToken: refresh_token,

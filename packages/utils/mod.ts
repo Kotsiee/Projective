@@ -1,5 +1,9 @@
-export * from './math.ts';
-export * from './date-math.ts';
-export * from './time-math.ts';
-export * from './processors/mock-wasm.ts';
-export * from './QuillParser.ts';
+export * from './src/cookies.ts';
+export * from './src/pipes/StringModifier.ts';
+export * from './src/math/math.ts';
+export * from './src/math/date-math.ts';
+export * from './src/math/time-math.ts';
+export * from './src/processors/mock-wasm.ts';
+
+export * from './src/markdown/index.ts';
+export * from './src/validation/index.ts';

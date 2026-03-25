@@ -1,5 +1,5 @@
-import NewBusinessIsland from '@islands/pages/dashboard/business/NewBusiness.tsx';
+import BusinessesIslandWrapper from '../(_islands)/BusinessIslandWrapper.tsx';
 
 export default function Business() {
-	return <NewBusinessIsland />;
+	return <BusinessesIslandWrapper />;
 }

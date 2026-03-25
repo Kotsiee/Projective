@@ -1,5 +1,5 @@
-import { ProjectsLayoutIsland } from 'packages/features/dashboard/projects/client.ts';
 import { ComponentChildren } from 'preact';
+import ProjectsLayoutIsland from '@features/dashboard/projects/islands/ProjectsLayout.tsx';
 
 type ProjectsLayoutProps = {
 	url: URL;

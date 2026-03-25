@@ -1,6 +1,6 @@
 // apps/web/routes/api/v1/auth/refresh.ts
 import { define } from '@utils';
-import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
+import { maybeRefreshFromRequest } from '@features/auth/services/refresh.ts';
 import { clearAuthCookies, setAuthCookies } from '@projective/backend';
 
 export const handler = define.handlers({

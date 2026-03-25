@@ -1,6 +1,6 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { ProjectsBackendService } from 'packages/features/dashboard/projects/server.ts';
+import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {

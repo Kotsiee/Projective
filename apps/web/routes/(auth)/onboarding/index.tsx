@@ -1,5 +1,5 @@
 import { Head } from 'fresh/runtime';
-import OnboardingIsland from '@islands/pages/auth/Onboarding.tsx';
+import OnboardingIsland from '@features/auth/islands/Onboarding.tsx';
 
 export default function Onboarding() {
 	return (

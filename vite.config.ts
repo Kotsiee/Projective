@@ -34,7 +34,6 @@ export default defineConfig({
 			'@types': r('./apps/web/types/'),
 			'@utils': r('./apps/web/utils.ts'),
 
-			'@projective/shared': r('./packages/shared/mod.ts'),
 			'@projective/backend': r('./packages/backend/mod.ts'),
 			'@projective/ui': r('./packages/ui/mod.ts'),
 			'@projective/utils': r('./packages/utils/mod.ts'),
@@ -42,7 +41,6 @@ export default defineConfig({
 			'@projective/fields': r('./packages/fields/mod.ts'),
 			'@projective/data': r('./packages/data/mod.ts'),
 			'@projective/charts': r('./packages/charts/mod.ts'),
-			'@projective/features/': r('./packages/features/'),
 		},
 	},
 
@@ -50,12 +48,10 @@ export default defineConfig({
 		exclude: [
 			'@projective/ui',
 			'@projective/fields',
-			'@projective/shared',
 			'@projective/utils',
 			'@projective/types',
 			'@projective/data',
 			'@projective/charts',
-			'@projective/features',
 		],
 	},
 

@@ -1,12 +1,11 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
-import { ProjectsBackendService } from 'packages/features/dashboard/projects/server.ts';
-import { CreateProjectSchema } from 'packages/features/dashboard/projects/contracts/new/_validation.ts';
+import { CreateProjectSchema } from '@features/dashboard/projects/contracts/new/_validation.ts';
+import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
 
 export const handler = define.handlers({
 	async POST(ctx) {
 		try {
-			// 1. Parse FormData instead of JSON to support file uploads
 			const formData = await ctx.req.formData();
 
 			const rawData = formData.get('data');
@@ -19,7 +18,6 @@ export const handler = define.handlers({
 				);
 			}
 
-			// Parse the stringified JSON payload
 			let body;
 			try {
 				body = JSON.parse(rawData);
@@ -30,7 +28,6 @@ export const handler = define.handlers({
 				);
 			}
 
-			// 2. Validate Payload
 			const validation = CreateProjectSchema.safeParse(body);
 
 			if (!validation.success) {
@@ -64,7 +61,6 @@ export const handler = define.handlers({
 				{ getClient },
 			);
 
-			// 5. Response
 			if (!res.ok) {
 				return new Response(JSON.stringify({ error: res.error }), {
 					status: res.error.status ?? 400,

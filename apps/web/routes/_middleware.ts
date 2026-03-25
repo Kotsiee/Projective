@@ -1,6 +1,6 @@
 import { define } from '@utils';
-import { maybeRefreshFromRequest } from '@server/auth/refresh.ts';
-import { isOnboarded } from '@server/auth/onboarding.ts';
+import { maybeRefreshFromRequest } from '@features/auth/services/refresh.ts';
+import { isOnboarded } from '@features/auth/services/onboarding.ts';
 import {
 	clearAuthCookies,
 	getAuthCookies,

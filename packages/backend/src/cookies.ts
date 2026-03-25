@@ -3,7 +3,6 @@ import { type Cookie, deleteCookie, getCookies, setCookie } from '@std/http/cook
 type SetAuthOpts = {
 	accessToken: string;
 	refreshToken: string;
-	/** Pass the current request URL so we can decide secure + naming correctly. */
 	requestUrl: URL;
 };
 

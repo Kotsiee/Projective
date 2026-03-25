@@ -6,4 +6,5 @@ export * from './src/components/splitter/index.ts';
 export * from './src/components/stepper/index.ts';
 export * from './src/components/button/index.ts';
 export * from './src/components/layouts/index.ts';
+export * from './src/components/card/Card.tsx';
 export * from './src/hooks/useRipple.ts';

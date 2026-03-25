@@ -1,5 +1,5 @@
-import TeamsIsland from '@islands/pages/dashboard/teams/TeamsIsland.tsx';
+import TeamsIslandWrapper from './(_islands)/TeamsIslandWrapper.tsx';
 
 export default function Teams() {
-	return <TeamsIsland />;
+	return <TeamsIslandWrapper />;
 }
