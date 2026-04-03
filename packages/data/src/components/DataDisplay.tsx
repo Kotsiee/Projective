@@ -21,6 +21,7 @@ import { DataDisplayProps } from '../types/DataDisplayProps.ts';
 export function DataDisplay<TOut, TIn>({
 	dataSource,
 	renderItem,
+	renderSkeleton,
 	mode = 'list',
 	scrollMode = 'container',
 	scrollToBottom = false,
@@ -68,7 +69,6 @@ export function DataDisplay<TOut, TIn>({
 	const totalCount = manager.dataset.value.totalCount ?? (activeOrder.length + 100);
 	const [containerWidth, setContainerWidth] = useState(0);
 
-	// FIX 1: Move the calculation *above* the Virtualizer setup so we don't have to fake the initial count
 	const effectiveGridColumns = useMemo(() => {
 		if (mode === 'grid' && columnWidth && containerWidth > 0) {
 			return Math.max(1, Math.floor((containerWidth + gap) / (columnWidth + gap)));
@@ -80,7 +80,6 @@ export function DataDisplay<TOut, TIn>({
 		? 0
 		: (mode === 'grid' ? Math.ceil(totalCount / effectiveGridColumns) : totalCount);
 
-	// FIX 2: Pass the reactive virtualRowCount properly
 	const { parentRef, virtualizer, getItems, getTotalSize } = useVirtual({
 		count: virtualRowCount,
 		estimateSize: () => estimateHeight,
@@ -175,6 +174,7 @@ export function DataDisplay<TOut, TIn>({
 									virtualItems={virtualItems}
 									virtualizer={virtualizer}
 									renderItem={safeRenderItem}
+									renderSkeleton={renderSkeleton}
 									onItemClick={handleItemClick}
 									interactive={interactive}
 								/>

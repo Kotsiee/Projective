@@ -55,7 +55,19 @@ export function GanttTaskList({ store, width }: GanttTaskListProps) {
 	};
 
 	return (
-		<aside class='gantt-task-list'>
+		<aside
+			class='gantt-task-list'
+			style={{
+				flex: '0 0 320px',
+				width: '320px',
+				display: 'flex',
+				flexDirection: 'column',
+				borderRight: '1px solid var(--border-color)',
+				backgroundColor: 'var(--card)',
+				overflow: 'hidden',
+				zIndex: 10,
+			}}
+		>
 			<div class='gantt-task-list__header'>
 				<span class='gantt-task-list__header__title'>Stages</span>
 			</div>

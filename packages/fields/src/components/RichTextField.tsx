@@ -151,7 +151,7 @@ export function RichTextField(props: RichTextFieldProps) {
 			}
 
 			if (!parserRef.current) {
-				const { MarkdownParser } = await import('../../../utils/QuillParser.ts');
+				const { MarkdownParser } = await import('../../../utils/src/markdown/QuillParser.ts');
 				parserRef.current = new MarkdownParser();
 			}
 

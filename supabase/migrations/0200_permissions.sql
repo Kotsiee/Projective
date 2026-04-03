@@ -85,17 +85,21 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA comms
 GRANT ALL ON SEQUENCES TO authenticated;
 
 -- Schema: FILES
-GRANT USAGE ON SCHEMA files TO authenticated;
+GRANT USAGE ON SCHEMA files TO anon, authenticated, service_role;
 
-GRANT ALL ON ALL TABLES IN SCHEMA files TO authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA files TO authenticated,
+service_role;
 
-GRANT ALL ON ALL SEQUENCES IN SCHEMA files TO authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA files TO authenticated,
+service_role;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA files
-GRANT ALL ON TABLES TO authenticated;
+GRANT ALL ON TABLES TO authenticated,
+service_role;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA files
-GRANT ALL ON SEQUENCES TO authenticated;
+GRANT ALL ON SEQUENCES TO authenticated,
+service_role;
 
 -- -----------------------------------------------------------------------------
 -- GRANTS: AUTHENTICATED + SERVICE_ROLE (No Anon)
@@ -121,37 +125,50 @@ GRANT ALL ON SEQUENCES TO authenticated,
 service_role;
 
 -- -----------------------------------------------------------------------------
--- Schema: SEARCH
--- Note: Requires public access because the Explore/Search pages are 
--- available to unauthenticated guests for SEO and discovery.
--- service_role is included so Edge Functions can update vector embeddings.
+-- Schema: SEARCH (CRITICAL: READ-ONLY FOR CLIENTS)
+-- Note: Requires public access for SEO and discovery.
+-- Clients (anon/authenticated) ONLY get SELECT privileges to prevent index manipulation.
+-- service_role gets ALL privileges for Edge Functions and background workers.
 -- -----------------------------------------------------------------------------
 GRANT USAGE ON SCHEMA search TO anon, authenticated, service_role;
 
-GRANT ALL ON ALL TABLES IN SCHEMA search TO anon,
-authenticated,
-service_role;
+-- 1. Read-Only for Clients
+GRANT SELECT ON ALL TABLES IN SCHEMA search TO anon, authenticated;
 
-GRANT ALL ON ALL SEQUENCES IN SCHEMA search TO anon,
-authenticated,
-service_role;
+GRANT
+SELECT
+    ON ALL SEQUENCES IN SCHEMA search TO anon,
+    authenticated;
 
--- Ensure future tables/indexes also inherit these permissions
+-- 2. Full Access for Service Role
+GRANT ALL ON ALL TABLES IN SCHEMA search TO service_role;
+
+GRANT ALL ON ALL SEQUENCES IN SCHEMA search TO service_role;
+
+-- 3. Ensure future tables/indexes inherit these Read-Only permissions
 ALTER DEFAULT PRIVILEGES IN SCHEMA search
-GRANT ALL ON TABLES TO anon,
-authenticated,
-service_role;
+GRANT
+SELECT ON TABLES TO anon, authenticated;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA search
-GRANT ALL ON SEQUENCES TO anon,
-authenticated,
-service_role;
+GRANT
+SELECT ON SEQUENCES TO anon, authenticated;
 
--- Grant execute permissions on all current and future Search RPCs
 ALTER DEFAULT PRIVILEGES IN SCHEMA search
-GRANT EXECUTE ON ROUTINES TO anon,
+GRANT ALL ON TABLES TO service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA search
+GRANT ALL ON SEQUENCES TO service_role;
+
+-- 4. RPCs (Functions)
+-- Keep EXECUTE so clients can run future Semantic Search (pgvector) RPC functions.
+ALTER DEFAULT PRIVILEGES IN SCHEMA search
+GRANT
+EXECUTE ON ROUTINES TO anon,
 authenticated,
 service_role;
 
--- (Optional but recommended) Explicitly grant execute on existing RPCs
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA search TO anon, authenticated, service_role;
+GRANT
+EXECUTE ON ALL FUNCTIONS IN SCHEMA search TO anon,
+authenticated,
+service_role;

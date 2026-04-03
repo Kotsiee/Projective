@@ -1,349 +1,181 @@
-import {
-	Deps,
-	fail,
-	normaliseSupabaseError,
-	normaliseUnknownError,
-	ok,
-	Result,
-	supabaseClient,
-} from '@projective/backend';
-import {
-	BusinessSearchParams,
-	FreelancerSearchParams,
-	ProjectSearchParams,
-	SearchResult,
-	ServiceSearchParams,
-	TeamSearchParams,
-	UserSearchParams,
-} from '../contracts/Search.ts';
+import { SupabaseClient } from 'supabaseClient';
+import { ProjectResponse } from '../contracts/ProjectResponse.ts';
 
+// #region 1. Interfaces
 export interface PaginatedSearchQuery {
 	query: string;
 	limit: number;
 	offset: number;
 	countOnly: boolean;
+	id?: string;
 }
 
+export interface Deps {
+	getClient?: () => Promise<SupabaseClient>;
+}
+// #endregion
+
 export class SearchBackendService {
+	// #region 2. Helper Methods
 	private static buildArgs(args: Record<string, any>) {
 		return Object.fromEntries(
 			Object.entries(args).filter(([_, v]) => v !== null && v !== undefined),
 		);
 	}
+	// #endregion
+
+	// #region 3. Main Router
+	static async search(entity: string, params: PaginatedSearchQuery, deps: Deps = {}) {
+		if (!deps.getClient) {
+			return { ok: false, error: { status: 500, message: 'Missing database client context' } };
+		}
+
+		switch (entity) {
+			case 'people':
+				return await this.searchPeople(params, deps);
+			case 'projects':
+				return await this.searchProjects(params, deps);
+			case 'services':
+				return await this.searchServices(params, deps);
+			default:
+				return { ok: false, error: { status: 400, message: `Invalid search entity: ${entity}` } };
+		}
+	}
+	// #endregion
+
+	// #region 4. Entity Search Implementations
+	private static async searchPeople(params: PaginatedSearchQuery, deps: Deps) {
+		const client = await deps.getClient!();
+
+		let query = client
+			.schema('search')
+			.from('profiles_index')
+			.select(
+				params.countOnly ? '*' : 'entity_id, entity_type, display_name, headline, metadata',
+				{
+					count: 'exact',
+					head: params.countOnly,
+				},
+			)
+			.eq('is_active', true);
+
+		if (params.query) {
+			query = query.textSearch('fts', params.query, { config: 'english', type: 'websearch' });
+		}
+
+		if (!params.countOnly) {
+			query = query.range(params.offset, params.offset + params.limit - 1);
+		}
+
+		const { data, count, error } = await query;
+		if (error) return { ok: false, error };
+
+		return {
+			ok: true,
+			data: {
+				items: params.countOnly ? [] : data || [],
+				meta: { totalCount: count || 0 },
+			},
+		};
+	}
 
 	/**
-	 * @function searchAndHydrate
-	 * Orchestrates RPC searching, count evaluation, array slicing, and hydration.
+	 * @private
+	 * @description Queries the search.projects_index table.
+	 * Security Note: RLS policies on projects.projects will cascade here if configured properly,
+	 * but currently the index is filtered strictly by is_active (public visibility).
 	 */
-	static async searchAndHydrate(
-		entity: string,
-		params: PaginatedSearchQuery,
-		deps: Deps = {},
-	): Promise<Result<{ items: any[]; meta: { totalCount: number } }>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
+	private static async searchProjects(params: PaginatedSearchQuery, deps: Deps) {
+		const client = await deps.getClient!();
 
-			let searchRes;
-			const fetchCount = params.offset + params.limit;
+		const selectColumns = params.countOnly
+			? 'project_id'
+			: 'project_id, title, description, thumbnail_url, status, is_active, industry_category_id, target_project_start_date, created_at, owner_id, owner_type, owner_name, owner_username, owner_avatar_url, nda_required, ip_ownership_mode, languages, locations, skills, stages, roles';
 
-			if (entity === 'teams') {
-				searchRes = await this.searchTeams({ query: params.query, limit: fetchCount }, {
-					getClient,
-				});
-			} else if (entity === 'projects') {
-				searchRes = await this.searchProjects({ query: params.query, limit: fetchCount }, {
-					getClient,
-				});
-			} else {
-				return fail('bad_request', `Unsupported search entity: ${entity}`, 400);
-			}
+		let query = client
+			.schema('search')
+			.from('projects_index')
+			.select(selectColumns, { count: 'exact', head: params.countOnly })
+			.eq('is_active', true);
 
-			if (!searchRes.ok) return searchRes;
-
-			const totalCount = searchRes.data.length;
-
-			if (params.countOnly) {
-				return ok({ items: [], meta: { totalCount } });
-			}
-
-			const paginatedResults = searchRes.data.slice(params.offset, params.offset + params.limit);
-			const ids = paginatedResults.map((r: any) => r.id);
-
-			if (ids.length === 0) {
-				return ok({ items: [], meta: { totalCount } });
-			}
-
-			let items: any[] = [];
-
-			if (entity === 'teams') {
-				const { data: teams, error: dbError } = await supabase
-					.schema('org')
-					.from('teams')
-					.select('id, name, headline, avatar_url, banner_url')
-					.in('id', ids);
-
-				if (dbError) throw dbError;
-
-				items = (teams || []).map((t: any) => ({
-					id: t.id,
-					type: 'Team',
-					title: t.name,
-					description: t.headline || 'No description provided.',
-					owner: { name: t.name, profilePictureUrl: t.avatar_url },
-					bannerUrl: t.banner_url || `https://picsum.photos/seed/${t.id}/400/300`,
-					rating: 4.5,
-					reviews: 12,
-					price: '£50/hr',
-				}));
-			} else if (entity === 'projects') {
-				const { data: projects, error: dbError } = await supabase
-					.schema('projects')
-					.from('projects')
-					.select(
-						'id, title, description, thumbnail_url, currency, owner_user_id, client_business_id',
-					)
-					.in('id', ids);
-
-				if (dbError) throw dbError;
-
-				const userIds = [
-					...new Set((projects || []).map((p: any) => p.owner_user_id).filter(Boolean)),
-				];
-				const businessIds = [
-					...new Set((projects || []).map((p: any) => p.client_business_id).filter(Boolean)),
-				];
-
-				const { data: users } = await supabase
-					.schema('org')
-					.from('users_public')
-					.select('user_id, first_name, last_name, avatar_url')
-					.in('user_id', userIds);
-
-				const { data: businesses } = await supabase
-					.schema('org')
-					.from('business_profiles')
-					.select('id, name, logo_url')
-					.in('id', businessIds);
-
-				const userMap = new Map(users?.map((u: any) => [u.user_id, u]));
-				const businessMap = new Map(businesses?.map((b: any) => [b.id, b]));
-
-				items = (projects || []).map((p: any) => {
-					const business = p.client_business_id ? businessMap.get(p.client_business_id) : null;
-					const user = p.owner_user_id ? userMap.get(p.owner_user_id) : null;
-
-					const ownerName = business
-						? business.name
-						: user
-						? `${user.first_name} ${user.last_name}`.trim()
-						: 'Unknown Client';
-
-					const ownerAvatar = business ? business.logo_url : user ? user.avatar_url : undefined;
-
-					return {
-						id: p.id,
-						type: 'Project',
-						title: p.title,
-						description: typeof p.description === 'string' ? p.description : 'Open gig',
-						owner: {
-							name: ownerName,
-							profilePictureUrl: ownerAvatar,
-						},
-						bannerUrl: p.thumbnail_url || `https://picsum.photos/seed/${p.id}/400/300`,
-						rating: 0,
-						reviews: 0,
-						price: p.currency,
-					};
-				});
-			}
-
-			return ok({ items, meta: { totalCount } });
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
+		if (params.id) {
+			query = query.eq('project_id', params.id);
+		} else if (params.query) {
+			query = query.textSearch('fts', params.query, { config: 'english', type: 'websearch' });
 		}
-	}
 
-	static async searchTeams(
-		params: TeamSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
+		if (!params.countOnly) {
+			query = query.range(params.offset, params.offset + params.limit - 1);
+		}
 
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-				min_rate: params.minRate,
-				max_rate: params.maxRate,
+		const { data, count, error } = await query;
+		if (error) return { ok: false, error };
+
+		// Map the flat database row to the nested ProjectResponse structure
+		const formattedItems: ProjectResponse[] = params.countOnly
+			? []
+			: (data || []).map((item: any) => {
+				// Extract owner fields to construct the nested object
+				const {
+					owner_id,
+					owner_type,
+					owner_name,
+					owner_username,
+					owner_avatar_url,
+					...projectData
+				} = item;
+
+				return {
+					...projectData,
+					owner: {
+						id: owner_id,
+						type: owner_type,
+						name: owner_name,
+						username: owner_username,
+						avatar_url: owner_avatar_url,
+					},
+				} as ProjectResponse;
 			});
 
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_teams', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
-		}
+		return {
+			ok: true,
+			data: {
+				items: formattedItems,
+				meta: { totalCount: count || 0 },
+			},
+		};
 	}
 
-	static async searchFreelancers(
-		params: FreelancerSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
+	private static async searchServices(params: PaginatedSearchQuery, deps: Deps) {
+		const client = await deps.getClient!();
 
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-				min_rate: params.minRate,
-				max_rate: params.maxRate,
-				required_skills: params.skills?.length ? params.skills : undefined,
-			});
+		let query = client
+			.schema('search')
+			.from('services_index')
+			.select(params.countOnly ? '*' : 'service_id, title, avg_rating', {
+				count: 'exact',
+				head: params.countOnly,
+			})
+			.eq('is_public', true);
 
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_freelancers', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
+		if (params.query) {
+			query = query.textSearch('fts', params.query, { config: 'english', type: 'websearch' });
 		}
-	}
 
-	static async searchUsers(
-		params: UserSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
-
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-				target_country: params.country,
-			});
-
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_users', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
+		if (!params.countOnly) {
+			query = query.range(params.offset, params.offset + params.limit - 1);
 		}
+
+		const { data, count, error } = await query;
+		if (error) return { ok: false, error };
+
+		return {
+			ok: true,
+			data: {
+				items: params.countOnly ? [] : data || [],
+				meta: { totalCount: count || 0 },
+			},
+		};
 	}
-
-	static async searchBusinesses(
-		params: BusinessSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
-
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-				target_country: params.country,
-			});
-
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_businesses', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
-		}
-	}
-
-	static async searchProjects(
-		params: ProjectSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
-
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-				target_industry_id: params.industryId,
-			});
-
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_projects', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
-		}
-	}
-
-	static async searchServices(
-		params: ServiceSearchParams,
-		deps: Deps = {},
-	): Promise<Result<SearchResult[]>> {
-		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
-
-			const args = this.buildArgs({
-				search_query: params.query || '',
-				match_count: params.limit || 20,
-			});
-
-			const { data, error } = await supabase
-				.schema('search')
-				.rpc('simple_search_services', args);
-
-			if (error) {
-				const n = normaliseSupabaseError(error);
-				return fail(n.code, n.message, 400);
-			}
-
-			return ok(data as SearchResult[]);
-		} catch (err) {
-			const n = normaliseUnknownError(err);
-			return fail(n.code, n.message, 500);
-		}
-	}
+	// #endregion
 }

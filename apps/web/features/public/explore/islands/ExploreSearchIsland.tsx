@@ -1,9 +1,9 @@
 import '../styles/islands/search.css';
 import ExploreSearchHeaderActions from '../components/search/header-actions.tsx';
 import ExploreSearchHeaderSearch from '../components/search/header-search.tsx';
-import ExploreSearchResults from '../components/search/results.tsx';
 import ExploreSearchFilters from '../components/search/filters.tsx';
 import { useExploreContext } from '../contexts/ExploreContext.tsx';
+import ExploreSearchResults from '../components/search/results/results.tsx';
 
 /**
  * @function ExploreSearchIsland
@@ -11,10 +11,9 @@ import { useExploreContext } from '../contexts/ExploreContext.tsx';
  * Reacts to global context state to mount/unmount the sidebar.
  */
 export default function ExploreSearchIsland() {
-	const { isFiltersOpen, searchTab } = useExploreContext();
+	const { isFiltersOpen, searchType } = useExploreContext();
 
-	// Only show filters if toggled ON and we are NOT in the federated carousel view
-	const showFilters = isFiltersOpen.value && searchTab.value !== 'all';
+	const showFilters = isFiltersOpen.value && searchType.value !== 'all';
 
 	return (
 		<div class='explore-search'>

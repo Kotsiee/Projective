@@ -1,6 +1,6 @@
 import { Head } from 'fresh/runtime';
 import { State } from '@utils';
-import Providers from '@islands/Providers.tsx';
+import Providers from './(_islands)/Providers.tsx';
 
 export default function App(
 	ctx: { Component: preact.ComponentType; stateTheme?: 'light' | 'dark'; state: State },

@@ -12,6 +12,8 @@ export const handler = define.handlers({
 			countOnly: url.searchParams.get('countOnly') === 'true',
 			limit: parseInt(url.searchParams.get('limit') || '20', 10),
 			offset: parseInt(url.searchParams.get('offset') || '0', 10),
+			// NEW: Support direct ID lookups for deep-linking
+			id: url.searchParams.get('id') || undefined,
 		};
 
 		try {
@@ -19,7 +21,7 @@ export const handler = define.handlers({
 				// deno-lint-ignore no-explicit-any
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-			const res = await SearchBackendService.searchAndHydrate(entity, params, { getClient });
+			const res = await SearchBackendService.search(entity, params, { getClient });
 
 			if (!res.ok) {
 				return new Response(JSON.stringify({ error: res.error }), {

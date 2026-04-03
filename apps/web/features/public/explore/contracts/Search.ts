@@ -17,56 +17,40 @@ export interface SearchResult {
 export interface BaseSearchParams {
 	query?: string;
 	limit?: number;
+	offset?: number;
 }
 // #endregion
 
-// #region 3. Entity-Specific Search Parameters
 /**
- * @interface TeamSearchParams
- * @description Filter parameters for searching teams.
+ * @interface PeopleSearchParams extends BaseSearchParams {
+
+ * @description Filter parameters for searching people.
  */
-export interface TeamSearchParams extends BaseSearchParams {
+export interface PeopleSearchParams extends BaseSearchParams {
 	minRate?: number;
 	maxRate?: number;
+	type?: string; // Freelancer, Agency, etc.
+	skills?: string;
+	serviceTypes?: string;
+	location?: string;
+	languages?: string[];
 }
 
-/**
- * @interface FreelancerSearchParams
- * @description Filter parameters for searching freelancers.
- */
-export interface FreelancerSearchParams extends BaseSearchParams {
-	minRate?: number;
-	maxRate?: number;
-	skills?: string[];
+export interface ProjectsSearchParams extends BaseSearchParams {
+	category?: string;
+	budgetMin?: number;
+	budgetMax?: number;
+	durationMin?: number;
+	durationMax?: number;
+	skills?: string;
 }
 
-/**
- * @interface UserSearchParams
- * @description Filter parameters for searching users (social/people).
- */
-export interface UserSearchParams extends BaseSearchParams {
-	country?: string;
+export interface ServicesSearchParams extends BaseSearchParams {
+	type?: string; // File, Session, Maintenance, etc.
+	revisions?: number;
+	priceMin?: number;
+	priceMax?: number;
+	languages?: string[];
 }
 
-/**
- * @interface BusinessSearchParams
- * @description Filter parameters for searching business profiles.
- */
-export interface BusinessSearchParams extends BaseSearchParams {
-	country?: string;
-}
-
-/**
- * @interface ProjectSearchParams
- * @description Filter parameters for searching open projects/gigs.
- */
-export interface ProjectSearchParams extends BaseSearchParams {
-	industryId?: string;
-}
-
-/**
- * @interface ServiceSearchParams
- * @description Filter parameters for searching marketplace services/portfolios.
- */
-export interface ServiceSearchParams extends BaseSearchParams {}
-// #endregion
+export type SearchParams = PeopleSearchParams | ProjectsSearchParams | ServicesSearchParams;

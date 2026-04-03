@@ -1,79 +1,74 @@
 --------------------------------------------------------
--- SCHEMA: SEARCH (Hybrid Vector Discovery)
+-- SCHEMA: SEARCH (Unified Hybrid Vector Discovery)
 --------------------------------------------------------
 
--- Enable pgvector extension
+-- Enable extensions
 CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- #region 1. TABLE DEFINITIONS & INDEXES
 
--- 1A. TEAMS
-CREATE TABLE search.teams_index (
-    team_id uuid PRIMARY KEY REFERENCES org.teams(id) ON DELETE CASCADE,
-    embedding vector(1536),
-    hourly_rate_avg integer DEFAULT 0,
-    member_count integer DEFAULT 1,
-    avg_rating numeric(3,2) DEFAULT 0.0,
+-- 1A. THE "PEOPLE" PILLAR: Unified Profiles Index
+-- Consolidates Teams, Businesses, Freelancers, and Users into one table.
+CREATE TYPE search.profile_entity_type AS ENUM ('user', 'freelancer', 'business', 'team');
+
+CREATE TABLE search.profiles_index (
+    entity_id uuid NOT NULL,
+    entity_type search.profile_entity_type NOT NULL,
+    display_name text NOT NULL,
+    headline text,
+    fts tsvector, -- For rapid full-text keyword matching
+    embedding vector(1536), -- For semantic similarity
+    metadata jsonb DEFAULT '{}'::jsonb, -- Stores type-specific data (hourly_rate, plan, skills)
     is_active boolean DEFAULT true,
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone DEFAULT now(),
+    PRIMARY KEY (entity_id, entity_type)
 );
-CREATE INDEX idx_teams_vector ON search.teams_index USING hnsw (embedding vector_cosine_ops);
 
--- 1B. FREELANCERS
-CREATE TABLE search.freelancers_index (
-    user_id uuid PRIMARY KEY REFERENCES org.freelancer_profiles(user_id) ON DELETE CASCADE,
-    embedding vector(1536),
-    hourly_rate integer,
-    availability_status text,
-    skills text[] DEFAULT '{}'::text[],
-    avg_rating numeric(3,2) DEFAULT 0.0,
-    updated_at timestamp with time zone DEFAULT now()
-);
-CREATE INDEX idx_freelancers_vector ON search.freelancers_index USING hnsw (embedding vector_cosine_ops);
+-- Indexes for hybrid search on profiles
+CREATE INDEX idx_profiles_vector ON search.profiles_index USING hnsw (embedding vector_cosine_ops);
 
--- 1C. USERS (Social/LinkedIn Mode)
-CREATE TABLE search.users_index (
-    user_id uuid PRIMARY KEY REFERENCES org.users_public(user_id) ON DELETE CASCADE,
-    embedding vector(1536),
-    country text,
-    is_active boolean DEFAULT true,
-    updated_at timestamp with time zone DEFAULT now()
-);
-CREATE INDEX idx_users_vector ON search.users_index USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX idx_profiles_fts ON search.profiles_index USING GIN (fts);
 
--- 1D. BUSINESSES
-CREATE TABLE search.businesses_index (
-    business_id uuid PRIMARY KEY REFERENCES org.business_profiles(id) ON DELETE CASCADE,
-    embedding vector(1536),
-    country text,
-    plan text,
-    updated_at timestamp with time zone DEFAULT now()
-);
-CREATE INDEX idx_businesses_vector ON search.businesses_index USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX idx_profiles_type ON search.profiles_index (entity_type);
 
--- 1E. SERVICES (Portfolios)
-CREATE TABLE search.services_index (
-    service_id uuid PRIMARY KEY REFERENCES org.portfolios(id) ON DELETE CASCADE,
-    embedding vector(1536),
-    is_public boolean DEFAULT true,
-    avg_rating numeric(3,2) DEFAULT 0.0,
-    updated_at timestamp with time zone DEFAULT now()
-);
-CREATE INDEX idx_services_vector ON search.services_index USING hnsw (embedding vector_cosine_ops);
-
--- 1F. PROJECTS
+-- 1B. THE "PROJECTS" PILLAR
 CREATE TABLE search.projects_index (
-    project_id uuid PRIMARY KEY REFERENCES projects.projects(id) ON DELETE CASCADE,
-    embedding vector(1536),
-    industry_id uuid,
+    project_id uuid PRIMARY KEY REFERENCES projects.projects (id) ON DELETE CASCADE,
+    title text NOT NULL,
+    fts tsvector,
+    embedding vector (1536),
+    industry_category_id uuid,
     status text,
     is_active boolean DEFAULT false,
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp
+    with
+        time zone DEFAULT now()
 );
+
 CREATE INDEX idx_projects_vector ON search.projects_index USING hnsw (embedding vector_cosine_ops);
 
--- #endregion
+CREATE INDEX idx_projects_fts ON search.projects_index USING GIN (fts);
 
+-- 1C. THE "SERVICES" PILLAR (Portfolios / Marketplace Assets)
+CREATE TABLE search.services_index (
+    service_id uuid PRIMARY KEY REFERENCES org.portfolios (id) ON DELETE CASCADE,
+    title text NOT NULL,
+    fts tsvector,
+    embedding vector (1536),
+    is_public boolean DEFAULT true,
+    avg_rating numeric(3, 2) DEFAULT 0.0,
+    updated_at timestamp
+    with
+        time zone DEFAULT now()
+);
+
+CREATE INDEX idx_services_vector ON search.services_index USING hnsw (embedding vector_cosine_ops);
+
+CREATE INDEX idx_services_fts ON search.services_index USING GIN (fts);
+
+-- #endregion
 
 -- #region 2. SYNC TRIGGERS
 
@@ -81,13 +76,20 @@ CREATE INDEX idx_projects_vector ON search.projects_index USING hnsw (embedding 
 CREATE OR REPLACE FUNCTION search.sync_team_to_index()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO search.teams_index (team_id, is_active, updated_at)
+    INSERT INTO search.profiles_index (entity_id, entity_type, display_name, fts, metadata, is_active, updated_at)
     VALUES (
         NEW.id,
-        CASE WHEN NEW.visibility = 'public' THEN true ELSE false END,
+        'team',
+        NEW.slug, -- Or team name if added to org.teams
+        to_tsvector('english', coalesce(NEW.slug, '')),
+        jsonb_build_object('payout_model', NEW.payout_model),
+        true,
         now()
     )
-    ON CONFLICT (team_id) DO UPDATE SET
+    ON CONFLICT (entity_id, entity_type) DO UPDATE SET
+        display_name = EXCLUDED.display_name,
+        fts = EXCLUDED.fts,
+        metadata = search.profiles_index.metadata || EXCLUDED.metadata,
         is_active = EXCLUDED.is_active,
         updated_at = now();
     
@@ -99,23 +101,22 @@ CREATE TRIGGER trg_sync_team_search
 AFTER INSERT OR UPDATE ON org.teams
 FOR EACH ROW EXECUTE FUNCTION search.sync_team_to_index();
 
-
 -- 2B. FREELANCERS SYNC
 CREATE OR REPLACE FUNCTION search.sync_freelancer_to_index()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO search.freelancers_index (user_id, hourly_rate, availability_status, skills, updated_at)
+    INSERT INTO search.profiles_index (entity_id, entity_type, display_name, fts, metadata, updated_at)
     VALUES (
         NEW.user_id,
-        NEW.hourly_rate,
-        NEW.availability_status,
-        NEW.skills,
+        'freelancer',
+        'Freelancer Profile', -- Display name synced from users_public in a robust setup
+        to_tsvector('english', array_to_string(NEW.skills, ' ')),
+        jsonb_build_object('hourly_rate', NEW.hourly_rate, 'skills', NEW.skills),
         now()
     )
-    ON CONFLICT (user_id) DO UPDATE SET
-        hourly_rate = EXCLUDED.hourly_rate,
-        availability_status = EXCLUDED.availability_status,
-        skills = EXCLUDED.skills,
+    ON CONFLICT (entity_id, entity_type) DO UPDATE SET
+        fts = EXCLUDED.fts,
+        metadata = search.profiles_index.metadata || EXCLUDED.metadata,
         updated_at = now();
     
     RETURN NEW;
@@ -126,20 +127,26 @@ CREATE TRIGGER trg_sync_freelancer_search
 AFTER INSERT OR UPDATE ON org.freelancer_profiles
 FOR EACH ROW EXECUTE FUNCTION search.sync_freelancer_to_index();
 
-
--- 2C. USERS SYNC
+-- 2C. USERS (PUBLIC) SYNC
 CREATE OR REPLACE FUNCTION search.sync_user_to_index()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO search.users_index (user_id, country, is_active, updated_at)
+    INSERT INTO search.profiles_index (entity_id, entity_type, display_name, headline, fts, metadata, is_active, updated_at)
     VALUES (
         NEW.user_id,
-        NEW.country,
+        'user',
+        coalesce(NEW.first_name, '') || ' ' || coalesce(NEW.last_name, ''),
+        NEW.headline,
+        to_tsvector('english', coalesce(NEW.first_name, '') || ' ' || coalesce(NEW.last_name, '') || ' ' || coalesce(NEW.headline, '')),
+        jsonb_build_object('username', NEW.username),
         CASE WHEN NEW.visibility = 'public' THEN true ELSE false END,
         now()
     )
-    ON CONFLICT (user_id) DO UPDATE SET
-        country = EXCLUDED.country,
+    ON CONFLICT (entity_id, entity_type) DO UPDATE SET
+        display_name = EXCLUDED.display_name,
+        headline = EXCLUDED.headline,
+        fts = EXCLUDED.fts,
+        metadata = search.profiles_index.metadata || EXCLUDED.metadata,
         is_active = EXCLUDED.is_active,
         updated_at = now();
     
@@ -151,21 +158,23 @@ CREATE TRIGGER trg_sync_user_search
 AFTER INSERT OR UPDATE ON org.users_public
 FOR EACH ROW EXECUTE FUNCTION search.sync_user_to_index();
 
-
 -- 2D. BUSINESSES SYNC
 CREATE OR REPLACE FUNCTION search.sync_business_to_index()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO search.businesses_index (business_id, country, plan, updated_at)
+    INSERT INTO search.profiles_index (entity_id, entity_type, display_name, fts, metadata, updated_at)
     VALUES (
         NEW.id,
-        NEW.country,
-        NEW.plan,
+        'business',
+        NEW.name,
+        to_tsvector('english', coalesce(NEW.name, '')),
+        jsonb_build_object('plan', NEW.plan),
         now()
     )
-    ON CONFLICT (business_id) DO UPDATE SET
-        country = EXCLUDED.country,
-        plan = EXCLUDED.plan,
+    ON CONFLICT (entity_id, entity_type) DO UPDATE SET
+        display_name = EXCLUDED.display_name,
+        fts = EXCLUDED.fts,
+        metadata = search.profiles_index.metadata || EXCLUDED.metadata,
         updated_at = now();
     
     RETURN NEW;
@@ -176,44 +185,22 @@ CREATE TRIGGER trg_sync_business_search
 AFTER INSERT OR UPDATE ON org.business_profiles
 FOR EACH ROW EXECUTE FUNCTION search.sync_business_to_index();
 
-
--- 2E. SERVICES (PORTFOLIOS) SYNC
-CREATE OR REPLACE FUNCTION search.sync_service_to_index()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO search.services_index (service_id, is_public, updated_at)
-    VALUES (
-        NEW.id,
-        NEW.is_public,
-        now()
-    )
-    ON CONFLICT (service_id) DO UPDATE SET
-        is_public = EXCLUDED.is_public,
-        updated_at = now();
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_sync_service_search
-AFTER INSERT OR UPDATE ON org.portfolios
-FOR EACH ROW EXECUTE FUNCTION search.sync_service_to_index();
-
-
--- 2F. PROJECTS SYNC
+-- 2E. PROJECTS SYNC
 CREATE OR REPLACE FUNCTION search.sync_project_to_index()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO search.projects_index (project_id, industry_id, status, is_active, updated_at)
+    INSERT INTO search.projects_index (project_id, title, fts, industry_category_id, status, is_active, updated_at)
     VALUES (
         NEW.id,
+        'Project Title',
+        to_tsvector('english', NEW.status::text),
         NEW.industry_category_id,
         NEW.status::text,
         CASE WHEN NEW.visibility = 'public' AND NEW.status != 'draft' THEN true ELSE false END,
         now()
     )
     ON CONFLICT (project_id) DO UPDATE SET
-        industry_id = EXCLUDED.industry_id,
+        industry_category_id = EXCLUDED.industry_category_id,
         status = EXCLUDED.status,
         is_active = EXCLUDED.is_active,
         updated_at = now();
@@ -227,64 +214,3 @@ AFTER INSERT OR UPDATE ON projects.projects
 FOR EACH ROW EXECUTE FUNCTION search.sync_project_to_index();
 
 -- #endregion
-
-
-
--- 5. RPC: HYBRID TEAM SEARCH
--- Combines vector similarity with hard metadata filters
--- CREATE OR REPLACE FUNCTION search.search_teams(
---     query_embedding vector(1536),
---     match_threshold float,
---     match_count int,
---     min_rate int DEFAULT 0,
---     max_rate int DEFAULT 999999,
---     required_skills uuid[] DEFAULT '{}'::uuid[]
--- )
--- RETURNS TABLE (
---     team_id uuid,
---     similarity float
--- )
--- LANGUAGE plpgsql
--- AS $$
--- BEGIN
---     RETURN QUERY
---     SELECT
---         si.team_id,
---         1 - (si.embedding <=> query_embedding) AS similarity
---     FROM search.teams_index si
---     WHERE 1 - (si.embedding <=> query_embedding) > match_threshold
---       AND si.hourly_rate_avg BETWEEN min_rate AND max_rate
---       AND (required_skills = '{}'::uuid[] OR si.skills_ids @> required_skills)
---       AND si.is_active = true
---     ORDER BY si.embedding <=> query_embedding
---     LIMIT match_count;
--- END;
--- $$;
-
--- -- 6. RPC: RECOMMEND SIMILAR TEAMS
--- -- Pure vector similarity for "More like this" features
--- CREATE OR REPLACE FUNCTION search.get_similar_teams(
---     target_team_id uuid,
---     match_count int DEFAULT 4
--- )
--- RETURNS TABLE (
---     team_id uuid,
---     similarity float
--- )
--- LANGUAGE plpgsql
--- AS $$
--- DECLARE
---     target_embedding vector(1536);
--- BEGIN
---     SELECT embedding INTO target_embedding FROM search.teams_index WHERE team_id = target_team_id;
-    
---     RETURN QUERY
---     SELECT
---         si.team_id,
---         1 - (si.embedding <=> target_embedding) AS similarity
---     FROM search.teams_index si
---     WHERE si.team_id != target_team_id
---     ORDER BY si.embedding <=> target_embedding
---     LIMIT match_count;
--- END;
--- $$;

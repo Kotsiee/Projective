@@ -1,9 +1,9 @@
 import { Head } from 'fresh/runtime';
-import VerifyIsland from '@features/auth/islands/Verify.tsx';
 import { State } from '@utils';
 import { getCookies } from '@std/http/cookie';
 import { RenderableProps } from 'preact';
 import { PageProps } from 'fresh';
+import VerifyIslandWrapper from '../(_islands)/VerifyIslandWrapper.tsx';
 
 // deno-lint-ignore no-explicit-any
 export default function Verify(ctx: RenderableProps<PageProps<never, State>, any>) {
@@ -16,7 +16,7 @@ export default function Verify(ctx: RenderableProps<PageProps<never, State>, any
 				<title>Verify</title>
 			</Head>
 
-			<VerifyIsland email={email} />
+			<VerifyIslandWrapper email={email} />
 		</>
 	);
 }

@@ -15,7 +15,7 @@ export class TaskRenderer extends BaseRenderer {
 		this.container.removeChildren();
 
 		const tasks = this.store.tasks.value;
-		const rows = this.store.rows.value;
+		const rows = [...this.store.rows.value].sort((a, b) => a.orderIndex - b.orderIndex);
 		const rowHeight = this.store.rowHeight.value;
 
 		const rowMap = new Map<string, number>();
@@ -46,12 +46,12 @@ export class TaskRenderer extends BaseRenderer {
 			if (rowIndex === undefined) continue;
 
 			const coords = this.store.getTaskCoordinates(task);
+			const safeWidth = Math.min(Math.max(coords.width, 2), 16000);
 
 			const margin = 12;
 			const barHeight = rowHeight - (margin * 2);
 			const y = (rowIndex * rowHeight) + margin;
 
-			// Check if this task's row is currently selected
 			const isSelected = task.rowId === this.store.selectedRowId.value;
 
 			if (task.isMilestone) {
@@ -65,7 +65,7 @@ export class TaskRenderer extends BaseRenderer {
 					task,
 					isSelected,
 					coords.x,
-					coords.width,
+					safeWidth,
 					y,
 					barHeight,
 					{ cAccent },
@@ -150,7 +150,6 @@ export class TaskRenderer extends BaseRenderer {
 
 		graphics.fill({ color: colors.cMilestone, alpha: 1 });
 
-		// If selected, highlight the stroke with the primary accent color instead of cutting it out
 		const strokeColor = isSelected ? colors.cAccent : colors.cBg;
 		graphics.stroke({ width: 3, color: strokeColor, alpha: 1 });
 

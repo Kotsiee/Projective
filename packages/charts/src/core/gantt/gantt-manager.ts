@@ -71,7 +71,6 @@ export class GanttManager {
 
 		this.renderers.push(grid, tasks, scrollbars);
 
-		// OVERRIDE: If mouse is hovering a scrollbar, let the ScrollRenderer handle it exclusively
 		this.app.canvas.addEventListener('pointerdown', () => {
 			if (this.store.hoveredScrollbar.value) return;
 			this.scroll.handlePointerDown();

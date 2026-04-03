@@ -75,14 +75,12 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 	const addProps = useHoldRepeat(handleAddDay);
 	const subProps = useHoldRepeat(handleSubDay);
 
-	// Dynamically generate the 90 tick marks
 	const dynamicMarks = useMemo(() => {
 		const arr = [];
 		for (let i = minDays; i <= maxDays; i++) {
 			let className = 'gantt-slider-mark--day';
 			let label = undefined;
 
-			// Only show labels on the very first and very last tick
 			if (i === minDays) {
 				label = `${i}d`;
 				className += ' gantt-slider-mark--min';
@@ -91,7 +89,6 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 				className += ' gantt-slider-mark--max';
 			}
 
-			// Add month class every 30 days
 			if (i % 30 === 0) {
 				className += ' gantt-slider-mark--month';
 			}
@@ -102,16 +99,32 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 	}, [minDays, maxDays]);
 
 	return (
-		<div class='gantt-header'>
+		<div
+			class='gantt-header'
+			style={{
+				display: 'flex',
+				width: '100%',
+				alignItems: 'center',
+				justifyContent: 'space-between',
+				padding: '0.25rem 0',
+			}}
+		>
+			{/* Left section: Slider block */}
 			<div
-				class='gantt-header__spacer'
-				style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0 1rem' }}
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					gap: '1rem',
+					flex: '1 1 0%',
+					minWidth: '250px',
+					padding: '0 1rem',
+				}}
 			>
 				<IconButton variant='secondary' size='small' aria-label='Decrease days' {...subProps}>
 					<IconMinus size={16} />
 				</IconButton>
 
-				<div style={{ flex: 1 }}>
+				<div style={{ flex: 1, minWidth: '150px' }}>
 					<SliderField
 						value={store.visibleDays.value}
 						onChange={(val) => store.setVisibleDays(val as number)}
@@ -127,7 +140,16 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 				</IconButton>
 			</div>
 
-			<div class='gantt-header__date-range'>
+			{/* Middle section: Date block */}
+			<div
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					flex: '1 1 0%',
+					gap: '0.5rem',
+				}}
+			>
 				<IconButton
 					variant='secondary'
 					size='medium'
@@ -139,7 +161,9 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 					<IconChevronLeft />
 				</IconButton>
 
-				<span style={{ minWidth: '140px', textAlign: 'center' }}>
+				<span
+					style={{ minWidth: '150px', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem' }}
+				>
 					{dateLabel.value}
 				</span>
 
@@ -155,7 +179,8 @@ export function GanttHeader({ store }: GanttHeaderProps) {
 				</IconButton>
 			</div>
 
-			<div class='gantt-header__spacer'></div>
+			{/* Right section: Spacer to maintain perfect center alignment for dates */}
+			<div style={{ flex: '1 1 0%' }}></div>
 		</div>
 	);
 }

@@ -1,5 +1,5 @@
 import { Head } from 'fresh/runtime';
-import OnboardingIsland from '@features/auth/islands/Onboarding.tsx';
+import OnboardingIslandWrapper from '../(_islands)/OnboardingIslandWrapper.tsx';
 
 export default function Onboarding() {
 	return (
@@ -8,7 +8,7 @@ export default function Onboarding() {
 				<title>Onboarding</title>
 			</Head>
 
-			<OnboardingIsland />
+			<OnboardingIslandWrapper />
 		</>
 	);
 }

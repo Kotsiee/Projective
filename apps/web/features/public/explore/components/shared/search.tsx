@@ -1,9 +1,10 @@
+import '../../styles/components/shared/search.css';
 import { useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
 import { IconSearch, IconX } from '@tabler/icons-preact';
 import { SelectField, SelectOption } from '@projective/fields';
 import { IconButton } from '@projective/ui';
-import '../../styles/components/shared/search.css';
+import { SearchType } from '../../contracts/Explore.ts';
 
 // #region 1. CONSTANTS & TYPES
 const SEARCH_PHRASES = [
@@ -14,12 +15,14 @@ const SEARCH_PHRASES = [
 	'Find marketing micro-agencies...',
 ];
 
-type SearchType = 'projects' | 'marketplace' | 'traders';
-
 const CATEGORY_OPTIONS: SelectOption<SearchType>[] = [
+	{ label: 'All', value: 'all' },
 	{ label: 'Projects', value: 'projects' },
-	{ label: 'Marketplace', value: 'marketplace' },
-	{ label: 'Local Traders', value: 'traders' },
+	{ label: 'Services', value: 'services' },
+	{ label: 'People', value: 'people' },
+	// { label: 'Posts', value: 'posts' },
+	// { label: 'Marketplace', value: 'marketplace' },
+	// { label: 'Local Traders', value: 'traders' },
 ];
 
 export interface ExploreSearchProps {
@@ -35,7 +38,7 @@ export interface ExploreSearchProps {
 export default function ExploreSearch({ onSearch }: ExploreSearchProps) {
 	// #region 2. STATE
 	const query = useSignal('');
-	const searchType = useSignal<SearchType>('projects');
+	const searchType = useSignal<SearchType>('all');
 	const activeIndex = useSignal(0);
 	const isFocused = useSignal(false);
 	const inputRef = useRef<HTMLInputElement>(null);

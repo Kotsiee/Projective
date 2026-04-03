@@ -1,10 +1,17 @@
 import { Signal } from '@preact/signals';
+import { ProjectResponse } from './ProjectResponse.ts';
 
-// #region 1. TYPE DEFINITIONS
+export type ExploreResponses = ProjectResponse;
 export type ViewMode = 'grid' | 'list' | 'masonry';
-export type SearchTab = 'all' | 'products' | 'services' | 'work' | 'resources' | 'projects';
 export type SortType = 'recommended' | 'price' | 'rating' | 'recent';
-// #endregion
+export type SearchType =
+	| 'projects'
+	| 'marketplace'
+	| 'traders'
+	| 'services'
+	| 'people'
+	| 'posts'
+	| 'all';
 
 /**
  * @interface ExploreState
@@ -16,11 +23,11 @@ export interface ExploreState {
 	/** The layout mode for the search results (e.g., grid vs list) */
 	viewMode: Signal<ViewMode>;
 	/** The active federated search tab */
-	searchTab: Signal<SearchTab>;
+	searchType: Signal<SearchType>;
 	/** The active sorting parameter */
 	sortType: Signal<SortType>;
-	/** The ID of the item currently selected for split-view or modal inspection */
-	selectedItemId: Signal<string | null>;
+	/** Store the full data object of the selected item instead of just the ID */
+	selectedItem: Signal<any | null>;
 	/** Controls the visibility of the sticky filter sidebar */
 	isFiltersOpen: Signal<boolean>;
 }

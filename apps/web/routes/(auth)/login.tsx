@@ -1,5 +1,5 @@
 import { Head } from 'fresh/runtime';
-import LoginIsland from '@features/auth/islands/Login.tsx';
+import LoginIslandWrapper from './(_islands)/LoginIslandWrapper.tsx';
 
 export default function Login() {
 	return (
@@ -8,7 +8,7 @@ export default function Login() {
 				<title>Login</title>
 			</Head>
 
-			<LoginIsland />
+			<LoginIslandWrapper />
 		</>
 	);
 }

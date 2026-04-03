@@ -1,15 +1,15 @@
 import '../../styles/components/search/header-search.css';
 import { useExploreContext } from '../../contexts/ExploreContext.tsx';
-import { SearchTab } from '../../contracts/Explore.ts';
+import { searchType } from '../../contracts/Explore.ts';
 import ExploreSearch from '../shared/search.tsx';
 import { StringModifier } from 'packages/utils/src/pipes/StringModifier.ts';
 
 export default function ExploreSearchHeaderSearch() {
-	const { exploreQuery, searchTab } = useExploreContext();
+	const { exploreQuery, searchType } = useExploreContext();
 
 	const handleSearch = (term: string, type: string) => {
 		exploreQuery.value = term;
-		searchTab.value = type as SearchTab;
+		searchType.value = type as searchType;
 	};
 
 	return (

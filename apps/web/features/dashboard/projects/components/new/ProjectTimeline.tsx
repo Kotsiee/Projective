@@ -6,8 +6,15 @@ import { DependencyType, GanttChart, RowType } from '@projective/charts';
 import { IconCalendarEvent, IconChartArcs } from '@tabler/icons-preact';
 import { useMemo } from 'preact/hooks';
 
+import ProjectTimelineControls from './timeline/ProjectTimelineControls.tsx';
+
 export default function ProjectTimeline() {
 	const state = useNewProjectContext();
+
+	const stages = state.stages.value;
+	const targetStartDate = state.targetStartDate.value;
+	const timelinePreset = state.timelinePreset.value;
+	const selectedStageIndex = state.timelineSelectedStageIndex.value;
 
 	const presetOptions: SelectOption<string>[] = [
 		{ label: 'Sequential (Waterfall)', value: TimelinePreset.Sequential },
@@ -20,7 +27,7 @@ export default function ProjectTimeline() {
 		state.timelinePreset.value = preset;
 		if (preset === TimelinePreset.Custom) return;
 
-		const newStages = [...state.stages.value];
+		const newStages = [...stages];
 		newStages.forEach((s, i) => {
 			if (preset === TimelinePreset.Simultaneous) {
 				s.start_trigger_type = StartTriggerType.OnProjectStart;
@@ -50,9 +57,11 @@ export default function ProjectTimeline() {
 		state.stages.value = newStages;
 	};
 
+	// deno-lint-ignore no-explicit-any
 	const extractMs = (dateVal: any, fallback: number): number => {
 		if (!dateVal) return fallback;
 		if (typeof dateVal === 'number') return dateVal;
+		if (typeof dateVal.toMillis === 'function') return dateVal.toMillis();
 		if (typeof dateVal.getTime === 'function') return dateVal.getTime();
 		const d = new Date(dateVal.toString());
 		return isNaN(d.getTime()) ? fallback : d.getTime();
@@ -72,9 +81,10 @@ export default function ProjectTimeline() {
 		const fallbackStart = new Date();
 		fallbackStart.setHours(0, 0, 0, 0);
 
-		const defaultStart = extractMs(state.targetStartDate.value, fallbackStart.getTime());
+		const defaultStart = extractMs(targetStartDate, fallbackStart.getTime());
 
-		const computedStages: any[] = state.stages.value.map((s, idx) => ({
+		// deno-lint-ignore no-explicit-any
+		const computedStages: any[] = stages.map((s, idx) => ({
 			...s,
 			idx,
 			calculatedStartMs: defaultStart,
@@ -101,7 +111,6 @@ export default function ProjectTimeline() {
 					const parent = computedStages[depIdx];
 					if (parent) {
 						const lagMs = (s.start_dependency_lag_days || 0) * 86400000;
-
 						intendedStart = Math.max(defaultStart, parent.calculatedEndMs + lagMs);
 					}
 				}
@@ -170,6 +179,7 @@ export default function ProjectTimeline() {
 			}
 		}
 
+		// deno-lint-ignore no-explicit-any
 		const finalTasks: any[] = [];
 		for (const s of computedStages) {
 			if (s.stage_type === StageType.SessionBased && (s.session_preferred_days || []).length > 0) {
@@ -260,10 +270,13 @@ export default function ProjectTimeline() {
 				})
 				.filter((dep) => dep !== null),
 		};
-	}, [state.stages.value, state.targetStartDate.value]);
+	}, [stages, targetStartDate]);
 
 	return (
-		<div className='project-timeline'>
+		<div
+			className='project-timeline'
+			style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+		>
 			<div className='project-timeline__header'>
 				<h2>Timeline & Dependencies</h2>
 				<p className='project-timeline__subtitle'>
@@ -280,7 +293,7 @@ export default function ProjectTimeline() {
 						name='timeline_preset'
 						label='Overall Timeline Preset'
 						options={presetOptions}
-						value={state.timelinePreset.value || TimelinePreset.Sequential}
+						value={timelinePreset || TimelinePreset.Sequential}
 						onChange={(v) => handlePresetChange(v as string)}
 						searchable={false}
 						floating
@@ -289,7 +302,7 @@ export default function ProjectTimeline() {
 
 					<DateField
 						label='Target Project Start Date'
-						value={state.targetStartDate.value}
+						value={targetStartDate}
 						onChange={(v) => state.targetStartDate.value = v}
 						floating
 						required
@@ -298,19 +311,60 @@ export default function ProjectTimeline() {
 				</div>
 			</div>
 
-			<div className='project-timeline__section' style={{ flex: 1, minHeight: 0 }}>
+			<div
+				className='project-timeline__section'
+				style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+			>
 				<h3 className='project-timeline__section-title'>
 					<IconChartArcs size={18} /> Interactive Timeline
 				</h3>
-				<div className='gantt-chart-wrapper'>
-					{/* @ts-ignore - Bypass for filtered arrays */}
-					<GanttChart
-						initialData={ganttData}
-						selectedRowId={state.timelineSelectedStageIndex.value.toString()}
-						onRowSelect={(id) => {
-							state.timelineSelectedStageIndex.value = parseInt(id, 10);
+
+				{
+					/* CRITICAL FIX:
+				    Replaced `minHeight` with a strict physical `height: '500px'`.
+				    Because this element is rendered inside a block-level <StepperPanel>,
+				    flexible heights resolve to 0 and collapse the PixiJS ResizeObserver.
+				*/
+				}
+				<div
+					style={{
+						display: 'flex',
+						gap: '1.5rem',
+						width: '100%',
+						height: '500px',
+						overflow: 'hidden',
+					}}
+				>
+					<div
+						className='gantt-chart-wrapper'
+						style={{
+							flex: 1,
+							display: 'flex',
+							flexDirection: 'column',
+							overflow: 'hidden',
 						}}
-					/>
+					>
+						{/* @ts-ignore - Bypass for filtered arrays */}
+						<GanttChart
+							initialData={ganttData}
+							selectedRowId={(selectedStageIndex ?? 0).toString()}
+							onRowSelect={(id) => {
+								state.timelineSelectedStageIndex.value = parseInt(id, 10);
+							}}
+						/>
+					</div>
+
+					<aside
+						style={{
+							width: '380px',
+							flexShrink: 0,
+							overflowY: 'auto',
+							paddingLeft: '1.5rem',
+							borderLeft: '1px solid var(--border-color)',
+						}}
+					>
+						<ProjectTimelineControls />
+					</aside>
 				</div>
 			</div>
 		</div>

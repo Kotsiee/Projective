@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { effect, useComputed } from '@preact/signals';
+import { useComputed } from '@preact/signals';
 import { GanttStore } from '../../core/gantt/store.ts';
 import { GanttManager } from '../../core/gantt/gantt-manager.ts';
 import { generateHeaderBlocks, getHeaderTier } from '../../core/gantt/header-utils.ts';
@@ -11,11 +11,8 @@ interface GanttTimelineProps {
 	store: GanttStore;
 }
 
-const VIRTUAL_OFFSET = 5000000;
-
 export function GanttTimeline({ store }: GanttTimelineProps) {
 	const canvasRootRef = useRef<HTMLDivElement>(null);
-	const headerScrollRef = useRef<HTMLDivElement>(null);
 	const ganttManager = useRef<GanttManager | null>(null);
 
 	useEffect(() => {
@@ -23,32 +20,11 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 			ganttManager.current = new GanttManager(canvasRootRef.current, store);
 		}
 
-		const dispose = effect(() => {
-			const x = store.scrollX.value;
-			const targetLeft = VIRTUAL_OFFSET - x;
-
-			if (headerScrollRef.current) {
-				if (Math.abs(headerScrollRef.current.scrollLeft - targetLeft) > 1) {
-					headerScrollRef.current.scrollLeft = targetLeft;
-				}
-			}
-		});
-
 		return () => {
-			dispose();
 			ganttManager.current?.destroy();
 			ganttManager.current = null;
 		};
 	}, []);
-
-	const onScroll = (e: Event) => {
-		const target = e.target as HTMLDivElement;
-		const newX = VIRTUAL_OFFSET - target.scrollLeft;
-
-		if (Math.abs(store.scrollX.value - newX) > 1) {
-			store.scrollX.value = newX;
-		}
-	};
 
 	const dynamicHeaders = useComputed(() => {
 		const currentX = store.scrollX.value;
@@ -78,21 +54,26 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 			topRows,
 			bottomRows,
 			tier,
-			totalWidth: VIRTUAL_OFFSET * 2,
 		};
 	});
 
 	// deno-lint-ignore no-explicit-any
 	const renderBlock = (block: any, content: string, isTop: boolean) => {
-		const domLeft = VIRTUAL_OFFSET + block.x;
+		// Hardware-accelerated GPU translation instead of expanding the DOM width
+		const screenX = block.x + store.scrollX.value;
 
 		return (
 			<div
 				key={block.key}
 				class='gantt-time-block'
 				style={{
-					left: `${domLeft}px`,
+					position: 'absolute',
+					left: 0,
+					top: 0,
+					height: '100%',
 					width: `${block.width}px`,
+					transform: `translateX(${screenX}px)`,
+					willChange: 'transform',
 				}}
 			>
 				<span class={isTop ? 'gantt-sticky-label' : 'gantt-centered-label'}>
@@ -105,16 +86,26 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 	const header = dynamicHeaders.value;
 
 	return (
-		<section class='gantt-timeline'>
+		<section
+			class='gantt-timeline'
+			style={{
+				flex: 1,
+				display: 'flex',
+				flexDirection: 'column',
+				minWidth: 0,
+				width: '100%',
+				overflow: 'hidden',
+			}}
+		>
 			<div
 				class='gantt-timeline__header'
-				ref={headerScrollRef}
-				onScroll={onScroll}
+				style={{ overflow: 'hidden', width: '100%', position: 'relative' }}
 			>
 				<div
 					class='gantt-header-content'
-					style={{ width: `${header.totalWidth}px` }}
+					style={{ width: '100%', position: 'relative', height: '100%' }}
 				>
+					{/* CRITICAL FIX: Removed conflicting inline relative positioning */}
 					<div class='gantt-header-row top'>
 						{header.topRows.map((block) =>
 							renderBlock(
@@ -137,10 +128,14 @@ export function GanttTimeline({ store }: GanttTimelineProps) {
 				</div>
 			</div>
 
-			<div class='gantt-timeline__viewport'>
+			<div
+				class='gantt-timeline__viewport'
+				style={{ flex: 1, position: 'relative', overflow: 'hidden', width: '100%' }}
+			>
 				<div
 					class='gantt-timeline__canvas'
 					ref={canvasRootRef}
+					style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
 				/>
 				<GanttTooltip store={store} />
 			</div>
