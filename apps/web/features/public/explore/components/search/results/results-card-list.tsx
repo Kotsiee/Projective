@@ -19,7 +19,7 @@ function ExploreSearchResultsListItemProjects({ data }: { data: ProjectResponse 
 	const { selectedItem } = useExploreContext();
 
 	// Dedicated page URL (Used natively for Middle-Click / Right-Click -> New Tab)
-	const projectUrl = `/projects/${data.project_id}`;
+	const projectUrl = `/view/project?id=${data.project_id}`;
 
 	const startDate = data.target_project_start_date
 		? new DateTime(data.target_project_start_date).toFormat('DD MMM yyyy')

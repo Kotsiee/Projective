@@ -184,6 +184,17 @@ export default function ExploreSearchResultsDetails() {
 	// STATE 3: Populated
 	const data = parsedData.value;
 
+	const generateViewUrl = () => {
+		switch (data.type.toLowerCase()) {
+			case 'project':
+				return `/view/project?id=${data.id}`;
+			case 'service':
+				return `/view/service?id=${data.id}`;
+			default:
+				return data.username ? `/${data.username}` : `/view/profile?id=${data.id}`;
+		}
+	};
+
 	return (
 		<div class='explore-search-results-details'>
 			<div class='explore-search-results-details__hero'>
@@ -250,7 +261,14 @@ export default function ExploreSearchResultsDetails() {
 			</div>
 
 			<div class='explore-search-results-details__footer'>
-				<Button variant='primary' size='large' style={{ width: '100%' }}>
+				<Button
+					variant='primary'
+					size='large'
+					style={{ width: '100%' }}
+					onClick={() => {
+						globalThis.location.href = generateViewUrl();
+					}}
+				>
 					View Full {data.type}
 				</Button>
 			</div>
