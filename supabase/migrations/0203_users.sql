@@ -1,9 +1,5 @@
--- ============================================================
--- TABLE: org.users_public
--- ============================================================
 ALTER TABLE org.users_public ENABLE ROW LEVEL SECURITY;
 
--- SELECT
 DROP POLICY IF EXISTS "Any authenticated user can view public profiles" ON org.users_public;
 
 CREATE POLICY "Any authenticated user can view public profiles" ON org.users_public FOR
@@ -11,7 +7,6 @@ SELECT TO public USING (
         auth.role () = 'authenticated'
     );
 
--- INSERT
 DROP POLICY IF EXISTS "Users can create their own profile" ON org.users_public;
 
 CREATE POLICY "Users can create their own profile" ON org.users_public FOR
@@ -23,7 +18,6 @@ WITH
         OR security.is_admin ()
     );
 
--- UPDATE
 DROP POLICY IF EXISTS "Users can update their own profile" ON org.users_public;
 
 CREATE POLICY "Users can update their own profile" ON org.users_public FOR
@@ -32,12 +26,8 @@ UPDATE TO public USING (
     OR security.is_admin ()
 );
 
--- ============================================================
--- TABLE: org.user_emails
--- ============================================================
 ALTER TABLE org.user_emails ENABLE ROW LEVEL SECURITY;
 
--- SELECT
 DROP POLICY IF EXISTS "Users can view their own emails" ON org.user_emails;
 
 CREATE POLICY "Users can view their own emails" ON org.user_emails FOR
@@ -46,7 +36,6 @@ SELECT TO public USING (
         OR security.is_admin ()
     );
 
--- INSERT
 DROP POLICY IF EXISTS "Users can add their own emails" ON org.user_emails;
 
 CREATE POLICY "Users can add their own emails" ON org.user_emails FOR
@@ -58,7 +47,6 @@ WITH
         OR security.is_admin ()
     );
 
--- UPDATE
 DROP POLICY IF EXISTS "Users can update their own emails" ON org.user_emails;
 
 CREATE POLICY "Users can update their own emails" ON org.user_emails FOR
@@ -67,7 +55,6 @@ UPDATE TO public USING (
     OR security.is_admin ()
 );
 
--- DELETE
 DROP POLICY IF EXISTS "Users can delete their own emails" ON org.user_emails;
 
 CREATE POLICY "Users can delete their own emails" ON org.user_emails FOR DELETE TO public USING (

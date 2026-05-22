@@ -1,0 +1,91 @@
+/* #region Container */
+.view-meta {
+    box-sizing: border-box;
+    /* CRITICAL: Includes padding inside the 100% width */
+    padding: 1.5rem;
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius__large);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: calc(var(--header-height) + var(--view-header-height) + 2rem);
+    box-shadow: 0 4px 12px hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.02);
+}
+
+.view-meta__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    text-transform: capitalize;
+}
+
+/* #endregion */
+
+/* #region List & Items */
+.view-meta__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.view-meta__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.view-meta__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    background-color: var(--input-bg);
+    padding: 0.4rem;
+    border-radius: var(--border-radius__small);
+    flex-shrink: 0;
+}
+
+.view-meta__item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    /* Allows text truncation/wrapping */
+}
+
+.view-meta__item-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.view-meta__item-value {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-weight: 500;
+    line-height: 1.4;
+    word-break: break-word;
+    /* Prevents long URLs/Tags from breaking the box */
+}
+
+/* #endregion */
+
+/* #region Actions */
+.view-meta__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* #endregion */

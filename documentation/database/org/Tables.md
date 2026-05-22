@@ -61,7 +61,7 @@ Micro-agencies or collaborative units.
 | `slug`          | text | UNIQUE, used for team URLs.                 |
 | `payout_model`  | text | Internal distribution logic.                |
 
-### `org.team_memberships`
+### `org.team_members`
 
 Join table mapping users to teams with specific roles.
 

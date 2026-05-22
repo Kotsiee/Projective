@@ -1,6 +1,6 @@
 import { ComponentChildren, createContext } from 'preact';
 import { useContext, useEffect } from 'preact/hooks';
-import { effect, useSignal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { ExploreState, SearchType, SortType, ViewMode } from '../contracts/Explore.ts';
 
 // #region 1. CONTEXT INITIALIZATION

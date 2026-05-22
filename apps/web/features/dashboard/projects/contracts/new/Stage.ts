@@ -1,6 +1,7 @@
 import { QuillDelta } from '@projective/utils';
-import { BudgetType, DateTime, StageType, StartTriggerType } from '@projective/types';
+import { BudgetType, DateTime, StartTriggerType } from '@projective/types';
 
+// #region 1. Sub-Interfaces
 export interface StageStaffingRole {
 	id?: string;
 	role_title: string;
@@ -17,17 +18,24 @@ export interface StageOpenSeat {
 	budget_max_cents?: number;
 	require_proposals: boolean;
 }
+// #endregion
 
+// #region 2. Main Contract
 export interface Stage {
 	id?: string;
 	project_id?: string;
 
 	title: string;
 	description: string | QuillDelta;
-	stage_type: StageType;
 	status: string;
 	sort_order: number;
 
+	// Deliverable & Configuration Logic
+	file_upload_required?: boolean;
+	default_tasks?: Record<string, any>[];
+	skills?: string[];
+
+	// Triggers & Timeline
 	start_trigger_type: StartTriggerType;
 	fixed_start_date?: DateTime | string;
 	start_dependency_stage_id?: string;
@@ -45,6 +53,9 @@ export interface Stage {
 	management_contract_mode?: 'fixed_dates' | 'duration_from_start';
 	maintenance_cycle_interval?: 'weekly' | 'monthly';
 	ip_ownership_override?: string;
+
+	// Staffing & Budgets
 	staffing_roles: StageStaffingRole[];
 	open_seats: StageOpenSeat[];
 }
+// #endregion

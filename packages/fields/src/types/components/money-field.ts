@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { ValueFieldProps } from '../core.ts';
 import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
 
@@ -11,4 +12,7 @@ export interface MoneyFieldProps
 		Omit<MessageWrapperProps, 'error' | 'hint'> {
 	currency?: string;
 	locale?: string;
+	onInput?: (e: any) => void;
+	onBlur?: (e: any) => void;
+	onFocus?: (e: any) => void;
 }

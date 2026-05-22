@@ -1,8 +1,9 @@
 /**
- * @file ProjectsBackendService.ts
+ * @file ProjectsServiceBackend.ts
  * @description Backend service layer for handling database interactions for Projects.
  */
 
+// #region Imports
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
 import {
 	Config,
@@ -17,13 +18,57 @@ import {
 import { ProjectsFilterParams } from '../contracts/Projects.ts';
 import { CreateProjectInput } from '../contracts/new/_validation.ts';
 import { StoragePaths } from '@projective/types';
+// #endregion
 
-interface FileOptions {
-	thumbnail?: File;
+// #region Interfaces
+export interface FileOptions {
 	attachments?: File[];
 }
+// #endregion
 
+// #region Helper Functions
+/**
+ * Extracts plain string text from a Quill Delta object for search indexing.
+ * @param {any} delta The Quill Delta object containing an ops array.
+ * @returns {string} The concatenated plain text.
+ */
+// deno-lint-ignore no-explicit-any
+const extractTextFromDelta = (delta: any): string => {
+	if (!delta) return '';
+
+	let parsedDelta = delta;
+
+	if (typeof delta === 'string') {
+		try {
+			parsedDelta = JSON.parse(delta);
+		} catch {
+			return delta;
+		}
+	}
+
+	if (!parsedDelta || !Array.isArray(parsedDelta.ops)) {
+		return typeof parsedDelta === 'string' ? parsedDelta : '';
+	}
+
+	return parsedDelta.ops
+		.filter((op: any) => typeof op.insert === 'string')
+		.map((op: any) => op.insert)
+		.join('');
+};
+// #endregion
+
+// #region Service Definition
 export class ProjectsBackendService {
+	/**
+	 * Creates a new project, handles file quarantine uploads, and triggers the database RPC.
+	 * Automatically extracts plain text from Quill Deltas for search indexing.
+	 *
+	 * @param {CreateProjectInput} data The validated project creation payload.
+	 * @param {'draft' | 'active'} targetStatus The desired initial status.
+	 * @param {FileOptions} files Any attachments provided in the multipart request.
+	 * @param {Deps} deps Dependency injection object for Supabase client.
+	 * @returns {Promise<Result<{ projectId: string }>>} The ID of the created project.
+	 */
 	static async createProject(
 		data: CreateProjectInput,
 		targetStatus: 'draft' | 'active',
@@ -42,9 +87,10 @@ export class ProjectsBackendService {
 			const projectId = crypto.randomUUID();
 			const serviceRoleKey = Config.SUPABASE_SERVICE_ROLE_KEY;
 			const supabaseUrl = Config.SUPABASE_URL;
+			// deno-lint-ignore no-explicit-any
 			let adminClient: any = null;
 
-			if (files.thumbnail || (files.attachments && files.attachments.length > 0)) {
+			if (files.attachments && files.attachments.length > 0) {
 				if (!serviceRoleKey || !supabaseUrl) {
 					console.error('Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL');
 					return fail('server_error', 'Upload configuration missing', 500);
@@ -56,7 +102,7 @@ export class ProjectsBackendService {
 
 			const processFile = async (
 				file: File,
-				contextType: 'project_thumbnail' | 'project_global_attachment',
+				contextType: 'project_global_attachment',
 				attachmentId?: string,
 			): Promise<{ url?: string; id: string }> => {
 				const fileId = attachmentId || crypto.randomUUID();
@@ -104,18 +150,7 @@ export class ProjectsBackendService {
 				return { url, id: fileId };
 			};
 
-			let thumbnail_url = undefined;
 			const attachment_ids: string[] = [];
-
-			if (files.thumbnail) {
-				try {
-					const res = await processFile(files.thumbnail, 'project_thumbnail');
-					thumbnail_url = res.url;
-				} catch (e) {
-					console.error('Thumbnail upload failed:', e);
-					return fail('server_error', 'Failed to upload thumbnail', 500);
-				}
-			}
 
 			if (files.attachments && files.attachments.length > 0) {
 				try {
@@ -129,8 +164,15 @@ export class ProjectsBackendService {
 				}
 			}
 
-			const existingAttachments = data.global_attachments || [];
+const existingAttachments = data.global_attachments || [];
 			const finalAttachments = [...existingAttachments, ...attachment_ids];
+			
+			const projectDescriptionText = extractTextFromDelta(data.description);
+
+			const stagesWithText = data.stages.map((stage) => ({
+				...stage,
+				description_text: extractTextFromDelta(stage.description),
+			}));
 
 			const { data: _rpcResultId, error: rpcError } = await supabase
 				.schema('projects')
@@ -138,7 +180,8 @@ export class ProjectsBackendService {
 					payload: {
 						...data,
 						id: projectId,
-						thumbnail_url,
+						description_text: projectDescriptionText,
+						stages: stagesWithText,
 						global_attachments: finalAttachments,
 					},
 				});
@@ -168,9 +211,16 @@ export class ProjectsBackendService {
 		}
 	}
 
+	/**
+	 * Fetches project details.
+	 * @param {string} project_id The UUID of the project.
+	 * @param {Deps} deps Dependency injection for Supabase.
+	 * @returns {Promise<Result<any>>} The project payload.
+	 */
 	static async getProject(
 		project_id: string,
 		deps: Deps = {},
+		// deno-lint-ignore no-explicit-any
 	): Promise<Result<any>> {
 		try {
 			const getClient = deps.getClient ?? supabaseClient;
@@ -194,9 +244,16 @@ export class ProjectsBackendService {
 		}
 	}
 
+	/**
+	 * Fetches a filtered list of projects for the dashboard.
+	 * @param {ProjectsFilterParams} params The filtering parameters.
+	 * @param {Deps} deps Dependency injection for Supabase.
+	 * @returns {Promise<Result<any>>} The paginated project list.
+	 */
 	static async getDashboardProjects(
 		params: ProjectsFilterParams,
 		deps: Deps = {},
+		// deno-lint-ignore no-explicit-any
 	): Promise<Result<any>> {
 		try {
 			const getClient = deps.getClient ?? supabaseClient;
@@ -225,10 +282,18 @@ export class ProjectsBackendService {
 		}
 	}
 
+	/**
+	 * Fetches details for a specific project stage.
+	 * @param {string} project_id The UUID of the project.
+	 * @param {string} stage_id The UUID of the stage.
+	 * @param {Deps} deps Dependency injection for Supabase.
+	 * @returns {Promise<Result<any>>} The stage details payload.
+	 */
 	static async getStage(
 		project_id: string,
 		stage_id: string,
 		deps: Deps = {},
+		// deno-lint-ignore no-explicit-any
 	): Promise<Result<any>> {
 		try {
 			const getClient = deps.getClient ?? supabaseClient;
@@ -255,3 +320,4 @@ export class ProjectsBackendService {
 		}
 	}
 }
+// #endregion

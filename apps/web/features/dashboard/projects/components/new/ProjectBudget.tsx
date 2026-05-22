@@ -1,35 +1,27 @@
-// deno-lint-ignore-file no-explicit-any
+/**
+ * @file ProjectBudget.tsx
+ * @description Step 5 of the Project Creation Engine.
+ * Manages the allocation of budget, defined roles, and open seats for each project stage.
+ */
+
+// #region Imports
 import '../../styles/components/new/new-project-budget.css';
+import { useEffect } from 'preact/hooks';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
 import { MoneyField, SelectField, SelectOption, TextField } from '@projective/fields';
 import { BudgetType } from '@projective/types';
 import { IconBriefcase, IconCoin, IconPlus, IconTrash, IconUserPlus } from '@tabler/icons-preact';
 import { StageOpenSeat, StageStaffingRole } from '../../contracts/new/Stage.ts';
+// #endregion
 
 export default function ProjectBudget() {
 	const state = useNewProjectContext();
 
-	// #region Options
+	// #region Options & Defaults
 	const budgetTypeOptions: SelectOption<string>[] = [
 		{ label: 'Fixed Price', value: BudgetType.FixedPrice },
 		{ label: 'Hourly Cap', value: BudgetType.HourlyCap },
 	];
-	// #endregion
-
-	// #region Handlers
-	const updateStageMode = (index: number, mode: 'defined_roles' | 'open_seats') => {
-		const newStages = [...state.stages.value];
-		newStages[index]._ui_model_type = mode;
-
-		// Initialize default arrays if switching modes and they are empty
-		if (mode === 'defined_roles' && newStages[index].staffing_roles.length === 0) {
-			newStages[index].staffing_roles = [createDefaultRole()];
-		} else if (mode === 'open_seats' && newStages[index].open_seats.length === 0) {
-			newStages[index].open_seats = [createDefaultSeat()];
-		}
-
-		state.stages.value = newStages;
-	};
 
 	const createDefaultRole = (): StageStaffingRole => ({
 		role_title: '',
@@ -43,21 +35,74 @@ export default function ProjectBudget() {
 		description_of_need: '',
 		require_proposals: true,
 	});
+	// #endregion
+
+	// #region Initialization
+	// Automatically populate the empty UI models when the component mounts or new stages are added
+	useEffect(() => {
+		let changed = false;
+		const newStages = [...state.stages.value];
+
+		newStages.forEach((stage, index) => {
+			if (
+				stage._ui_model_type === 'defined_roles' &&
+				(!stage.staffing_roles || stage.staffing_roles.length === 0)
+			) {
+				newStages[index] = { ...stage, staffing_roles: [createDefaultRole()] };
+				changed = true;
+			} else if (
+				stage._ui_model_type === 'open_seats' &&
+				(!stage.open_seats || stage.open_seats.length === 0)
+			) {
+				newStages[index] = { ...stage, open_seats: [createDefaultSeat()] };
+				changed = true;
+			}
+		});
+
+		if (changed) {
+			state.stages.value = newStages;
+		}
+	}, [state.stages.value.length]);
+	// #endregion
+
+	// #region Handlers
+	const updateStageMode = (index: number, mode: 'defined_roles' | 'open_seats') => {
+		const newStages = [...state.stages.value];
+		const currentStage = { ...newStages[index], _ui_model_type: mode };
+
+		// Initialize default arrays if switching modes and they are currently empty
+		if (
+			mode === 'defined_roles' &&
+			(!currentStage.staffing_roles || currentStage.staffing_roles.length === 0)
+		) {
+			currentStage.staffing_roles = [createDefaultRole()];
+		} else if (
+			mode === 'open_seats' && (!currentStage.open_seats || currentStage.open_seats.length === 0)
+		) {
+			currentStage.open_seats = [createDefaultSeat()];
+		}
+
+		newStages[index] = currentStage;
+		state.stages.value = newStages;
+	};
 
 	const addRole = (stageIndex: number) => {
 		const newStages = [...state.stages.value];
-		newStages[stageIndex].staffing_roles.push(createDefaultRole());
+		const currentStage = { ...newStages[stageIndex] };
+		currentStage.staffing_roles = [...(currentStage.staffing_roles || []), createDefaultRole()];
+		newStages[stageIndex] = currentStage;
 		state.stages.value = newStages;
 	};
 
 	const removeRole = (stageIndex: number, roleIndex: number) => {
 		const newStages = [...state.stages.value];
-		newStages[stageIndex].staffing_roles = newStages[stageIndex].staffing_roles.filter((_, i) =>
-			i !== roleIndex
-		);
+		const currentStage = { ...newStages[stageIndex] };
+		currentStage.staffing_roles = currentStage.staffing_roles.filter((_, i) => i !== roleIndex);
+		newStages[stageIndex] = currentStage;
 		state.stages.value = newStages;
 	};
 
+	// deno-lint-ignore no-explicit-any
 	const updateRole = (
 		stageIndex: number,
 		roleIndex: number,
@@ -65,22 +110,30 @@ export default function ProjectBudget() {
 		value: any,
 	) => {
 		const newStages = [...state.stages.value];
-		newStages[stageIndex].staffing_roles[roleIndex] = {
-			...newStages[stageIndex].staffing_roles[roleIndex],
-			[field]: value,
-		};
+		const currentStage = { ...newStages[stageIndex] };
+		const newRoles = [...currentStage.staffing_roles];
+
+		newRoles[roleIndex] = { ...newRoles[roleIndex], [field]: value };
+		currentStage.staffing_roles = newRoles;
+
+		newStages[stageIndex] = currentStage;
 		state.stages.value = newStages;
 	};
 
+	// deno-lint-ignore no-explicit-any
 	const updateSeat = (stageIndex: number, field: keyof StageOpenSeat, value: any) => {
 		const newStages = [...state.stages.value];
-		if (!newStages[stageIndex].open_seats[0]) {
-			newStages[stageIndex].open_seats[0] = createDefaultSeat();
+		const currentStage = { ...newStages[stageIndex] };
+		const newSeats = [...(currentStage.open_seats || [])];
+
+		if (!newSeats[0]) {
+			newSeats[0] = createDefaultSeat();
 		}
-		newStages[stageIndex].open_seats[0] = {
-			...newStages[stageIndex].open_seats[0],
-			[field]: value,
-		};
+
+		newSeats[0] = { ...newSeats[0], [field]: value };
+		currentStage.open_seats = newSeats;
+
+		newStages[stageIndex] = currentStage;
 		state.stages.value = newStages;
 	};
 	// #endregion
@@ -125,7 +178,7 @@ export default function ProjectBudget() {
 						</div>
 
 						{/* --- DEFINED ROLES UI --- */}
-						{stage._ui_model_type === 'defined_roles' && (
+						{stage._ui_model_type === 'defined_roles' && stage.staffing_roles && (
 							<div className='budget-card__content'>
 								{stage.staffing_roles.map((role, roleIndex) => (
 									<div key={roleIndex.toString()} className='staffing-role-row'>
@@ -191,7 +244,7 @@ export default function ProjectBudget() {
 						)}
 
 						{/* --- OPEN SEATS UI --- */}
-						{stage._ui_model_type === 'open_seats' && stage.open_seats[0] && (
+						{stage._ui_model_type === 'open_seats' && stage.open_seats && stage.open_seats[0] && (
 							<div className='budget-card__content'>
 								<p className='budget-card__helper'>
 									Describe what you need done and let agencies or freelancers propose the team

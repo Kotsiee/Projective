@@ -1,4 +1,4 @@
-import { ComponentChildren, JSX } from 'preact';
+import { ComponentChildren, CSSProperties } from 'preact';
 import { Signal } from '@preact/signals';
 
 export type StepperOrientation = 'horizontal' | 'vertical';
@@ -31,7 +31,7 @@ export interface StepperProps {
 	keepMounted?: boolean;
 
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 }
 
 export interface StepProps {
@@ -44,7 +44,7 @@ export interface StepProps {
 	disabled?: boolean;
 	error?: boolean;
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 	index?: number;
 	isLast?: boolean;
 }
@@ -53,7 +53,7 @@ export interface StepperPanelProps {
 	children: ComponentChildren;
 	index?: number;
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 }
 
 export interface StepperContextValue {

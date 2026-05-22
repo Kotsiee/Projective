@@ -1,103 +1,101 @@
-:root {
-  main {
-    margin-top: 0 !important;
-  }
+/* #region AUTH LAYOUT BEM STYLES */
+.auth-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg);
 }
 
-.layout-auth {
-  display: flex;
+/* --- Left Pane: The Structural Anchor --- */
+.auth-layout__anchor {
+  display: none;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100vw;
+  /* In dark mode data-theme, --card naturally shifts to a deep elevated 13% lightness */
+  background-color: var(--card);
+  border-right: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
 
-.background {
+/* Ambient glow effect for a premium "wow" factor */
+.auth-layout__anchor::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  object-fit: cover;
-  z-index: -1;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle at 50% 30%,
+      hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.08) 0%,
+      transparent 65%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.layout-auth__modal {
-  width: 90vw;
-  height: 90vh;
-  background-color: var(--primary);
-  color: white;
-  border-radius: 50px;
-  display: flex;
-  gap: 2rem;
+/* Ensure content sits above the ambient glow */
+.auth-layout__anchor>* {
+  z-index: 1;
   position: relative;
+}
 
-  .layout-auth__modal__window {
-    position: relative;
-    top: 10px;
-    left: 10px;
-    height: calc(100% - 20px);
-    width: 40%;
-    border-radius: 40px;
-    overflow: hidden;
-    background-color: white;
-
-    img {
-      position: absolute;
-      top: calc(-5vh - 10px);
-      left: calc(-5vw - 10px);
-      height: 100vh;
-      width: 100vw;
-      object-fit: cover;
-      filter: brightness(1.2) blur(10px);
-    }
-
-    .layout-auth__modal__window__content {
-      position: relative;
-      height: calc(100% - 8rem);
-      width: calc(100% - 8rem);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      color: white;
-      padding: 4rem;
-
-      .layout-auth__modal__window__content__quote__line-container {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-
-        .layout-auth__modal__window__content__quote__line {
-          height: 2px;
-          width: 30%;
-          background-color: white;
-        }
-      }
-
-      .layout-auth__modal__window__content__slogan {
-        .deliver-better {
-          margin-left: 20%;
-        }
-      }
-
-      h1 {
-        padding: 0;
-        margin: 0;
-        font-size: 3rem;
-      }
-
-      p {
-        font-size: 1.2rem;
-      }
-    }
-  }
-
-  .layout-auth__modal__content {
-    width: 60%;
-    height: 100%;
-    margin-right: 2rem;
+@media (min-width: 1024px) {
+  .auth-layout__anchor {
+    display: flex;
   }
 }
+
+.auth-layout__anchor--50 {
+  width: 50%;
+  justify-content: center;
+}
+
+.auth-layout__anchor--45 {
+  width: 45%;
+  padding: 4rem;
+  justify-content: flex-start;
+}
+
+/* --- Right Pane: The Interaction Zone --- */
+.auth-layout__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  background-color: var(--bg);
+}
+
+.auth-layout__form-wrapper {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 2;
+}
+
+/* --- Mobile Brand Header --- */
+.auth-layout__mobile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.auth-layout__mobile-logo {
+  height: 32px;
+  width: 32px;
+  border-radius: var(--border-radius__xsmall);
+}
+
+@media (min-width: 1024px) {
+  .auth-layout__mobile-header {
+    display: none;
+  }
+}
+
+/* #endregion */

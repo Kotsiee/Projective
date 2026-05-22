@@ -1,12 +1,13 @@
 import '../../styles/components/new/new-project-legal.css';
 import { IPOptionMode, PortfolioDisplayRights } from '@projective/types';
-import { SelectField, SelectOption, TagInput, TextField } from '@projective/fields';
+import { SelectField, SelectOption, TextField } from '@projective/fields';
 import { IconPlus, IconTrash } from '@tabler/icons-preact';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
 
 export default function ProjectLegal() {
 	const state = useNewProjectContext();
 
+	// #region Options
 	const ipOptions: SelectOption<string>[] = [
 		{ label: 'Exclusive Transfer (Client owns everything)', value: IPOptionMode.ExclusiveTransfer },
 		{ label: 'Licensed Use (Creator retains ownership)', value: IPOptionMode.LicensedUse },
@@ -24,8 +25,9 @@ export default function ProjectLegal() {
 		{ label: 'Yes, require a signed NDA', value: 'true' },
 		{ label: 'No NDA required', value: 'false' },
 	];
+	// #endregion
 
-	// Handlers for Screening Questions
+	// #region Handlers
 	const addQuestion = () => {
 		state.screeningQuestions.value = [...state.screeningQuestions.value, ''];
 	};
@@ -39,6 +41,7 @@ export default function ProjectLegal() {
 		newQuestions[index] = value;
 		state.screeningQuestions.value = newQuestions;
 	};
+	// #endregion
 
 	return (
 		<div className='project-legal'>
@@ -58,7 +61,7 @@ export default function ProjectLegal() {
 						label='IP Ownership Mode'
 						options={ipOptions}
 						value={state.ipMode.value}
-						onChange={(v) => state.ipMode.value = v as string}
+						onChange={(v) => state.ipMode.value = v as IPOptionMode}
 						searchable={false}
 						multiple={false}
 						floating
@@ -84,7 +87,7 @@ export default function ProjectLegal() {
 						label='Portfolio Display Rights'
 						options={portfolioOptions}
 						value={state.portfolioRights.value}
-						onChange={(v) => state.portfolioRights.value = v as string}
+						onChange={(v) => state.portfolioRights.value = v as PortfolioDisplayRights}
 						searchable={false}
 						multiple={false}
 						floating
@@ -114,17 +117,6 @@ export default function ProjectLegal() {
 						hint='Leave blank if not strictly required'
 					/>
 				</div>
-
-				<div className='project-legal__row'>
-					<TagInput
-						name='skills'
-						label='Required Skills'
-						value={state.skills}
-						onChange={(v) => state.skills.value = v}
-						placeholder='Type a skill and press Enter...'
-						floating
-					/>
-				</div>
 			</div>
 
 			<div className='project-legal__section project-legal__section--questions'>
@@ -137,7 +129,7 @@ export default function ProjectLegal() {
 
 				<div className='project-legal__questions-list'>
 					{state.screeningQuestions.value.map((question, index) => (
-						<div key={index} className='project-legal__question-item'>
+						<div key={index.toString()} className='project-legal__question-item'>
 							<div className='project-legal__question-input'>
 								<TextField
 									label={`Question ${index + 1}`}

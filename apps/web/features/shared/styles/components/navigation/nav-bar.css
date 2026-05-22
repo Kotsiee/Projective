@@ -10,7 +10,7 @@ header {
   align-items: center;
   padding-top: 1rem;
   z-index: 1000;
-  background: linear-gradient(var(--bg), hsla(var(--bg-hue), var(--bg-saturation), var(--bg-lightness), 0));
+  background: var(--bg);
 
   nav {
     margin: 1rem;

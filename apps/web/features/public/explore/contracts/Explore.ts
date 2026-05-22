@@ -1,7 +1,14 @@
-import { Signal } from '@preact/signals';
-import { ProjectResponse } from './ProjectResponse.ts';
+/**
+ * @file Explore.ts
+ * @description Contracts and state definitions for the Explore discovery engine.
+ */
 
-export type ExploreResponses = ProjectResponse;
+import { Signal } from '@preact/signals';
+import { PartialEntityResponse } from '@projective/types';
+
+// Update to expect the normalized DTO instead of full domain entities
+export type ExploreResponses = PartialEntityResponse;
+
 export type ViewMode = 'grid' | 'list' | 'masonry';
 export type SortType = 'recommended' | 'price' | 'rating' | 'recent';
 export type SearchType =
@@ -27,6 +34,7 @@ export interface ExploreState {
 	/** The active sorting parameter */
 	sortType: Signal<SortType>;
 	/** Store the full data object of the selected item instead of just the ID */
+	// deno-lint-ignore no-explicit-any
 	selectedItem: Signal<any | null>;
 	/** Controls the visibility of the sticky filter sidebar */
 	isFiltersOpen: Signal<boolean>;

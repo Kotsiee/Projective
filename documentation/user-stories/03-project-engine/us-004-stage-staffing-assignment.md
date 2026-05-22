@@ -19,7 +19,7 @@
 - [ ] **AC 2: Multi-Type Applications:** The system accepts applications from both individual
       Freelancers and Freelancer Teams.
 - [ ] **AC 3: Team Lead Authority:** Only a user with `admin` or `owner` status in
-      `org.team_memberships` can apply for a project on behalf of a team.
+      `org.team_members` can apply for a project on behalf of a team.
 - [ ] **AC 4: Atomic Assignment:** The Client can assign a specific profile to a specific stage.
       This creates a record in `projects.stage_assignments`.
 - [ ] **AC 5: Status Transition:** Once an assignment is confirmed by both parties, the stage status

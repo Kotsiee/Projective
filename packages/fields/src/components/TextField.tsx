@@ -1,6 +1,6 @@
 import '../styles/fields/text-field.css';
-import { JSX } from 'preact';
-import { computed, Signal, useSignal } from '@preact/signals';
+import { TargetedEvent } from 'preact';
+import { computed, Signal } from '@preact/signals';
 import { TextFieldProps } from '../types/components/text-field.ts';
 import { useFieldState } from '../hooks/useFieldState.ts';
 import { useInteraction } from '../hooks/useInteraction.ts';
@@ -8,6 +8,7 @@ import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
 import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
 import { EffectWrapper } from '../wrappers/EffectWrapper.tsx';
 import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
 
 export function TextField(props: TextFieldProps) {
 	const {
@@ -30,7 +31,7 @@ export function TextField(props: TextFieldProps) {
 		info,
 		help,
 		helpLink,
-		helpPosition, // NEW
+		helpPosition,
 		type = 'text',
 		multiline,
 		rows = 3,
@@ -44,14 +45,17 @@ export function TextField(props: TextFieldProps) {
 		showCount,
 		prefix,
 		suffix,
+		prefixProps,
+		suffixProps,
 		onPrefixClick,
 		onSuffixClick,
 		onInput,
 		onFocus,
 		onBlur,
+		nextField,
+		onKeyDown,
 	} = props;
 
-	// 1. State Management
 	const fieldState = useFieldState({
 		value,
 		defaultValue: defaultValue ?? '',
@@ -67,11 +71,9 @@ export function TextField(props: TextFieldProps) {
 	const errorMessage = fieldState.error.value;
 	const val = fieldState.value.value || '';
 
-	// 2. Computed
 	const length = computed(() => val.length);
 	const isOverLimit = computed(() => maxLength ? length.value > maxLength : false);
 
-	// 3. Handlers
 	const handleContainerClick = (e: MouseEvent) => {
 		if (isDisabled) return;
 		const input = (e.currentTarget as HTMLElement).querySelector<
@@ -80,20 +82,31 @@ export function TextField(props: TextFieldProps) {
 		input?.focus();
 	};
 
-	const handleInput = (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+	const handleInput = (e: TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const newValue = e.currentTarget.value;
 		fieldState.setValue(newValue);
 		interaction.handleChange(newValue);
 		onInput?.(e);
 	};
 
-	// 4. Render Helpers
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter' && !multiline) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		} else if (e.key === 'Tab' && !e.shiftKey && nextField) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		}
+		onKeyDown?.(e);
+	};
+
 	const renderInput = () => {
 		const commonProps = {
 			id,
 			className: 'field-text__input',
 			value: val,
 			onInput: handleInput,
+			onKeyDown: handleKeyDown,
 			onFocus: (e: any) => {
 				interaction.handleFocus(e);
 				onFocus?.(e);
@@ -150,6 +163,7 @@ export function TextField(props: TextFieldProps) {
 				<AdornmentWrapper
 					position='prefix'
 					onClick={onPrefixClick}
+					{...prefixProps}
 				>
 					{prefix}
 				</AdornmentWrapper>
@@ -175,6 +189,7 @@ export function TextField(props: TextFieldProps) {
 				<AdornmentWrapper
 					position='suffix'
 					onClick={onSuffixClick}
+					{...suffixProps}
 				>
 					{suffix}
 				</AdornmentWrapper>

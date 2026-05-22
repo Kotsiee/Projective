@@ -1,9 +1,5 @@
--- db/migrations/0004_helpers_functions.sql
-
--- NOTE: we rely on pgcrypto/gen_random_uuid(). Make sure extension is on.
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- is_admin(): check ops.admin_users
 CREATE OR REPLACE FUNCTION security.is_admin()
 RETURNS boolean
 LANGUAGE sql
@@ -17,7 +13,6 @@ AS $$
   );
 $$;
 
--- simple debug helper: return current JWT context
 CREATE OR REPLACE FUNCTION security.current_context()
 RETURNS jsonb
 LANGUAGE sql

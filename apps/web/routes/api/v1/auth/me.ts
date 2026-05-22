@@ -1,10 +1,12 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
 import { getAuthCookies } from '@projective/backend';
+import { AuthBackendService } from '@features/shared/services/profile/AuthServiceBackend.ts';
 
 export const handler = define.handlers({
 	async GET(ctx) {
 		const { accessToken } = getAuthCookies(ctx.req);
+
 		if (!accessToken) {
 			return new Response(
 				JSON.stringify({ error: { code: 'unauthorized' } }),
@@ -18,14 +20,16 @@ export const handler = define.handlers({
 			);
 		}
 
-		const sb = await supabaseClient(ctx.req);
-		const { data: userRes, error: userErr } = await sb.auth.getUser();
+		// Delegate business logic and DB fetching to the Service layer
+		const result = await AuthBackendService.getMe({
+			getClient: async () => await supabaseClient(ctx.req),
+		});
 
-		if (userErr || !userRes?.user) {
+		if (!result.ok) {
 			return new Response(
-				JSON.stringify({ error: { code: 'unauthorized' } }),
+				JSON.stringify({ error: { code: result.error?.code || 'unauthorized' } }),
 				{
-					status: 401,
+					status: result.error?.status || 401,
 					headers: {
 						'content-type': 'application/json; charset=utf-8',
 						'cache-control': 'no-store',
@@ -34,40 +38,8 @@ export const handler = define.handlers({
 			);
 		}
 
-		const { data: publicProfile } = await sb
-			.schema('org')
-			.from('users_public')
-			.select('user_id, first_name, last_name, username, avatar_url')
-			.eq('user_id', userRes.user.id)
-			.single();
-
-		const { data: sessionContext } = await sb
-			.schema('security')
-			.from('session_context')
-			.select('active_profile_type, active_profile_id, active_team_id')
-			.eq('user_id', userRes.user.id)
-			.single();
-
-		const payload = {
-			id: userRes.user.id,
-
-			displayName: publicProfile
-				? `${publicProfile.first_name || ''} ${publicProfile.last_name || ''}`.trim() ||
-					publicProfile.username
-				: null,
-			username: publicProfile?.username ?? null,
-			avatarUrl: publicProfile?.avatar_url ?? null,
-
-			activeProfileType: (sessionContext?.active_profile_type as
-				| 'freelancer'
-				| 'business'
-				| null) ?? null,
-			activeProfileId: (sessionContext?.active_profile_id as string | null) ?? null,
-			activeTeamId: (sessionContext?.active_team_id as string | null) ??
-				null,
-		};
-
-		return new Response(JSON.stringify({ user: payload }), {
+		// Return successful response
+		return new Response(JSON.stringify({ user: result.data }), {
 			status: 200,
 			headers: {
 				'content-type': 'application/json; charset=utf-8',

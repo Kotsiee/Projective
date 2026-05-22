@@ -1,26 +1,33 @@
 import '../../styles/components/navigation/nav-bar-guest.css';
-import { theme } from '@projective/ui';
+import AuthModal from '../../components/auth/AuthModal.tsx';
 
+/**
+ * NavBarGuest
+ * * The public-facing navigation bar for unauthenticated users.
+ * Provides links to explore the platform and triggers the Auth Modal island for login.
+ */
 export default function NavBarGuest() {
-	const switchTheme = () => {
-		if (theme.value === 'light') {
-			theme.value = 'dark';
-		} else {
-			theme.value = 'light';
-		}
-	};
-
 	return (
-		<div class='header-container'>
-			<div class='header__logo'>
-				<h1>Projective</h1>
+		<div class='nav-bar-guest'>
+			{/* Brand / Logo */}
+			<a href='/' class='nav-bar-guest__brand' aria-label='Projective Home'>
+				<img
+					src='https://placehold.co/140x40/288690/FFFFFF?text=Projective'
+					alt='Projective Logo'
+					class='nav-bar-guest__logo'
+				/>
+			</a>
+
+			{/* Center Links */}
+			<div class='nav-bar-guest__nav'>
+				<a href='/explore' class='nav-bar-guest__link'>Explore</a>
+				<a href='/services' class='nav-bar-guest__link'>Services</a>
+				<a href='/about' class='nav-bar-guest__link'>How it Works</a>
 			</div>
-			<div class='header__buttons'>
-				<button type='button'>search</button>
-				<button type='button' onClick={() => switchTheme()}>{theme.value}</button>
-				<a href='#'>Explore</a>
-				<a class='header__buttons__user header__buttons__login' href='/login'>Login</a>
-				<a class='header__buttons__user header__buttons__join' href='/register'>Join</a>
+
+			{/* Actions - Rendered via an Island to manage Modal State */}
+			<div class='nav-bar-guest__actions'>
+				<AuthModal />
 			</div>
 		</div>
 	);

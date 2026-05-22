@@ -35,14 +35,14 @@ export function PublishButton() {
 		console.log('=== FORM VALIDATION DEBUG ===');
 		let hasErrors = false;
 
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 1; i <= 5; i++) {
 			const errors = validateProjectStep(i, state);
 			if (errors.length > 0) {
 				hasErrors = true;
-				console.error(`Step ${i + 1} Errors:`, errors);
-				errors.forEach((err) => toast.error(`Step ${i + 1}: ${err}`));
+				console.error(`Step ${i} Errors:`, errors);
+				errors.forEach((err) => toast.error(`Step ${i}: ${err}`));
 			} else {
-				console.log(`Step ${i + 1}: OK`);
+				console.log(`Step ${i}: OK`);
 			}
 		}
 
@@ -74,6 +74,7 @@ export function PublishButton() {
 
 				const payload = {
 					title: state.title.value,
+					format: state.format.value,
 					description: typeof state.description.value === 'string'
 						? JSON.parse(state.description.value)
 						: state.description.value,
@@ -102,7 +103,7 @@ export function PublishButton() {
 					stages: state.stages.value.map((stage) => {
 						const cleanStage: any = { ...stage };
 
-						// FIX: Wipe out the ghost data from whichever staffing model is NOT actively selected
+						// Wipe out the ghost data from whichever staffing model is NOT actively selected
 						if (cleanStage._ui_model_type === 'defined_roles') {
 							cleanStage.open_seats = [];
 						} else if (cleanStage._ui_model_type === 'open_seats') {
@@ -131,10 +132,6 @@ export function PublishButton() {
 
 				const formData = new FormData();
 				formData.append('payload', JSON.stringify(payload));
-
-				if (state.thumbnail.value?.file) {
-					formData.append('thumbnail', state.thumbnail.value.file);
-				}
 
 				state.attachments.value.forEach((fileWithMeta) => {
 					if (fileWithMeta.file) {

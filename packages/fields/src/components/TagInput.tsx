@@ -5,6 +5,8 @@ import { useInteraction } from '../hooks/useInteraction.ts';
 import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
 import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
 import { EffectWrapper } from '../wrappers/EffectWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
+import { generateTagTheme } from '@projective/utils';
 
 export function TagInput(props: TagInputProps) {
 	const {
@@ -25,6 +27,10 @@ export function TagInput(props: TagInputProps) {
 		hint,
 		warning,
 		info,
+		nextField,
+		onKeyDown,
+		tagColor,
+		tagVariant = 'transparent',
 	} = props;
 
 	const interaction = useInteraction(
@@ -46,6 +52,13 @@ export function TagInput(props: TagInputProps) {
 	const errorMessage = error instanceof Signal ? error.value : error;
 
 	const handleKeyDown = (e: KeyboardEvent) => {
+		// Tab Navigation
+		if (e.key === 'Tab' && !e.shiftKey && nextField) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		}
+
+		// Tag Creation
 		if (e.key === 'Enter' || e.key === ',') {
 			e.preventDefault();
 			const val = inputValue.value.trim();
@@ -74,6 +87,8 @@ export function TagInput(props: TagInputProps) {
 			}
 			onChange?.(newTags);
 		}
+
+		onKeyDown?.(e);
 	};
 
 	const removeTag = (tagToRemove: string) => {
@@ -91,6 +106,12 @@ export function TagInput(props: TagInputProps) {
 		if (isDisabled) return;
 		const input = (e.currentTarget as HTMLElement).querySelector('input');
 		input?.focus();
+	};
+
+	const getTagStyles = (tag: string) => {
+		if (!tagColor) return {};
+		const colorStr = typeof tagColor === 'function' ? tagColor(tag) : tagColor;
+		return generateTagTheme(colorStr, tagVariant);
 	};
 
 	return (
@@ -111,7 +132,7 @@ export function TagInput(props: TagInputProps) {
 				/>
 
 				{signalValue.value?.map((tag) => (
-					<div key={tag} className='field-tag__chip'>
+					<div key={tag} className='field-tag__chip' style={getTagStyles(tag)}>
 						<span>{tag}</span>
 						<span
 							className='field-tag__chip-remove'
@@ -120,7 +141,20 @@ export function TagInput(props: TagInputProps) {
 								removeTag(tag);
 							}}
 						>
-							&times;
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								width='14'
+								height='14'
+								viewBox='0 0 24 24'
+								fill='none'
+								stroke='currentColor'
+								strokeWidth='2'
+								strokeLinecap='round'
+								strokeLinejoin='round'
+							>
+								<path d='M18 6 6 18' />
+								<path d='m6 6 12 12' />
+							</svg>
 						</span>
 					</div>
 				))}
@@ -138,7 +172,6 @@ export function TagInput(props: TagInputProps) {
 				/>
 			</div>
 
-			{/* FIX: LabelWrapper moved to end */}
 			<LabelWrapper
 				id={id}
 				label={label}

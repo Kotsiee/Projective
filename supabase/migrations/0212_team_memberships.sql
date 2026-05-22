@@ -1,25 +1,17 @@
--- ============================================================
--- TABLE: org.team_memberships
--- ============================================================
-ALTER TABLE org.team_memberships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE org.team_members ENABLE ROW LEVEL SECURITY;
 
--- SELECT: Visibility Rule
-DROP POLICY IF EXISTS "Users can view members of their teams" ON org.team_memberships;
+DROP POLICY IF EXISTS "Users can view members of their teams" ON org.team_members;
 
-CREATE POLICY "Users can view members of their teams" ON org.team_memberships FOR
+CREATE POLICY "Users can view members of their teams" ON org.team_members FOR
 SELECT TO public USING (
-        -- I am the user in this row
         user_id = auth.uid ()
-        OR
-        -- OR I am a member of the team this row belongs to (Uses recursion breaker)
-        org.is_active_team_member (team_id)
+        OR org.is_active_team_member (team_id)
         OR security.is_admin ()
     );
 
--- INSERT: Add Members Rule
-DROP POLICY IF EXISTS "Team owners can add members" ON org.team_memberships;
+DROP POLICY IF EXISTS "Team owners can add members" ON org.team_members;
 
-CREATE POLICY "Team owners can add members" ON org.team_memberships FOR
+CREATE POLICY "Team owners can add members" ON org.team_members FOR
 INSERT
     TO public
 WITH
@@ -34,10 +26,9 @@ WITH
         OR security.is_admin ()
     );
 
--- UPDATE: Manage Members Rule
-DROP POLICY IF EXISTS "Team owners can update members" ON org.team_memberships;
+DROP POLICY IF EXISTS "Team owners can update members" ON org.team_members;
 
-CREATE POLICY "Team owners can update members" ON org.team_memberships FOR
+CREATE POLICY "Team owners can update members" ON org.team_members FOR
 UPDATE TO public USING (
     EXISTS (
         SELECT 1
@@ -49,15 +40,11 @@ UPDATE TO public USING (
     OR security.is_admin ()
 );
 
--- DELETE: Remove/Leave Rule
-DROP POLICY IF EXISTS "Team owners can remove members or members can leave" ON org.team_memberships;
+DROP POLICY IF EXISTS "Team owners can remove members or members can leave" ON org.team_members;
 
-CREATE POLICY "Team owners can remove members or members can leave" ON org.team_memberships FOR DELETE TO public USING (
-    -- I am the user leaving
+CREATE POLICY "Team owners can remove members or members can leave" ON org.team_members FOR DELETE TO public USING (
     user_id = auth.uid ()
-    OR
-    -- OR I am the owner of the team
-    EXISTS (
+    OR EXISTS (
         SELECT 1
         FROM org.teams t
         WHERE

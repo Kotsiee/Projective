@@ -1,0 +1,79 @@
+.view-join-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+}
+
+/* 2-Column Layout Wrapper */
+.view-join-form__body {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.view-join-form__section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    /* Prevents flex blowouts */
+}
+
+/* Vertical Divider */
+.view-join-form__divider {
+    width: 1px;
+    background-color: var(--border-color);
+    flex-shrink: 0;
+}
+
+/* Adjustable Text Box Setup */
+.view-join-form__textfield {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Target the underlying input to force resize capability and starting height */
+.view-join-form__textfield textarea.field-text__input {
+    resize: vertical;
+    height: 150px;
+    /* Starting fixed height */
+    min-height: 100px;
+    max-height: 400px;
+    /* Sensible upper bounds */
+}
+
+/* Hint text below the new SelectField */
+.view-join-form__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Actions Footer */
+.view-join-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsive Fallback for Mobile */
+@media (max-width: 768px) {
+    .view-join-form__body {
+        flex-direction: column;
+    }
+
+    .view-join-form__divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .view-join-form__textfield textarea.field-text__input {
+        height: 120px;
+    }
+}

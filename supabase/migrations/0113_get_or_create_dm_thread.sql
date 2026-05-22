@@ -9,7 +9,7 @@ DECLARE
     v_current_user_id uuid := auth.uid();
     v_thread_id uuid;
 BEGIN
-    -- Find existing thread where BOTH users are participants
+    
     SELECT t.id INTO v_thread_id
     FROM comms.dm_threads t
     JOIN comms.dm_participants p1 ON p1.thread_id = t.id AND p1.user_id = v_current_user_id
@@ -20,12 +20,12 @@ BEGIN
         RETURN v_thread_id;
     END IF;
 
-    -- Create new thread
+    
     INSERT INTO comms.dm_threads (created_by_user_id)
     VALUES (v_current_user_id)
     RETURNING id INTO v_thread_id;
 
-    -- Insert participants
+    
     INSERT INTO comms.dm_participants (thread_id, user_id)
     VALUES (v_thread_id, v_current_user_id), (v_thread_id, target_user_id);
 

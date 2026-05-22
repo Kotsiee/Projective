@@ -10,7 +10,7 @@ DECLARE
   invite_record jsonb;
   _id uuid;
 BEGIN
-  -- Allow pre-generated ID for file upload paths
+  
   _id := COALESCE((payload->>'id')::uuid, gen_random_uuid());
 
   INSERT INTO org.teams (
@@ -18,7 +18,7 @@ BEGIN
     owner_user_id,
     name,
     slug,
-    headline, -- NEW
+    headline, 
     description,
     avatar_url,
     banner_url,
@@ -31,7 +31,7 @@ BEGIN
     (payload->>'owner_id')::uuid,
     payload->>'name',
     payload->>'slug',
-    COALESCE(payload->>'headline', ''), -- NEW
+    COALESCE(payload->>'headline', ''), 
     COALESCE(payload->>'description', ''),
     payload->>'avatar_url',
     payload->>'banner_url',
@@ -41,8 +41,8 @@ BEGIN
   )
   RETURNING id, slug INTO new_team_id, new_team_slug;
 
-  -- Create Owner Membership
-  INSERT INTO org.team_memberships (
+  
+  INSERT INTO org.team_members (
     team_id,
     user_id,
     role,
@@ -55,7 +55,7 @@ BEGIN
     'active'
   );
 
-  -- Handle Invites
+  
   IF payload ? 'invites' AND jsonb_array_length(payload->'invites') > 0 THEN
     FOR invite_record IN SELECT * FROM jsonb_array_elements(payload->'invites')
     LOOP

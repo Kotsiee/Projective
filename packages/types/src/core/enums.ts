@@ -4,11 +4,6 @@ export enum Visibility {
 	Unlisted = 'unlisted',
 }
 
-export enum ProfileType {
-	Freelancer = 'freelancer',
-	Business = 'business',
-}
-
 export enum AssignmentType {
 	Freelancer = 'freelancer',
 	Team = 'team',

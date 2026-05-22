@@ -7,5 +7,8 @@ export * from './src/components/stepper/index.ts';
 export * from './src/components/button/index.ts';
 export * from './src/components/layouts/index.ts';
 export * from './src/components/card/index.ts';
+export * from './src/components/overlay/index.ts';
 export * from './src/components/skeleton/index.ts';
+export * from './src/components/taglist/index.ts';
+export * from './src/components/icon/index.ts';
 export * from './src/hooks/useRipple.ts';

@@ -9,27 +9,23 @@ export function useCurrencyMask(
 
 	const formatCurrency = (val: number) => {
 		return new Intl.NumberFormat(locale, {
-			style: 'currency',
-			currency: currency,
+			style: 'decimal',
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
 		}).format(val);
-	};
-
-	const parseCurrency = (val: string): number => {
-		// Remove non-numeric characters except decimal point
-		const clean = val.replace(/[^0-9.-]+/g, '');
-		return parseFloat(clean);
 	};
 
 	const handleBlur = () => {
 		if (value.value !== undefined && !isNaN(value.value)) {
 			displayValue.value = formatCurrency(value.value);
 		} else {
-			displayValue.value = '';
+			value.value = 0;
+			displayValue.value = formatCurrency(0);
 		}
 	};
 
 	const handleFocus = () => {
-		if (value.value !== undefined && !isNaN(value.value)) {
+		if (value.value !== undefined && !isNaN(value.value) && value.value !== 0) {
 			displayValue.value = value.value.toString();
 		} else {
 			displayValue.value = '';
@@ -37,16 +33,28 @@ export function useCurrencyMask(
 	};
 
 	const handleChange = (val: string) => {
-		displayValue.value = val;
-		const parsed = parseCurrency(val);
-		if (!isNaN(parsed)) {
-			value.value = parsed;
-		} else {
+		let sanitized = val.replace(/[^0-9.]/g, '');
+
+		const parts = sanitized.split('.');
+		if (parts.length > 2) {
+			sanitized = parts[0] + '.' + parts.slice(1).join('');
+		}
+
+		displayValue.value = sanitized;
+
+		if (sanitized === '' || sanitized === '.') {
 			value.value = undefined;
+		} else {
+			value.value = parseFloat(sanitized);
 		}
 	};
 
-	// Initialize display value
+	const setProgrammaticValue = (newVal: number) => {
+		const rounded = Math.round(newVal * 100) / 100;
+		value.value = rounded;
+		displayValue.value = formatCurrency(rounded);
+	};
+
 	if (value.value !== undefined && !displayValue.value) {
 		displayValue.value = formatCurrency(value.value);
 	}
@@ -56,5 +64,6 @@ export function useCurrencyMask(
 		handleBlur,
 		handleFocus,
 		handleChange,
+		setProgrammaticValue,
 	};
 }

@@ -1,28 +1,28 @@
 import { JSX } from 'preact';
 import '../styles/wrappers/adornment-wrapper.css';
 
-interface AdornmentWrapperProps {
+export interface AdornmentWrapperProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	children?: JSX.Element | string;
 	position: 'prefix' | 'suffix';
-	onClick?: (e: MouseEvent) => void;
-	className?: string;
 }
 
 export function AdornmentWrapper(props: AdornmentWrapperProps) {
-	if (!props.children) return null;
+	const { children, position, className, onClick, ...rest } = props;
+
+	if (!children) return null;
 
 	const classes = [
 		'field-adornment',
-		`field-adornment--${props.position}`,
-		props.onClick && 'field-adornment--interactive',
-		props.className,
+		`field-adornment--${position}`,
+		(onClick || rest.onPointerDown) && 'field-adornment--interactive',
+		className,
 	]
 		.filter(Boolean)
 		.join(' ');
 
 	return (
-		<div className={classes} onClick={props.onClick}>
-			{props.children}
+		<div className={classes} onClick={onClick} {...rest}>
+			{children}
 		</div>
 	);
 }

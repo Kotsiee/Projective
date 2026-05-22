@@ -10,7 +10,7 @@ AS $$
 DECLARE
     v_channel_id uuid;
 BEGIN
-    -- Try to find existing
+    
     SELECT id INTO v_channel_id
     FROM comms.project_channels
     WHERE project_id = p_project_id AND stage_id = p_stage_id
@@ -20,7 +20,7 @@ BEGIN
         RETURN v_channel_id;
     END IF;
 
-    -- Create new
+    
     INSERT INTO comms.project_channels (project_id, stage_id, name)
     VALUES (p_project_id, p_stage_id, p_name)
     RETURNING id INTO v_channel_id;

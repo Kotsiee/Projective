@@ -4,8 +4,8 @@ CREATE OR REPLACE FUNCTION projects.get_project_details(
 RETURNS TABLE (
   project_id uuid,
   title text,
+  format text,
   status text,
-  banner_url text,
   is_starred boolean,
   target_project_start_date timestamptz,
   timeline_preset text,
@@ -22,116 +22,33 @@ DECLARE
   v_user_role text;
   v_is_owner boolean;
 BEGIN
-  -- 1. Determine Access & Role
   SELECT 
     CASE 
-      WHEN p.owner_user_id = v_user_id THEN 'owner'
-      WHEN EXISTS (
-        SELECT 1 FROM org.business_profiles bp 
-        WHERE bp.id = p.client_business_id AND bp.owner_user_id = v_user_id
-      ) THEN 'owner'
-      WHEN EXISTS (
-        SELECT 1 FROM projects.project_participants pp 
-        WHERE pp.project_id = p.id 
-        AND (
-           -- FIXED: Removed freelancer subquery trap
-           (pp.profile_type = 'freelancer' AND pp.profile_id = v_user_id) OR
-           -- FIXED: Explicit bp.id alias 
-           (pp.profile_type = 'business' AND pp.profile_id IN (SELECT bp.id FROM org.business_profiles bp WHERE bp.owner_user_id = v_user_id))
-        )
-      ) THEN 'collaborator'
-      -- Check if assigned to any stage (Freelancer or Team Member)
-      WHEN EXISTS (
-        SELECT 1 FROM projects.stage_assignments sa
-        JOIN projects.project_stages ps ON ps.id = sa.project_stage_id
-        WHERE ps.project_id = p.id
-        AND (
-           -- FIXED: Removed freelancer subquery trap
-           (sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id = v_user_id) OR
-           (sa.assignee_type = 'team' AND sa.team_id IN (
-              SELECT tm.team_id 
-              FROM org.team_memberships tm 
-              WHERE tm.user_id = v_user_id AND tm.status = 'active'
-           ))
-        )
-      ) THEN 'collaborator'
+      WHEN p.owner_user_id = v_user_id OR EXISTS (SELECT 1 FROM org.business_profiles bp WHERE bp.id = p.client_business_id AND bp.owner_user_id = v_user_id) THEN 'owner'
+      WHEN EXISTS (SELECT 1 FROM projects.project_participants pp WHERE pp.project_id = p.id AND ((pp.profile_type = 'freelancer' AND pp.profile_id = v_user_id) OR (pp.profile_type = 'business' AND pp.profile_id IN (SELECT bp.id FROM org.business_profiles bp WHERE bp.owner_user_id = v_user_id)))) THEN 'collaborator'
+      WHEN EXISTS (SELECT 1 FROM projects.stage_assignments sa JOIN projects.project_stages ps ON ps.id = sa.project_stage_id WHERE ps.project_id = p.id AND ((sa.assignee_type = 'freelancer' AND sa.freelancer_profile_id = v_user_id) OR (sa.assignee_type = 'team' AND sa.team_id IN (SELECT tm.team_id FROM org.team_members tm WHERE tm.user_id = v_user_id AND tm.status = 'active')))) THEN 'collaborator'
       ELSE NULL
     END
   INTO v_user_role
   FROM projects.projects p
   WHERE p.id = p_project_id;
 
-  IF v_user_role IS NULL THEN
-    RAISE EXCEPTION 'Access Denied';
-  END IF;
-
+  IF v_user_role IS NULL THEN RAISE EXCEPTION 'Access Denied'; END IF;
   v_is_owner := (v_user_role = 'owner');
 
   RETURN QUERY
   SELECT
-    p.id,
-    p.title,
-    p.status::text,
-    NULL::text as banner_url,
-    COALESCE(pref.is_starred, false),
-    p.target_project_start_date,
-    p.timeline_preset::text,     
-
+    p.id, p.title, p.format::text, p.status::text,
+    COALESCE(pref.is_starred, false), p.target_project_start_date, p.timeline_preset::text,     
     jsonb_build_object(
       'id', COALESCE(bp.id, p.owner_user_id),
-      'name', CASE 
-          WHEN bp.id IS NOT NULL THEN bp.name 
-          ELSE COALESCE(NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.last_name)), ''), up.username)
-        END,
-      'avatar_url', COALESCE(bp.logo_url, up.avatar_url),
+      'name', CASE WHEN bp.id IS NOT NULL THEN bp.name ELSE COALESCE(NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.last_name)), ''), up.username) END,
+      'avatar', CASE WHEN bp.id IS NOT NULL THEN (SELECT metadata->'variants' FROM files.items WHERE id = bp.logo_file_id) ELSE (SELECT metadata->'variants' FROM files.items WHERE id = up.avatar_file_id) END,
+      'banner', CASE WHEN bp.id IS NOT NULL THEN (SELECT metadata->'variants' FROM files.items WHERE id = bp.banner_file_id) ELSE (SELECT metadata->'variants' FROM files.items WHERE id = up.banner_file_id) END,
       'type', CASE WHEN bp.id IS NOT NULL THEN 'business' ELSE 'freelancer' END
     ) as owner,
-
-    jsonb_build_object(
-      'role', v_user_role,
-      'permissions', (
-        SELECT jsonb_agg(perm)
-        FROM (
-          SELECT 'manage_settings' WHERE v_is_owner
-          UNION ALL
-          SELECT 'manage_members' WHERE v_is_owner
-          UNION ALL
-          SELECT 'view_financials' WHERE v_is_owner
-        ) as pr(perm)
-      )
-    ) as viewer_context,
-
-    (
-      SELECT jsonb_agg(
-        jsonb_build_object(
-          'id', ps.id,
-          'name', ps.name,
-          'status', ps.status,
-          'stage_type', ps.stage_type,
-          
-          'start_trigger_type', ps.start_trigger_type,
-          'fixed_start_date', ps.fixed_start_date,
-          'start_dependency_stage_id', ps.start_dependency_stage_id,
-          'start_dependency_lag_days', ps.start_dependency_lag_days,
-          'file_duration_mode', ps.file_duration_mode,
-          'file_duration_days', ps.file_duration_days,
-          'file_due_date', ps.file_due_date,
-          'session_count', ps.session_count,
-          'session_preferred_days', ps.session_preferred_days,
-          'session_end_date', ps.session_end_date,
-          'maintenance_cycle_interval', ps.maintenance_cycle_interval,
-          'hire_trigger_active', ps.hire_trigger_active,
-
-          'unread', EXISTS(
-             SELECT 1 FROM comms.notifications n 
-             WHERE n.user_id = v_user_id AND n.read_at IS NULL AND n.entity_id = ps.id
-          )
-        ) ORDER BY ps.sort_order ASC
-      )
-      FROM projects.project_stages ps
-      WHERE ps.project_id = p.id
-    ) as stages
-
+    jsonb_build_object('role', v_user_role, 'permissions', (SELECT jsonb_agg(perm) FROM (SELECT 'manage_settings' WHERE v_is_owner UNION ALL SELECT 'manage_members' WHERE v_is_owner UNION ALL SELECT 'view_financials' WHERE v_is_owner) as pr(perm))) as viewer_context,
+    (SELECT jsonb_agg(jsonb_build_object('id', ps.id, 'name', ps.name, 'status', ps.status, 'file_upload_required', ps.file_upload_required, 'default_tasks', ps.default_tasks, 'skills', ps.skills, 'start_trigger_type', ps.start_trigger_type, 'fixed_start_date', ps.fixed_start_date, 'start_dependency_stage_id', ps.start_dependency_stage_id, 'start_dependency_lag_days', ps.start_dependency_lag_days, 'file_duration_mode', ps.file_duration_mode, 'file_duration_days', ps.file_duration_days, 'file_due_date', ps.file_due_date, 'session_count', ps.session_count, 'session_preferred_days', ps.session_preferred_days, 'session_end_date', ps.session_end_date, 'maintenance_cycle_interval', ps.maintenance_cycle_interval, 'hire_trigger_active', ps.hire_trigger_active) ORDER BY ps.sort_order ASC) FROM projects.project_stages ps WHERE ps.project_id = p.id) as stages
   FROM projects.projects p
   LEFT JOIN projects.user_preferences pref ON pref.project_id = p.id AND pref.user_id = v_user_id
   LEFT JOIN org.business_profiles bp ON bp.id = p.client_business_id

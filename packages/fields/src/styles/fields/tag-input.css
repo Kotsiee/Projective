@@ -45,15 +45,40 @@
 .field-tag__chip {
   display: flex;
   align-items: center;
-  background-color: var(--primary-surface, rgba(186, 57%, 36%, 0.12));
-  color: var(--text-brand, #1d4ed8);
+  gap: 6px;
+  /* Balanced default state using colour.css semantics */
+  background-color: var(--primary-surface);
+  color: var(--text-blue);
+  border: 1px solid var(--primary-half);
   border-radius: var(--border-radius__xlarge, 16px);
   padding: 2px 8px;
   font-size: 0.875em;
+  transition: all var(--fast, 150ms ease);
+}
+
+.field-tag__chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--fast, 150ms ease), color var(--fast, 150ms ease);
+}
+
+.field-tag__chip-remove:hover {
+  opacity: 1;
+  color: var(--danger);
 }
 
 .field-tag__input {
   color: var(--field-text, #111827);
+  flex: 1;
+  min-width: 60px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--field-font-size, 14px);
 }
 
 .field-tag__input::placeholder {

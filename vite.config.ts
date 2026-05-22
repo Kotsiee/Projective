@@ -6,7 +6,9 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
 	root: 'apps/web',
-	plugins: [fresh()],
+	plugins: [fresh({
+		islandSpecifiers: ['./apps/web/features/public/explore/islands/index.ts'],
+	})],
 
 	server: {
 		fs: {

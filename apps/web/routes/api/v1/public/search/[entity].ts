@@ -12,7 +12,6 @@ export const handler = define.handlers({
 			countOnly: url.searchParams.get('countOnly') === 'true',
 			limit: parseInt(url.searchParams.get('limit') || '20', 10),
 			offset: parseInt(url.searchParams.get('offset') || '0', 10),
-			// NEW: Support direct ID lookups for deep-linking
 			id: url.searchParams.get('id') || undefined,
 		};
 

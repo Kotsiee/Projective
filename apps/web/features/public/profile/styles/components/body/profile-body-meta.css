@@ -1,0 +1,50 @@
+/* apps/web/features/public/profile/styles/components/body/profile-body-meta.css */
+
+.profile-body-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: -0.5rem; /* Pulls it slightly closer to the headline */
+    margin-bottom: 0.5rem;
+}
+
+.profile-body-meta--loading {
+    gap: 1rem;
+    margin-top: 0;
+}
+
+.profile-body-meta__item-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.profile-body-meta__item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.profile-body-meta__icon {
+    color: var(--text-muted);
+}
+
+.profile-body-meta__icon--star {
+    color: var(--warning); /* Applies a gold/yellow color specifically to the star rating */
+}
+
+.profile-body-meta__label strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.profile-body-meta__divider {
+    color: var(--border-color);
+    font-size: 1.2rem;
+    line-height: 0;
+    user-select: none;
+}

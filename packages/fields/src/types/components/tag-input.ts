@@ -9,5 +9,6 @@ export interface TagInputProps
 		ValueFieldProps<string[]>,
 		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
 		Omit<MessageWrapperProps, 'error' | 'hint'> {
-	// Tag specific props can be added here
+	tagColor?: string | ((tag: string) => string);
+	tagVariant?: 'solid' | 'transparent';
 }

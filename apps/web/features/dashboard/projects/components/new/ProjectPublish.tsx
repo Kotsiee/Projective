@@ -1,3 +1,10 @@
+/**
+ * @file ProjectPublish.tsx
+ * @description Step 5 of the Project Creation Engine.
+ * Provides a final review summary of the project configuration before submission.
+ */
+
+// #region Imports
 import '../../styles/components/new/new-project-publish.css';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
 import {
@@ -9,10 +16,12 @@ import {
 	IconFileDescription,
 	IconListCheck,
 } from '@tabler/icons-preact';
-import { DateTime, IPOptionMode, Visibility } from '@projective/types';
+import { DateTime, IPOptionMode, ProjectFormat, Visibility } from '@projective/types';
+// #endregion
 
 export default function ProjectPublish() {
 	const state = useNewProjectContext();
+	const isOneOff = state.format.value === ProjectFormat.OneOff;
 
 	// #region Helper Formatting Functions
 	const formatCurrency = (cents: number) => {
@@ -29,12 +38,12 @@ export default function ProjectPublish() {
 		let max = 0;
 
 		state.stages.value.forEach((stage) => {
-			if (stage._ui_model_type === 'defined_roles') {
+			if (stage._ui_model_type === 'defined_roles' && stage.staffing_roles) {
 				stage.staffing_roles.forEach((role) => {
 					min += role.budget_amount_cents * role.quantity;
 					max += role.budget_amount_cents * role.quantity;
 				});
-			} else if (stage._ui_model_type === 'open_seats' && stage.open_seats[0]) {
+			} else if (stage._ui_model_type === 'open_seats' && stage.open_seats && stage.open_seats[0]) {
 				min += stage.open_seats[0].budget_min_cents || 0;
 				max += stage.open_seats[0].budget_max_cents || 0;
 			}
@@ -56,11 +65,11 @@ export default function ProjectPublish() {
 		if (mode === IPOptionMode.SharedOwnership) return 'Shared Ownership';
 		return mode;
 	};
-	// #endregion
 
 	const jumpToStep = (stepNumber: number) => {
 		state.currentStep.value = stepNumber;
 	};
+	// #endregion
 
 	return (
 		<div className='project-publish'>
@@ -90,6 +99,12 @@ export default function ProjectPublish() {
 								<span className='summary-item__label'>Project Title</span>
 								<span className='summary-item__value summary-item__value--large'>
 									{state.title.value || 'Untitled Project'}
+								</span>
+							</div>
+							<div className='summary-item'>
+								<span className='summary-item__label'>Format</span>
+								<span className='summary-item__value' style={{ textTransform: 'capitalize' }}>
+									{state.format.value.replace('_', ' ')}
 								</span>
 							</div>
 							<div className='summary-item'>
@@ -147,14 +162,14 @@ export default function ProjectPublish() {
 					<div className='publish-section__header'>
 						<div className='publish-section__title-group'>
 							<IconListCheck size={20} className='publish-section__icon' />
-							<h3>Scope & Timeline</h3>
+							<h3>Scope & Scheduling</h3>
 						</div>
 						<div className='publish-section__actions'>
 							<button type='button' className='btn-edit-step' onClick={() => jumpToStep(3)}>
 								<IconBriefcase size={16} /> Stages
 							</button>
 							<button type='button' className='btn-edit-step' onClick={() => jumpToStep(4)}>
-								<IconCalendarStats size={16} /> Timeline
+								<IconCalendarStats size={16} /> Scheduling
 							</button>
 						</div>
 					</div>
@@ -175,24 +190,45 @@ export default function ProjectPublish() {
 										: 'Not Set'}
 								</span>
 							</div>
-							<div className='summary-item'>
-								<span className='summary-item__label'>Timeline Mode</span>
-								<span className='summary-item__value' style={{ textTransform: 'capitalize' }}>
-									{state.timelinePreset.value || 'Custom'}
-								</span>
-							</div>
+
+							{isOneOff
+								? (
+									<>
+										<div className='summary-item'>
+											<span className='summary-item__label'>Timeline Mode</span>
+											<span className='summary-item__value' style={{ textTransform: 'capitalize' }}>
+												{state.timelinePreset.value || 'Custom'}
+											</span>
+										</div>
+										<div className='summary-item'>
+											<span className='summary-item__label'>Soft Deadline</span>
+											<span className='summary-item__value'>
+											</span>
+										</div>
+									</>
+								)
+								: (
+									<div className='summary-item'>
+										<span className='summary-item__label'>Throughput Flow</span>
+										<span className='summary-item__value' style={{ textTransform: 'capitalize' }}>
+											{state.timelinePreset.value || 'Sequential'}
+										</span>
+									</div>
+								)}
 						</div>
 
 						<div className='publish-stage-list'>
 							{state.stages.value.map((stage, idx) => (
-								<div key={idx} className='summary-stage-row'>
+								<div key={idx.toString()} className='summary-stage-row'>
 									<div className='summary-stage-row__index'>{idx + 1}</div>
 									<div className='summary-stage-row__details'>
 										<span className='summary-stage-row__title'>
 											{stage.title || 'Untitled Stage'}
 										</span>
 										<span className='summary-stage-row__type'>
-											{stage.stage_type.replace('_', ' ')}
+											{stage.file_upload_required ? 'Requires Deliverables • ' : ''}
+											{stage.default_tasks?.length || 0} Checklist Tasks •{' '}
+											{stage.skills?.length || 0} Specific Skills
 										</span>
 									</div>
 								</div>

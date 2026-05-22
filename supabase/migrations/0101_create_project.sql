@@ -13,7 +13,6 @@ DECLARE
   seat_record jsonb;
   attachment_id text;
   
-  -- UUID Mapping array for dependency resolution
   stage_uuids uuid[] := '{}';
   i integer;
   _dep_raw text;
@@ -23,6 +22,7 @@ DECLARE
   _id uuid;
   _title text;
   _desc jsonb;
+  _desc_text text;
   _thumb text;
   _client_biz uuid;
   _industry uuid;
@@ -33,10 +33,11 @@ DECLARE
   _legal_screening jsonb;
   
 BEGIN
-  -- 1. Extract Project Level Data
+  
   _id := COALESCE((payload->>'id')::uuid, gen_random_uuid());
   _title := payload->>'title';
   _desc := payload->'description';
+  _desc_text := payload->>'description_text';
   _thumb := payload->>'thumbnail_url';
   _client_biz := (payload->>'client_business_id')::uuid;
   _industry := (payload->>'industry_category_id')::uuid;
@@ -46,13 +47,13 @@ BEGIN
   _preset := (payload->>'timeline_preset')::timeline_preset;
   _legal_screening := payload->'legal_and_screening';
 
-  -- 2. Insert Project Header
   INSERT INTO projects.projects (
     id,
     owner_user_id,
     client_business_id,
     title,
     description,
+    description_text,
     thumbnail_url,
     industry_category_id,
     visibility,
@@ -72,6 +73,7 @@ BEGIN
     _client_biz,
     _title,
     _desc,
+    _desc_text,
     _thumb,
     _industry,
     _vis,
@@ -87,7 +89,6 @@ BEGIN
   )
   RETURNING id INTO new_project_id;
 
-  -- 3. Insert Global Attachments
   IF payload ? 'global_attachments' THEN
     FOR attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
     LOOP
@@ -96,21 +97,17 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- 4. Pre-generate UUIDs for all stages to handle cross-stage dependencies
   IF payload ? 'stages' THEN
     FOR i IN 0 .. jsonb_array_length(payload->'stages') - 1 LOOP
       stage_uuids := array_append(stage_uuids, gen_random_uuid());
     END LOOP;
   END IF;
 
-  -- 5. Loop through Stages and Insert
   i := 0;
   FOR stage_record IN SELECT * FROM jsonb_array_elements(payload->'stages')
   LOOP
-    -- Grab the pre-generated ID for this iteration
     new_stage_id := stage_uuids[i + 1];
 
-    -- Resolve the frontend array index to the matching pre-generated UUID
     _dep_raw := stage_record->>'start_dependency_stage_id';
     IF _dep_raw IS NOT NULL AND _dep_raw != '' THEN
       _dep_idx := _dep_raw::int;
@@ -124,8 +121,8 @@ BEGIN
       project_id,
       name,
       description,
+      description_text,
       sort_order,
-      stage_type,
       start_trigger_type,
       fixed_start_date,
       start_dependency_stage_id,
@@ -148,8 +145,8 @@ BEGIN
       new_project_id,
       stage_record->>'title',
       stage_record->'description',
+      stage_record->>'description_text',
       (stage_record->>'sort_order')::int,
-      (stage_record->>'stage_type')::stage_type_enum,
       (stage_record->>'start_trigger_type')::start_trigger_type,
       (stage_record->>'fixed_start_date')::timestamp with time zone,
       _dep_uuid,
@@ -174,7 +171,6 @@ BEGIN
       (stage_record->>'ip_ownership_override')::ip_option_mode
     );
 
-    -- Insert Staffing Roles
     IF stage_record ? 'staffing_roles' THEN
       FOR role_record IN SELECT * FROM jsonb_array_elements(stage_record->'staffing_roles')
       LOOP
@@ -197,7 +193,6 @@ BEGIN
       END LOOP;
     END IF;
 
-    -- Insert Open Seats
     IF stage_record ? 'open_seats' THEN
       FOR seat_record IN SELECT * FROM jsonb_array_elements(stage_record->'open_seats')
       LOOP

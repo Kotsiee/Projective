@@ -1,12 +1,8 @@
 import { define } from '@utils';
-import AuthLayoutWrapper from './(_islands)/AuthLayoutWrapper.tsx';
 
-export default define.layout(function App(props) {
+// We don't use AuthLayoutWrapper here because Login and Register
+// need to pass different graphics into the left pane.
+export default define.layout(function AuthLayoutBase(props) {
 	const { Component } = props;
-
-	return (
-		<AuthLayoutWrapper>
-			<Component />
-		</AuthLayoutWrapper>
-	);
+	return <Component />;
 });

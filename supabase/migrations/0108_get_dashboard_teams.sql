@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION org.get_dashboard_teams(
   p_search_query text,
-  p_role_filter text, -- 'all', 'owner', 'member', 'admin'
+  p_role_filter text, 
   p_sort_by text,
   p_sort_dir text,
   p_limit int,
@@ -32,17 +32,17 @@ BEGIN
       t.id,
       t.name,
       t.slug,
-      t.avatar_url,
-      t.banner_url,
+      t.avatar_file_id,
+      t.banner_file_id,
       t.description,
       t.payout_model,
       t.created_at,
       t.updated_at,
       tm.role as user_role,
-      -- FIX: Alias the table to 'm' and use 'm.team_id' to avoid conflict with output var
-      (SELECT COUNT(*) FROM org.team_memberships m WHERE m.team_id = t.id AND m.status = 'active') as member_count
+      
+      (SELECT COUNT(*) FROM org.team_members m WHERE m.team_id = t.id AND m.status = 'active') as member_count
     FROM org.teams t
-    JOIN org.team_memberships tm ON tm.team_id = t.id
+    JOIN org.team_members tm ON tm.team_id = t.id
     WHERE 
       tm.user_id = v_user_id
       AND tm.status = 'active'
@@ -59,7 +59,7 @@ BEGIN
       )
   )
   SELECT
-    ut.id as team_id, -- Maps explicitly to the return column
+    ut.id as team_id, 
     ut.name,
     ut.slug,
     ut.avatar_url,

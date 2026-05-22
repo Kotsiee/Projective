@@ -1,13 +1,14 @@
 import '../styles/fields/select-field.css';
-import { computed, Signal } from '@preact/signals';
+import { Signal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
 import { IconCheck, IconChevronDown, IconLoader2, IconSelector, IconX } from '@tabler/icons-preact';
 import { SelectFieldProps, SelectOption } from '../types/components/select-field.ts';
-import { FlatOption, useSelectState } from '../hooks/useSelectState.ts';
+import { useSelectState } from '../hooks/useSelectState.ts';
 import { useInteraction } from '../hooks/useInteraction.ts';
 import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
 import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
 import { EffectWrapper, useRipple } from '../wrappers/EffectWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
 
 export function SelectField<T = string>(props: SelectFieldProps<T>) {
 	const {
@@ -37,6 +38,8 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		enableSelectAll,
 		groupSelectMode = 'value',
 		icons,
+		nextField,
+		onKeyDown,
 	} = props;
 
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -71,7 +74,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		groupSelectMode,
 	});
 
-	// --- Positioning Logic ---
 	useEffect(() => {
 		if (isOpen.value && containerRef.current) {
 			const rect = containerRef.current.getBoundingClientRect();
@@ -95,7 +97,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		}
 	}, [isOpen.value, highlightedIndex.value]);
 
-	// Close on click outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
 			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -106,11 +107,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
 
-	// --- Render Helpers ---
-
-	// Find the label for a value by searching the flattened list
-	// We construct a temporary map or search on fly.
-	// For performance in large lists, a map is better, but here we scan.
 	const getLabelForValue = (val: T) => {
 		const findInTree = (opts: SelectOption<T>[]): SelectOption<T> | undefined => {
 			for (const o of opts) {
@@ -166,9 +162,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		if (!multiple && selectedValues.value.length > 0) {
 			const val = selectedValues.value[0];
 			const label = getLabelForValue(val);
-			// Find object for icon/avatar
-			// Simple flatten for lookup
-			// const opt = ... (Optimization: useSelectState could expose a value map)
 
 			if (searchable && searchQuery.value) return null;
 			return (
@@ -188,6 +181,16 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		addRipple(e);
 		toggleOpen();
 		if (!isOpen.value) interaction.handleFocus(e);
+	};
+
+	const handleFieldKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Tab' && !e.shiftKey && nextField && !isOpen.value) {
+			e.preventDefault();
+			focusNextElement(inputRef.current || containerRef.current!, nextField);
+		}
+
+		handleKeyDown(e);
+		onKeyDown?.(e);
 	};
 
 	return (
@@ -251,7 +254,7 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 								? (placeholder || (floating ? '' : 'Select...'))
 								: ''}
 							onInput={(e) => searchQuery.value = e.currentTarget.value}
-							onKeyDown={handleKeyDown}
+							onKeyDown={handleFieldKeyDown}
 							onFocus={interaction.handleFocus}
 							onBlur={() => {
 								setTimeout(() => interaction.handleBlur(), 100);
@@ -284,7 +287,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 					{renderStatusIcon()}
 				</div>
 
-				{/* Dropdown Menu */}
 				<div
 					className={`field-select__menu ${isOpen.value ? 'field-select__menu--open' : ''}`}
 					ref={listRef}
@@ -308,10 +310,8 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 							filteredOptions.value.map((option, index) => {
 								const isHighlighted = index === highlightedIndex.value;
 
-								// Selection Check Logic
 								let isSelected = false;
 								if (option.isGroup && groupSelectMode === 'members' && multiple) {
-									// Group is selected if all descendants are selected
 									isSelected = option.descendantValues.length > 0 &&
 										option.descendantValues.every((v) => selectedValues.value.includes(v));
 								} else {
@@ -356,7 +356,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 				</div>
 			</div>
 
-			{/* Chips Below Mode */}
 			{multiple && displayMode === 'chips-below' && selectedValues.value.length > 0 && (
 				<div className='field-select__chips-external'>
 					{renderChips()}

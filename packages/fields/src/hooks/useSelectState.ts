@@ -220,9 +220,14 @@ export function useSelectState<T>({
 				break;
 			case 'Enter':
 				e.preventDefault();
-				if (isOpen.value && highlightedIndex.value >= 0) {
-					const opt = filteredOptions.value[highlightedIndex.value];
-					if (opt) selectOption(opt);
+				if (isOpen.value) {
+					if (highlightedIndex.value >= 0) {
+						const opt = filteredOptions.value[highlightedIndex.value];
+						if (opt) selectOption(opt);
+					} else {
+						// If open but nothing is highlighted, Enter closes the menu
+						toggleOpen(false);
+					}
 				}
 				break;
 			case 'Escape':

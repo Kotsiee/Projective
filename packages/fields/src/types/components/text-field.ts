@@ -1,10 +1,8 @@
+// deno-lint-ignore-file no-explicit-any
+import { HTMLAttributes } from 'preact';
 import { AdornmentProps, ValueFieldProps } from '../core.ts';
 import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
 
-/**
- * TextField specific props.
- * Extends BaseFieldProps (via ValueFieldProps) and Wrapper Props.
- */
 export interface TextFieldProps
 	extends
 		ValueFieldProps<string>,
@@ -17,15 +15,13 @@ export interface TextFieldProps
 	maxRows?: number;
 	autoComplete?: string;
 	pattern?: string;
-	/** Minimum value (for type="number" or "date" etc.) */
 	min?: number | string;
-	/** Maximum value (for type="number" or "date" etc.) */
 	max?: number | string;
-	/** Minimum character length */
 	minLength?: number;
-	/** Maximum character length */
 	maxLength?: number;
 	showCount?: boolean;
+	prefixProps?: HTMLAttributes<HTMLDivElement>;
+	suffixProps?: HTMLAttributes<HTMLDivElement>;
 	onInput?: (e: any) => void;
 	onBlur?: (e: any) => void;
 	onFocus?: (e: any) => void;

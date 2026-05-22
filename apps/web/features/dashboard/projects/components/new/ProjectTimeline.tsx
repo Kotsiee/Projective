@@ -1,13 +1,26 @@
+/**
+ * @file ProjectTimeline.tsx
+ * @description Step 4 of the Project Creation Engine.
+ * Dynamically renders either a Gantt Chart (One-Off) or a Flow Visualizer (Pipeline) based on the project format.
+ */
+
+// #region Imports
 import '../../styles/components/new/new-project-timeline.css';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
 import { DateField, SelectField, SelectOption } from '@projective/fields';
-import { StageType, StartTriggerType, TimelinePreset } from '@projective/types';
+import { ProjectFormat, StartTriggerType, TimelinePreset } from '@projective/types';
 import { DependencyType, GanttChart, RowType } from '@projective/charts';
-import { IconCalendarEvent, IconChartArcs } from '@tabler/icons-preact';
+import { IconCalendarEvent, IconChartArcs, IconGitBranch } from '@tabler/icons-preact';
 import { useMemo } from 'preact/hooks';
 
-import ProjectTimelineControls from './timeline/ProjectTimelineControls.tsx';
+import ProjectTimelineControls from '@features/dashboard/projects/components/new/ProjectTimelineControls.tsx';
+// #endregion
 
+// #region Main Component
+/**
+ * @function ProjectTimeline
+ * @description Renders the Workflow and Scheduling step, adapting its layout and tools to the selected ProjectFormat.
+ */
 export default function ProjectTimeline() {
 	const state = useNewProjectContext();
 
@@ -15,7 +28,9 @@ export default function ProjectTimeline() {
 	const targetStartDate = state.targetStartDate.value;
 	const timelinePreset = state.timelinePreset.value;
 	const selectedStageIndex = state.timelineSelectedStageIndex.value;
+	const isOneOff = state.format.value === ProjectFormat.OneOff;
 
+	// #region Options & Handlers
 	const presetOptions: SelectOption<string>[] = [
 		{ label: 'Sequential (Waterfall)', value: TimelinePreset.Sequential },
 		{ label: 'Simultaneous (All at once)', value: TimelinePreset.Simultaneous },
@@ -24,7 +39,7 @@ export default function ProjectTimeline() {
 	];
 
 	const handlePresetChange = (preset: string) => {
-		state.timelinePreset.value = preset;
+		state.timelinePreset.value = preset as TimelinePreset;
 		if (preset === TimelinePreset.Custom) return;
 
 		const newStages = [...stages];
@@ -56,7 +71,9 @@ export default function ProjectTimeline() {
 		});
 		state.stages.value = newStages;
 	};
+	// #endregion
 
+	// #region Gantt Data Calculation (One-Off Only)
 	// deno-lint-ignore no-explicit-any
 	const extractMs = (dateVal: any, fallback: number): number => {
 		if (!dateVal) return fallback;
@@ -67,17 +84,9 @@ export default function ProjectTimeline() {
 		return isNaN(d.getTime()) ? fallback : d.getTime();
 	};
 
-	const daysMap: Record<string, number> = {
-		sunday: 0,
-		monday: 1,
-		tuesday: 2,
-		wednesday: 3,
-		thursday: 4,
-		friday: 5,
-		saturday: 6,
-	};
-
 	const ganttData = useMemo(() => {
+		if (!isOneOff) return { rows: [], tasks: [], dependencies: [] };
+
 		const fallbackStart = new Date();
 		fallbackStart.setHours(0, 0, 0, 0);
 
@@ -122,50 +131,11 @@ export default function ProjectTimeline() {
 
 				let newEndMs = s.calculatedStartMs + s.durationMs;
 
-				if (s.stage_type === StageType.SessionBased) {
-					const prefDays = s.session_preferred_days || [];
-					const count = s.session_count || 1;
-
-					if (prefDays.length > 0) {
-						const targetDays = prefDays.map((d: string) => daysMap[d.toLowerCase()]).filter((
-							d: number,
-						) => d !== undefined);
-						let currentMs = s.calculatedStartMs;
-						let scheduled = 0;
-						let safety = 0;
-						let lastMs = currentMs;
-
-						while (scheduled < count && safety < 365) {
-							const date = new Date(currentMs);
-							if (targetDays.includes(date.getDay())) {
-								lastMs = currentMs;
-								scheduled++;
-							}
-							if (scheduled < count) currentMs += 86400000;
-							safety++;
-						}
-						newEndMs = lastMs + 86400000;
-					} else {
-						if (s.session_end_date) {
-							newEndMs = Math.max(
-								extractMs(s.session_end_date, s.calculatedStartMs + 86400000),
-								s.calculatedStartMs + 86400000,
-							);
-						} else {
-							newEndMs = s.calculatedStartMs + (count * 86400000);
-						}
-					}
-				} else if (
-					s.stage_type === StageType.FileBased && s.file_duration_mode === 'fixed_deadline' &&
-					s.file_due_date
-				) {
+				if (s.file_duration_mode === 'fixed_deadline' && s.file_due_date) {
 					newEndMs = Math.max(
 						extractMs(s.file_due_date, s.calculatedStartMs),
 						s.calculatedStartMs + 86400000,
 					);
-				} else if (s.stage_type === StageType.MaintenanceBased) {
-					newEndMs = s.calculatedStartMs +
-						(s.maintenance_cycle_interval === 'monthly' ? 30 * 86400000 : 7 * 86400000);
 				} else {
 					newEndMs = s.calculatedStartMs + ((s.file_duration_days || 7) * 86400000);
 				}
@@ -180,59 +150,24 @@ export default function ProjectTimeline() {
 		}
 
 		// deno-lint-ignore no-explicit-any
-		const finalTasks: any[] = [];
-		for (const s of computedStages) {
-			if (s.stage_type === StageType.SessionBased && (s.session_preferred_days || []).length > 0) {
-				const prefDays = s.session_preferred_days || [];
-				const count = s.session_count || 1;
-				const targetDays = prefDays.map((d: string) => daysMap[d.toLowerCase()]).filter((
-					d: number,
-				) => d !== undefined);
-
-				let currentMs = s.calculatedStartMs;
-				let scheduled = 0;
-				let safety = 0;
-
-				while (scheduled < count && safety < 365) {
-					const date = new Date(currentMs);
-					if (targetDays.includes(date.getDay())) {
-						finalTasks.push({
-							id: `task-${s.idx}-${scheduled}`,
-							rowId: s.idx.toString(),
-							name: `${s.title} (Session ${scheduled + 1}/${count})`,
-							startAt: currentMs,
-							endAt: currentMs + 86400000,
-							progress: 0,
-							status: 'todo',
-							isMilestone: true,
-						});
-						scheduled++;
-					}
-					currentMs += 86400000;
-					safety++;
-				}
-			} else {
-				finalTasks.push({
-					id: `task-${s.idx}`,
-					rowId: s.idx.toString(),
-					name: s.title || `Stage ${s.idx + 1}`,
-					startAt: s.calculatedStartMs,
-					endAt: s.calculatedEndMs,
-					progress: 0,
-					status: 'todo',
-					isMilestone: s.stage_type === StageType.ManagementBased,
-				});
-			}
-		}
+		const finalTasks: any[] = computedStages.map((s) => ({
+			id: `task-${s.idx}`,
+			rowId: s.idx.toString(),
+			name: s.title || `Stage ${s.idx + 1}`,
+			startAt: s.calculatedStartMs,
+			endAt: s.calculatedEndMs,
+			progress: 0,
+			status: 'todo',
+			isMilestone: false,
+		}));
 
 		const finalRows = computedStages.map((s) => ({
 			id: s.idx.toString(),
 			label: s.title || `Stage ${s.idx + 1}`,
-			type: s.stage_type === StageType.ManagementBased ? RowType.Milestone : RowType.Task,
+			type: RowType.Task,
 			orderIndex: s.idx,
 			collapsed: false,
 			data: {
-				originalType: s.stage_type,
 				startMs: s.calculatedStartMs,
 				endMs: s.calculatedEndMs,
 			},
@@ -270,7 +205,8 @@ export default function ProjectTimeline() {
 				})
 				.filter((dep) => dep !== null),
 		};
-	}, [stages, targetStartDate]);
+	}, [stages, targetStartDate, isOneOff]);
+	// #endregion
 
 	return (
 		<div
@@ -278,30 +214,34 @@ export default function ProjectTimeline() {
 			style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
 		>
 			<div className='project-timeline__header'>
-				<h2>Timeline & Dependencies</h2>
+				<h2>Workflow & Scheduling</h2>
 				<p className='project-timeline__subtitle'>
-					Define the global timeline and map exactly when each stage should begin.
+					{isOneOff
+						? 'Define the absolute timeline, dependencies, and deadlines for your one-off sprint.'
+						: 'Configure the sequential flow, SLA turnaround times, and limits for your pipeline.'}
 				</p>
 			</div>
 
+			{/* Global Schedule Constraints */}
 			<div className='project-timeline__section project-timeline__section--global'>
 				<h3 className='project-timeline__section-title'>
-					<IconCalendarEvent size={18} /> Global Project Schedule
+					<IconCalendarEvent size={18} /> Global Project Settings
 				</h3>
 				<div className='project-timeline__grid'>
 					<SelectField
 						name='timeline_preset'
-						label='Overall Timeline Preset'
+						label='Stage Flow Preset'
 						options={presetOptions}
 						value={timelinePreset || TimelinePreset.Sequential}
 						onChange={(v) => handlePresetChange(v as string)}
 						searchable={false}
 						floating
 						required
+						hint='Determines the default dependencies between stages.'
 					/>
 
 					<DateField
-						label='Target Project Start Date'
+						label='Target Start Date'
 						value={targetStartDate}
 						onChange={(v) => state.targetStartDate.value = v}
 						floating
@@ -311,21 +251,25 @@ export default function ProjectTimeline() {
 				</div>
 			</div>
 
+			{/* Visualizer & Inspector Split */}
 			<div
 				className='project-timeline__section'
 				style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
 			>
 				<h3 className='project-timeline__section-title'>
-					<IconChartArcs size={18} /> Interactive Timeline
+					{isOneOff
+						? (
+							<>
+								<IconChartArcs size={18} /> Interactive Timeline
+							</>
+						)
+						: (
+							<>
+								<IconGitBranch size={18} /> Process Flow
+							</>
+						)}
 				</h3>
 
-				{
-					/* CRITICAL FIX:
-				    Replaced `minHeight` with a strict physical `height: '500px'`.
-				    Because this element is rendered inside a block-level <StepperPanel>,
-				    flexible heights resolve to 0 and collapse the PixiJS ResizeObserver.
-				*/
-				}
 				<div
 					style={{
 						display: 'flex',
@@ -335,25 +279,48 @@ export default function ProjectTimeline() {
 						overflow: 'hidden',
 					}}
 				>
+					{/* Left Pane: Visualizer */}
 					<div
 						className='gantt-chart-wrapper'
-						style={{
-							flex: 1,
-							display: 'flex',
-							flexDirection: 'column',
-							overflow: 'hidden',
-						}}
+						style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
 					>
-						{/* @ts-ignore - Bypass for filtered arrays */}
-						<GanttChart
-							initialData={ganttData}
-							selectedRowId={(selectedStageIndex ?? 0).toString()}
-							onRowSelect={(id) => {
-								state.timelineSelectedStageIndex.value = parseInt(id, 10);
-							}}
-						/>
+						{isOneOff
+							? (
+								// @ts-ignore - Bypass for filtered arrays
+								<GanttChart
+									initialData={ganttData}
+									selectedRowId={(selectedStageIndex ?? 0).toString()}
+									onRowSelect={(id) => {
+										state.timelineSelectedStageIndex.value = parseInt(id, 10);
+									}}
+								/>
+							)
+							: (
+								<div
+									style={{
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+										justifyContent: 'center',
+										height: '100%',
+										backgroundColor: 'var(--input-bg)',
+										border: '1px dashed var(--border-color)',
+										borderRadius: 'var(--border-radius)',
+										color: 'var(--text-muted)',
+									}}
+								>
+									<IconGitBranch size={48} opacity={0.2} style={{ marginBottom: '1rem' }} />
+									<h4 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>
+										Pipeline Flow Visualizer
+									</h4>
+									<span style={{ fontSize: '0.875rem' }}>
+										Stages will be rendered as a sequence of connected nodes here.
+									</span>
+								</div>
+							)}
 					</div>
 
+					{/* Right Pane: Inspector Controls */}
 					<aside
 						style={{
 							width: '380px',
@@ -370,3 +337,4 @@ export default function ProjectTimeline() {
 		</div>
 	);
 }
+// #endregion

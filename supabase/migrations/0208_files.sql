@@ -1,13 +1,9 @@
--- 1. Grant USAGE on the schema (allows them to "see" the schema exists)
 GRANT USAGE ON SCHEMA files TO service_role, authenticated;
 
--- 2. Service Role (Admin) gets full power
 GRANT ALL ON ALL TABLES IN SCHEMA files TO service_role;
 
 GRANT ALL ON ALL SEQUENCES IN SCHEMA files TO service_role;
 
--- 3. Authenticated Users get Standard CRUD (Create, Read, Update, Delete)
--- They still cannot alter table structure or truncate.
 GRANT
 SELECT,
 INSERT
@@ -19,7 +15,6 @@ GRANT USAGE,
 SELECT
     ON ALL SEQUENCES IN SCHEMA files TO authenticated;
 
--- 4. Set Defaults for FUTURE tables (so you don't have to run this again)
 ALTER DEFAULT PRIVILEGES IN SCHEMA files
 GRANT ALL ON TABLES TO service_role;
 

@@ -1,0 +1,17 @@
+.profile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0 2rem;
+    width: 100%;
+}
+
+.profile__section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}

@@ -1,0 +1,22 @@
+/* apps/web/features/public/profile/styles/components/body/profile-body-skills.css */
+
+.profile-skills {
+    width: 100%;
+}
+
+/* Loading state styles */
+.profile-skills--loading {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-skills__heading-skeleton {
+    margin-bottom: 0.25rem;
+}
+
+.profile-skills__list-skeleton {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}

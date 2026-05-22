@@ -1,45 +1,39 @@
+import { ComponentChildren } from 'preact';
 import '../styles/layouts/auth.css';
-import { type ComponentChildren } from 'preact';
 
-type AuthLayoutProps = {
+export interface AuthLayoutProps {
+	/** Content for the left pane (Hidden on mobile) */
+	anchorContent: ComponentChildren;
+	/** Main interactive form (Right pane) */
 	children: ComponentChildren;
-};
+	/** Width ratio of the left pane. @default '50' */
+	anchorRatio?: '45' | '50';
+}
 
-export default function AuthLayout(props: AuthLayoutProps) {
+export default function AuthLayout(
+	{ anchorContent, children, anchorRatio = '50' }: AuthLayoutProps,
+) {
 	return (
-		<div class='layout-auth'>
-			<img
-				src='https://images.unsplash.com/photo-1690791456616-8d7a5cb8925d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170'
-				alt='background'
-				class='background'
-			/>
+		<div class='auth-layout'>
+			{/* Left Pane - Forced Dark Mode */}
+			<div class={`auth-layout__anchor auth-layout__anchor--${anchorRatio}`} data-theme='dark'>
+				{anchorContent}
+			</div>
 
-			<div class='layout-auth__modal'>
-				<div class='layout-auth__modal__window'>
-					<img
-						src='https://images.unsplash.com/photo-1690791456616-8d7a5cb8925d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170'
-						alt='background'
-						class='backgrounds'
-					/>
-					<div class='layout-auth__modal__window__content'>
-						<div class='layout-auth__modal__window__content__quote'>
-							<p>Everything you can imagine is real</p>
-							<div class='layout-auth__modal__window__content__quote__line-container'>
-								<div class='layout-auth__modal__window__content__quote__line'></div>
-								<span>Pablo Picasso</span>
-							</div>
-						</div>
-
-						<div class='layout-auth__modal__window__content__slogan'>
-							<h1 class='build-together'>Build Together.</h1>
-							<h1 class='deliver-better'>Deliver Better.</h1>
-						</div>
+			{/* Right Pane - Form Canvas */}
+			<div class='auth-layout__content'>
+				<div class='auth-layout__form-wrapper'>
+					{/* Mobile-only brand header */}
+					<div class='auth-layout__mobile-header'>
+						<img
+							src='https://placehold.co/32x32/288690/FFFFFF?text=P'
+							alt='Projective'
+							class='auth-layout__mobile-logo'
+						/>
+						<span>Projective</span>
 					</div>
-				</div>
 
-				<div class='layout-auth__modal__content'>
-					<h1>Welcome</h1>
-					{props.children}
+					{children}
 				</div>
 			</div>
 		</div>

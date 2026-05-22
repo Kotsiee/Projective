@@ -1,163 +1,133 @@
-import '../styles/pages/register.css';
-import { signal } from '@preact/signals';
-import { AuthValidator, RegisterErrors } from '@projective/utils';
+import { useSignal } from '@preact/signals';
+import { Button, Icon, Step, Stepper } from '@projective/ui';
 import { TextField } from '@projective/fields';
-import RegisterButton from '../components/RegisterButton.tsx';
-import GoogleRegisterButton from '../components/GitHubRegisterButton.tsx';
-import GitHubRegisterButton from '../components/GitHubRegisterButton.tsx';
+import { IconBriefcase, IconCode } from '@tabler/icons-preact';
+import AuthLayout from './AuthLayout.tsx';
+import '../styles/pages/register.css';
 
-const email = signal<string | undefined>(undefined);
-const password = signal<string | undefined>(undefined);
-const confirmPassword = signal<string | undefined>(undefined);
+export default function RegisterWizardIsland() {
+	const currentStep = useSignal(1);
 
-const emailError = signal<string | null>(null);
-const passwordError = signal<string | null>(null);
-const confirmPasswordError = signal<string | null>(null);
+	const email = useSignal('');
+	const password = useSignal('');
+	const firstName = useSignal('');
+	const lastName = useSignal('');
+	const username = useSignal('');
+	const persona = useSignal<'client' | 'freelancer' | null>(null);
 
-const errors = signal<RegisterErrors>({});
+	const handleNext = () => currentStep.value++;
+	const handleBack = () => currentStep.value--;
+	const handleSubmit = async () => window.location.href = '/dashboard';
 
-export default function RegisterIsland() {
+	const renderPreview = () => {
+		if (currentStep.value === 1) {
+			return (
+				<div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+					<Icon size={48} color='primary'><IconCode /></Icon>
+					<h3 style={{ marginTop: '1rem', color: 'var(--text-main)' }}>Secure by Design</h3>
+					<p>Your credentials are encrypted and securely stored.</p>
+				</div>
+			);
+		}
+		if (currentStep.value === 2) {
+			return (
+				<div class="wizard-avatar-card">
+					<div class="wizard-avatar-card__icon" />
+					<div class="wizard-avatar-card__name">
+						{firstName.value || lastName.value ? `${firstName.value} ${lastName.value}` : 'Your Name'}
+					</div>
+					<div style={{ color: 'var(--primary)', fontSize: '0.875rem' }}>
+						@{username.value || 'username'}
+					</div>
+				</div>
+			);
+		}
+		return (
+			<div style={{ textAlign: 'center' }}>
+				<h3 style={{ color: 'var(--text-main)' }}>
+					{persona.value === 'client' ? 'Pipeline Architecture' : 'Global Kanbans'}
+				</h3>
+				<p style={{ color: 'var(--text-muted)' }}>
+					{persona.value === 'client'
+						? 'Deploy capital into secure escrow.'
+						: 'Track workload intensity in real-time.'}
+				</p>
+			</div>
+		);
+	};
+
+	const anchor = (
+		<>
+			<div class='wizard-header'>
+				<h2 style={{ margin: '0 0 2rem 0' }}>Join Projective.</h2>
+				{/* Make sure your Stepper component uses 'orientation' or 'direction' based on your ui mod.ts */}
+				<Stepper activeStep={currentStep.value} orientation='vertical'>
+					<Step label='Account Details' description='Secure your access' />
+					<Step label='Public Identity' description='How the network sees you' />
+					<Step label='Your Objective' description='Hire teams or find work' />
+				</Stepper>
+			</div>
+			<div class='wizard-preview'>
+				{renderPreview()}
+			</div>
+		</>
+	);
+
 	return (
-		<div class='register'>
-			<div class='register__container'>
-				<div class='register__container__center'>
-					<div class='register__header'>
-						<h1>Create an account</h1>
-						<p>Begin Your Journey Here</p>
+		<AuthLayout anchorContent={anchor} anchorRatio="45">
+			{currentStep.value === 1 && (
+				<div class="wizard-step-pane">
+					<h2>Create Account</h2>
+					<TextField label='Email Address' type='email' value={email} floatingRule='auto' />
+					<TextField label='Password' type='password' value={password} floatingRule='auto' help='Minimum 8 characters' />
+					<Button variant='primary' fullWidth onClick={handleNext} disabled={!email.value || !password.value}>
+						Continue
+					</Button>
+				</div>
+			)}
+
+			{currentStep.value === 2 && (
+				<div class="wizard-step-pane">
+					<h2>Identity</h2>
+					<div style={{ display: 'flex', gap: '1rem' }}>
+						<TextField label='First Name' value={firstName} floatingRule='auto' />
+						<TextField label='Last Name' value={lastName} floatingRule='auto' />
+					</div>
+					<TextField label='Username' value={username} floatingRule='auto' prefix='@' />
+					<div class="wizard-step-actions">
+						<Button ghost onClick={handleBack}>Back</Button>
+						<Button variant='primary' style={{ flex: 1 }} onClick={handleNext} disabled={!firstName.value || !username.value}>
+							Continue
+						</Button>
+					</div>
+				</div>
+			)}
+
+			{currentStep.value === 3 && (
+				<div class="wizard-step-pane">
+					<h2>What brings you here?</h2>
+					<p style={{ color: 'var(--text-muted)' }}>This sets up your dashboard experience. You can switch later.</p>
+					
+					<div class={`wizard-card-button ${persona.value === 'client' ? 'wizard-card-button--active' : ''}`} onClick={() => persona.value = 'client'}>
+						<Icon size={24} color={persona.value === 'client' ? 'primary' : 'muted'}><IconBriefcase /></Icon>
+						<span style={{ fontWeight: 600, fontSize: '1.1rem' }}>I want to hire talent</span>
+						<span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Create businesses and fund projects.</span>
 					</div>
 
-					<form class='register__fields__container'>
-						<div class='register__fields'>
-							<div class='register__field'>
-								<TextField
-									id='email'
-									onFocus={() => {
-										emailError.value = '';
-									}}
-									onBlur={() => {
-										emailError.value = AuthValidator
-											.validateEmail(email.value || '');
-									}}
-									placeholder='Email'
-									type='email'
-									aria-label='Email address'
-									aria-required='true'
-									aria-invalid={!!emailError.value}
-									aria-describedby='email-error'
-									onInput={(e) => {
-										email.value = e.currentTarget.value;
-									}}
-								/>
-								{emailError.value && (
-									<p
-										id='email-error'
-										class='register__field-error'
-										role='alert'
-									>
-										{emailError.value ||
-											errors.value?.email}
-									</p>
-								)}
-							</div>
+					<div class={`wizard-card-button ${persona.value === 'freelancer' ? 'wizard-card-button--active' : ''}`} onClick={() => persona.value = 'freelancer'}>
+						<Icon size={24} color={persona.value === 'freelancer' ? 'primary' : 'muted'}><IconCode /></Icon>
+						<span style={{ fontWeight: 600, fontSize: '1.1rem' }}>I want to build & earn</span>
+						<span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Create teams and claim project stages.</span>
+					</div>
 
-							<div class='register__field'>
-								<TextField
-									type='password'
-									onFocus={() => {
-										passwordError.value = '';
-										confirmPasswordError.value = '';
-									}}
-									onBlur={() => {
-										passwordError.value = AuthValidator
-											.validateConfirmPassword(
-												password.value || '',
-												confirmPassword.value || '',
-											);
-										confirmPasswordError.value = AuthValidator
-											.validateConfirmPassword(
-												password.value || '',
-												confirmPassword.value || '',
-											);
-									}}
-									placeholder='Password'
-									aria-label='Password'
-									aria-required='true'
-									aria-invalid={!!passwordError.value}
-									aria-describedby='password-error'
-									onInput={(e) => {
-										password.value = e.currentTarget.value;
-									}}
-								/>
-								{passwordError.value && (
-									<p
-										id='password-error'
-										class='register__field-error'
-										role='alert'
-									>
-										{passwordError.value ||
-											errors.value?.password}
-									</p>
-								)}
-							</div>
-
-							<div class='register__field'>
-								<TextField
-									id='confirmPassword'
-									onFocus={() => {
-										passwordError.value = '';
-										confirmPasswordError.value = '';
-									}}
-									onBlur={() => {
-										passwordError.value = AuthValidator
-											.validateConfirmPassword(
-												password.value || '',
-												confirmPassword.value || '',
-											);
-										confirmPasswordError.value = AuthValidator
-											.validateConfirmPassword(
-												password.value || '',
-												confirmPassword.value || '',
-											);
-									}}
-									placeholder='Re-enter Password'
-									aria-label='Confirm password'
-									aria-required='true'
-									aria-invalid={!!confirmPasswordError.value}
-									aria-describedby='confirmPassword-error'
-									onInput={(e) => {
-										confirmPassword.value = e.currentTarget.value;
-									}}
-								/>
-								{confirmPasswordError.value && (
-									<p
-										id='confirmPassword-error'
-										class='register__field-error'
-										role='alert'
-									>
-										{confirmPasswordError.value ||
-											errors.value?.confirmPassword}
-									</p>
-								)}
-							</div>
-						</div>
-
-						<div class='register__actions'>
-							<RegisterButton
-								email={email}
-								password={password}
-								confirmPassword={confirmPassword}
-							/>
-							<GoogleRegisterButton />
-							<GitHubRegisterButton />
-						</div>
-					</form>
+					<div class="wizard-step-actions">
+						<Button ghost onClick={handleBack}>Back</Button>
+						<Button variant='primary' style={{ flex: 1 }} onClick={handleSubmit} disabled={!persona.value}>
+							Complete Setup
+						</Button>
+					</div>
 				</div>
-			</div>
-
-			<div class='switch-auth'>
-				<p class='switch-auth__text'>Already have an account?</p>
-				<a class='switch-auth__link' href='/login'>Log In</a>
-			</div>
-		</div>
+			)}
+		</AuthLayout>
 	);
 }

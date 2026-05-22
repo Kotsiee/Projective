@@ -1,9 +1,10 @@
 /**
  * @file ProjectStages.tsx
  * @description Step 3 of the Project Creation Engine.
- * Manages the definition of atomic project stages (The "What"), stripping out temporal and financial concerns.
+ * Manages the definition of atomic project stages (The "What"), stripping out temporal, financial, and rigid type concerns.
  */
 
+// #region Imports
 import '../../styles/components/new/new-project-stages.css';
 import { Signal, signal, useSignal } from '@preact/signals';
 import {
@@ -11,54 +12,50 @@ import {
 	IconCheck,
 	IconChevronDown,
 	IconCircle,
+	IconListCheck,
 	IconPlus,
 	IconSettings,
 	IconTrash,
+	IconUpload,
 } from '@tabler/icons-preact';
 
-import { RichTextField, SelectField, SelectOption, TextField } from '@projective/fields';
-import { IPOptionMode, StageType, StartTriggerType } from '@projective/types';
+import { RichTextField, SelectField, SelectOption, TagInput, TextField } from '@projective/fields';
+import { FileWithMeta, IPOptionMode, StartTriggerType } from '@projective/types';
 
-import ProjectStageFile from './stages/ProjectStageFile.tsx';
-import ProjectStageMaintenance from './stages/ProjectStageMaintenance.tsx';
-import ProjectStageManagement from './stages/ProjectStageManagement.tsx';
-import ProjectStageSession from './stages/ProjectStageSession.tsx';
 import { Stage } from '../../contracts/new/Stage.ts';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
-import { FileWithMeta } from '@projective/types';
+// #endregion
 
+// #region Interfaces
 export interface UIStage extends Stage {
 	_ui_model_type: 'defined_roles' | 'open_seats';
 	_attachments_temp: Signal<FileWithMeta[]>;
 	hire_trigger_active: boolean;
 }
+// #endregion
 
 export default function ProjectStages() {
 	const state = useNewProjectContext();
-
 	const activeTabIndex = useSignal(0);
 
+	// #region Helpers
 	function createDefaultStage(): UIStage {
 		return {
 			title: '',
 			description: { ops: [{ insert: '\n' }] },
-			stage_type: StageType.FileBased,
 			status: 'open',
 			sort_order: state.stages.value.length,
 			start_trigger_type: StartTriggerType.DependentOnStage,
+
+			// New Unified Features
+			file_upload_required: false,
+			default_tasks: [],
+			skills: [],
+
 			staffing_roles: [],
 			open_seats: [],
 			_ui_model_type: 'defined_roles',
 			_attachments_temp: signal([]),
-			file_revisions_allowed: 1,
-			file_duration_mode: 'relative_duration',
-			file_duration_days: 7,
-			file_extensions_allowed: [],
-			file_max_size_mb: 2048,
-			file_max_count: 20,
-			session_duration_minutes: 60,
-			session_count: 1,
-			session_preferred_days: [],
 			hire_trigger_active: true,
 		};
 	}
@@ -75,25 +72,24 @@ export default function ProjectStages() {
 
 	const addStage = () => {
 		state.stages.value = [...state.stages.value, createDefaultStage()];
-
 		activeTabIndex.value = state.stages.value.length - 1;
 	};
 
 	const removeStage = (index: number) => {
 		state.stages.value = state.stages.value.filter((_, i) => i !== index);
-
 		if (activeTabIndex.value >= state.stages.value.length) {
 			activeTabIndex.value = Math.max(0, state.stages.value.length - 1);
 		}
 	};
+	// #endregion
 
 	return (
 		<div className='new-project__stages'>
 			<div className='stages-header'>
 				<h2>Define Stages (The "What")</h2>
 				<p className='stages-header__subtitle'>
-					Break your project down into modular deliverables or milestones. We will assign budgets
-					and timelines later.
+					Break your project down into modular milestones. Define the scope, required skills, and
+					specific tasks.
 				</p>
 			</div>
 
@@ -122,7 +118,8 @@ export default function ProjectStages() {
 			{/* ACTIVE STAGE CONTENT PANEL */}
 			{state.stages.value.length > 0 && (
 				<div className='stages-content-panel'>
-					<ProjectStage id={activeTabIndex.value} />
+					{/* FIX: Added a unique key to force remount on tab change so RichTextField re-initializes */}
+					<ProjectStage key={`stage-panel-${activeTabIndex.value}`} id={activeTabIndex.value} />
 
 					<div className='stage-footer'>
 						<button
@@ -139,9 +136,10 @@ export default function ProjectStages() {
 	);
 }
 
+// #region Sub-Components
 /**
- * Sub-component for individual stage editing (Scope Definition only).
- * (Unchanged, just nested inside the new Content Panel)
+ * @function ProjectStage
+ * @description Sub-component for individual stage editing (Scope Definition only).
  */
 export function ProjectStage({ id }: { id: number }) {
 	const state = useNewProjectContext();
@@ -150,13 +148,6 @@ export function ProjectStage({ id }: { id: number }) {
 
 	if (!stage) return null;
 
-	const stageTypes: SelectOption<string>[] = [
-		{ label: 'File Based (Deliverable)', value: StageType.FileBased },
-		{ label: 'Session Based (Call/Workshop)', value: StageType.SessionBased },
-		{ label: 'Management Based (Contractual)', value: StageType.ManagementBased },
-		{ label: 'Maintenance Based (Recurring)', value: StageType.MaintenanceBased },
-	];
-
 	const ipOptions: SelectOption<string>[] = [
 		{ label: 'Use Project Default', value: 'default' },
 		{ label: 'Exclusive Transfer', value: IPOptionMode.ExclusiveTransfer },
@@ -164,10 +155,28 @@ export function ProjectStage({ id }: { id: number }) {
 		{ label: 'Shared Ownership', value: IPOptionMode.SharedOwnership },
 	];
 
+	// deno-lint-ignore no-explicit-any
 	const updateStage = (field: keyof UIStage, value: any) => {
 		const newStages = [...state.stages.value];
 		newStages[id] = { ...newStages[id], [field]: value };
 		state.stages.value = newStages;
+	};
+
+	// Task Management Handlers
+	const addTask = () => {
+		const currentTasks = stage.default_tasks || [];
+		updateStage('default_tasks', [...currentTasks, { id: crypto.randomUUID(), description: '' }]);
+	};
+
+	const updateTask = (taskIndex: number, desc: string) => {
+		const currentTasks = [...(stage.default_tasks || [])];
+		currentTasks[taskIndex].description = desc;
+		updateStage('default_tasks', currentTasks);
+	};
+
+	const removeTask = (taskIndex: number) => {
+		const currentTasks = (stage.default_tasks || []).filter((_, i) => i !== taskIndex);
+		updateStage('default_tasks', currentTasks);
 	};
 
 	return (
@@ -181,32 +190,37 @@ export function ProjectStage({ id }: { id: number }) {
 				</div>
 
 				<div className='form-grid'>
-					<TextField
-						label='Stage Name'
-						value={stage.title}
-						onChange={(v) => updateStage('title', v)}
-						showCount
-						maxLength={100}
-						placeholder='e.g. Initial UI/UX Design'
-						floating
-						required
-					/>
-					<SelectField
-						name={`stage-type-${id}`}
-						label='Stage Type'
-						options={stageTypes}
-						value={stage.stage_type}
-						onChange={(v) => updateStage('stage_type', v as string)}
-						searchable={false}
-						multiple={false}
-						floating
-						required
-					/>
+					<div className='form-grid--span-full'>
+						<TextField
+							label='Stage Name'
+							value={stage.title}
+							onChange={(v) => updateStage('title', v)}
+							showCount
+							maxLength={100}
+							placeholder='e.g. Initial UI/UX Design'
+							floating
+							required
+						/>
+					</div>
+
+					<div className='form-grid--span-full'>
+						<TagInput
+							name={`stage-skills-${id}`}
+							label='Required Skills for this Stage'
+							value={stage.skills || []}
+							onChange={(v) => updateStage('skills', v)}
+							placeholder='e.g. React, Figma, SEO...'
+							floating
+							hint='Skills specific to executing this milestone.'
+						/>
+					</div>
 
 					<div className='form-grid--span-full'>
 						<RichTextField
 							label='Stage Requirements & Description'
-							value={stage.description.toString()}
+							value={typeof stage.description === 'string'
+								? stage.description
+								: JSON.stringify(stage.description)}
 							onChange={(v) => updateStage('description', v)}
 							minHeight='120px'
 							toolbar='basic'
@@ -219,7 +233,87 @@ export function ProjectStage({ id }: { id: number }) {
 				</div>
 			</div>
 
-			{/* SECTION 2: ADVANCED SETTINGS */}
+			{/* SECTION 2: TASKS & DELIVERABLES */}
+			<div className='stage-section'>
+				<div className='stage-section__header'>
+					<h4 className='stage-section__title'>
+						<IconListCheck size={16} /> Tasks & Deliverables
+					</h4>
+				</div>
+
+				<div className='stage-section__content'>
+					{/* File Upload Toggle */}
+					<div
+						className='toggle-row'
+						style={{ paddingBottom: '1rem', borderBottom: '1px dashed var(--border-color)' }}
+					>
+						<label className='toggle-label'>
+							<IconUpload size={18} color='var(--text-muted)' />
+							<div>
+								<span className='toggle-label__title'>Require File Deliverables</span>
+								<span className='toggle-label__desc'>
+									The freelancer must upload files before this stage can be submitted for review.
+								</span>
+							</div>
+						</label>
+						<div className='toggle-switch'>
+							<input
+								type='checkbox'
+								id={`file-req-${id}`}
+								checked={stage.file_upload_required === true}
+								onChange={(e) => updateStage('file_upload_required', e.currentTarget.checked)}
+							/>
+							<label htmlFor={`file-req-${id}`}></label>
+						</div>
+					</div>
+
+					{/* Task Checklist Builder */}
+					<div style={{ paddingTop: '0.5rem' }}>
+						<p className='project-legal__subtitle' style={{ marginBottom: '1rem' }}>
+							Define specific checklist items the freelancer must complete.
+						</p>
+
+						<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+							{(stage.default_tasks || []).map((task, idx) => (
+								<div
+									key={task.id}
+									style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}
+								>
+									<div style={{ flex: 1 }}>
+										<TextField
+											label={`Task ${idx + 1}`}
+											value={task.description}
+											onChange={(v) => updateTask(idx, v)}
+											placeholder='e.g. Optimize database queries'
+											floating
+										/>
+									</div>
+									<button
+										type='button'
+										className='btn-remove-stage'
+										style={{ marginTop: '0.25rem', padding: '0.5rem' }}
+										onClick={() => removeTask(idx)}
+										title='Remove Task'
+									>
+										<IconTrash size={18} />
+									</button>
+								</div>
+							))}
+						</div>
+
+						<button
+							type='button'
+							className='project-legal__btn-add'
+							onClick={addTask}
+							style={{ marginTop: '1rem' }}
+						>
+							<IconPlus size={18} /> Add Checklist Item
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{/* SECTION 3: ADVANCED SETTINGS */}
 			<div className='stage-section'>
 				<button
 					type='button'
@@ -227,7 +321,7 @@ export function ProjectStage({ id }: { id: number }) {
 					onClick={() => isAdvancedOpen.value = !isAdvancedOpen.value}
 				>
 					<h4 className='stage-section__title'>
-						<IconSettings size={16} /> Advanced Settings & Constraints
+						<IconSettings size={16} /> Advanced Legal Settings
 					</h4>
 					<IconChevronDown
 						size={16}
@@ -239,7 +333,7 @@ export function ProjectStage({ id }: { id: number }) {
 
 				{isAdvancedOpen.value && (
 					<div className='stage-section__content'>
-						<div className='form-grid' style={{ marginBottom: '1.25rem' }}>
+						<div className='form-grid'>
 							<div className='form-grid--span-full'>
 								<SelectField
 									name={`ip-override-${id}`}
@@ -255,24 +349,10 @@ export function ProjectStage({ id }: { id: number }) {
 								/>
 							</div>
 						</div>
-
-						<div className='type-specific-config'>
-							{stage.stage_type === StageType.FileBased && (
-								<ProjectStageFile stage={stage} updateStage={updateStage} />
-							)}
-							{stage.stage_type === StageType.SessionBased && (
-								<ProjectStageSession stage={stage} updateStage={updateStage} />
-							)}
-							{stage.stage_type === StageType.ManagementBased && (
-								<ProjectStageManagement stage={stage} updateStage={updateStage} />
-							)}
-							{stage.stage_type === StageType.MaintenanceBased && (
-								<ProjectStageMaintenance stage={stage} updateStage={updateStage} />
-							)}
-						</div>
 					</div>
 				)}
 			</div>
 		</div>
 	);
 }
+// #endregion

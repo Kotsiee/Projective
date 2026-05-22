@@ -11,7 +11,7 @@ layer.
 
 - **`security.is_admin()`**: Returns true if the `auth.uid()` exists in `ops.admin_users`.
 - **`org.is_active_team_member(_team_id)`**: Returns true if the `auth.uid()` has an 'active' status
-  in `org.team_memberships` for the specified team.
+  in `org.team_members` for the specified team.
 
 ---
 
@@ -90,14 +90,14 @@ ON org.teams FOR ALL TO public
 USING (owner_user_id = auth.uid() OR security.is_admin());
 ```
 
-### `org.team_memberships`
+### `org.team_members`
 
 Critical policies for managing team rosters and permissions.
 
 ```sql
 -- SELECT: Users see their own rows, and team members see fellow members
 CREATE POLICY "Users can view members of their teams" 
-ON org.team_memberships FOR SELECT TO public 
+ON org.team_members FOR SELECT TO public 
 USING (
     user_id = auth.uid() 
     OR org.is_active_team_member(team_id) 
@@ -106,7 +106,7 @@ USING (
 
 -- INSERT/UPDATE: Restricted to Team Owners or Admins
 CREATE POLICY "Team owners can manage memberships" 
-ON org.team_memberships FOR ALL TO public 
+ON org.team_members FOR ALL TO public 
 USING (
     EXISTS (
         SELECT 1 FROM org.teams t 
@@ -117,7 +117,7 @@ USING (
 
 -- DELETE: Owner can remove members; members can leave
 CREATE POLICY "Team owners can remove members or members can leave" 
-ON org.team_memberships FOR DELETE TO public 
+ON org.team_members FOR DELETE TO public 
 USING (
     user_id = auth.uid() 
     OR EXISTS (
@@ -158,7 +158,7 @@ USING (
 ## ⚠️ Security Notes
 
 - **Recursive Triggers**: The `is_active_team_member` helper must be used carefully to avoid
-  infinite recursion in policies where `org.team_memberships` checks itself.
+  infinite recursion in policies where `org.team_members` checks itself.
 - **Admin Bypass**: All policies include an `OR security.is_admin()` check to allow platform-level
   moderation and support.
 - **Public Discovery**: Currently, `freelancer_profiles` are only visible to the owner. To enable

@@ -24,7 +24,8 @@ export function ListCard(props: ListCardProps) {
 			onClick={props.onClick}
 			role='article'
 		>
-			<div class='list-card__image-container'>
+			{
+				/* <div class='list-card__image-container'>
 				{props.imageUrl
 					? <img src={props.imageUrl} alt={props.title} class='list-card__image' />
 					: (
@@ -32,7 +33,8 @@ export function ListCard(props: ListCardProps) {
 							{props.imageFallback || props.title.charAt(0)}
 						</div>
 					)}
-			</div>
+			</div> */
+			}
 
 			<div class='list-card__content'>
 				<div class='list-card__header'>

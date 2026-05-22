@@ -7,7 +7,7 @@ STABLE
 AS $$
   SELECT EXISTS (
     SELECT 1 
-    FROM org.team_memberships 
+    FROM org.team_members 
     WHERE team_id = _team_id 
     AND user_id = auth.uid() 
     AND status = 'active'

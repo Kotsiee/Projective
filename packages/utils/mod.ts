@@ -7,3 +7,4 @@ export * from './src/processors/mock-wasm.ts';
 
 export * from './src/markdown/index.ts';
 export * from './src/validation/index.ts';
+export * from './src/color.ts';

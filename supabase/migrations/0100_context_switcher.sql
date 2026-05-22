@@ -8,7 +8,7 @@ SECURITY DEFINER
 SET search_path = public, security, org
 AS $$
 BEGIN
-  -- 1. Security Check
+  
   IF p_type = 'freelancer' THEN
     IF NOT EXISTS (
       SELECT 1 FROM org.freelancer_profiles 
@@ -18,9 +18,9 @@ BEGIN
     END IF;
   
   ELSIF p_type = 'business' THEN
-    -- CHANGED: Check Membership Table
+    
     IF NOT EXISTS (
-      SELECT 1 FROM org.business_memberships 
+      SELECT 1 FROM org.business_members 
       WHERE business_id = p_id 
       AND user_id = auth.uid() 
       AND status = 'active'
@@ -31,7 +31,7 @@ BEGIN
     RAISE EXCEPTION 'Invalid profile type';
   END IF;
 
-  -- 2. Update the session context
+  
   UPDATE security.session_context
   SET 
     active_profile_type = p_type,
@@ -40,7 +40,7 @@ BEGIN
     updated_at = NOW()
   WHERE user_id = auth.uid();
 
-  -- 3. Log the switch
+  
   INSERT INTO security.audit_logs (
     user_id, action, entity_table, entity_id, actor_profile_id
   ) VALUES (

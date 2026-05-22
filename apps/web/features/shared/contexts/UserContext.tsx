@@ -35,6 +35,7 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 	const isAuthenticated = computed(() => !!user.value);
 
 	const fetchUser = async () => {
+		console.log('Fetching user data...');
 		isLoading.value = true;
 		error.value = null;
 
@@ -47,8 +48,22 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 				throw new Error(`Error ${res.status}`);
 			} else {
 				const data = await res.json();
-				user.value = data.user;
+				const rawUser = data.user;
+
+				// Map the backend payload to the expected UserProfile interface
+				user.value = {
+					id: rawUser.id || rawUser.user_id,
+					displayName: rawUser.displayName || rawUser.display_name ||
+						[rawUser.first_name, rawUser.last_name].filter(Boolean).join(' ') || null,
+					username: rawUser.username || null,
+					avatarUrl: rawUser.avatarUrl || rawUser.avatar_url || null,
+					activeProfileType: rawUser.activeProfileType || null,
+					activeProfileId: rawUser.activeProfileId || null,
+					activeTeamId: rawUser.activeTeamId || null,
+				};
 			}
+
+			console.log('User data fetched:', user.value);
 			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
 			console.error('User Fetch Error:', err);

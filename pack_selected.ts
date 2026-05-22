@@ -5,7 +5,16 @@ import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./packages/charts',
+	// './apps/web/features/auth',
+	// './apps/web/features/shared',
+	// './apps/web/features/dashboard/projects',
+	// './apps/web/features/public/explore',
+	// './apps/web/features/public/profile',
+	// './apps/web/routes/api',
+	'./apps/web/routes/api/v1/public/profile',
+	'./packages/fields',
+	// './packages/ui',
+	// './supabase/migrations',
 ];
 
 // 2. The existing file to REPLACE (This will be overwritten)
@@ -19,8 +28,6 @@ const IGNORE_FILES = [
 	'.DS_Store',
 	'pack_project.ts',
 	'README.md',
-	'TextFile.tsx',
-	'text-field.css',
 	OUTPUT_FILE,
 ];
 
@@ -28,7 +35,7 @@ const IGNORE_FILES = [
 const IGNORE_EXTS = ['.snap', '.log'];
 
 // Only these extensions are allowed through
-const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml'];
+const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml', '.css'];
 
 // ---------------------
 

@@ -3,12 +3,13 @@ import {
 	BudgetType,
 	IPOptionMode,
 	PortfolioDisplayRights,
-	StageType,
+	ProjectFormat,
 	StartTriggerType,
 	TimelinePreset,
 	Visibility,
 } from '@projective/types';
 
+// #region 1. Base Utility Schemas
 export const QuillDeltaSchema = z.object({
 	ops: z.array(
 		z.object({
@@ -20,7 +21,9 @@ export const QuillDeltaSchema = z.object({
 		}),
 	),
 });
+// #endregion
 
+// #region 2. Nested Schemas
 export const LegalAndScreeningSchema = z.object({
 	ip_ownership_mode: z.nativeEnum(IPOptionMode),
 	nda_required: z.boolean(),
@@ -34,7 +37,6 @@ export const StageStaffingRoleSchema = z.object({
 	role_title: z.string().min(1, 'Role title is required').max(100),
 	quantity: z.number().int().min(1),
 	budget_type: z.nativeEnum(BudgetType),
-
 	budget_amount_cents: z.number().int().min(0, 'Budget cannot be negative'),
 	allow_proposals: z.boolean(),
 });
@@ -54,15 +56,17 @@ export const StageSchema = z.object({
 
 	title: z.string().min(1, 'Stage title is required').max(100),
 	description: z.union([z.string(), QuillDeltaSchema]),
-	stage_type: z.nativeEnum(StageType),
 	status: z.string().default('open'),
 	sort_order: z.number().int().min(0),
+
+	file_upload_required: z.boolean().default(false).optional(),
+	default_tasks: z.array(z.record(z.string(), z.any())).default([]).optional(),
+	skills: z.array(z.string()).default([]).optional(),
 
 	start_trigger_type: z.nativeEnum(StartTriggerType),
 	fixed_start_date: z.coerce.date().optional(),
 
 	start_dependency_stage_id: z.string().optional(),
-
 	start_dependency_lag_days: z.number().int().optional(),
 	hire_trigger_active: z.boolean().optional(),
 
@@ -102,9 +106,13 @@ export const StageSchema = z.object({
 	message: "Fixed start date is required when trigger type is 'Fixed Date'",
 	path: ['fixed_start_date'],
 });
+// #endregion
 
+// #region 3. Core Output Schemas
 export const CreateProjectSchema = z.object({
 	client_business_id: z.uuid().optional(),
+
+	format: z.nativeEnum(ProjectFormat),
 
 	title: z.string().min(5, 'Title must be at least 5 characters').max(150),
 	description: QuillDeltaSchema,
@@ -119,16 +127,21 @@ export const CreateProjectSchema = z.object({
 	),
 
 	timeline_preset: z.nativeEnum(TimelinePreset),
-	target_project_start_date: z.coerce.date(),
+
+	target_project_start_date: z.coerce.date().refine((date) => {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		return date.getTime() >= today.getTime();
+	}, { message: 'Target project start date cannot be in the past' }),
+
+	soft_deadline: z.coerce.date().optional(),
 
 	legal_and_screening: LegalAndScreeningSchema,
-
 	stages: z.array(StageSchema).min(1, 'Project must have at least one stage'),
-
 	global_attachments: z.array(z.uuid()).optional(),
-
 	tags: z.array(z.string()).max(10, 'Too many tags').optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
 export type StageInput = z.infer<typeof StageSchema>;
+// #endregion

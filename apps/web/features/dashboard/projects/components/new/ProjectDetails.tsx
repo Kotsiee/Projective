@@ -1,12 +1,17 @@
 import '../../styles/components/new/new-project-details.css';
-import { Visibility } from '@projective/types';
+import { ProjectFormat, Visibility } from '@projective/types';
 import { RichTextField, SelectField, SelectOption, TagInput, TextField } from '@projective/fields';
-import ProjectDetailsThumbnail from './ProjectDetailsThumbnail.tsx';
 import ProjectDetailsAttachments from './ProjectDetailsAttachments.tsx';
 import { useNewProjectContext } from '../../contexts/NewProjectContext.tsx';
 
 export default function ProjectDetails() {
 	const state = useNewProjectContext();
+
+	// #region Options
+	const formatOptions: SelectOption<string>[] = [
+		{ label: 'Pipeline (Multiple ongoing stages/tickets)', value: ProjectFormat.Pipeline },
+		{ label: 'One-Off Project (Single clear objective)', value: ProjectFormat.OneOff },
+	];
 
 	const categoryOptions: SelectOption<string>[] = [
 		{ label: 'Web Development', value: 'befe48ee-4c71-4e8f-b8e6-01b6602eea6c' },
@@ -25,19 +30,31 @@ export default function ProjectDetails() {
 		{ label: 'GBP (£)', value: 'GBP' },
 		{ label: 'EUR (€)', value: 'EUR' },
 	];
+	// #endregion
 
 	return (
 		<div className='new-project__details'>
 			<div className='new-project__header'>
 				<h2>Project Details</h2>
 				<p className='new-project__subtitle'>
-					Define the core information, categorize your project, and upload essential briefs.
+					Define the core format, categorize your project, and upload essential briefs.
 				</p>
 			</div>
 
-			<ProjectDetailsThumbnail
-				value={state.thumbnail}
-			/>
+			<div className='new-project__row'>
+				<SelectField
+					name='format'
+					label='Project Format'
+					options={formatOptions}
+					value={state.format.value}
+					onChange={(v) => state.format.value = v as ProjectFormat}
+					searchable={false}
+					multiple={false}
+					floating
+					required
+					hint='Pipelines utilize Kanban boards. One-Offs utilize Gantt chart timelines.'
+				/>
+			</div>
 
 			<div className='new-project__row'>
 				<TextField
@@ -83,7 +100,7 @@ export default function ProjectDetails() {
 					label='Visibility'
 					options={visibilityOptions}
 					value={state.visibility.value}
-					onChange={(v) => state.visibility.value = v as string}
+					onChange={(v) => state.visibility.value = v as Visibility}
 					searchable={false}
 					multiple={false}
 					floating
@@ -116,9 +133,7 @@ export default function ProjectDetails() {
 			</div>
 
 			<div className='new-project__row'>
-				<ProjectDetailsAttachments
-					files={state.attachments}
-				/>
+				<ProjectDetailsAttachments files={state.attachments} />
 			</div>
 		</div>
 	);

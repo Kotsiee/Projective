@@ -1,16 +1,24 @@
+/**
+ * @file publish.ts
+ * @description API route controller for processing project creation requests and files.
+ */
+
+// #region Imports
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
 import { CreateProjectSchema } from '@features/dashboard/projects/contracts/new/_validation.ts';
 import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
+// #endregion
 
 export const handler = define.handlers({
 	async POST(ctx) {
 		try {
 			const contentType = ctx.req.headers.get('content-type') || '';
+			// deno-lint-ignore no-explicit-any
 			let body: any = {};
-			let thumbnailFile: File | undefined;
 			const attachmentFiles: File[] = [];
 
+			// Parse multipart/form-data for attachments
 			if (contentType.includes('multipart/form-data')) {
 				const formData = await ctx.req.formData();
 				const payloadStr = formData.get('payload')?.toString();
@@ -20,9 +28,6 @@ export const handler = define.handlers({
 				}
 				body = JSON.parse(payloadStr);
 
-				const thumb = formData.get('thumbnail');
-				if (thumb instanceof File) thumbnailFile = thumb;
-
 				const rawAttachments = formData.getAll('attachments');
 				rawAttachments.forEach((entry) => {
 					if (entry instanceof File) attachmentFiles.push(entry);
@@ -31,6 +36,7 @@ export const handler = define.handlers({
 				body = await ctx.req.json();
 			}
 
+			// Validate the payload shape against our Zod SSOT
 			const validation = CreateProjectSchema.safeParse(body);
 
 			if (!validation.success) {
@@ -48,14 +54,16 @@ export const handler = define.handlers({
 				);
 			}
 
+			// Dependency injection wrapper for the Supabase client
+			// deno-lint-ignore no-explicit-any
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
+			// Execute the business logic through the service
 			const res = await ProjectsBackendService.createProject(
 				validation.data,
 				'active',
 				{
-					thumbnail: thumbnailFile,
 					attachments: attachmentFiles,
 				},
 				{ getClient },
@@ -79,7 +87,7 @@ export const handler = define.handlers({
 					headers: { 'Content-Type': 'application/json' },
 				},
 			);
-		} catch (e: any) {
+		} catch (e: unknown) {
 			console.error('Publish Error:', e);
 			return new Response(JSON.stringify({ error: 'Bad Request' }), { status: 400 });
 		}

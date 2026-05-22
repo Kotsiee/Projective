@@ -1,0 +1,52 @@
+/* #region 1. Container Setup */
+.profile-tabs-container {
+    width: 100%;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.profile-tabs {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    overflow-x: auto;
+
+    /* Hide scrollbar for clean UI but maintain scrollability on mobile */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.profile-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* #endregion */
+
+/* #region 2. Tab Items */
+.profile-tabs__button {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 1.25rem 0;
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color var(--fast) ease, border-color var(--fast) ease;
+    white-space: nowrap;
+    /* Prevent wrapping on smaller viewports */
+}
+
+.profile-tabs__button:hover {
+    color: var(--text-main);
+}
+
+.profile-tabs__button--active {
+    color: var(--text-main);
+    font-weight: 600;
+    border-bottom-color: var(--primary);
+}
+
+/* #endregion */

@@ -1,9 +1,6 @@
 import { Signal } from '@preact/signals';
 import { CSSProperties, JSX } from 'preact';
 
-/**
- * Base properties shared by all form fields.
- */
 export interface BaseFieldProps {
 	id?: string;
 	name?: string;
@@ -16,21 +13,13 @@ export interface BaseFieldProps {
 	floating?: boolean;
 	className?: string;
 	style?: CSSProperties;
+	nextField?: string | HTMLElement;
+	onKeyDown?: (e: KeyboardEvent) => void;
 }
 
-/**
- * Visual variants for fields.
- */
 export type FieldVariant = 'outlined' | 'filled' | 'standard';
-
-/**
- * Density/Size variants.
- */
 export type FieldDensity = 'compact' | 'normal' | 'comfortable';
 
-/**
- * Validation status.
- */
 export type ValidationStatus =
 	| 'success'
 	| 'warning'
@@ -38,9 +27,6 @@ export type ValidationStatus =
 	| 'info'
 	| 'neutral';
 
-/**
- * Generic interface for fields that hold a value.
- */
 export interface ValueFieldProps<T> extends BaseFieldProps {
 	value?: T | Signal<T>;
 	defaultValue?: T;
@@ -49,9 +35,6 @@ export interface ValueFieldProps<T> extends BaseFieldProps {
 	hint?: string;
 }
 
-/**
- * Interface for fields that support adornments (icons/text).
- */
 export interface AdornmentProps {
 	prefix?: JSX.Element | string;
 	suffix?: JSX.Element | string;

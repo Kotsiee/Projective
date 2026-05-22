@@ -1,0 +1,38 @@
+.view-stages-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.view-stages-meta__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.view-stages-meta__icon {
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.view-stages-meta__text {
+    display: flex;
+    flex-direction: column;
+}
+
+.view-stages-meta__label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.view-stages-meta__value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-main);
+}

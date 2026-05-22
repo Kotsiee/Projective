@@ -1,6 +1,5 @@
 BEGIN;
 
--- 1. BACKFILL TEAMS
 INSERT INTO
     search.profiles_index (
         entity_id,
@@ -21,7 +20,6 @@ SELECT
     now()
 FROM org.teams ON CONFLICT (entity_id, entity_type) DO NOTHING;
 
--- 2. BACKFILL FREELANCERS
 INSERT INTO
     search.profiles_index (
         entity_id,
@@ -48,7 +46,6 @@ SELECT
     now()
 FROM org.freelancer_profiles ON CONFLICT (entity_id, entity_type) DO NOTHING;
 
--- 3. BACKFILL USERS (PUBLIC)
 INSERT INTO
     search.profiles_index (
         entity_id,
@@ -77,7 +74,6 @@ SELECT
     now()
 FROM org.users_public ON CONFLICT (entity_id, entity_type) DO NOTHING;
 
--- 4. BACKFILL BUSINESSES
 INSERT INTO
     search.profiles_index (
         entity_id,
@@ -96,11 +92,10 @@ SELECT
     now()
 FROM org.business_profiles ON CONFLICT (entity_id, entity_type) DO NOTHING;
 
--- 5. BACKFILL PROJECTS
 INSERT INTO search.projects_index (project_id, title, fts, industry_category_id, status, is_active, updated_at)
 SELECT 
     id, 
-    'Project Title', -- Placeholder as per your schema
+    'Project Title', 
     to_tsvector('english', status::text),
     industry_category_id,
     status::text,
@@ -109,7 +104,6 @@ SELECT
 FROM projects.projects
 ON CONFLICT (project_id) DO NOTHING;
 
--- 6. BACKFILL SERVICES (PORTFOLIOS)
 INSERT INTO
     search.services_index (
         service_id,
