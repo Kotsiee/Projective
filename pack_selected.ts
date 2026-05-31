@@ -5,14 +5,14 @@ import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	// './apps/web/features/auth',
+	'./apps/web/features/auth',
 	// './apps/web/features/shared',
 	// './apps/web/features/dashboard/projects',
 	// './apps/web/features/public/explore',
-	// './apps/web/features/public/profile',
+	'./apps/web/routes/(auth)',
 	// './apps/web/routes/api',
-	'./apps/web/routes/api/v1/public/profile',
-	'./packages/fields',
+	// './apps/web/routes/api/v1/public/profile',
+	// './packages/fields',
 	// './packages/ui',
 	// './supabase/migrations',
 ];

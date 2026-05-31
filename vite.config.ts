@@ -1,18 +1,60 @@
 import { defineConfig } from 'npm:vite@7.2.2';
 import { fresh } from '@fresh/plugin-vite';
-import { fileURLToPath } from 'node:url';
+import { walkSync } from 'jsr:@std/fs/walk';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import process from 'node:process';
 
-const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
+// #region Helper Functions
+const ROOT = process.cwd();
 
+/**
+ * Dynamically discovers all Island components within the features directory.
+ * Formats discovered paths as explicit file:// URLs so the Deno module loader
+ * can resolve them correctly without looking for them in the import map.
+ *
+ * @returns {string[]} An array of file:// URL strings for island components.
+ */
+function discoverFeatureIslands(): string[] {
+	const islands: string[] = [];
+	const featuresPath = path.resolve(ROOT, 'apps/web/features');
+
+	try {
+		for (
+			const entry of walkSync(featuresPath, {
+				exts: ['.tsx', '.ts', '.jsx'],
+				includeDirs: false,
+			})
+		) {
+			if (entry.path.includes('/islands/') || entry.path.includes('\\islands\\')) {
+				// Convert absolute system path (POSIX or Windows) into a file:/// URL
+				const fileUrl = pathToFileURL(entry.path).href;
+				islands.push(fileUrl);
+			}
+		}
+	} catch (error) {
+		console.warn('⚠️ Could not walk features directory for islands:', error);
+	}
+
+	return islands;
+}
+// #endregion
+
+// #region Vite Configuration
 export default defineConfig({
 	root: 'apps/web',
-	plugins: [fresh({
-		islandSpecifiers: ['./apps/web/features/public/explore/islands/index.ts'],
-	})],
+
+	plugins: [
+		fresh({
+			islandSpecifiers: [
+				...discoverFeatureIslands(),
+			],
+		}),
+	],
 
 	server: {
 		fs: {
-			allow: ['..', '../..'],
+			allow: [ROOT],
 		},
 		watch: {
 			ignored: [
@@ -26,23 +68,23 @@ export default defineConfig({
 
 	resolve: {
 		alias: {
-			'@': r('./apps/web/'),
-			'@styles': r('./apps/web/styles/'),
-			'@components': r('./apps/web/components/'),
-			'@features': r('./apps/web/features/'),
-			'@islands': r('./apps/web/islands/'),
-			'@server': r('./apps/web/server/'),
-			'@services': r('./apps/web/services/'),
-			'@types': r('./apps/web/types/'),
-			'@utils': r('./apps/web/utils.ts'),
+			'@': path.resolve(ROOT, 'apps/web/'),
+			'@styles': path.resolve(ROOT, 'apps/web/styles/'),
+			'@components': path.resolve(ROOT, 'apps/web/components/'),
+			'@features': path.resolve(ROOT, 'apps/web/features/'),
+			'@islands': path.resolve(ROOT, 'apps/web/islands/'),
+			'@server': path.resolve(ROOT, 'apps/web/server/'),
+			'@services': path.resolve(ROOT, 'apps/web/services/'),
+			'@types': path.resolve(ROOT, 'apps/web/types/'),
+			'@utils': path.resolve(ROOT, 'apps/web/utils.ts'),
 
-			'@projective/backend': r('./packages/backend/mod.ts'),
-			'@projective/ui': r('./packages/ui/mod.ts'),
-			'@projective/utils': r('./packages/utils/mod.ts'),
-			'@projective/types': r('./packages/types/mod.ts'),
-			'@projective/fields': r('./packages/fields/mod.ts'),
-			'@projective/data': r('./packages/data/mod.ts'),
-			'@projective/charts': r('./packages/charts/mod.ts'),
+			'@projective/backend': path.resolve(ROOT, 'packages/backend/mod.ts'),
+			'@projective/ui': path.resolve(ROOT, 'packages/ui/mod.ts'),
+			'@projective/utils': path.resolve(ROOT, 'packages/utils/mod.ts'),
+			'@projective/types': path.resolve(ROOT, 'packages/types/mod.ts'),
+			'@projective/fields': path.resolve(ROOT, 'packages/fields/mod.ts'),
+			'@projective/data': path.resolve(ROOT, 'packages/data/mod.ts'),
+			'@projective/charts': path.resolve(ROOT, 'packages/charts/mod.ts'),
 		},
 	},
 
@@ -71,3 +113,4 @@ export default defineConfig({
 		},
 	},
 });
+// #endregion

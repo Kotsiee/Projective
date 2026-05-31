@@ -1,4 +1,4 @@
-import { ProjectPermission, StagePermission, StageType } from '@projective/types';
+import { ProjectPermission, StagePermission } from '@projective/types';
 import { Signal } from '@preact/signals';
 import { VNode } from 'preact';
 
@@ -85,7 +85,6 @@ export interface StageDetails {
 		| 'approved'
 		| 'revisions'
 		| 'paid';
-	stage_type: StageType;
 	ip_mode:
 		| 'exclusive_transfer'
 		| 'licensed_use'

@@ -1,95 +1,44 @@
-.onboarding {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 85%;
+/* #region ONBOARDING CANVAS */
+.onboarding-canvas {
+	display: flex;
+	min-height: 100vh;
+	width: 100%;
+	background-color: var(--bg);
+	position: relative;
+	overflow: hidden;
+}
 
+.onboarding-canvas__header {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	position: absolute;
+	top: 2rem;
+	left: 0;
+}
 
-    .onboarding-stages-indicator {
-        font-size: 0.8rem;
-    }
+.onboarding-canvas__back {
+	position: absolute;
+	top: 0;
+	left: 2rem;
+	z-index: 10;
+	color: var(--text-muted);
+	transition: color var(--fast) ease;
+}
 
-    .onboarding-stages {
-        width: 60%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+.onboarding-canvas__back:hover {
+	color: var(--text-main);
+}
 
-        .onboarding-stage {
-            position: relative;
-            width: 100%;
-            top: -4rem;
+.onboarding-canvas__left {
+	flex: 1;
+	display: flex;
+	width: 65%;
+	position: relative;
+}
 
-            display: flex;
-            flex-direction: column;
-            gap: 0.75em;
-            width: 100%;
-
-            .onboarding-stage__account-type__container {
-                display: flex;
-                gap: 0.75em;
-                width: 100%;
-
-                .onboarding-stage__account-type {
-                    width: 100%;
-                    background-color: #fff5;
-                    color: var(--primary);
-                    border-radius: var(--border-radius);
-                    padding: 1rem;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    cursor: pointer;
-                    transition: background-color var(--fast);
-
-                    &:hover {
-                        background-color: #fff4;
-                    }
-
-                    &:has(input:checked) {
-                        background-color: #000;
-                        color: white;
-                        font-weight: bold;
-                    }
-                }
-            }
-
-            .onboarding-stage__separator {
-                width: 100%;
-                border: 1px solid #fff3;
-            }
-
-            .onboarding-stage__name {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                gap: 0.75em;
-            }
-        }
-    }
-
-    .onboarding-stage-location {
-        width: 60%;
-        display: flex;
-        gap: 0.5rem;
-        justify-content: space-between;
-
-        .onboarding-back,
-        .onboarding-submit,
-        .onboarding-continue {
-            width: 100%;
-            background-color: #000;
-            border-radius: var(--border-radius);
-            padding: 1rem;
-
-            &:hover {
-                background-color: #222;
-
-            }
-        }
-    }
+.onboarding-canvas__right {
+	flex: 1;
+	display: flex;
+	width: 35%;
 }
