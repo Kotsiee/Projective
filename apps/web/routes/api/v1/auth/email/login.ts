@@ -1,66 +1,54 @@
+/**
+ * @file callback.ts
+ * @description API Route Controller for handling OAuth and Email PKCE Verification callbacks.
+ */
+
+// #region Imports
 import { define } from '@utils';
-import { setCookie } from '@std/http/cookie';
-import { setAuthCookies } from '@projective/backend';
-import { loginWithEmail } from '@features/auth/services/email/login.ts';
+import { supabaseClient } from '@projective/backend';
+// #endregion
 
+// #region Handlers
 export const handler = define.handlers({
-	async POST(ctx) {
-		const body = await ctx.req.json();
-		const res = await loginWithEmail(body);
+	async GET(ctx) {
+		const url = new URL(ctx.req.url);
+		const code = url.searchParams.get('code');
 
-		const reqUrl = new URL(ctx.req.url);
-		const verifyUrl = new URL('/verify', reqUrl).href;
+		const cookieHeader = ctx.req.headers.get('Cookie') || '';
+		const hasVerifyCookie = cookieHeader.includes('verify_email=');
 
-		const headers = new Headers({ 'content-type': 'application/json; charset=utf-8' });
+		if (code) {
+			const supabase = await supabaseClient(ctx.req);
+			const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-		if (!res.ok) {
-			const status = res.error.status ?? (res.error.code === 'bad_request' ? 400 : 401);
-			return new Response(JSON.stringify({ error: res.error }), { status, headers });
-		}
-
-		const user = res.data.user;
-		const unverified = user && !(user.email_confirmed_at ?? user.confirmed_at);
-
-		if (unverified) {
-			const email = user.email ?? (typeof body?.email === 'string' ? body.email : '');
-			if (email) {
-				setCookie(headers, {
-					name: 'verify_email',
-					value: encodeURIComponent(email),
-					httpOnly: true,
-					sameSite: 'Lax',
-					secure: reqUrl.protocol === 'https:',
-					path: '/verify',
-					maxAge: 10 * 60,
+			if (!error) {
+				// If the verification happened within the 10-minute cookie window, route to Dashboard.
+				// Otherwise, route to Login to enforce a fresh credential check.
+				const response = new Response(null, {
+					status: 302,
+					headers: { Location: hasVerifyCookie ? '/dashboard' : '/login' },
 				});
+
+				if (!hasVerifyCookie) {
+					// Time limit surpassed; revoke the session created by the PKCE exchange.
+					await supabase.auth.signOut();
+				} else {
+					// Time limit met; clear the tracking cookie immediately.
+					response.headers.append(
+						'Set-Cookie',
+						'verify_email=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax',
+					);
+				}
+
+				return response;
 			}
-			return new Response(JSON.stringify({ ok: true, redirectTo: verifyUrl }), {
-				status: 200,
-				headers,
-			});
 		}
 
-		if (res.data.session) {
-			const { access_token, refresh_token } = res.data.session;
-			if (!access_token || !refresh_token) {
-				return new Response(
-					JSON.stringify({ error: { code: 'bad_request', message: 'Missing tokens' } }),
-					{
-						status: 400,
-						headers,
-					},
-				);
-			}
-			setAuthCookies(headers, {
-				accessToken: access_token,
-				refreshToken: refresh_token,
-				requestUrl: reqUrl,
-			});
-		}
-
-		return new Response(JSON.stringify({ ok: true, redirectTo: '/' }), {
-			status: 200,
-			headers,
+		// Fallback for invalid codes or bad requests
+		return new Response(null, {
+			status: 302,
+			headers: { Location: '/login?error=Invalid+or+expired+verification+link' },
 		});
 	},
 });
+// #endregion

@@ -9,14 +9,15 @@ import {
 	supabaseClient,
 } from '@projective/backend';
 import { Config } from '@projective/backend';
-import { createClient } from 'supabaseClient';
-import { StoragePaths } from 'packages/types/src/files/storagePaths.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.90.1';
+import { StoragePaths } from '@projective/types';
 
 interface SendMessageOptions {
 	type?: 'dm' | 'channel';
 	message?: string;
 	attachments?: string[];
 	files?: File[];
+	voiceMessageNames?: string[];
 	targetUserId?: string;
 	targetStageId?: string;
 }
@@ -38,6 +39,7 @@ export async function sendMessage(
 			message,
 			attachments = [],
 			files = [],
+			voiceMessageNames = [],
 			targetUserId,
 			targetStageId,
 		} = options;
@@ -117,6 +119,7 @@ export async function sendMessage(
 			const uploadPromises = files.map(async (file) => {
 				const fileId = crypto.randomUUID();
 				const quarantinePath = `${crypto.randomUUID()}/${file.name}`;
+
 				const context: any = type === 'channel'
 					? {
 						type: 'project_attachment',
@@ -131,6 +134,9 @@ export async function sendMessage(
 					context,
 				);
 
+				// Check if the file's exact name is in the voice messages array
+				const isVoiceMessage = voiceMessageNames.includes(file.name);
+
 				const { error: dbError } = await supabase.schema('files').from('items').insert({
 					id: fileId,
 					owner_user_id: user.id,
@@ -143,6 +149,7 @@ export async function sendMessage(
 					target_bucket: targetBucket,
 					target_path: targetPath,
 					status: 'pending_upload',
+					metadata: isVoiceMessage ? { is_voice_message: true } : {}, // Inject the metadata flag
 				});
 				if (dbError) throw dbError;
 

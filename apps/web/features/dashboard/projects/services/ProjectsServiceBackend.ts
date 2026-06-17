@@ -62,12 +62,6 @@ export class ProjectsBackendService {
 	/**
 	 * Creates a new project, handles file quarantine uploads, and triggers the database RPC.
 	 * Automatically extracts plain text from Quill Deltas for search indexing.
-	 *
-	 * @param {CreateProjectInput} data The validated project creation payload.
-	 * @param {'draft' | 'active'} targetStatus The desired initial status.
-	 * @param {FileOptions} files Any attachments provided in the multipart request.
-	 * @param {Deps} deps Dependency injection object for Supabase client.
-	 * @returns {Promise<Result<{ projectId: string }>>} The ID of the created project.
 	 */
 	static async createProject(
 		data: CreateProjectInput,
@@ -164,27 +158,59 @@ export class ProjectsBackendService {
 				}
 			}
 
-const existingAttachments = data.global_attachments || [];
+			const existingAttachments = data.global_attachments || [];
 			const finalAttachments = [...existingAttachments, ...attachment_ids];
-			
-			const projectDescriptionText = extractTextFromDelta(data.description);
 
+			const projectDescriptionText = extractTextFromDelta(data.description);
 			const stagesWithText = data.stages.map((stage) => ({
 				...stage,
 				description_text: extractTextFromDelta(stage.description),
+				skills: Array.isArray(stage.skills) ? stage.skills : [],
 			}));
+
+			// Construct a clean, perfectly flat mapping that matches the RPC explicit requirements
+			// deno-lint-ignore no-explicit-any
+			const rawData = data as any;
+			const legalData = rawData.legal_and_screening || {};
+
+			// Helper to ensure lists resolve as arrays for the PostgreSQL text[] mapper
+			// deno-lint-ignore no-explicit-any
+			const arrayify = (val: any) => Array.isArray(val) ? val : (val ? [val] : []);
+
+			const rpcPayload = {
+				id: projectId,
+				title: rawData.title,
+				description: rawData.description,
+				description_text: projectDescriptionText,
+				format: rawData.format,
+				industry_category_id: rawData.industry_category_id || rawData.category || null,
+				visibility: rawData.visibility || 'public',
+				currency: rawData.currency || 'USD',
+				timeline_preset: rawData.timeline_preset || rawData.timelinePreset || 'sequential',
+				target_project_start_date: rawData.target_project_start_date || rawData.targetStartDate ||
+					null,
+
+				// Flatten the nested frontend legal data directly to Postgres column names
+				ip_ownership_mode: legalData.ip_ownership_mode || rawData.ipMode || 'exclusive_transfer',
+				nda_required: legalData.nda_required === 'true' || legalData.nda_required === true ||
+					rawData.ndaRequired === 'true' || rawData.ndaRequired === true || false,
+				portfolio_display_rights: legalData.portfolio_display_rights || rawData.portfolioRights ||
+					'allowed',
+				location_restriction: arrayify(
+					legalData.location_restriction || rawData.locationRestriction,
+				),
+				language_requirement: arrayify(
+					legalData.language_requirement || rawData.languageRequirement,
+				),
+				screening_questions: legalData.screening_questions || rawData.screeningQuestions || [],
+
+				stages: stagesWithText,
+				global_attachments: finalAttachments,
+			};
 
 			const { data: _rpcResultId, error: rpcError } = await supabase
 				.schema('projects')
-				.rpc('create_project', {
-					payload: {
-						...data,
-						id: projectId,
-						description_text: projectDescriptionText,
-						stages: stagesWithText,
-						global_attachments: finalAttachments,
-					},
-				});
+				.rpc('create_project', { payload: rpcPayload });
 
 			if (rpcError) {
 				const n = normaliseSupabaseError(rpcError);
@@ -211,12 +237,6 @@ const existingAttachments = data.global_attachments || [];
 		}
 	}
 
-	/**
-	 * Fetches project details.
-	 * @param {string} project_id The UUID of the project.
-	 * @param {Deps} deps Dependency injection for Supabase.
-	 * @returns {Promise<Result<any>>} The project payload.
-	 */
 	static async getProject(
 		project_id: string,
 		deps: Deps = {},
@@ -244,12 +264,6 @@ const existingAttachments = data.global_attachments || [];
 		}
 	}
 
-	/**
-	 * Fetches a filtered list of projects for the dashboard.
-	 * @param {ProjectsFilterParams} params The filtering parameters.
-	 * @param {Deps} deps Dependency injection for Supabase.
-	 * @returns {Promise<Result<any>>} The paginated project list.
-	 */
 	static async getDashboardProjects(
 		params: ProjectsFilterParams,
 		deps: Deps = {},
@@ -282,13 +296,6 @@ const existingAttachments = data.global_attachments || [];
 		}
 	}
 
-	/**
-	 * Fetches details for a specific project stage.
-	 * @param {string} project_id The UUID of the project.
-	 * @param {string} stage_id The UUID of the stage.
-	 * @param {Deps} deps Dependency injection for Supabase.
-	 * @returns {Promise<Result<any>>} The stage details payload.
-	 */
 	static async getStage(
 		project_id: string,
 		stage_id: string,
@@ -314,6 +321,69 @@ const existingAttachments = data.global_attachments || [];
 			}
 
 			return ok(data);
+		} catch (err) {
+			const n = normaliseUnknownError(err);
+			return fail(n.code, n.message, 500);
+		}
+	}
+
+	/**
+	 * Creates a new stage within an existing project and appends it to the correct sort order.
+	 */
+	static async createStage(
+		projectId: string,
+		// deno-lint-ignore no-explicit-any
+		data: any,
+		deps: Deps = {},
+	): Promise<Result<{ stageId: string }>> {
+		try {
+			const getClient = deps.getClient ?? supabaseClient;
+			const supabase = await getClient();
+
+			// 1. Identify current highest sort_order
+			const { data: stages, error: sortError } = await supabase
+				.schema('projects')
+				.from('project_stages')
+				.select('sort_order')
+				.eq('project_id', projectId)
+				.order('sort_order', { ascending: false })
+				.limit(1);
+
+			if (sortError) throw sortError;
+			const nextSortOrder = (stages?.[0]?.sort_order ?? -1) + 1;
+
+			// 2. Process Rich Text Delta
+			const descriptionText = extractTextFromDelta(data.description);
+
+			// 3. Insert Stage
+			const insertData = {
+				project_id: projectId,
+				name: data.name,
+				description: data.description || {},
+				description_text: descriptionText,
+				sort_order: nextSortOrder,
+				file_upload_required: !!data.file_upload_required,
+				default_tasks: data.default_tasks || [],
+				skills: data.skills || [],
+				fixed_start_date: data.start_date || null,
+				file_due_date: data.end_date || null,
+				ip_ownership_override: data.ip_ownership_override || null,
+				status: 'open',
+			};
+
+			const { data: newStage, error } = await supabase
+				.schema('projects')
+				.from('project_stages')
+				.insert(insertData)
+				.select('id')
+				.single();
+
+			if (error) {
+				const n = normaliseSupabaseError(error);
+				return fail(n.code, n.message, n.status);
+			}
+
+			return ok({ stageId: newStage.id });
 		} catch (err) {
 			const n = normaliseUnknownError(err);
 			return fail(n.code, n.message, 500);

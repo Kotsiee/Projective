@@ -3,7 +3,7 @@ import NavBarUserProfileDropdown from './NavBarUserProfileDropdown.tsx';
 import { signal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
 import { IconUser } from '@tabler/icons-preact';
-import { useUserContext } from '@features/shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 
 const open = signal(false);
 

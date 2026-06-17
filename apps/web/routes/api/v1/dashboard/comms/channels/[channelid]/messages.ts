@@ -73,6 +73,7 @@ export const handler = define.handlers({
 		let message = '';
 		let attachments: string[] = [];
 		let files: File[] = [];
+		let voiceMessageNames: string[] = [];
 		let targetUserId: string | undefined;
 		let targetStageId: string | undefined;
 
@@ -90,10 +91,15 @@ export const handler = define.handlers({
 
 				const formAttachmentIds = formData.getAll('attachments');
 				attachments = formAttachmentIds.map((id) => id.toString());
+
+				// Extract the voice message flags
+				const formVoiceMessages = formData.getAll('voiceMessages');
+				voiceMessageNames = formVoiceMessages.map((name) => name.toString());
 			} else {
 				const body = await ctx.req.json().catch(() => ({}));
 				message = body.message || '';
 				attachments = body.attachments || [];
+				voiceMessageNames = body.voiceMessageNames || [];
 				targetUserId = body.targetUserId;
 				targetStageId = body.targetStageId;
 			}
@@ -132,6 +138,7 @@ export const handler = define.handlers({
 				message,
 				attachments,
 				files,
+				voiceMessageNames,
 				targetUserId,
 				targetStageId,
 			}, {

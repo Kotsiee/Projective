@@ -1,6 +1,9 @@
 :root[data-theme="dark"] {
-  --bg: #222222;
-  --header: #191919;
+  --header: #999999;
+  --mid: #181818;
+  /* Hex exactly halfway between header and bg */
+  --bg: #0F0F0F;
+
   --text: #ffffff;
   --text-medium: #999;
   --text-dark: #555555;

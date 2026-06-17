@@ -36,6 +36,7 @@ export function DataDisplay<TOut, TIn>({
 	className,
 	style,
 	interactive,
+	emptyState,
 }: DataDisplayProps<TOut, TIn>) {
 	const isLocal = Array.isArray(dataSource);
 	const isMasonry = mode === 'masonry';
@@ -66,7 +67,9 @@ export function DataDisplay<TOut, TIn>({
 		return d.order;
 	}, [manager.dataset.value, tableState.sort, isLocal, columns]);
 
-	const totalCount = manager.dataset.value.totalCount ?? (activeOrder.length + 100);
+	// FIXED: Prevent local arrays from calculating an extra 100 skeleton items
+	const totalCount = manager.dataset.value.totalCount ??
+		(isLocal ? activeOrder.length : activeOrder.length + 100);
 	const [containerWidth, setContainerWidth] = useState(0);
 
 	const effectiveGridColumns = useMemo(() => {
@@ -141,11 +144,16 @@ export function DataDisplay<TOut, TIn>({
 
 	const safeRenderItem = (item: TOut, index: number) => renderItem(item, index);
 
+	// Evaluate if the list is empty (post-fetch for network data, immediately for local data)
+	const isEmpty = !manager.isFetching.value && (
+		isLocal ? activeOrder.length === 0 : manager.dataset.value.totalCount === 0
+	);
+
 	return (
 		<div className={`data-display ${className ?? ''}`} style={style}>
 			{manager.isFetching.value && <div className='data-display__loader'>Loading...</div>}
 
-			{isMasonry
+			{isEmpty && emptyState ? <>{emptyState}</> : isMasonry
 				? (
 					<MasonryGrid
 						dataset={{ ...manager.dataset.value, order: activeOrder }}

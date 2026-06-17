@@ -6,7 +6,7 @@ import {
 	IconUserCircle,
 	IconWallet,
 } from '@tabler/icons-preact';
-import { useUserContext } from '@features/shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 
 export default function NavBarUserProfileDropdownActions() {
 	const { logout, user } = useUserContext();

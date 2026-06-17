@@ -3,7 +3,7 @@ import { IconArrowsLeftRight, IconUser } from '@tabler/icons-preact';
 import NavBarUserProfileDropdownActions from './NavBarUserProfileDropdownActions.tsx';
 import NavBarUserProfileDropdownSwitch from './NavBarUserProfileDropdownSwitch.tsx';
 import { useSignal } from '@preact/signals';
-import { useUserContext } from '@features/shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 
 export default function NavBarUserProfileDropdown() {
 	const switchView = useSignal(false);

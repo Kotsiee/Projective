@@ -1,38 +1,38 @@
 .project-chat-island {
+    /* REMOVED: flex: 1 and height: 100% to allow natural expansion */
     display: flex;
     flex-direction: column;
-
-    height: 100%;
     width: 100%;
     position: relative;
 }
 
-
 .project-chat-island__messages {
-    flex: 1;
-    min-height: 0;
+    /* REMOVED: flex: 1 and min-height: 0 */
     width: 100%;
     display: flex;
     flex-direction: column;
 }
 
-
 .project-chat-island__input {
+    /* ADDED: Sticky positioning and background mask */
+    position: sticky;
+    bottom: 0;
+    background-color: var(--bg);
+    /* Masks messages scrolling underneath */
 
     flex-shrink: 0;
     width: 100%;
     z-index: 20;
     display: flex;
     justify-content: center;
-    padding-top: 0.5rem;
-    padding-bottom: 1.5rem;
+    padding-top: 1rem;
+    /* Slightly increased for breathing room */
+    padding-bottom: 2rem;
 }
 
 .project-chat-island__input>* {
-
     max-width: 800px;
     width: 100%;
-
     box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
 }
 

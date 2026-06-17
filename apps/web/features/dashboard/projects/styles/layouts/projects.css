@@ -1,61 +1,7 @@
-.layout-projects {
-    position: fixed;
-    top: calc(var(--header-height) + 2rem);
-    left: 0;
-    right: 1rem;
-    bottom: 0;
-    padding-left: calc(var(--side-nav-width) + 2rem);
-    display: flex;
-    background-color: var(--bg);
-    transition: padding-left var(--medium) ease;
-    z-index: 1;
-}
-
-.layout-projects__splitter {
-    .splitter__gutter {
-        background-color: transparent;
-    }
-
-    .splitter__gutter:hover,
-    .splitter__gutter:focus-visible {
-        background-color: var(--primary, #186f7e) !important;
-    }
-}
-
-.layout-projects__pane-sidebar {
+.projects-layout {
+    flex: 1;
     height: 100%;
-    min-width: 0;
-}
-
-.layout-projects__pane-content {
-    height: 100%;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.layout-projects__sidebar__container {
-    height: calc(100% - 1rem);
-    width: calc(100% - 2rem - 2px);
+    width: 100%;
     display: flex;
     flex-direction: column;
-    container-type: inline-size;
-    container-name: projects-sidebar;
-}
-
-.layout-projects__content__container {
-    position: relative;
-    left: 0.75rem;
-    width: calc(100% - 0.75rem);
-    height: 100%;
-}
-
-@container projects-sidebar (max-width: 260px) {
-    .layout-projects__sidebar__search-input {
-        font-size: 0.8rem;
-        padding-left: 2rem;
-    }
-
-    .project-list-item__meta {
-        display: none;
-    }
 }

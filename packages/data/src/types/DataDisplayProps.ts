@@ -1,4 +1,4 @@
-import type { CSSProperties, VNode } from 'preact';
+import type { ComponentChildren, CSSProperties, VNode } from 'preact';
 import type { DataSource } from '../core/datasource.ts';
 import type { ColumnDef } from '../core/table.ts';
 
@@ -101,4 +101,9 @@ export interface DataDisplayProps<TOut, TIn = unknown> {
 	 * If true, enables hover states and interactive styling on rows.
 	 */
 	interactive?: boolean;
+
+	/**
+	 * Component to display when there is no data to render.
+	 */
+	emptyState?: ComponentChildren;
 }

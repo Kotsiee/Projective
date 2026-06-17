@@ -5,14 +5,17 @@ import { relative } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // 1. Define the specific folders you want to pack
 const TARGET_PATHS = [
-	'./apps/web/features/auth',
+	// './apps/web/features/auth',
+	// './apps/web/features/navigation',
 	// './apps/web/features/shared',
 	// './apps/web/features/dashboard/projects',
 	// './apps/web/features/public/explore',
-	'./apps/web/routes/(auth)',
-	// './apps/web/routes/api',
+	// './apps/web/routes/(dashboard)/projects',
+	// './apps/web/routes/api/v1/dashboard',
 	// './apps/web/routes/api/v1/public/profile',
 	// './packages/fields',
+	// './packages/charts',
+	'./packages/data',
 	// './packages/ui',
 	// './supabase/migrations',
 ];
@@ -21,7 +24,15 @@ const TARGET_PATHS = [
 const OUTPUT_FILE = 'codebase_context.md';
 
 // 3. Filtering options
-const IGNORE_DIRS = ['.git', 'node_modules', '_fresh', '.vscode', 'cov_profile', 'docs', 'tests'];
+const IGNORE_DIRS = [
+	'.git',
+	'node_modules',
+	'_fresh',
+	'.vscode',
+	'cov_profile',
+	'docs',
+	'tests',
+];
 const IGNORE_FILES = [
 	'.env',
 	'deno.lock',
@@ -32,10 +43,10 @@ const IGNORE_FILES = [
 ];
 
 // ❗ NEW: Ignore files by extension (always excluded)
-const IGNORE_EXTS = ['.snap', '.log'];
+const IGNORE_EXTS = ['.snap', '.log', '.css'];
 
 // Only these extensions are allowed through
-const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml', '.css'];
+const INCLUDE_EXTS = ['.ts', '.tsx', '.js', '.jsx', '.sql', '.md', '.json', '.toml'];
 
 // ---------------------
 

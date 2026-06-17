@@ -1,159 +1,263 @@
 .sidebar-details {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
-    gap: 1.5rem;
-    /* Uses theme variables */
-    color: var(--text-main);
 }
 
-/* --- Header Section --- */
 .sidebar-details__header {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    padding-right: 0;
 }
 
-.sidebar-details__header-info {
+.sidebar-details__header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-details__header__details {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.sidebar-details__back-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-tertiary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: color var(--fast);
-    margin-bottom: 0.25rem;
-}
-
-.sidebar-details__back-link:hover {
-    color: var(--text-primary);
-}
-
-.sidebar-details__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text-primary);
-    line-height: 1.3;
-}
-
-.sidebar-details__owner {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.sidebar-details__avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+.sidebar-details__header__details__avatar img {
+    height: 65px;
+    width: 65px;
+    border-radius: 65px;
     object-fit: cover;
-    margin-bottom: 0.5rem;
+    overflow: hidden;
 }
 
-/* --- Navigation Links --- */
-.sidebar-details__nav {
+.sidebar-details__header__details__info {
     display: flex;
+    flex-direction: column;
     gap: 0.25rem;
 }
 
-.sidebar-details__nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--border-radius);
-    background-color: var(--bg-surface);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.9375rem;
+.sidebar-details__header__details__title {
+    font-size: 1.25rem;
     font-weight: 500;
-    transition: background-color var(--fast), color var(--fast);
+    padding: 0;
+    margin: 0;
 }
 
-.sidebar-details__nav-link:hover {
-    background-color: var(--bg-surface-active);
-    color: var(--text-primary);
+.sidebar-details__header__details__owner {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    padding: 0;
+    margin: 0;
+    transition: all var(--medium);
+
+    &:hover {
+        text-decoration: underline;
+        color: var(--primary);
+    }
 }
 
-/* --- Stages List Section --- */
-.sidebar-details__stages {
-    flex: 1;
+.sidebar-details__content {
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    /* Crucial for nested scrolling */
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 100%;
 }
 
-.sidebar-details__section-title {
+.sidebar-details__actions {
+    padding: 1rem;
+    background-color: var(--bg);
+    border-radius: var(--border-radius);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* #region Channels List Styles */
+
+.sidebar-details__channels {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
+    /* Hide scrollbar for a cleaner look */
+    scrollbar-width: none;
+}
+
+.sidebar-details__channels::-webkit-scrollbar {
+    display: none;
+}
+
+.sidebar-details__channels__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Header & Toggle */
+.sidebar-details__channels__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+}
+
+.sidebar-details__channels__header-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    transition: color var(--fast);
+}
+
+.sidebar-details__channels__header-toggle:hover {
+    color: var(--text-main);
+}
+
+.sidebar-details__channels__header-toggle svg {
+    transition: transform var(--medium);
+}
+
+.sidebar-details__channels__header-toggle--closed svg {
+    transform: rotate(-90deg);
+}
+
+.sidebar-details__channels__title {
     font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-tertiary);
-    font-weight: 600;
     margin: 0;
-    padding-left: 0.5rem;
 }
 
-.sidebar-details__list-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-}
-
-/* --- Footer Actions --- */
-.sidebar-details__footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-subtle);
-}
-
-.sidebar-details__action {
+/* Add Button */
+.sidebar-details__channels__action__add {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--border-radius);
-    font-size: 0.9375rem;
-    font-weight: 500;
-    background: none;
+    justify-content: center;
+    background: transparent;
     border: none;
+    color: var(--text-muted);
     cursor: pointer;
-    text-decoration: none;
-    transition: background-color var(--fast);
-    width: 100%;
-    text-align: left;
+    padding: 0.25rem;
+    border-radius: var(--border-radius__small);
+    transition: all var(--fast);
 }
 
-.sidebar-details__action--settings {
+.sidebar-details__channels__action__add:hover {
+    background: var(--field-bg-hover);
+    color: var(--text-main);
+}
+
+/* List & Items */
+.sidebar-details__channels__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-details__channels__empty {
+    font-size: 0.8125rem;
+    color: var(--text-disabled);
+    padding: 0.5rem;
+    font-style: italic;
+}
+
+.sidebar-details__channels__list-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-details__channels__list-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 0.375rem 0.5rem;
+    border-radius: var(--border-radius__small);
     color: var(--text-secondary);
+    text-decoration: none;
+    transition: background-color var(--fast), color var(--fast);
+    min-width: 0;
+    /* allows text truncation */
 }
 
-.sidebar-details__action--settings:hover {
-    background-color: var(--bg-surface-active);
-    color: var(--text-primary);
+.sidebar-details__channels__list-item:hover,
+.sidebar-details__channels__list-item--active {
+    background-color: var(--field-bg-hover);
+    color: var(--text-main);
 }
 
-.sidebar-details__action--leave {
-    color: var(--border-error);
+.sidebar-details__channels__list-item--active {
+    background-color: var(--primary-surface);
+    color: var(--primary);
+    font-weight: 500;
 }
 
-.sidebar-details__action--leave:hover {
-    background-color: var(--bg-surface-disabled);
+.sidebar-details__channels__list-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    opacity: 0.7;
+    margin-right: 0.5rem;
 }
+
+.sidebar-details__channels__list-item-title {
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Options Button (...) */
+.sidebar-details__channels__list-item-options {
+    position: absolute;
+    right: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: none;
+    color: var(--text-muted);
+    padding: 0.25rem;
+    border-radius: var(--border-radius__xsmall);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--fast), color var(--fast);
+}
+
+.sidebar-details__channels__list-item-wrapper:hover .sidebar-details__channels__list-item-options {
+    opacity: 1;
+}
+
+.sidebar-details__channels__list-item-options:hover {
+    color: var(--text-main);
+}
+
+/* Little DM Avatar Placeholder */
+.sidebar-details__channels__dm-avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--field-bg-disabled);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+/* #endregion */

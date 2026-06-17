@@ -5,7 +5,7 @@ import { computed, Signal, useSignal } from '@preact/signals';
 import { ProfileData, ProfileTab } from '../contracts/Profile.ts';
 import { ProfileService } from '../services/ProfileService.ts';
 import { ProfileType } from 'packages/types/src/core/base-response.ts';
-import { useUserContext } from '@features/shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 // #endregion
 
 // #region Context Interface

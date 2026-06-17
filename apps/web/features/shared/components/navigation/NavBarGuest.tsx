@@ -1,5 +1,5 @@
+import LoginModal from '@features/navigation/components/overlays/login-modal.tsx';
 import '../../styles/components/navigation/nav-bar-guest.css';
-import AuthModal from '../../components/auth/AuthModal.tsx';
 
 /**
  * NavBarGuest
@@ -27,7 +27,7 @@ export default function NavBarGuest() {
 
 			{/* Actions - Rendered via an Island to manage Modal State */}
 			<div class='nav-bar-guest__actions'>
-				<AuthModal />
+				<LoginModal />
 			</div>
 		</div>
 	);

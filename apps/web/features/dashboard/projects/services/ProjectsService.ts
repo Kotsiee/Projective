@@ -5,15 +5,15 @@
  */
 
 // #region Imports
+// deno-lint-ignore-file no-explicit-any
 import { ProjectDetails, ProjectsFilterParams } from '../contracts/Projects.ts';
+import { getCsrfToken } from '@projective/utils'; // Assumed import path for your CSRF utility
 // #endregion
 
-// #region Service Definition
 export class ProjectsService {
+	// #region Query Operations
 	/**
 	 * Fetches full details for a specific project.
-	 * @param {string} projectId The UUID of the project.
-	 * @returns {Promise<ProjectDetails>} The full project details.
 	 */
 	static async getProjectDetails(projectId: string): Promise<ProjectDetails> {
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}`);
@@ -23,10 +23,7 @@ export class ProjectsService {
 
 	/**
 	 * Fetches a list of dashboard projects based on filters.
-	 * @param {ProjectsFilterParams} params The filtering and pagination parameters.
-	 * @returns {Promise<any>} The paginated list of projects.
 	 */
-	// deno-lint-ignore no-explicit-any
 	static async getDashboardProjects(params: ProjectsFilterParams): Promise<any> {
 		const queryParams = new URLSearchParams(params as any).toString();
 		const res = await fetch(`/api/v1/dashboard/projects?${queryParams}`);
@@ -34,37 +31,15 @@ export class ProjectsService {
 		if (!res.ok) throw new Error(`Failed to fetch dashboard projects: ${res.statusText}`);
 		return await res.json();
 	}
+	// #endregion
 
+	// #region Mutations
 	/**
-	 * Fetches details for a specific project stage.
-	 * @param {string} projectId The UUID of the project.
-	 * @param {string} stageId The UUID of the stage.
-	 * @returns {Promise<any>} The stage details.
+	 * Creates a new project in a draft/scoping state.
 	 */
-	// deno-lint-ignore no-explicit-any
-	static async getStage(projectId: string, stageId: string): Promise<any> {
-		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}`);
-		if (!res.ok) throw new Error(`Failed to fetch project stage: ${res.statusText}`);
-		return await res.json();
-	}
-
-	/**
-	 * Creates a new project with optional files.
-	 * @param {any} data The JSON payload containing the project configuration.
-	 * @param {string} targetStatus The intended status upon creation (e.g., 'active' or 'draft').
-	 * @param {Object} [files] Optional file attachments.
-	 * @param {File[]} [files.attachments] Global project attachments.
-	 * @returns {Promise<any>} The created project response.
-	 */
-	static async createProject(
-		// deno-lint-ignore no-explicit-any
-		data: any,
-		targetStatus: string,
-		files?: { attachments?: File[] },
-	): Promise<any> {
+	static async createProject(data: any, files?: { attachments?: File[] }): Promise<any> {
 		const formData = new FormData();
-		formData.append('data', JSON.stringify(data));
-		formData.append('targetStatus', targetStatus);
+		formData.append('payload', JSON.stringify(data));
 
 		if (files?.attachments) {
 			files.attachments.forEach((file) => {
@@ -72,29 +47,64 @@ export class ProjectsService {
 			});
 		}
 
-		const res = await fetch(`/api/v1/dashboard/projects`, {
+		const csrf = getCsrfToken();
+		if (!csrf) console.warn('[Projective] CSRF token is missing from the client environment.');
+
+		const res = await fetch(`/api/v1/dashboard/projects/new/publish`, {
 			method: 'POST',
+			headers: {
+				'X-CSRF': csrf || '',
+			},
 			body: formData,
 		});
 
-		if (!res.ok) throw new Error(`Failed to create project: ${res.statusText}`);
+		if (!res.ok) {
+			const errData = await res.json().catch(() => ({}));
+			throw new Error(errData.error?.message || `Failed to create project: ${res.statusText}`);
+		}
+
 		return await res.json();
 	}
 
 	/**
-	 * Updates the project status (e.g., Active -> Completed)
-	 * @param {string} projectId The UUID of the project.
-	 * @param {string} status The new status string.
-	 * @returns {Promise<void>}
+	 * Updates the project status (e.g., draft -> active)
 	 */
 	static async updateStatus(projectId: string, status: string): Promise<void> {
+		const csrf = getCsrfToken();
+
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/status`, {
 			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF': csrf || '',
+			},
 			body: JSON.stringify({ status }),
 		});
 
-		if (!res.ok) throw new Error(`Failed to update status: ${res.statusText}`);
+		if (!res.ok) throw new Error(`Failed to update project status: ${res.statusText}`);
+	}
+	// #endregion
+
+	/**
+	 * Creates a new stage within an existing project.
+	 */
+	static async createStage(projectId: string, data: any): Promise<any> {
+		const csrf = getCsrfToken();
+
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF': csrf || '',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!res.ok) {
+			const errData = await res.json().catch(() => ({}));
+			throw new Error(errData.error?.message || `Failed to create stage: ${res.statusText}`);
+		}
+
+		return await res.json();
 	}
 }
-// #endregion

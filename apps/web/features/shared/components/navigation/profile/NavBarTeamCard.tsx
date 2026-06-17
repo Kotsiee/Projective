@@ -1,6 +1,6 @@
 import { IconArrowsRight, IconCheck, IconUsers } from '@tabler/icons-preact';
 import { DashboardTeam } from '@features/dashboard/teams/contracts/Teams.ts';
-import { useUserContext } from '@features/shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 
 interface NavBarTeamCardProps {
 	team: DashboardTeam;

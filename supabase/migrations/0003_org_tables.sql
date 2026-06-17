@@ -44,6 +44,7 @@ CREATE TABLE org.users_public (
     dob date NOT NULL,
     visibility text NOT NULL DEFAULT 'public'::text,
     bio jsonb NOT NULL DEFAULT '{}'::jsonb,
+    interests text[] NOT NULL DEFAULT '{}'::text[], -- Added for algorithm discovery
     rating_average numeric(3,2) DEFAULT 0.0,
     rating_count integer DEFAULT 0,
     active_project_count integer DEFAULT 0,

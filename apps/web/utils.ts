@@ -9,7 +9,6 @@ export interface State {
 	refreshedTokens?: { access: string; refresh: string } | null;
 	clearAuth?: boolean;
 	isAuthenticated?: boolean;
-	isOnboarded?: boolean;
 	slugs?: Record<string, string>;
 }
 

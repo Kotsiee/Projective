@@ -15,4 +15,5 @@ export interface FileWithMeta {
 	errors: FileError[];
 	processingMeta?: Record<string, any>;
 	type?: FileCategory | 'Other';
+	meta?: any;
 }

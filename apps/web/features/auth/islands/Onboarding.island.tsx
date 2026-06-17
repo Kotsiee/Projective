@@ -12,13 +12,11 @@ export default function OnboardingIsland() {
 				<div class='onboarding-canvas'>
 					<div class='onboarding-canvas__left'>
 						<div class='onboarding-canvas__header'>
-							<a href='/explore' class='onboarding-canvas__back' aria-label='Return to site'>
-								<IconButton aria-label='Back' ghost>
-									<Icon>
-										<IconArrowLeft />
-									</Icon>
-								</IconButton>
-							</a>
+							<IconButton href='/' aria-label='Back' ghost>
+								<Icon>
+									<IconArrowLeft />
+								</Icon>
+							</IconButton>
 							<div class='onboarding-canvas__logo'>Logo</div>
 						</div>
 

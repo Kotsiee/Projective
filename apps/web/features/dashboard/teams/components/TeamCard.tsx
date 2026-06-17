@@ -1,7 +1,7 @@
 import '../styles/components/team-card.css';
 import { IconUsers } from '@tabler/icons-preact';
 import { DashboardTeam } from '../contracts/Teams.ts';
-import { useUserContext } from '../../../shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 import { VNode } from 'preact';
 import { deltaToPlainText } from '@projective/utils';
 import { Card, metaPosition } from '@projective/ui';

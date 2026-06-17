@@ -1,7 +1,7 @@
 import { IconCurrencyDollar } from '@tabler/icons-preact';
 import { DashboardBusiness } from '../contracts/Business.ts';
 import { VNode } from 'preact';
-import { useUserContext } from '../../../shared/contexts/UserContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 import { useSignal } from '@preact/signals';
 import { Card, metaPosition } from 'packages/ui/src/components/card/Card.tsx';
 

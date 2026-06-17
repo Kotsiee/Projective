@@ -27,7 +27,7 @@ export interface Project {
 	// Details
 	title: string;
 	description: string | QuillDelta;
-	industry_category_id: string; // UUID
+	industry_category_id?: string; // UUID
 	visibility: Visibility;
 	global_attachments?: string[] | FileWithMeta[];
 	currency: string | CurrencyDefinition;
@@ -36,14 +36,14 @@ export interface Project {
 	format: ProjectFormat;
 
 	// Timeline High-level
-	timeline_preset: TimelinePreset;
-	target_project_start_date: string | Date | DateTime;
+	timeline_preset?: TimelinePreset;
+	target_project_start_date?: string | Date | DateTime;
 	soft_deadline?: string | Date | DateTime;
 
 	// Extracted Interface
-	legal_and_screening: LegalAndScreening;
+	legal_and_screening?: LegalAndScreening;
 
 	// The Stages List
-	stages: Stage[];
+	stages?: Stage[];
 }
 // #endregion

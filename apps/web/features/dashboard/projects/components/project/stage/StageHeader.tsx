@@ -1,76 +1,94 @@
 /**
  * @file StageHeader.tsx
- * @description Floating header component for the stage layout, displaying stage details,
- * contextual tabs, and actions.
+ * @description Global middle-nav header component for the stage layout, displaying stage details,
+ * contextual tabs, and actions. Injected via NavigationContext.
  */
 
+// #region Imports
+import '../../../styles/components/project/stage/stage-header.css';
 import { useStageContext } from '../../../contexts/StageContext.tsx';
-import { useProjectContext } from '../../../contexts/ProjectContext.tsx';
-import { stageTabs } from '@projective/types';
+import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
 import { IconDotsVertical } from '@tabler/icons-preact';
+import { IconButton } from '@projective/ui';
+// #endregion
 
-/**
- * Renders the stage header with dynamic tabs and stage metadata.
- * * @returns {preact.VNode} The rendered StageHeader component.
- */
+export const stageTabs = () => {
+	const tabs = [
+		{ label: 'Chat', href: 'chat' },
+		{ label: 'Files', href: 'files' },
+		{ label: 'Tasks', href: 'tasks' },
+		{ label: 'Submissions', href: 'submissions' },
+		{ label: 'Finance', href: 'finance' },
+		{ label: 'Members', href: 'members' },
+	];
+
+	return tabs;
+};
+
+// #region Component
 export default function StageHeader() {
 	const { stage, stage_id } = useStageContext();
 	const { project, project_id } = useProjectContext();
 
 	let tabs: { label: string; href: string }[] = [];
 	if (stage.value) {
-		tabs = stageTabs(stage.value.stage_type);
+		tabs = stageTabs();
 	}
 
 	const isCurrentTab = (href: string) => {
 		if (typeof window === 'undefined') return false;
-		return globalThis.location.href.includes(
+		return globalThis.location.pathname.includes(
 			`/projects/${project_id.value}/${stage_id.value}/${href}`,
 		);
 	};
 
 	return (
-		<div class='stage-header__container'>
-			<div class='stage-header'>
-				<div class='stage-header__left'>
-					<img
-						src={project.value?.banner_url || 'https://placehold.co/50'}
-						alt='Stage Assignee Avatar'
-						class='stage-header__avatar'
-					/>
-					<div class='stage-header__details'>
-						<h3 class='stage-header__title'>
-							{stage.value?.title || 'Loading Stage...'}
-						</h3>
-						<p class='stage-header__meta'>
-							Active
-						</p>
-					</div>
+		<div class='stage-header'>
+			{/* Left: Identity */}
+			<div class='stage-header__left'>
+				<img
+					src={project.value?.banner_url || 'https://placehold.co/32'}
+					alt='Stage Assignee Avatar'
+					class='stage-header__avatar'
+				/>
+				<div class='stage-header__details'>
+					<h3 class='stage-header__title'>
+						{stage.value?.title || 'Loading Stage...'}
+					</h3>
+					<span class='stage-header__status'>Active</span>
 				</div>
+			</div>
 
-				<div class='stage-header__center'>
-					{tabs.map((tab) => {
-						const targetUrl = `/projects/${project_id.value}/${stage_id.value}/${tab.href}`;
-						return (
-							<a
-								key={tab.href}
-								class='stage-header__tab'
-								data-current={isCurrentTab(tab.href)}
-								href={targetUrl}
-								f-partial={targetUrl}
-							>
-								{tab.label}
-							</a>
-						);
-					})}
-				</div>
+			{/* Center: Navigation Tabs */}
+			<div class='stage-header__center'>
+				{tabs.map((tab) => {
+					const targetUrl = `/projects/${project_id.value}/${stage_id.value}/${tab.href}`;
+					const isActive = isCurrentTab(tab.href);
 
-				<div class='stage-header__right'>
-					<button type='button' class='stage-header__action-btn' title='Stage Options'>
-						<IconDotsVertical size={20} />
-					</button>
-				</div>
+					return (
+						<a
+							key={tab.href}
+							class={`stage-header__tab ${isActive ? 'stage-header__tab--active' : ''}`}
+							href={targetUrl}
+							f-client-nav={false}
+						>
+							{tab.label}
+						</a>
+					);
+				})}
+			</div>
+
+			{/* Right: Actions */}
+			<div class='stage-header__right'>
+				<IconButton
+					ghost
+					size='small'
+					aria-label='Stage Options'
+				>
+					<IconDotsVertical size={18} />
+				</IconButton>
 			</div>
 		</div>
 	);
 }
+// #endregion

@@ -115,10 +115,10 @@ export const CreateProjectSchema = z.object({
 	format: z.nativeEnum(ProjectFormat),
 
 	title: z.string().min(5, 'Title must be at least 5 characters').max(150),
-	description: QuillDeltaSchema,
+	description: z.union([z.string(), QuillDeltaSchema]),
 	industry_category_id: z.string().uuid({
 		message: 'Please select an industry category',
-	}),
+	}).optional(),
 
 	visibility: z.nativeEnum(Visibility),
 	currency: z.string().length(3).regex(
@@ -126,9 +126,10 @@ export const CreateProjectSchema = z.object({
 		'Must be a 3-letter currency code',
 	),
 
-	timeline_preset: z.nativeEnum(TimelinePreset),
+	timeline_preset: z.nativeEnum(TimelinePreset).optional(),
 
-	target_project_start_date: z.coerce.date().refine((date) => {
+	target_project_start_date: z.coerce.date().optional().refine((date) => {
+		if (!date) return true;
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		return date.getTime() >= today.getTime();
@@ -136,8 +137,8 @@ export const CreateProjectSchema = z.object({
 
 	soft_deadline: z.coerce.date().optional(),
 
-	legal_and_screening: LegalAndScreeningSchema,
-	stages: z.array(StageSchema).min(1, 'Project must have at least one stage'),
+	legal_and_screening: LegalAndScreeningSchema.optional(),
+	stages: z.array(StageSchema).optional().default([]),
 	global_attachments: z.array(z.uuid()).optional(),
 	tags: z.array(z.string()).max(10, 'Too many tags').optional(),
 });

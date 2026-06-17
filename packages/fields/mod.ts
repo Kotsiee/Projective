@@ -13,6 +13,7 @@ export * from './src/wrappers/FieldArrayWrapper.tsx';
 // Hooks
 export * from './src/hooks/useInteraction.ts';
 export * from './src/hooks/useCurrencyMask.ts';
+export * from './src/hooks/useGlobalDrag.ts';
 
 // Components
 export * from './src/components/TextField.tsx';

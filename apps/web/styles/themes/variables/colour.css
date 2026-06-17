@@ -7,13 +7,20 @@
         --lighter-delta: 20%;
 
         /* #region 2. BASE PALETTE (H/S/L) */
-        --bg-hue: 0;
-        --bg-saturation: 0%;
-        --bg-lightness: 98%;
-
         --header-hue: 0;
         --header-saturation: 0%;
         --header-lightness: 100%;
+        /* Lightest layer */
+
+        --mid-hue: 0;
+        --mid-saturation: 0%;
+        --mid-lightness: 99%;
+        /* Exact middle between Header and BG */
+
+        --bg-hue: 0;
+        --bg-saturation: 0%;
+        --bg-lightness: 98%;
+        /* Base layer */
 
         --card-hue: 0;
         --card-saturation: 0%;
@@ -41,8 +48,9 @@
         /* #endregion */
 
         /* #region 3. GENERATED COLORS */
-        --bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
         --header: hsl(var(--header-hue), var(--header-saturation), var(--header-lightness));
+        --mid: hsl(var(--mid-hue), var(--mid-saturation), var(--mid-lightness));
+        --bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
 
         --card: hsl(var(--card-hue), var(--card-saturation), var(--card-lightness));
         --card-hover: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--hover-delta)));
@@ -89,8 +97,14 @@
         --darker-delta: 20%;
         --lighter-delta: -20%;
 
-        --bg-lightness: 10%;
-        --header-lightness: 8%;
+        /* The dark mode HSL scale */
+        --header-lightness: 6%;
+        /* Darkest */
+        --mid-lightness: 9%;
+        /* Middle step */
+        --bg-lightness: 12%;
+        /* Base layer */
+
         --card-lightness: 13%;
         --text-lightness: 100%;
 

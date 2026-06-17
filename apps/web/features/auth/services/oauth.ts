@@ -1,3 +1,8 @@
+/**
+ * @file oauth.ts
+ * @description Frontend Service for initiating OAuth handshakes.
+ */
+
 import { supabaseClient } from '@projective/backend';
 
 export type OAuthProvider = 'google' | 'github';
@@ -9,17 +14,19 @@ export async function getProviderRedirectUrl(
 	requestUrl: URL,
 	next = '/',
 ): Promise<string> {
-	const verifyUrl = new URL('/verify', requestUrl);
+	// Point to the new dedicated callback route
+	const callbackUrl = new URL('/api/v1/auth/callback', requestUrl);
+
 	if (next && next !== '/') {
-		verifyUrl.searchParams.set('next', next);
+		callbackUrl.searchParams.set('next', next);
 	}
-	verifyUrl.searchParams.set('intent', intent);
+	callbackUrl.searchParams.set('intent', intent);
 
 	const sb = await supabaseClient();
 	const { data, error } = await sb.auth.signInWithOAuth({
 		provider,
 		options: {
-			redirectTo: verifyUrl.toString(),
+			redirectTo: callbackUrl.toString(),
 			skipBrowserRedirect: true,
 		} as any,
 	});

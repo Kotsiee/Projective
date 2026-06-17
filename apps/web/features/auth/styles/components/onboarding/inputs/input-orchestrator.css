@@ -1,30 +1,38 @@
 .onboarding__input-orchestrator {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	padding: 2rem 15%;
-	position: relative;
-	background-color: var(--header);
-	width: 100%;
-	height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 15%;
+    position: relative;
+    background-color: var(--header);
+    width: 100%;
+    height: 100%;
+}
+
+.onboarding__input-orchestrator__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 450px;
 }
 
 .onboarding__input-orchestrator__title {
-	margin-bottom: 3rem;
+    margin-bottom: 3rem;
 }
 
 .onboarding__input-orchestrator__login {
-	position: relative;
-	bottom: 0;
-	font-size: 0.8rem;
-	display: flex;
-	gap: 0.5rem;
+    position: relative;
+    bottom: 0;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.5rem;
 
-	a {
-		color: var(--primary);
+    a {
+        color: var(--primary);
 
-		&:hover {
-			color: var(--primary-hover);
-		}
-	}
+        &:hover {
+            color: var(--primary-hover);
+        }
+    }
 }

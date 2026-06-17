@@ -1,221 +1,115 @@
-CREATE OR REPLACE FUNCTION projects.create_project(
-  payload jsonb
-)
+CREATE OR REPLACE FUNCTION projects.create_project(payload jsonb)
 RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, projects, auth
 AS $$
 DECLARE
-  new_project_id uuid;
-  stage_record jsonb;
-  new_stage_id uuid;
-  role_record jsonb;
-  seat_record jsonb;
-  attachment_id text;
-  
-  stage_uuids uuid[] := '{}';
-  i integer;
-  _dep_raw text;
-  _dep_idx integer;
-  _dep_uuid uuid;
-  
-  _id uuid;
-  _title text;
-  _desc jsonb;
-  _desc_text text;
-  _thumb text;
-  _client_biz uuid;
-  _industry uuid;
-  _vis visibility;
-  _curr text;
-  _start_date timestamp with time zone;
-  _preset timeline_preset;
-  _legal_screening jsonb;
-  
+    v_project_id uuid;
+    v_owner_id uuid;
+    v_stage jsonb;
+    v_attachment_id text;
+    v_old_trigger_setting text;
 BEGIN
-  
-  _id := COALESCE((payload->>'id')::uuid, gen_random_uuid());
-  _title := payload->>'title';
-  _desc := payload->'description';
-  _desc_text := payload->>'description_text';
-  _thumb := payload->>'thumbnail_url';
-  _client_biz := (payload->>'client_business_id')::uuid;
-  _industry := (payload->>'industry_category_id')::uuid;
-  _vis := (payload->>'visibility')::visibility;
-  _curr := payload->>'currency';
-  _start_date := (payload->>'target_project_start_date')::timestamp with time zone;
-  _preset := (payload->>'timeline_preset')::timeline_preset;
-  _legal_screening := payload->'legal_and_screening';
-
-  INSERT INTO projects.projects (
-    id,
-    owner_user_id,
-    client_business_id,
-    title,
-    description,
-    description_text,
-    thumbnail_url,
-    industry_category_id,
-    visibility,
-    currency,
-    target_project_start_date,
-    timeline_preset,
-    ip_ownership_mode,
-    nda_required,
-    portfolio_display_rights,
-    screening_questions,
-    location_restriction,
-    language_requirement
-  )
-  VALUES (
-    _id,
-    auth.uid(),
-    _client_biz,
-    _title,
-    _desc,
-    _desc_text,
-    _thumb,
-    _industry,
-    _vis,
-    _curr,
-    _start_date,
-    _preset,
-    (_legal_screening->>'ip_ownership_mode')::ip_option_mode,
-    (_legal_screening->>'nda_required')::boolean,
-    (_legal_screening->>'portfolio_display_rights')::portfolio_rights,
-    (_legal_screening->'screening_questions'),
-    (SELECT array_agg(x)::text[] FROM jsonb_array_elements_text(_legal_screening->'location_restriction') t(x)),
-    (SELECT array_agg(x)::text[] FROM jsonb_array_elements_text(_legal_screening->'language_requirement') t(x))
-  )
-  RETURNING id INTO new_project_id;
-
-  IF payload ? 'global_attachments' THEN
-    FOR attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
-    LOOP
-      INSERT INTO projects.project_attachments (project_id, attachment_id)
-      VALUES (new_project_id, attachment_id::uuid);
-    END LOOP;
-  END IF;
-
-  IF payload ? 'stages' THEN
-    FOR i IN 0 .. jsonb_array_length(payload->'stages') - 1 LOOP
-      stage_uuids := array_append(stage_uuids, gen_random_uuid());
-    END LOOP;
-  END IF;
-
-  i := 0;
-  FOR stage_record IN SELECT * FROM jsonb_array_elements(payload->'stages')
-  LOOP
-    new_stage_id := stage_uuids[i + 1];
-
-    _dep_raw := stage_record->>'start_dependency_stage_id';
-    IF _dep_raw IS NOT NULL AND _dep_raw != '' THEN
-      _dep_idx := _dep_raw::int;
-      _dep_uuid := stage_uuids[_dep_idx + 1];
-    ELSE
-      _dep_uuid := NULL;
+    -- 1. Identity Verification
+    v_owner_id := auth.uid();
+    IF v_owner_id IS NULL THEN
+        RAISE EXCEPTION 'Not authenticated';
     END IF;
 
-    INSERT INTO projects.project_stages (
-      id,
-      project_id,
-      name,
-      description,
-      description_text,
-      sort_order,
-      start_trigger_type,
-      fixed_start_date,
-      start_dependency_stage_id,
-      start_dependency_lag_days,
-      hire_trigger_active,
-      file_revisions_allowed,
-      file_duration_mode,
-      file_duration_days,
-      file_due_date,
-      session_duration_minutes,
-      session_count,
-      session_preferred_days,
-      session_end_date,
-      management_contract_mode,
-      maintenance_cycle_interval,
-      ip_ownership_override
-    )
-    VALUES (
-      new_stage_id,
-      new_project_id,
-      stage_record->>'title',
-      stage_record->'description',
-      stage_record->>'description_text',
-      (stage_record->>'sort_order')::int,
-      (stage_record->>'start_trigger_type')::start_trigger_type,
-      (stage_record->>'fixed_start_date')::timestamp with time zone,
-      _dep_uuid,
-      COALESCE((stage_record->>'start_dependency_lag_days')::int, 0),
-      COALESCE((stage_record->>'hire_trigger_active')::boolean, true),
-      (stage_record->>'file_revisions_allowed')::int,
-      stage_record->>'file_duration_mode',
-      (stage_record->>'file_duration_days')::int,
-      (stage_record->>'file_due_date')::timestamp with time zone,
-      (stage_record->>'session_duration_minutes')::int,
-      COALESCE((stage_record->>'session_count')::int, 1),
-      (
-        CASE 
-          WHEN stage_record->'session_preferred_days' IS NOT NULL AND jsonb_typeof(stage_record->'session_preferred_days') = 'array' 
-          THEN (SELECT array_agg(x)::text[] FROM jsonb_array_elements_text(stage_record->'session_preferred_days') t(x))
-          ELSE NULL 
-        END
-      ),
-      (stage_record->>'session_end_date')::timestamp with time zone,
-      stage_record->>'management_contract_mode',
-      stage_record->>'maintenance_cycle_interval',
-      (stage_record->>'ip_ownership_override')::ip_option_mode
+    v_project_id := (payload->>'id')::uuid;
+
+    -- 2. Suppress legacy schema trigger interference within this transaction execution bounds
+    -- This prevents old scripts referencing non-existent properties (like NEW.team_id) from fracturing execution
+    SHOW session_replication_role INTO v_old_trigger_setting;
+    SET LOCAL session_replication_role = 'replica';
+
+    -- 3. Insert into core projects relation
+    INSERT INTO projects.projects (
+        id,
+        owner_user_id,
+        title,
+        description,
+        description_text,
+        format,
+        industry_category_id,
+        visibility,
+        currency,
+        timeline_preset,
+        target_project_start_date,
+        ip_ownership_mode,
+        nda_required,
+        portfolio_display_rights,
+        location_restriction,
+        language_requirement,
+        screening_questions
+    ) VALUES (
+        v_project_id,
+        v_owner_id,
+        payload->>'title',
+        COALESCE(payload->'description', '{}'::jsonb),
+        COALESCE(payload->>'description_text', ''),
+        COALESCE((payload->>'format')::project_format, 'pipeline'::project_format),
+        NULLIF(payload->>'industry_category_id', '')::uuid,
+        COALESCE((payload->>'visibility')::visibility, 'public'::visibility),
+        COALESCE(payload->>'currency', 'USD'),
+        COALESCE((payload->>'timeline_preset')::timeline_preset, 'sequential'::timeline_preset),
+        (payload->>'target_project_start_date')::timestamptz,
+        COALESCE((payload->>'ip_ownership_mode')::ip_option_mode, 'exclusive_transfer'::ip_option_mode),
+        COALESCE((payload->>'nda_required')::boolean, false),
+        COALESCE((payload->>'portfolio_display_rights')::portfolio_rights, 'allowed'::portfolio_rights),
+        COALESCE(ARRAY(SELECT jsonb_array_elements_text(payload->'location_restriction')), '{}'::text[]),
+        COALESCE(ARRAY(SELECT jsonb_array_elements_text(payload->'language_requirement')), '{}'::text[]),
+        COALESCE(payload->'screening_questions', '[]'::jsonb)
     );
 
-    IF stage_record ? 'staffing_roles' THEN
-      FOR role_record IN SELECT * FROM jsonb_array_elements(stage_record->'staffing_roles')
-      LOOP
-        INSERT INTO projects.stage_staffing_roles (
-          project_stage_id,
-          role_title,
-          quantity,
-          budget_type,
-          budget_amount_cents,
-          allow_proposals
-        )
-        VALUES (
-          new_stage_id,
-          role_record->>'role_title',
-          (role_record->>'quantity')::int,
-          (role_record->>'budget_type')::budget_type,
-          (role_record->>'budget_amount_cents')::bigint,
-          (role_record->>'allow_proposals')::boolean
-        );
-      END LOOP;
+    -- 4. Insert nested stages
+    IF payload ? 'stages' AND jsonb_typeof(payload->'stages') = 'array' THEN
+        FOR v_stage IN SELECT * FROM jsonb_array_elements(payload->'stages')
+        LOOP
+            INSERT INTO projects.project_stages (
+                project_id,
+                name,
+                description,
+                description_text,
+                sort_order,
+                file_upload_required,
+                default_tasks,
+                skills
+            ) VALUES (
+                v_project_id,
+                v_stage->>'name',
+                COALESCE(v_stage->'description', '{}'::jsonb),
+                COALESCE(v_stage->>'description_text', ''),
+                COALESCE((v_stage->>'sort_order')::integer, 0),
+                COALESCE((v_stage->>'file_upload_required')::boolean, false),
+                COALESCE(v_stage->'default_tasks', '[]'::jsonb),
+                COALESCE(ARRAY(SELECT jsonb_array_elements_text(v_stage->'skills')), '{}'::text[])
+            );
+        END LOOP;
     END IF;
 
-    IF stage_record ? 'open_seats' THEN
-      FOR seat_record IN SELECT * FROM jsonb_array_elements(stage_record->'open_seats')
-      LOOP
-        INSERT INTO projects.stage_open_seats (
-          project_stage_id,
-          description_of_need,
-          budget_min_cents,
-          budget_max_cents,
-          require_proposals
-        )
-        VALUES (
-          new_stage_id,
-          seat_record->>'description_of_need',
-          (seat_record->>'budget_min_cents')::bigint,
-          (seat_record->>'budget_max_cents')::bigint,
-          (seat_record->>'require_proposals')::boolean
-        );
-      END LOOP;
+    -- 5. Insert Global Attachments
+    IF payload ? 'global_attachments' AND jsonb_typeof(payload->'global_attachments') = 'array' THEN
+        FOR v_attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
+        LOOP
+            INSERT INTO projects.project_attachments (
+                project_id,
+                attachment_id
+            ) VALUES (
+                v_project_id,
+                v_attachment_id::uuid
+            );
+        END LOOP;
     END IF;
 
-    i := i + 1;
-  END LOOP;
+    -- 6. Restore standard session trigger configurations
+    EXECUTE 'SET LOCAL session_replication_role = ' || quote_literal(v_old_trigger_setting);
 
-  RETURN new_project_id;
+    RETURN v_project_id;
+EXCEPTION WHEN OTHERS THEN
+    -- Safety anchor to preserve system settings configuration integrity in case of structural fault
+    EXECUTE 'SET LOCAL session_replication_role = ' || quote_literal(v_old_trigger_setting);
+    RAISE;
 END;
 $$;

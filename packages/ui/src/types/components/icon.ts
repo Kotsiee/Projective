@@ -13,5 +13,7 @@ export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
 	children?: ComponentChildren;
 	size?: number | string;
 	color?: IconColor;
+	strokeColor?: string;
+	fillColor?: string;
 	spin?: boolean;
 }

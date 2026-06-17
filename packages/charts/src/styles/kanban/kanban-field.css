@@ -1,0 +1,100 @@
+/* #region KANBAN FIELD */
+.kanban-field {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    height: 100%;
+    max-height: 100%;
+    background-color: var(--card);
+    border-radius: var(--border-radius__large);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+}
+
+.kanban-field__header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    gap: 0.5rem;
+}
+
+/* Dynamic Grab Cursor */
+.kanban-field__header[data-reorderable="true"] {
+    cursor: grab;
+    touch-action: none;
+}
+
+.kanban-field__header[data-reorderable="false"] {
+    cursor: default;
+}
+
+.kanban-field__indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--field-indicator, var(--primary));
+}
+
+.kanban-field__title {
+    flex-grow: 1;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.kanban-field__metrics {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.kanban-field__metrics--danger {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.kanban-field__count {
+    font-weight: 600;
+}
+
+.kanban-field__body {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Add Card Button Logic */
+.kanban-field__add-wrapper {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--fast) ease;
+    margin-top: 0.25rem;
+}
+
+/* Show button when hovering the field OR when focus is within the field */
+.kanban-field:hover .kanban-field__add-wrapper,
+.kanban-field:focus-within .kanban-field__add-wrapper {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.kanban-field__add-btn {
+    width: 100%;
+    justify-content: flex-start;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.kanban-field__add-btn:hover {
+    color: var(--text-main);
+}
+
+/* #endregion */

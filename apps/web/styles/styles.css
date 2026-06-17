@@ -5,8 +5,25 @@
 @import 'themes/utils/tooltip.css';
 @import '../../../packages/ui/src/styles/components/list-card.css';
 
+/* 1. GLOBAL BOX MODEL FIX
+   This ensures that width: 100% INCLUDES padding, 
+   stopping elements from bleeding off the screen horizontally. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    /* 2. Prevent any accidental horizontal jiggle during sidebar animations */
+    overflow-x: hidden;
+}
+
 body {
     width: 100%;
+    /* 3. Changed from height: 100% so the body can grow to trigger the native scrollbar */
+    min-height: 100vh;
     margin: 0;
     padding: 0;
 
@@ -15,25 +32,10 @@ body {
         margin: 0;
         padding: 0;
         display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: calc(100vh - var(--header-height));
     }
-}
-
-.container {
-    position: relative;
-    height: calc(100vh - (var(--header-height) + 1rem));
-    width: calc(100vw - (var(--side-nav-width) + 2.1rem));
-    top: calc(var(--header-height) + 1rem);
-    left: calc(var(--side-nav-width) + 1rem);
-    transition: width var(--medium), left var(--medium);
-    display: flex;
-}
-
-.page {
-    position: relative;
-    height: calc(100% - (var(--header-height) + 1rem));
-    width: 100%;
-    padding: 2rem;
-    transition: width var(--medium), left var(--medium);
 }
 
 a {
@@ -48,7 +50,6 @@ button {
     background: none;
     color: inherit;
     outline: none;
-    border: none;
 }
 
 button {
@@ -56,25 +57,22 @@ button {
     transition: all var(--fast);
 }
 
-/* width */
+/* --- Scrollbars --- */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
     border-radius: 10px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
     background: var(--scrollbar-bg);
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 10px;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover);
 }

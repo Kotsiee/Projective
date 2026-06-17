@@ -1,78 +1,147 @@
 .chat-message-input {
-    position: relative;
     display: flex;
-    align-items: flex-end;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
     width: 100%;
-    background-color: var(--field-bg, #f3f4f6);
-    border-radius: 1.5rem;
-    padding: 0.5rem 0.75rem;
-    transition: background-color 0.2s;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
-.chat-message-input:focus-within {
-    background-color: var(--field-bg-active, #fff);
-    box-shadow: 0 0 0 2px var(--primary, #3b82f6);
+/* #region Attachments Tray */
+.chat-message-input__attachments {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 60%;
+    overflow-x: auto;
+    padding: 0.25rem 0;
+    scrollbar-width: none;
+    /* Firefox */
 }
 
-.chat-message-input__input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    padding: 0.6rem 0;
-    font-size: 0.95rem;
-    max-height: 120px;
-    resize: none;
-    outline: none;
-    color: var(--text-main, #111827);
-    line-height: 1.4;
+.chat-message-input__attachments::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
 }
 
-.chat-message-input__input::placeholder {
-    color: var(--text-muted, #9ca3af);
+.chat-message-input__attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+    border-radius: var(--border-radius__large);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    color: var(--text-main);
+    box-shadow: var(--elevation-low);
 }
 
-.chat-btn {
+.chat-message-input__attachment-name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-message-input__attachment-remove {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted, #6b7280);
-    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
+    color: var(--text-muted);
+    border-radius: 50%;
+    padding: 2px;
+    transition: background-color var(--fast) ease, color var(--fast) ease;
 }
 
-.chat-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--text-main, #111827);
+.chat-message-input__attachment-remove:hover {
+    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1);
+    color: var(--danger);
 }
 
-.chat-btn--primary {
-    background-color: var(--primary, #3b82f6);
-    color: white;
+/* #endregion */
+
+.chat-message-input__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60%;
+    gap: 0.75rem;
+    height: 3rem;
 }
 
-.chat-btn--primary:hover {
-    background-color: var(--primary-hover, #2563eb);
-    color: white;
+.chat-message-input__input-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center
 }
 
-.chat-btn--voice {
-    /* Style distinctively if needed */
+.audio-message-input-visualizer,
+.chat-message-input__input {
+    width: 100%;
+    height: 100%;
+    background-color: var(--field-bg);
+    border-radius: 4rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    color: var(--text-main);
 }
 
-/* Desktop-only specific logic usually handled by media queries */
-.chat-btn--desktop-only {
-    display: none;
+.chat-message-input__input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--field-ring-color);
 }
 
-@media (min-width: 768px) {
-    .chat-btn--desktop-only {
-        display: flex;
-    }
+.chat-message-input__right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
 }
+
+/* #region Audio Visualizer */
+.audio-message-input-visualizer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 0.5rem;
+    padding: 0 4px;
+}
+
+.audio-message-input-visualizer__waveform {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    /* Hide overflowing SVG bars */
+}
+
+/* SVG Bar coloring based on classes */
+.audio-bar {
+    transition: fill var(--fast) ease;
+}
+
+.audio-bar.bar-live,
+.audio-bar.bar-played {
+    fill: var(--primary);
+}
+
+.audio-bar.bar-pending {
+    fill: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.2);
+}
+
+.audio-bar.bar-hovered {
+    fill: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5);
+}
+
+/* #endregion */
+

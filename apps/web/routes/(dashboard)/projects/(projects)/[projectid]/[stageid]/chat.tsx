@@ -1,5 +1,5 @@
-import ProjectChatIslandWrapper from '../../../(_islands)/project/stage/Chat.island.tsx';
+import ProjectChatIsland from '@features/dashboard/projects/islands/project/stage/StageChat.island.tsx';
 
 export default function ProjectChat() {
-	return <ProjectChatIslandWrapper />;
+	return <ProjectChatIsland />;
 }

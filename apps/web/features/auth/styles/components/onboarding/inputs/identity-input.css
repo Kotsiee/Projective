@@ -1,0 +1,31 @@
+.identity-input__container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.identity-input__name-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.identity-input__fields {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+    gap: 0.5rem;
+}
+
+.identity-input__actions {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+}
+
+.identity-input__back-button {
+    width: 200px;
+}
+
+.identity-input__continue-button {
+    width: 100%;
+}

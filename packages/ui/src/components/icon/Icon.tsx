@@ -11,6 +11,8 @@ export function Icon({
 	children,
 	size = 24,
 	color = 'inherit',
+	strokeColor,
+	fillColor,
 	spin = false,
 	className,
 	style = {},
@@ -18,17 +20,22 @@ export function Icon({
 }: IconProps) {
 	const sizeStr = typeof size === 'number' ? `${size}px` : size;
 
+	// Inject the custom colors as CSS variables if they are provided
+	const customStyles = {
+		width: sizeStr,
+		height: sizeStr,
+		fontSize: sizeStr,
+		...(strokeColor ? { '--icon-stroke': strokeColor } : {}),
+		...(fillColor ? { '--icon-fill': fillColor } : {}),
+		...(style as Record<string, any>),
+	} as CSSProperties;
+
 	return (
 		<span
 			className={`icon-wrapper icon-wrapper--${color} ${spin ? 'icon-wrapper--spin' : ''} ${
 				className || ''
 			}`}
-			style={{
-				width: sizeStr,
-				height: sizeStr,
-				fontSize: sizeStr,
-				...(style as CSSProperties),
-			}}
+			style={customStyles}
 			aria-hidden='true'
 			{...rest}
 		>

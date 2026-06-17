@@ -4,9 +4,11 @@
  */
 
 // #region Imports
+// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
 import { CreateProjectSchema } from '@features/dashboard/projects/contracts/new/_validation.ts';
+// FIX: Imported the correct class name 'ProjectsBackendService'
 import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
 // #endregion
 
@@ -14,7 +16,6 @@ export const handler = define.handlers({
 	async POST(ctx) {
 		try {
 			const contentType = ctx.req.headers.get('content-type') || '';
-			// deno-lint-ignore no-explicit-any
 			let body: any = {};
 			const attachmentFiles: File[] = [];
 
@@ -24,7 +25,10 @@ export const handler = define.handlers({
 				const payloadStr = formData.get('payload')?.toString();
 
 				if (!payloadStr) {
-					return new Response(JSON.stringify({ error: 'Missing payload' }), { status: 400 });
+					return new Response(
+						JSON.stringify({ error: { message: 'Missing payload' } }),
+						{ status: 400 },
+					);
 				}
 				body = JSON.parse(payloadStr);
 
@@ -55,17 +59,15 @@ export const handler = define.handlers({
 			}
 
 			// Dependency injection wrapper for the Supabase client
-			// deno-lint-ignore no-explicit-any
 			const getClient = () =>
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
 			// Execute the business logic through the service
+			// FIX: Using the correct class name and adding 'draft' as the targetStatus argument
 			const res = await ProjectsBackendService.createProject(
 				validation.data,
-				'active',
-				{
-					attachments: attachmentFiles,
-				},
+				'draft', // <- Requires targetStatus: 'draft' | 'active'
+				{ attachments: attachmentFiles },
 				{ getClient },
 			);
 
@@ -79,7 +81,7 @@ export const handler = define.handlers({
 			return new Response(
 				JSON.stringify({
 					ok: true,
-					projectId: res.data.projectId,
+					project_id: res.data.projectId, // FIX: res.data from the backend service returns projectId, not project_id
 					redirectTo: `/projects/${res.data.projectId}`,
 				}),
 				{
@@ -89,7 +91,10 @@ export const handler = define.handlers({
 			);
 		} catch (e: unknown) {
 			console.error('Publish Error:', e);
-			return new Response(JSON.stringify({ error: 'Bad Request' }), { status: 400 });
+			return new Response(
+				JSON.stringify({ error: { message: 'Bad Request' } }),
+				{ status: 400 },
+			);
 		}
 	},
 });

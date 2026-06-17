@@ -1,14 +1,18 @@
 import { define } from '@utils';
-import StageLayoutIslandWrapper from '../../../(_islands)/project/stage/Layout.island.tsx';
+import StageLayoutIsland from '@features/dashboard/projects/islands/project/stage/StageLayout.island.tsx';
+import { Partial } from 'fresh/runtime';
 
 export default define.layout(function App(ctx) {
-	const { projectid, stageid } = ctx.params;
-
 	return (
 		<>
-			<StageLayoutIslandWrapper projectId={projectid} stageId={stageid}>
-				<ctx.Component />
-			</StageLayoutIslandWrapper>
+			<StageLayoutIsland
+				projectId={ctx.params.projectid}
+				stageId={ctx.params.stageid}
+			>
+				<Partial name='stage-content'>
+					<ctx.Component />
+				</Partial>
+			</StageLayoutIsland>
 		</>
 	);
 });

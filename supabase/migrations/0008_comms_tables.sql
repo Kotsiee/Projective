@@ -65,8 +65,11 @@ CREATE TABLE comms.dm_messages (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     thread_id uuid NOT NULL,
     sender_user_id uuid NOT NULL,
+    project_id uuid NULL, -- Direct messages pertaining to a specific project
+    service_id uuid NULL, -- Messages likely between potential customers pertaining to a service
     body text NOT NULL,
     has_attachments boolean NOT NULL DEFAULT false,
+    is_audio boolean NOT NULL DEFAULT false,
     created_at timestamp
     with
         time zone NOT NULL DEFAULT now(),
@@ -95,6 +98,7 @@ CREATE TABLE comms.project_messages (
     sender_user_id uuid NOT NULL,
     body text NOT NULL,
     has_attachments boolean NOT NULL DEFAULT false,
+    is_audio boolean NOT NULL DEFAULT false,
     created_at timestamp
     with
         time zone NOT NULL DEFAULT now(),

@@ -28,7 +28,7 @@ export function OnboardingStepper() {
 					<>
 						<div class={`onboarding-tracker__step ${stepClass}`} key={step.label}>
 							<div class='onboarding-tracker__indicator'>
-								<Icon size={20}>{step.icon}</Icon>
+								<Icon size={24}>{step.icon}</Icon>
 							</div>
 							<span class='onboarding-tracker__label'>{step.label}</span>
 						</div>

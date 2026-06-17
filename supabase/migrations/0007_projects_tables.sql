@@ -73,8 +73,6 @@ CREATE TABLE projects.project_stages (
   session_preferred_days text[],
   session_end_date timestamp with time zone,
 
-  management_contract_mode text,
-  maintenance_cycle_interval text,
   ip_ownership_override ip_option_mode,
   
   created_at timestamp with time zone NOT NULL DEFAULT now(),

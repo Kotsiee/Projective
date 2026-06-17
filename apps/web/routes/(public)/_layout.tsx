@@ -1,15 +1,13 @@
 import { define } from '@utils';
-import NavBar from '../(_islands)/NavBar.tsx';
-import { UserProvider } from '@features/shared/contexts/UserContext.tsx';
+import { UserProvider } from '@features/navigation/contexts/UserContext.tsx';
+import Navigation from '@features/navigation/islands/navigation.tsx';
 
-export default define.layout(function App({ Component, state }) {
+export default define.layout(function App({ Component }) {
 	return (
 		<UserProvider>
-			<NavBar isAuthenticated={state.isOnboarded} />
-
-			<div class='container'>
+			<Navigation>
 				<Component />
-			</div>
+			</Navigation>
 		</UserProvider>
 	);
 });

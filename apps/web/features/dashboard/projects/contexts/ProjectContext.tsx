@@ -5,7 +5,8 @@ import { ComponentChildren } from 'preact';
 import { ProjectDetails, ProjectState } from '../contracts/Projects.ts';
 import { ProjectsService } from '../services/ProjectsService.ts';
 
-const ProjectContext = createContext<ProjectState | null>(null);
+// 1. MUST BE EXPORTED to allow tunneling
+export const ProjectContext = createContext<ProjectState | null>(null);
 
 export function ProjectProvider(
 	{ id, children }: { id: string | undefined; children: ComponentChildren },

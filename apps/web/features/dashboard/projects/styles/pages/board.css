@@ -1,0 +1,115 @@
+/* #region Project Board Global */
+.project-board {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 1rem;
+    overflow: hidden;
+    /* Base padding to prevent content from touching edges */
+    padding: 1rem;
+}
+
+/* #endregion */
+
+/* #region Header Layout */
+.project-board__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: stretch;
+    background-color: var(--card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    gap: 1.5rem;
+}
+
+.project-board__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 250px;
+}
+
+.project-board__panel--middle {
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+}
+
+/* #endregion */
+
+/* #region Header Typography & Elements */
+.project-board__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.project-board__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+.project-board__metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.project-board__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.project-board__metric-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.project-board__metric-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.project-board__metric-value--success {
+    color: var(--success);
+}
+
+/* #endregion */
+
+/* #region Board Content Container */
+.project-board__content {
+    flex: 1;
+    min-height: 0;
+    /* Critical for virtualized scrolling children */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg);
+    overflow: hidden;
+}
+
+/* #endregion */
+
+/* #region Navigation Footer Styling */
+.project-board__footer-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 1.5rem;
+    background-color: var(--header);
+    border-top: 1px solid var(--border-color);
+}
+
+/* #endregion */

@@ -43,10 +43,12 @@ export interface ProjectDetails {
 	status: 'draft' | 'active' | 'on_hold' | 'completed' | 'cancelled';
 	banner_url: string | null;
 	is_starred: boolean;
+	format: 'one_off' | 'pipeline';
 
 	owner: {
 		id: string;
 		name: string;
+		username: string;
 		avatar_url: string | null;
 		type: 'business' | 'freelancer';
 	};
@@ -125,5 +127,4 @@ export interface StageState {
 	isLoading: Signal<boolean>;
 	error: Signal<string | null>;
 	refresh: () => void;
-	footer: Signal<VNode | null>;
 }

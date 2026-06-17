@@ -11,6 +11,7 @@ export interface OnboardingState {
 	lastName: Signal<string | undefined>;
 	username: Signal<string | undefined>;
 	dob: Signal<DateTime | undefined>;
+	isAdult: Signal<boolean | undefined>;
 	profilePicture: Signal<string | undefined>;
 	objective: Signal<'client' | 'seller' | undefined>;
 	interests: Signal<string[] | undefined>;
@@ -28,6 +29,7 @@ export function OnboardingProvider(
 	const lastName = useSignal(undefined);
 	const username = useSignal(undefined);
 	const dob = useSignal(undefined);
+	const isAdult = useSignal(undefined);
 	const profilePicture = useSignal(undefined);
 	const objective = useSignal(undefined);
 	const interests = useSignal(undefined);
@@ -42,6 +44,7 @@ export function OnboardingProvider(
 				lastName,
 				username,
 				dob,
+				isAdult,
 				profilePicture,
 				objective,
 				interests,

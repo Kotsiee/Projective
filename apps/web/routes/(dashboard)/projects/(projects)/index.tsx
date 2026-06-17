@@ -1,11 +1,8 @@
 export default function Projects() {
 	return (
-		<div
-			style={{
-				minHeight: '500vh',
-			}}
-		>
-			<div>
+		<div>
+			{
+				/* <div>
 				<h1>Select a project</h1>
 				<p>
 					Or <a href='/projects/new' f-client-nav={false}>Join</a> a New One
@@ -13,7 +10,8 @@ export default function Projects() {
 			</div>
 			<div>
 				<h3>Recommended Projects</h3>
-			</div>
+			</div> */
+			}
 		</div>
 	);
 }

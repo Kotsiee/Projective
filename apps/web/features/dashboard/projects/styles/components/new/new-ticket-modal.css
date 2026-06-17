@@ -1,0 +1,18 @@
+.new-ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.new-ticket-form__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.new-ticket-form__section-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+}

@@ -1,7 +1,16 @@
+/**
+ * @file _app.tsx
+ * @description Main framework root template mapping global layouts and rendering injection boundaries.
+ */
+
+// #region Imports
 import { Head } from 'fresh/runtime';
 import { State } from '@utils';
 import Providers from './(_islands)/Providers.tsx';
+import HashAuthInterceptor from '@features/auth/islands/HashAuthInterceptor.island.tsx';
+// #endregion
 
+// #region App Container
 export default function App(
 	ctx: { Component: preact.ComponentType; stateTheme?: 'light' | 'dark'; state: State },
 ) {
@@ -22,7 +31,9 @@ export default function App(
 					rel='stylesheet'
 				/>
 			</Head>
-			<body data-onboarded={ctx.state.isOnboarded}>
+			<body>
+				<HashAuthInterceptor />
+
 				<main>
 					<Providers>
 						<ctx.Component />
@@ -32,3 +43,4 @@ export default function App(
 		</html>
 	);
 }
+// #endregion
