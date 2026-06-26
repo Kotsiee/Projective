@@ -1,6 +1,7 @@
-import { useComputed } from '@preact/signals';
+import { useEffect, useMemo } from 'preact/hooks';
 import { Kanban, KanbanCardProps, KanbanFieldProps } from '@projective/charts';
 import { ColumnDef, DataDisplay } from '@projective/data';
+import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 
 export interface BoardTicket {
 	id: string;
@@ -18,10 +19,17 @@ export interface BoardTicket {
 
 interface BoardDataViewProps {
 	tickets: BoardTicket[];
+	stages: { label: string; value: string }[];
 	viewType: 'stages' | 'status';
 	displayMode: 'kanban' | 'list';
 	isOwnerOrAdmin: boolean;
 	onCardClick: (ticketId: string) => void;
+	onCardMove: (
+		cardId: string,
+		sourceFieldId: string,
+		targetFieldId: string,
+		insertBeforeCardId: string | null,
+	) => void;
 	onFieldMove: (sourceId: string, targetId: string, insertBefore: boolean) => void;
 	onAddStage: () => void;
 }
@@ -30,15 +38,7 @@ interface BoardDataViewProps {
 const tableColumns: ColumnDef<BoardTicket>[] = [
 	{ id: 'title', field: 'title', label: 'Ticket Title', sortable: true, width: 250 },
 	{ id: 'stage', field: 'stageName', label: 'Stage', sortable: true, width: 150 },
-	{
-		id: 'status',
-		field: 'status',
-		label: 'Status',
-		sortable: true,
-		width: 120,
-		// In a real scenario, DataDisplay can accept a custom renderer or we format in standard text.
-		// For standard DataDisplay as defined, it strings the field, but we can return string formats here or extend component renderer.
-	},
+	{ id: 'status', field: 'status', label: 'Status', sortable: true, width: 120 },
 	{
 		id: 'assignee',
 		field: (t) => t.assigneeName || 'Unassigned',
@@ -73,44 +73,80 @@ const tableColumns: ColumnDef<BoardTicket>[] = [
 
 export function BoardDataView({
 	tickets,
+	stages,
 	viewType,
 	displayMode,
 	isOwnerOrAdmin,
 	onCardClick,
+	onCardMove,
 	onFieldMove,
 	onAddStage,
 }: BoardDataViewProps) {
-	// Kanban Field Generation
-	const kanbanFields = useComputed<KanbanFieldProps[]>(() => {
+	const { setCustomScrollEnabled } = useNavigationContext();
+	// 1. Define the mapper function FIRST so it's initialized before useMemo calls it.
+	// deno-lint-ignore no-explicit-any
+	const mapTicketToCard = (t: BoardTicket, orderIndex: number): any => {
+		const tags = [];
+		if (t.attachmentsScanned) {
+			tags.push({ id: `sec-${t.id}`, label: 'Secured', variant: 'solid', color: 'var(--success)' });
+		}
+		if (t.revisionsRequested > 0) {
+			tags.push({ id: `rev-${t.id}`, label: 'Revision', variant: 'text', color: 'var(--warning)' });
+		}
+		tags.push({
+			id: `wi-${t.id}`,
+			label: `Wi: ${t.workloadIntensity.toFixed(1)}`,
+			variant: 'solid',
+		});
+
+		const dateString = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(
+			new Date(t.createdAt),
+		);
+
+		return {
+			id: t.id,
+			title: t.title,
+			description: `This ticket requires a workload intensity of ${
+				t.workloadIntensity.toFixed(1)
+			} and has ${t.revisionsRequested} revisions requested.`,
+			meta: `Created: ${dateString}`,
+			takenBy: t.assigneeName ? { name: t.assigneeName } : undefined,
+			order: orderIndex,
+			permissions: { canReorder: isOwnerOrAdmin },
+			tags,
+		};
+	};
+
+	// 2. Compute the fields safely using the initialized mapper.
+	const kanbanFields = useMemo<KanbanFieldProps[]>(() => {
 		const fieldsMap = new Map<string, KanbanFieldProps>();
 
 		if (viewType === 'stages') {
-			// Pipeline Layout: "New" and "Done" are static and unmovable.
 			fieldsMap.set('New', {
 				id: 'New',
 				title: 'New',
+				color: 'primary',
 				order: 0,
 				cards: [],
 				permissions: { canReorder: false },
 			});
 
 			let orderCounter = 1;
-			tickets.forEach((t) => {
-				if (!fieldsMap.has(t.stageId)) {
-					fieldsMap.set(t.stageId, {
-						id: t.stageId,
-						title: t.stageName,
-						order: orderCounter++,
-						cards: [],
-						// Admin can move STAGES, but not New/Done.
-						permissions: { canReorder: isOwnerOrAdmin },
-					});
-				}
+			stages.forEach((s) => {
+				fieldsMap.set(s.value, {
+					id: s.value,
+					title: s.label,
+					color: 'secondary',
+					order: orderCounter++,
+					cards: [],
+					permissions: { canReorder: isOwnerOrAdmin },
+				});
 			});
 
 			fieldsMap.set('Done', {
 				id: 'Done',
 				title: 'Done',
+				color: 'var(--success)',
 				order: 999,
 				cards: [],
 				permissions: { canReorder: false },
@@ -121,15 +157,24 @@ export function BoardDataView({
 					? 'Done'
 					: (t.status === 'Backlog' ? 'New' : t.stageId);
 				const field = fieldsMap.get(targetField);
-				if (field) field.cards.push(mapTicketToCard(t));
+
+				if (field) field.cards.push(mapTicketToCard(t, field.cards.length));
 			});
 		} else {
-			// Status Layout
-			const statuses = ['Backlog', 'Todo', 'In Progress', 'In Review', 'Completed', 'Cancelled'];
+			const statuses = [
+				{ id: 'Backlog', color: 'primary' },
+				{ id: 'Todo', color: 'secondary' },
+				{ id: 'In Progress', color: 'secondary' },
+				{ id: 'In Review', color: 'secondary' },
+				{ id: 'Completed', color: 'var(--success)' },
+				{ id: 'Cancelled', color: 'var(--danger)' },
+			];
+
 			statuses.forEach((status, idx) => {
-				fieldsMap.set(status, {
-					id: status,
-					title: status,
+				fieldsMap.set(status.id, {
+					id: status.id,
+					title: status.id,
+					color: status.color,
 					order: idx,
 					cards: [],
 					permissions: { canReorder: false },
@@ -138,34 +183,37 @@ export function BoardDataView({
 
 			tickets.forEach((t) => {
 				const field = fieldsMap.get(t.status);
-				if (field) field.cards.push(mapTicketToCard(t));
+				if (field) field.cards.push(mapTicketToCard(t, field.cards.length));
 			});
 		}
 
 		return Array.from(fieldsMap.values()).sort((a, b) => a.order - b.order);
-	});
+	}, [tickets, stages, viewType, isOwnerOrAdmin]);
 
-	const mapTicketToCard = (t: BoardTicket): KanbanCardProps => ({
-		id: t.id,
-		title: t.title,
-		description: `Wi: ${t.workloadIntensity.toFixed(1)} | Revisions: ${t.revisionsRequested}`,
-		created: t.createdAt,
-		takenBy: t.assigneeName || undefined,
-		order: 0,
-		permissions: { canReorder: false }, // Absolute Work Rule enforced
-		tags: t.attachmentsScanned ? ['Secured'] : [],
-	});
+	useEffect(() => {
+		if (displayMode === 'kanban') {
+			setCustomScrollEnabled(true);
+		} else {
+			// Turn it off if they switch to the Table view
+			setCustomScrollEnabled(false);
+		}
+
+		// Cleanup: Always disable it when leaving the page entirely
+		return () => setCustomScrollEnabled(false);
+	}, [displayMode, setCustomScrollEnabled]);
 
 	if (displayMode === 'kanban') {
 		return (
-			<Kanban
-				fields={kanbanFields.value}
-				mode='container'
-				onCardClick={(card) => onCardClick(card.id)}
-				onFieldMove={onFieldMove}
-				onAddField={viewType === 'stages' && isOwnerOrAdmin ? onAddStage : undefined}
-				permissions={{ canAddField: viewType === 'stages' && isOwnerOrAdmin }}
-			/>
+			<div class='project-board__kanban-wrapper'>
+				<Kanban
+					fields={kanbanFields}
+					onCardClick={(card) => onCardClick(card.id)}
+					onCardMove={onCardMove}
+					onFieldMove={onFieldMove}
+					onAddField={viewType === 'stages' && isOwnerOrAdmin ? onAddStage : undefined}
+					permissions={{ canAddField: viewType === 'stages' && isOwnerOrAdmin }}
+				/>
+			</div>
 		);
 	}
 
@@ -175,7 +223,7 @@ export function BoardDataView({
 				mode='table'
 				columns={tableColumns}
 				dataSource={tickets}
-				renderItem={() => <></>} // Ignored by table mode, but required by prop contract
+				renderItem={() => <></>}
 				onSelectionChange={() => {}}
 				interactive
 			/>

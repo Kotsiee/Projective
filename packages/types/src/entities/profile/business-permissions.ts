@@ -50,8 +50,8 @@ export const ALL_BUSINESS_PERMISSIONS: BusinessPermission[] = [
  * @description Base validation schema for a Business Role payload.
  */
 export const BusinessRoleSchema = z.object({
-	id: z.string().uuid(),
-	business_profile_id: z.string().uuid(),
+	id: z.uuid(),
+	business_profile_id: z.uuid(),
 	name: z.string().min(1).max(50),
 	permissions: z.array(BusinessPermissionSchema),
 	is_system: z.boolean(),

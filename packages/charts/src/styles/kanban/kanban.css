@@ -1,40 +1,30 @@
-/* #region KANBAN BOARD */
 .kanban {
     display: flex;
-    background-color: var(--bg);
-}
-
-/* Container Mode: Internal scrolling, locked height */
-.kanban--mode-container {
     width: 100%;
     height: 100%;
     overflow-x: auto;
+    /* Scrollbar pinned to bottom of this container */
     overflow-y: hidden;
-}
-
-/* Window Mode: Visible overflow, scrolling delegated to the window body */
-.kanban--mode-window {
-    width: max-content;
-    min-width: 100%;
-    height: auto;
-    min-height: 100%;
-    overflow: visible;
+    /* Handled by columns */
 }
 
 .kanban__track {
     display: flex;
+    height: 100%;
     gap: 1.5rem;
     padding: 1.5rem;
-    height: 100%;
+    width: max-content;
+    /* Allows horizontal growth */
     align-items: flex-start;
 }
 
 .kanban__field-wrapper {
-    height: 100%;
+    height: max-content;
     display: flex;
     flex-direction: column;
 }
 
+/* Add Actions & Ghost Elements remains unchanged */
 .kanban__add-action {
     flex-shrink: 0;
     width: 320px;
@@ -79,5 +69,3 @@
     opacity: 0.95;
     transition: transform var(--fast) ease;
 }
-
-/* #endregion */

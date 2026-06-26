@@ -1,3 +1,5 @@
+import { DateTime } from '@projective/types';
+
 // Shared interfaces can be extracted to a separate file, defining them here for completeness
 export interface FiduciaryMetrics {
 	totalBudgetCents: number;
@@ -30,57 +32,46 @@ export function BoardHeader(
 ) {
 	return (
 		<header class='project-board__header'>
-			{/* Left Panel: Context Identification */}
 			<div class='project-board__panel'>
-				<div>
-					<h1 class='project-board__title'>{projectTitle}</h1>
-					<span class='project-board__subtitle'>
-						Workspace Engine: {projectFormat.replace('_', ' ')}
-					</span>
-				</div>
+				<h1 class='project-board__title'>{projectTitle}</h1>
 			</div>
 
-			{/* Middle Panel: Fiduciary Ledger Telemetry */}
-			<div class='project-board__panel project-board__panel--middle'>
-				<div class='project-board__metrics-grid'>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Total Budget</span>
-						<span class='project-board__metric-value'>
-							{formatCurrency(fiduciary.totalBudgetCents)}
-						</span>
-					</div>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Escrow TVL</span>
-						<span class='project-board__metric-value'>
-							{formatCurrency(fiduciary.tvlEscrowCents)}
-						</span>
-					</div>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Released</span>
-						<span class='project-board__metric-value project-board__metric-value--success'>
-							{formatCurrency(fiduciary.releasedBalanceCents)}
-						</span>
+			<div class='project-board__details'>
+				<div class='project-board__details-section'>
+					<h3>Tickets</h3>
+					<div class='project-board__details-section__content'>
+						<BoardMetric name='New' rawValue={3} />
+						<BoardMetric name='Active' rawValue={5} />
+						<BoardMetric name='Total' rawValue={8} />
 					</div>
 				</div>
-			</div>
-
-			{/* Right Panel: Operational Capacity Metrics */}
-			<div class='project-board__panel'>
-				<div class='project-board__metrics-grid'>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Backlog Queue</span>
-						<span class='project-board__metric-value'>{capacity.backlogQueueSize} Tickets</span>
-					</div>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Cumulative Wi</span>
-						<span class='project-board__metric-value'>{capacity.cumulativeWi.toFixed(1)}</span>
-					</div>
-					<div class='project-board__metric'>
-						<span class='project-board__metric-label'>Accuracy</span>
-						<span class='project-board__metric-value'>{capacity.accuracyPercentage}%</span>
+				<div class='project-board__details-section'>
+					<h3>Budget</h3>
+					<div class='project-board__details-section__content'>
+						<BoardMetric name='Ave. Cost / Ticket' rawValue={98327} type='currency' />
+						<BoardMetric name='Spent' rawValue={3672353276} type='currency' />
 					</div>
 				</div>
 			</div>
 		</header>
+	);
+}
+
+export function BoardMetric(
+	{ name, rawValue, type }: { name: string; rawValue: string | number | DateTime; type?: string },
+) {
+	let value: string = rawValue as string;
+
+	switch (type) {
+		case 'currency':
+			value = formatCurrency(rawValue as number);
+			break;
+	}
+
+	return (
+		<div class='project-board__details-metric'>
+			<p class='project-board__details-metric__name'>{name}</p>
+			<p class='project-board__details-metric__value'>{value}</p>
+		</div>
 	);
 }

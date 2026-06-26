@@ -1,17 +1,11 @@
-// #region IMPORTS
 import { Fragment } from 'preact';
-import type { Signal } from '@preact/signals';
 import { Button } from '@projective/ui';
 import { KanbanCard } from './KanbanCard.tsx';
-import type { DragData, KanbanCardProps, KanbanFieldProps } from '../../types/kanban.ts';
+import { KanbanCardProps, KanbanFieldProps } from '../../types/kanban.ts';
+import { dragData, useDraggable, useDropzone } from '../../hooks/useKanbanDnD.ts';
 import '../../styles/kanban/kanban-field.css';
-// #endregion
 
-// #region HELPERS
-const getTimestamp = (date: any): number => {
-	if (!date) return 0;
-	return new Date(date).getTime();
-};
+const getTimestamp = (date: any): number => date ? new Date(date).getTime() : 0;
 
 const sortCards = (cards: KanbanCardProps[]): KanbanCardProps[] => {
 	return [...cards].sort((a, b) => {
@@ -19,13 +13,14 @@ const sortCards = (cards: KanbanCardProps[]): KanbanCardProps[] => {
 		return getTimestamp(a.created) - getTimestamp(b.created);
 	});
 };
-// #endregion
 
-// #region COMPONENT
+const resolveColor = (c: string) => {
+	if (c === 'primary') return 'var(--primary)';
+	if (!c || c === 'secondary') return 'var(--text-muted)';
+	return c;
+};
+
 interface ExtendedFieldProps extends KanbanFieldProps {
-	dragData: Signal<DragData>;
-	startFieldDrag: (e: PointerEvent, field: KanbanFieldProps) => void;
-	startCardDrag: (e: PointerEvent, card: KanbanCardProps, fieldId: string) => void;
 	onCardClick?: (card: KanbanCardProps) => void;
 	onAddCard?: () => void;
 }
@@ -33,40 +28,39 @@ interface ExtendedFieldProps extends KanbanFieldProps {
 export function KanbanField({
 	id,
 	title,
-	color = 'var(--primary)',
+	color = 'secondary',
 	cards,
 	limit,
 	order,
 	permissions,
 	addCardLabel = 'Add Ticket',
-	dragData,
-	startFieldDrag,
-	startCardDrag,
 	onCardClick,
 	onAddCard,
 }: ExtendedFieldProps) {
 	const sortedCards = sortCards(cards);
 	const cardCount = cards.length;
 	const isOverLimit = limit !== undefined && cardCount > limit;
-	const canReorder = permissions?.canReorder === true;
+
+	// Locks/Hooks Setup
+	const isLocked = permissions?.canReorder !== true;
+	const draggableProps = useDraggable(
+		'field',
+		{ id, title, color, cards, limit, order, permissions },
+		id,
+		isLocked,
+	);
+	const dropzoneProps = useDropzone('field', id);
 
 	return (
 		<div
 			class='kanban-field'
-			style={{ '--field-indicator': color } as any}
-			data-kanban-field-id={id}
+			style={{ '--field-solid': resolveColor(color) } as any}
+			{...dropzoneProps}
 		>
-			<div
-				class='kanban-field__header'
-				onPointerDown={(e) =>
-					startFieldDrag(e, { id, title, color, cards, limit, order, permissions })}
-				data-reorderable={canReorder}
-			>
-				<div class='kanban-field__indicator' />
+			<div class='kanban-field__header' {...draggableProps}>
 				<h3 class='kanban-field__title'>{title}</h3>
 				<div class={`kanban-field__metrics ${isOverLimit ? 'kanban-field__metrics--danger' : ''}`}>
 					<span class='kanban-field__count'>{cardCount}</span>
-					{limit !== undefined && <span class='kanban-field__limit'>/ {limit}</span>}
 				</div>
 			</div>
 
@@ -88,7 +82,6 @@ export function KanbanField({
 									{...card}
 									fieldId={id}
 									onClick={() => onCardClick?.(card)}
-									onPointerDown={(e) => startCardDrag(e, card, id)}
 								/>
 							</div>
 
@@ -106,12 +99,7 @@ export function KanbanField({
 
 				{permissions?.canAddCard && onAddCard && (
 					<div class='kanban-field__add-wrapper'>
-						<Button
-							ghost
-							variant='secondary'
-							onClick={onAddCard}
-							className='kanban-field__add-btn'
-						>
+						<Button ghost variant='secondary' onClick={onAddCard} className='kanban-field__add-btn'>
 							+ {addCardLabel}
 						</Button>
 					</div>
@@ -120,4 +108,3 @@ export function KanbanField({
 		</div>
 	);
 }
-// #endregion

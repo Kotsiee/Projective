@@ -1,8 +1,10 @@
 import '../../styles/components/new/new-ticket-modal.css';
 import { useSignal } from '@preact/signals';
 import { Button, Modal, ModalLayout, ToggleButton, ToggleButtonGroup } from '@projective/ui';
-import { DateField, SelectField, TextField } from '@projective/fields';
+import { DateField, TextField } from '@projective/fields';
 import { DateTime } from '@projective/types';
+import { IconGripVertical } from '@tabler/icons-preact';
+import { useEffect } from 'preact/hooks';
 
 interface NewTicketModalProps {
 	isOpen: boolean;
@@ -11,82 +13,150 @@ interface NewTicketModalProps {
 	onSubmit: (payload: any) => void;
 }
 
+interface DraggableStage {
+	id: string;
+	label: string;
+	selected: boolean;
+}
+
 export function NewTicketModal(
 	{ isOpen, onClose, availableStages, onSubmit }: NewTicketModalProps,
 ) {
 	// Form State Signals
 	const title = useSignal('');
 	const description = useSignal('');
-	const selectedStages = useSignal<string[]>(availableStages.map((s) => s.value)); // All selected by default
-	const intensityTier = useSignal<'Low' | 'Standard' | 'High'>('Standard'); // Standard default
+	const intensityTier = useSignal<'Low' | 'Standard' | 'High'>('Standard');
 	const dueDate = useSignal<DateTime | null>(null);
 
+	// Drag & Drop Stages State
+	const stagesList = useSignal<DraggableStage[]>([]);
+	const draggedIndex = useSignal<number | null>(null);
+
+	// Initialize list when modal opens
+	useEffect(() => {
+		if (isOpen) {
+			stagesList.value = availableStages.map((stage) => ({
+				id: stage.value,
+				label: stage.label,
+				selected: true, // Enabled by default
+			}));
+		}
+	}, [isOpen, availableStages]);
+
 	const handleSubmit = () => {
+		// Map only the selected stages, maintaining their new sorted order
+		const required_stages = stagesList.value
+			.filter((s) => s.selected)
+			.map((s, index) => ({
+				stage_id: s.id,
+				order: index,
+			}));
+
 		onSubmit({
 			title: title.value,
 			description: description.value,
-			stages: selectedStages.value,
+			required_stages,
 			intensityTier: intensityTier.value,
 			dueDate: dueDate.value,
 		});
 		onClose();
 	};
 
+	// #region Local Drag & Drop Handlers
+	const handleDragStart = (e: DragEvent, index: number) => {
+		draggedIndex.value = index;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			// Required for Firefox
+			e.dataTransfer.setData('text/plain', index.toString());
+		}
+	};
+
+	const handleDragOver = (e: DragEvent, index: number) => {
+		e.preventDefault(); // Necessary to allow dropping
+		if (draggedIndex.value === null || draggedIndex.value === index) return;
+
+		const list = [...stagesList.value];
+		const draggedItem = list[draggedIndex.value];
+
+		// Swap the items
+		list.splice(draggedIndex.value, 1);
+		list.splice(index, 0, draggedItem);
+
+		draggedIndex.value = index;
+		stagesList.value = list;
+	};
+
+	const handleDrop = () => {
+		draggedIndex.value = null;
+	};
+
+	const toggleStageSelection = (index: number) => {
+		const list = [...stagesList.value];
+		list[index].selected = !list[index].selected;
+		stagesList.value = list;
+	};
+	// #endregion
+
 	return (
-		<Modal
-			isOpen={isOpen}
-			onClose={onClose}
-			title='Create New Ticket'
-			style={{ width: '600px', maxWidth: '90vw' }}
-		>
+		<Modal isOpen={isOpen} onClose={onClose} title='Create New Ticket'>
 			<ModalLayout
 				footer={
-					<div>
-						<Button ghost onClick={onClose}>Cancel</Button>
-						<Button variant='primary' onClick={handleSubmit}>Create Ticket</Button>
-					</div>
+					<>
+						<Button variant='secondary' ghost onClick={onClose}>Cancel</Button>
+						<Button variant='primary' onClick={handleSubmit} disabled={!title.value.trim()}>
+							Create Ticket
+						</Button>
+					</>
 				}
 			>
 				<div class='new-ticket-form'>
 					<TextField
 						label='Ticket Title'
-						value={title}
-						onChange={(v) => title.value = String(v)}
-						placeholder='e.g. Implement Navigation Header'
+						value={title.value}
+						onChange={(v) => title.value = v}
+						required
+						placeholder='e.g., Design Homepage Hero Section'
 					/>
 
 					<TextField
 						label='Description'
-						value={description}
-						onChange={(v) => description.value = String(v)}
+						value={description.value}
+						onChange={(v) => description.value = v}
 						multiline
-						placeholder='Detail the acceptance criteria...'
+						placeholder='Add any details, links, or requirements here...'
 						style={{ minHeight: '120px' }}
 					/>
 
-					{/* FileDropWrapper would go here for attachments. Placeholder: */}
 					<div class='new-ticket-form__section'>
-						<span class='new-ticket-form__section-label'>Attachments</span>
-						<div
-							style={{
-								border: '1px dashed var(--border-color)',
-								padding: '2rem',
-								textAlign: 'center',
-								borderRadius: 'var(--border-radius)',
-								color: 'var(--text-muted)',
-							}}
-						>
-							Drag and drop files here, or click to browse
+						<span class='new-ticket-form__section-label'>Required Stages (Drag to reorder)</span>
+						<div class='new-ticket-stage-list'>
+							{stagesList.value.map((stage, index) => (
+								<div
+									key={stage.id}
+									class={`new-ticket-stage-item ${draggedIndex.value === index ? 'dragging' : ''} ${
+										!stage.selected ? 'disabled' : ''
+									}`}
+									draggable={true}
+									onDragStart={(e) => handleDragStart(e, index)}
+									onDragOver={(e) => handleDragOver(e, index)}
+									onDragEnd={handleDrop}
+									onDrop={handleDrop}
+								>
+									<div class='new-ticket-stage-item__drag-handle'>
+										<IconGripVertical size={16} />
+									</div>
+									<input
+										type='checkbox'
+										checked={stage.selected}
+										onChange={() => toggleStageSelection(index)}
+										class='new-ticket-stage-item__checkbox'
+									/>
+									<span class='new-ticket-stage-item__label'>{stage.label}</span>
+								</div>
+							))}
 						</div>
 					</div>
-
-					<SelectField
-						label='Target Stages'
-						options={availableStages}
-						multiple
-						value={selectedStages.value}
-						onChange={(v) => selectedStages.value = v as string[]}
-					/>
 
 					<div class='new-ticket-form__section'>
 						<span class='new-ticket-form__section-label'>Intensity Tier (Wi Multiplier)</span>
@@ -102,12 +172,14 @@ export function NewTicketModal(
 						</ToggleButtonGroup>
 					</div>
 
-					<DateField
-						label='Due Date (Optional)'
-						variant='input'
-						value={dueDate.value}
-						onChange={(d) => dueDate.value = d}
-					/>
+					<div class='new-ticket-form__section'>
+						<span class='new-ticket-form__section-label'>Deadline (Optional)</span>
+						<DateField
+							label='Due Date'
+							value={dueDate.value}
+							onChange={(v) => dueDate.value = v}
+						/>
+					</div>
 				</div>
 			</ModalLayout>
 		</Modal>

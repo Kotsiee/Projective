@@ -25,10 +25,12 @@ export interface NavigationState {
 	isTopSideNavExpanded: Signal<boolean>;
 	middleNav: Signal<MiddleNavState>;
 	dynamicProviders: Signal<DynamicProviderDef[]>;
+	isCustomScrollEnabled: Signal<boolean>; // NEW
 	toggleTopSideNav: () => void;
 	setMiddleNav: (config: Partial<MiddleNavState>) => void;
 	addProvider: (id: string, component: ComponentType<any>, props?: Record<string, any>) => void;
 	removeProvider: (id: string) => void;
+	setCustomScrollEnabled: (enabled: boolean) => void; // NEW
 }
 
 const NavigationContext = createContext<NavigationState | null>(null);
@@ -40,7 +42,11 @@ export function NavigationProvider({ children }: { children: ComponentChildren }
 		}
 		return false;
 	};
+	const isCustomScrollEnabled = useSignal(false);
 
+	const setCustomScrollEnabled = (enabled: boolean) => {
+		isCustomScrollEnabled.value = enabled;
+	};
 	const isTopSideNavExpanded = useSignal(getInitialSidebarState());
 
 	const middleNav = useSignal<MiddleNavState>({
@@ -84,10 +90,12 @@ export function NavigationProvider({ children }: { children: ComponentChildren }
 				isTopSideNavExpanded,
 				middleNav,
 				dynamicProviders,
+				isCustomScrollEnabled,
 				toggleTopSideNav,
 				setMiddleNav,
 				addProvider,
 				removeProvider,
+				setCustomScrollEnabled,
 			}}
 		>
 			{children}

@@ -18,7 +18,7 @@ export function ToggleButtonGroup(props: ToggleButtonGroupProps) {
 		onChange,
 		multiple = false,
 		optional = true,
-		variant = 'outline',
+		variant = 'secondary',
 		size = 'medium',
 		orientation = 'horizontal',
 		fullWidth = false,

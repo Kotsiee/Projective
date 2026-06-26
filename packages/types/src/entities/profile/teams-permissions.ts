@@ -51,8 +51,8 @@ export const ALL_TEAM_PERMISSIONS: TeamPermission[] = [
  * @description Base validation schema for a Team Role payload.
  */
 export const TeamRoleSchema = z.object({
-	id: z.string().uuid(),
-	team_id: z.string().uuid(),
+	id: z.uuid(),
+	team_id: z.uuid(),
 	name: z.string().min(1).max(50),
 	permissions: z.array(TeamPermissionSchema),
 	is_system: z.boolean(),

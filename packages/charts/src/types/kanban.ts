@@ -1,25 +1,28 @@
-// #region IMPORTS
 import type { DateTime } from '@projective/types';
-// #endregion
 
-// #region INTERFACES
+export interface KanbanTag {
+	id: string;
+	label: string;
+	icon?: any; // e.g., Preact component or string emoji
+	color?: string; // CSS color variable or hex
+	variant?: 'solid' | 'ghost' | 'text';
+}
+
 export interface KanbanCardProps {
 	id: string;
 	title: string;
-	description: string;
-	tags?: string[];
-	attachments?: number;
-	created: DateTime | string | Date;
-	createdBy?: string;
-	updated?: DateTime | string | Date;
-	updatedBy?: string;
-	status?: string;
-	takenBy?: string;
+	description?: string;
+	meta?: string; // e.g., "Created: 4 Hours ago • Due: 30th July"
+	tags?: KanbanTag[];
+	takenBy?: {
+		name: string;
+		avatarUrl?: string;
+	};
 	order: number;
 	permissions?: {
 		canEdit?: boolean;
 		canDelete?: boolean;
-		canReorder?: boolean; // Defaults to false
+		canReorder?: boolean;
 	};
 }
 
@@ -27,24 +30,24 @@ export interface KanbanFieldProps {
 	id: string;
 	title: string;
 	description?: string;
-	color?: string;
+	color?: 'primary' | 'secondary' | string; // Supports presets or custom hex/rgb
 	cards: KanbanCardProps[];
 	limit?: number;
 	order: number;
-	addCardLabel?: string; // Custom label per field
+	addCardLabel?: string;
 	permissions?: {
-		canAddCard?: boolean; // Defaults to false
+		canAddCard?: boolean;
 		canEdit?: boolean;
 		canDelete?: boolean;
-		canReorder?: boolean; // Defaults to false
+		canReorder?: boolean; // Acts as our lock
 	};
 }
 
 export interface KanbanProps {
 	fields: KanbanFieldProps[];
-	mode?: 'window' | 'container'; // Defaults to 'container'
+	minHeight?: string;
 	permissions?: {
-		canAddField?: boolean; // Defaults to false
+		canAddField?: boolean;
 	};
 	onCardClick?: (card: KanbanCardProps) => void;
 	onFieldClick?: (field: KanbanFieldProps) => void;
@@ -92,4 +95,3 @@ export const INITIAL_DRAG_DATA: DragData = {
 	targetCardId: null,
 	insertPosition: null,
 };
-// #endregion

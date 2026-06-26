@@ -1,39 +1,29 @@
-import { Identifiable, Timestamped } from '../core/base-response.ts';
+import { z } from 'zod';
 import { BookmarkEntityType } from './enums.ts';
+import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
 
-// #region 1. USER PREFERENCES
-/**
- * @interface UserUISettings
- * @description Strongly typed structure for the JSONB ui_settings column.
- */
-export interface UserUISettings {
-	primary_color?: string;
-	density?: 'compact' | 'normal' | 'spacious';
-	sidebar_collapsed?: boolean;
-}
+export const UserUISettingsSchema = z.object({
+	primary_color: z.string().optional(),
+	density: z.enum(['compact', 'normal', 'spacious']).optional(),
+	sidebar_collapsed: z.boolean().optional(),
+});
+export type UserUISettings = z.infer<typeof UserUISettingsSchema>;
 
-/**
- * @interface UserPreferencesResponse
- * @description User configuration settings including dynamic UI elements.
- */
-export interface UserPreferencesResponse {
-	user_id: string;
-	theme: 'light' | 'dark' | 'system';
-	notification_email: boolean;
-	notification_push: boolean;
-	locale: string;
-	ui_settings: UserUISettings;
-}
-// #endregion
+export const UserPreferencesResponseSchema = z.object({
+	user_id: z.string().uuid(),
+	theme: z.enum(['light', 'dark', 'system']),
+	notification_email: z.boolean(),
+	notification_push: z.boolean(),
+	locale: z.string().min(1),
+	ui_settings: UserUISettingsSchema,
+});
+export type UserPreferencesResponse = z.infer<typeof UserPreferencesResponseSchema>;
 
-// #region 2. BOOKMARKS
-/**
- * @interface BookmarkResponse
- * @description Represents an item saved by the user for later reference.
- */
-export interface BookmarkResponse extends Identifiable, Timestamped {
-	user_id: string;
-	entity_type: BookmarkEntityType;
-	entity_id: string;
-}
-// #endregion
+export const BookmarkResponseSchema = IdentifiableSchema
+	.merge(TimestampedSchema)
+	.extend({
+		user_id: z.string().uuid(),
+		entity_type: z.enum(Object.values(BookmarkEntityType) as [string, ...string[]]),
+		entity_id: z.string().uuid(),
+	});
+export type BookmarkResponse = z.infer<typeof BookmarkResponseSchema>;

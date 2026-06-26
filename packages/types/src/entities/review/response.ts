@@ -1,22 +1,25 @@
-import { Identifiable, Timestamped } from '../core/base-response.ts';
+import { z } from 'zod';
+import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
 
-// #region 1. REVIEW TARGETS
-export type ReviewTargetType = 'user' | 'freelancer' | 'business' | 'team' | 'service_blueprint';
-// #endregion
+export const ReviewTargetTypeSchema = z.enum([
+	'user',
+	'freelancer',
+	'business',
+	'team',
+	'service_blueprint',
+]);
+export type ReviewTargetType = z.infer<typeof ReviewTargetTypeSchema>;
 
-// #region 2. REVIEW RESPONSE
-/**
- * @interface ReviewResponse
- * @description Represents a verified review on the platform, including any official replies.
- */
-export interface ReviewResponse extends Identifiable, Timestamped {
-	target_entity_id: string;
-	target_entity_type: ReviewTargetType;
-	reviewer_user_id: string;
-	project_id: string | null;
-	rating: number;
-	comment: string;
-	reply_comment: string | null;
-	replied_at: string | null;
-}
-// #endregion
+export const ReviewResponseSchema = IdentifiableSchema
+	.merge(TimestampedSchema)
+	.extend({
+		target_entity_id: z.string().uuid(),
+		target_entity_type: ReviewTargetTypeSchema,
+		reviewer_user_id: z.string().uuid(),
+		project_id: z.string().uuid().nullable(),
+		rating: z.number().min(1).max(5),
+		comment: z.string().default(''),
+		reply_comment: z.string().nullable(),
+		replied_at: z.string().datetime({}).nullable(),
+	});
+export type ReviewResponse = z.infer<typeof ReviewResponseSchema>;

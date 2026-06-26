@@ -2,6 +2,8 @@ CREATE TYPE project_format AS ENUM ('one_off', 'pipeline');
 
 CREATE TYPE ticket_status AS ENUM ('backlog', 'todo', 'in_progress', 'in_review', 'completed', 'cancelled');
 
+CREATE TYPE payment_status AS ENUM ('unpaid', 'escrow_funded', 'released');
+
 CREATE TYPE projects.cohort_status AS ENUM ('enrolling', 'active', 'completed', 'cancelled');
 
 CREATE TYPE projects.session_event_status AS ENUM ('scheduled', 'completed', 'cancelled_by_freelancer', 'cancelled_by_client');
@@ -34,6 +36,7 @@ CREATE TABLE projects.projects (
   location_restriction text[] DEFAULT '{}'::text[],
   language_requirement text[] DEFAULT '{}'::text[],
   screening_questions jsonb DEFAULT '[]'::jsonb,
+  allow_deadline_bonuses boolean NOT NULL DEFAULT false,
   
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
@@ -44,7 +47,7 @@ CREATE TABLE projects.projects (
 );
 
 
-CREATE TABLE projects.project_stages (
+CREATE TABLE IF NOT EXISTS projects.project_stages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   project_id uuid NOT NULL,
   name text NOT NULL,
@@ -84,22 +87,90 @@ CREATE TABLE projects.project_stages (
   CONSTRAINT project_stages_start_dependency_stage_id_fkey FOREIGN KEY (start_dependency_stage_id) REFERENCES projects.project_stages(id)
 );
 
-CREATE TABLE projects.tickets (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  project_id uuid NOT NULL,
-  title text NOT NULL,
-  description jsonb NOT NULL DEFAULT '{}'::jsonb,
-  status ticket_status NOT NULL DEFAULT 'backlog'::ticket_status,
-required_stage_ids uuid[] NOT NULL DEFAULT '{}'::uuid[],
-  current_stage_id uuid,
-assigned_to_user_id uuid,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT tickets_pkey PRIMARY KEY (id),
-  CONSTRAINT tickets_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects.projects(id),
-  CONSTRAINT tickets_current_stage_id_fkey FOREIGN KEY (current_stage_id) REFERENCES projects.project_stages(id),
-  CONSTRAINT tickets_assigned_user_fkey FOREIGN KEY (assigned_to_user_id) REFERENCES org.users_public(user_id)
+CREATE INDEX IF NOT EXISTS idx_project_stages_project ON projects.project_stages (project_id);
+-- #endregion
+
+-- #region 3. Tickets Table
+
+
+CREATE TABLE IF NOT EXISTS projects.tickets (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id uuid NOT NULL REFERENCES projects.projects(id) ON DELETE CASCADE,
+    current_stage_id uuid REFERENCES projects.project_stages(id) ON DELETE SET NULL,
+    current_assignee_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    
+    title text NOT NULL,
+    description jsonb NOT NULL DEFAULT '{}'::jsonb,
+    text_description text NOT NULL DEFAULT '', -- Flattened rich text for search functionality
+    
+    status ticket_status NOT NULL DEFAULT 'backlog'::ticket_status,
+    attachment_count smallint NOT NULL DEFAULT 0,
+    required_stages jsonb NOT NULL DEFAULT '[]'::jsonb, -- Format: [{"stage_id": "uuid", "order": 1}]
+    
+    due_date timestamp with time zone NULL,
+    workload_intensity numeric(4,2) NOT NULL DEFAULT 1.00,
+    payment_status payment_status NOT NULL DEFAULT 'unpaid'::payment_status,
+    
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_tickets_project ON projects.tickets (project_id);
+
+CREATE INDEX IF NOT EXISTS idx_tickets_stage ON projects.tickets (current_stage_id);
+
+CREATE INDEX IF NOT EXISTS idx_tickets_assignee ON projects.tickets (current_assignee_id);
+-- #endregion
+
+-- #region 4. Conditional Due Date Rule Enforcement
+CREATE OR REPLACE FUNCTION projects.fn_enforce_ticket_due_date()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_allow_deadlines boolean;
+BEGIN
+    -- Query the finance configuration on the parent project
+    SELECT allow_deadline_bonuses INTO v_allow_deadlines 
+    FROM projects.projects 
+    WHERE id = NEW.project_id;
+
+    -- If a due date is specified but the project finance settings forbid it, raise an error
+    IF NEW.due_date IS NOT NULL AND (v_allow_deadlines IS NULL OR NOT v_allow_deadlines) THEN
+        RAISE EXCEPTION 'Due dates can only be set if the client has agreed to deadline bonus terms under project finance settings.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_enforce_ticket_due_date
+    BEFORE INSERT OR UPDATE OF due_date ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_enforce_ticket_due_date();
+-- #endregion
+
+-- #region 5. Ticket History Table (Audit Trail Ledger)
+
+
+CREATE TABLE IF NOT EXISTS projects.ticket_history (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id uuid NOT NULL REFERENCES projects.tickets(id) ON DELETE CASCADE,
+    actor_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+    
+    action_type text NOT NULL, -- e.g., 'created', 'stage_moved', 'status_changed', 'reassigned', 'metadata_updated'
+    
+    previous_stage_id uuid REFERENCES projects.project_stages(id) ON DELETE SET NULL,
+    new_stage_id uuid REFERENCES projects.project_stages(id) ON DELETE SET NULL,
+    
+    previous_status ticket_status NULL,
+    new_status ticket_status NULL,
+    
+    changes jsonb NOT NULL DEFAULT '{}'::jsonb, -- Captures any other modified attributes as a diff patch
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ticket_history_ticket ON projects.ticket_history (ticket_id);
+
+CREATE INDEX IF NOT EXISTS idx_ticket_history_timeline ON projects.ticket_history (ticket_id, created_at DESC);
 
 
 CREATE TABLE projects.maintenance_contracts (

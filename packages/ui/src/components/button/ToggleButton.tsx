@@ -14,7 +14,7 @@ export function ToggleButton(props: ToggleButtonProps) {
 		selected = false,
 		onChange,
 		className,
-		variant = 'outline',
+		variant = 'secondary',
 		...rest
 	} = props;
 

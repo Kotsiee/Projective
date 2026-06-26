@@ -60,7 +60,7 @@
 
     /* Blends into Layer 1 (--header) */
     box-shadow:
-        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px var(--navigation-drop-shadow),
         0 0 0 150px var(--header);
 }
 
@@ -88,7 +88,7 @@
 
     /* Blends dynamically into Layer 2 OR Layer 1 using --mask-bg! */
     box-shadow:
-        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px var(--navigation-drop-shadow),
         0 0 0 150px var(--mask-bg);
 }
 
@@ -159,5 +159,73 @@
     /* Even if they are a guest on mobile, keep the padding clean */
     .navigation__body[data-is-guest="true"] {
         padding-bottom: 2rem !important;
+    }
+}
+
+/* =========================================
+   CUSTOM HORIZONTAL SCROLLBAR LOGIC
+   ========================================= */
+
+.navigation__body[data-custom-scroll="true"] {
+    overflow-x: auto;
+    /* Hide the horizontal scrollbar visually in Firefox */
+    scrollbar-width: none;
+}
+
+/* Hide the horizontal scrollbar visually in Chrome/Safari/Edge */
+.navigation__body[data-custom-scroll="true"]::-webkit-scrollbar:horizontal {
+    height: 0px;
+    display: none;
+}
+
+/* The Track is fixed to the bottom of the viewport 
+  (sitting right above the middle footer if it exists) 
+*/
+.navigation__scrollbar-track {
+    position: fixed;
+    bottom: var(--middle-footer-height, 0px);
+    left: var(--total-side);
+    right: 0;
+    height: 12px;
+    background-color: transparent;
+    z-index: 60;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: left var(--medium), opacity var(--medium);
+}
+
+.navigation__scrollbar-track[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.navigation__scrollbar-thumb {
+    height: 8px;
+    margin-top: 2px;
+    background-color: var(--text-muted);
+    border-radius: var(--border-radius__xlarge);
+    cursor: grab;
+    transition: background-color var(--fast);
+    flex-shrink: 0;
+}
+
+.navigation__scrollbar-track:hover .navigation__scrollbar-thumb {
+    background-color: var(--text-main);
+    height: 10px;
+    margin-top: 1px;
+}
+
+.navigation__scrollbar-thumb[data-dragging="true"],
+.navigation__scrollbar-thumb:active {
+    cursor: grabbing;
+    background-color: var(--primary);
+    height: 10px;
+    margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+    .navigation__scrollbar-track {
+        display: none !important;
     }
 }

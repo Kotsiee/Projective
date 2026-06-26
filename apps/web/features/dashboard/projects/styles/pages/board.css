@@ -1,115 +1,114 @@
-/* #region Project Board Global */
 .project-board {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    gap: 1rem;
-    overflow: hidden;
-    /* Base padding to prevent content from touching edges */
-    padding: 1rem;
+    min-height: calc(100vh - var(--header-height));
+    width: 100%;
 }
 
-/* #endregion */
-
-/* #region Header Layout */
-.project-board__header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: stretch;
-    background-color: var(--card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    gap: 1.5rem;
-}
-
-.project-board__panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    min-width: 250px;
-}
-
-.project-board__panel--middle {
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    padding: 0 1.5rem;
-}
-
-/* #endregion */
-
-/* #region Header Typography & Elements */
-.project-board__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin: 0;
-}
-
-.project-board__subtitle {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    text-transform: capitalize;
-}
-
-.project-board__metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 1rem;
-}
-
-.project-board__metric {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.project-board__metric-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.project-board__metric-value {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.project-board__metric-value--success {
-    color: var(--success);
-}
-
-/* #endregion */
-
-/* #region Board Content Container */
 .project-board__content {
     flex: 1;
     min-height: 0;
-    /* Critical for virtualized scrolling children */
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    background-color: var(--bg);
-    overflow: hidden;
+    width: 100%;
 }
 
-/* #endregion */
+.project-board__header {
+    padding: 2rem;
+}
 
-/* #region Navigation Footer Styling */
+.project-board__details {
+    display: flex;
+    gap: 2rem;
+}
+
+.project-board__details-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-right: 1px solid var(--border-color);
+    padding-right: 2rem;
+
+    h3,
+    p {
+        padding: 0;
+        margin: 0;
+    }
+
+    :last-child {
+        border-right: none;
+    }
+}
+
+.project-board__details-section__content {
+    display: flex;
+    gap: 1rem;
+}
+
+.project-board__details-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.project-board__details-metric__name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.project-board__details-metric__value {
+    font-size: 1.2rem;
+}
+
 .project-board__footer-wrapper {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 100%;
-    padding: 0 1.5rem;
-    background-color: var(--header);
-    border-top: 1px solid var(--border-color);
 }
 
-/* #endregion */
+.project-board__footer-left,
+.project-board__footer-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.project-board__kanban-wrapper {
+    width: 100%;
+    min-width: max-content;
+    /* Forces the wrapper to grow as columns are added */
+}
+
+/* Force the internal Kanban component to NOT scroll */
+.project-board__kanban-wrapper>* {
+    overflow: visible !important;
+    width: max-content !important;
+}
+
+/* 1. Force the root wrapper and Kanban base to grow indefinitely */
+.project-board__kanban-wrapper,
+.project-board__kanban-wrapper .kanban {
+    height: auto !important;
+    min-height: 0 !important;
+    /* Strip away any min-height constraints */
+}
+
+/* 2. Allow the horizontal track to expand vertically to fit the tallest column */
+.project-board__kanban-wrapper .kanban__track {
+    height: auto !important;
+    align-items: flex-start !important;
+}
+
+/* 3. Strip max-heights from the columns */
+.project-board__kanban-wrapper .kanban-field {
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* 4. THE MAGIC BULLET: Kill the internal scrollbar on the card container */
+.project-board__kanban-wrapper .kanban-field__body {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    /* Forces cards to push the container height down */
+}

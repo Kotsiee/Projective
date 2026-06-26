@@ -1,4 +1,10 @@
-import { BaseOwner, Identifiable, Ratable, Timestamped } from '../../core/base-response.ts';
+import { z } from 'zod';
+import {
+	BaseOwnerSchema,
+	IdentifiableSchema,
+	RatableSchema,
+	TimestampedSchema,
+} from '../../core/base-response.ts';
 import {
 	BudgetType,
 	IPOptionMode,
@@ -8,69 +14,98 @@ import {
 	TicketStatus,
 } from './enums.ts';
 
-// #region 1. FULL PROJECT RESPONSE
-/**
- * @interface FullProjectResponse
- * @description The complete data payload for the /view/project page, mapped to domain enums.
- */
-export interface FullProjectResponse extends Identifiable, Timestamped, Ratable {
-	title: string;
-	description: Record<string, any> | string | null;
-	format: ProjectFormat;
-	status: ProjectStatus;
-	is_active: boolean;
-	industry_category_id: string;
-	target_project_start_date: string;
-	owner: BaseOwner;
-	nda_required: boolean;
-	ip_ownership_mode: IPOptionMode;
-	languages: string[];
-	locations: string[];
-	skills: string[];
-	stages: ProjectStageResponse[];
-	roles: ProjectRoleResponse[];
-}
+// #region 1. AUXILIARY / NESTED SCHEMAS
 
 /**
- * @interface ProjectStageResponse
- * @description Represents a modular unit of work within a project, unified via configuration flags.
+ * @description Zod validation schema for staffing requirements and budgets per seat.
  */
-export interface ProjectStageResponse extends Identifiable {
-	name: string;
-	description: Record<string, any> | string | null;
-	description_text: string | null;
-	skills: string[];
-	status: StageStatus;
-	file_upload_required: boolean;
-	default_tasks: Record<string, any>[];
-	start_date: string | null;
-	end_date: string | null;
-}
+export const ProjectRoleResponseSchema = IdentifiableSchema.extend({
+	project_stage_id: z.uuid(),
+	quantity: z.number().int().positive(),
+	available_quantity: z.number().int().nonnegative(),
+	role_title: z.string().min(1),
+	budget_type: z.enum(Object.values(BudgetType) as [string, ...string[]]),
+	budget_amount_cents: z.number().int().nonnegative(),
+});
+export type ProjectRoleResponse = z.infer<typeof ProjectRoleResponseSchema>;
 
 /**
- * @interface ProjectRoleResponse
- * @description Defines staffing requirements and budget for a specific seat.
+ * @description Zod validation schema for modular units of work within a project execution.
  */
-export interface ProjectRoleResponse extends Identifiable {
-	project_stage_id: string;
-	quantity: number;
-	available_quantity: number;
-	role_title: string;
-	budget_type: BudgetType;
-	budget_amount_cents: number;
-}
+export const ProjectStageResponseSchema = IdentifiableSchema.extend({
+	name: z.string().min(1),
+	// FIX 1: Explicitly typed key and value for z.record to prevent argument length mismatches
+	description: z.union([z.record(z.string(), z.any()), z.string()]).nullable(),
+	description_text: z.string().nullable(),
+	skills: z.array(z.string()).default([]),
+	status: z.enum(Object.values(StageStatus) as [string, ...string[]]),
+	file_upload_required: z.boolean().default(false),
+	default_tasks: z.array(z.record(z.string(), z.any())).default([]),
+	// FIX 2: Passed empty config object to satisfy the modern .datetime signature
+	start_date: z.iso.datetime({}).nullable(),
+	end_date: z.iso.datetime({}).nullable(),
+});
+export type ProjectStageResponse = z.infer<typeof ProjectStageResponseSchema>;
+
+/**
+ * @description Embedded required stage tracker inside pipeline units.
+ */
+export const TicketRequiredStageSchema = z.object({
+	stage_id: z.uuid(),
+	order: z.number().int().nonnegative(),
+});
+
 // #endregion
 
+// #region 2. CORE ROOT ENTITIES
+
 /**
- * @interface TicketResponse
- * @description Represents the atomic unit of work flowing through a project pipeline.
+ * @description Canonical schema representing the full project context payload.
  */
-export interface TicketResponse extends Identifiable, Timestamped {
-	project_id: string;
-	title: string;
-	description: Record<string, any>;
-	status: TicketStatus;
-	required_stage_ids: string[];
-	current_stage_id: string | null;
-	assigned_to_user_id: string | null;
-}
+export const FullProjectResponseSchema = IdentifiableSchema
+	.merge(TimestampedSchema)
+	.merge(RatableSchema)
+	.extend({
+		title: z.string().min(1),
+		description: z.union([z.record(z.string(), z.any()), z.string()]).nullable(),
+		// FIX 3: Replaced z.nativeEnum with modern z.enum(Object.values(...)) patterns
+		format: z.enum(Object.values(ProjectFormat) as [string, ...string[]]),
+		status: z.enum(Object.values(ProjectStatus) as [string, ...string[]]),
+		is_active: z.boolean(),
+		industry_category_id: z.uuid(),
+		target_project_start_date: z.iso.datetime({}),
+		owner: BaseOwnerSchema,
+		nda_required: z.boolean().default(false),
+		ip_ownership_mode: z.enum(Object.values(IPOptionMode) as [string, ...string[]]),
+		languages: z.array(z.string()).default([]),
+		locations: z.array(z.string()).default([]),
+		skills: z.array(z.string()).default([]),
+		stages: z.array(ProjectStageResponseSchema).default([]),
+		roles: z.array(ProjectRoleResponseSchema).default([]),
+	});
+export type FullProjectResponse = z.infer<typeof FullProjectResponseSchema>;
+
+/**
+ * @description Canonical schema for tracking atomic task components flowing across columns.
+ */
+export const TicketResponseSchema = IdentifiableSchema
+	.merge(TimestampedSchema)
+	.extend({
+		project_id: z.uuid(),
+		current_stage_id: z.uuid().nullable(),
+		current_assignee_id: z.uuid().nullable(),
+
+		title: z.string().min(1),
+		description: z.record(z.string(), z.any()),
+		text_description: z.string().default(''),
+
+		status: z.enum(Object.values(TicketStatus) as [string, ...string[]]),
+		attachment_count: z.number().int().nonnegative().default(0),
+		required_stages: z.array(TicketRequiredStageSchema).default([]),
+
+		due_date: z.iso.datetime({}).nullable(),
+		workload_intensity: z.number().positive().default(1.0),
+	});
+export type TicketResponse = z.infer<typeof TicketResponseSchema>;
+
+// #endregion

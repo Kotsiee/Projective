@@ -88,6 +88,8 @@
         --scrollbar-bg: var(--bg);
         --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 88%);
         --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 82%);
+
+        --navigation-drop-shadow: rgba(0, 0, 0, 0.1)
 }
 
 :root[data-theme="dark"] {
@@ -116,6 +118,7 @@
         --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
         --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 12%);
         --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 90%);
+        --navigation-drop-shadow: rgba(0, 0, 0, 0.5)
 }
 
 /* #endregion */
