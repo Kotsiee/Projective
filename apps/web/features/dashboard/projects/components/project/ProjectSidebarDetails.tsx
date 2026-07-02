@@ -17,7 +17,7 @@ import {
 	IconUsers,
 } from '@tabler/icons-preact';
 import { IconButton } from '@projective/ui';
-import NewStageModal from '../../components/new/NewStageModal.tsx';
+import NewStageModal from '../../components/modals/NewStageModal.tsx';
 import { Head } from 'fresh/runtime';
 
 export default function ProjectSidebarDetails() {

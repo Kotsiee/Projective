@@ -12,7 +12,7 @@ import { ProjectListItem } from './ProjectListItem.tsx';
 import { useMemo } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { Button, IconButton } from '@projective/ui';
-import NewProjectModal from './new/NewProjectModal.tsx';
+import NewProjectModal from './modals/NewProjectModal.tsx';
 // #endregion
 
 export default function ProjectsSidebarList() {

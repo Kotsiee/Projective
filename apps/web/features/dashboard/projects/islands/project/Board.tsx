@@ -12,7 +12,7 @@ import { IconBasket, IconLayoutKanban, IconList } from '@tabler/icons-preact';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
 import { NewTicketModal } from '@features/dashboard/projects/components/modals/NewTicketModal.tsx';
-import NewStageModal from '@features/dashboard/projects/components/new/NewStageModal.tsx';
+import NewStageModal from '@features/dashboard/projects/components/modals/NewStageModal.tsx';
 import {
 	BoardDataView,
 	BoardTicket,

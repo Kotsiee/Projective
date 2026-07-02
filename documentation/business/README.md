@@ -1,42 +1,27 @@
 # Business Documentation
 
-This directory contains high-level strategic and operational documentation for Projective. It is
-designed for stakeholders, investors, and business partners to understand the platform's market
-positioning, monetization strategy, and long-term vision.
+## Hierarchy
 
-## 📂 Contents
+- **[brain.md](brain.md)** and **[brain2.md](brain2.md)** are the absolute source of truth for all
+  business logic, workflows, and architectural rules. Every other file in this folder is
+  supplementary — it either fills a gap `brain.md`/`brain2.md` leaves abstract, or covers material
+  (investor narrative, market data) that the brain files intentionally don't.
+- For UI component APIs, styling variables, and Deno/Fresh technical directives, see
+  [codebase_context.md](../../codebase_context.md) at the repo root — not this folder.
 
-| File                                               | Description                                                                            |
-| :------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **[Vision.md](./vision.md)**                       | The core philosophy, the problem we are solving, and our unique modular solution.      |
-| **[Market-Analysis.md](./market-analysis.md)**     | Detailed analysis of the $1.5T freelance market, competitor gaps, and 2026 trends.     |
-| **[Monetization.md](./monetization.md)**           | Our revenue model, including service fees, subscriptions, and marketplace commissions. |
-| **[Features-Overview.md](./features-overview.md)** | Persona-based breakdown of features for Businesses, Freelancers, and Teams.            |
-| **[Roadmap.md](./roadmap.md)**                     | The phased execution plan from MVP (Alpha) to the Enterprise Layer.                    |
-| **[Investor-Summary.md](./investor-summary.md)**   | The "One-Pager" pitch covering competitive advantages and financial snapshots.         |
+## Files in This Folder
 
----
+| File | Purpose | Relationship to brain.md |
+| :--- | :--- | :--- |
+| [finance-model.md](finance-model.md) | Concrete fee percentages, payout state machine, wallet architecture, edge cases | Extends `brain.md`'s Escrow/Wallets section with numbers and mechanics it leaves unspecified. **Contains a flagged fee-percentage conflict with `investor-summary.md` — see the note at the top of the file.** |
+| [features.md](features.md) | Phased feature rollout priority (MVP/Phase 2/Phase 3) | Everything else has been trimmed out; feature *definitions* live in `brain.md` |
+| [vision.md](vision.md) | Problem framing, long-term strategic positioning, platform philosophy | Narrative content `brain.md` doesn't cover; mechanics have been trimmed out |
+| [investor-summary.md](investor-summary.md) | Investor-facing pitch narrative, financial snapshot | Entirely absent from `brain.md` — pitch material, not a technical spec |
+| [market-analysis.md](market-analysis.md) | Market sizing, competitive analysis (Fiverr/Upwork comparison) | Entirely absent from `brain.md` — external market data |
 
-## 🎯 Strategic Objectives
+## For Future Agents
 
-- **Disrupt Fragmented Work**: Transition the gig economy from isolated tasks to cohesive,
-  team-based project delivery.
-- **Reduce Procurement Risk**: Implement modular stage-based hiring to allow businesses to swap
-  talent without losing project momentum.
-- **Empower Freelancer Collaboration**: Provide the legal and financial infrastructure for
-  freelancers to operate as professional "micro-agencies."
-- **Financial Stability**: Introduce AI-driven tools like "Income Smoothing" to solve the "feast or
-  famine" cycle of independent work.
-
-## 🏗 Conceptual Architecture
-
-Projective is built on an **Edge-first, Deno-powered architecture** using **Supabase** for secure,
-scalable data management. This ensures minimal operational overhead and maximal security via
-Row-Level Security (RLS).
-
-```text
-// Business Stakeholder Quick-Link
-Mission: "To become the go-to agency-builder for the global freelance workforce."
-Status: MVP / Alpha Testing Phase
-Tech: Deno / Supabase / Rust WASM
-```
+Before adding new business documentation here, check whether the content belongs in `brain.md`
+instead (if it's a durable business rule) or is genuinely supplementary (market data, pitch
+narrative, rollout sequencing). Don't let a new file restate what `brain.md` already says — link to
+it instead. See [../CLAUDE.md](../CLAUDE.md) and [CLAUDE.md](CLAUDE.md) for the full guardrails.

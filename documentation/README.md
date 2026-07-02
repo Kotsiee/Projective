@@ -1,66 +1,68 @@
 # Projective Documentation
 
-Projective is a modern freelancing ecosystem where businesses can hire individuals, multiple
-freelancers, or entire teams to collaborate on structured projects. Our core philosophy centers on a
-collaboration-first approach, transparency through clear stage-based pricing, and low barriers to
-entry via project templates.
+Projective is a collaborative freelancing marketplace where businesses hire individuals, teams, or
+entire "micro-agencies" to deliver structured, stage-based projects with escrow-backed payments.
 
-## 📂 Directory Structure
+## Source-of-Truth Hierarchy — Read This First
 
-This documentation is organized into domain-specific folders to maintain clarity as the platform
-scales.
+1. **[business/brain.md](business/brain.md)** and **[business/brain2.md](business/brain2.md)** are
+   the absolute, overriding authority for all business logic, database schemas, project workflows,
+   and architectural rules. If anything below conflicts with these two files, the brain files win.
+2. **[codebase_context.md](../codebase_context.md)** (repo root, not in this folder) is the
+   technical reference for UI component APIs, styling variables, and Deno/Fresh system directives.
+3. Everything else in `documentation/` is either (a) detail that fills a gap the brain files
+   deliberately leave abstract, or (b) content the brain files don't cover at all (investor
+   narrative, market data, per-route API tables, user stories). None of it should *restate* what's
+   already in the brain files — if you find a file doing that, it's a redundancy bug; consolidate
+   or delete it.
 
-### [Business](./business/README.md)
+See [CLAUDE.md](CLAUDE.md) for the full guardrails future agents should follow when editing this
+folder.
 
-Contains documents intended for investors and stakeholders to understand the market positioning and
-high-level strategy.
+## Directory Structure
 
-- **[Vision.md](./business/vision.md)**: Detailed philosophy and problem-solution alignment.
-- **Features.md**: Functional breakdown for businesses, freelancers, and teams.
-- **Tech_Stack.md**: High-level technical overview of the edge-first architecture.
-- **Roadmap.md**: Phased development plan from MVP to Enterprise.
+### [business/](business/README.md)
 
-### [User Stories](./user-stories/README.md)
+Business logic authority (`brain.md`/`brain2.md`), plus supplementary docs: the financial model
+(`finance-model.md`), phased feature rollout (`features.md`), positioning/philosophy (`vision.md`),
+and investor/market material (`investor-summary.md`, `market-analysis.md`).
 
-Narrative flows and functional requirements derived from user needs.
+### [database/](database/README.md)
 
-- **User_Creation.md**: Onboarding, role setup, and payment initialization.
-- **Project_Creation.md**: Flows for custom projects and template-based hiring.
-- **Project_Management.md**: Collaboration, submission loops, and approval logic.
+Per-domain schema documentation (Tables/Policies/Functions) for 11 domains (org, projects, finance,
+comms, files, security, analytics, integrations, marketplace, ops, search), plus the top-level
+[Schemas.md](database/Schemas.md) ERD/enum reference. Complements `brain2.md`'s migration/RLS
+conventions with actual column-level detail. Many domain files are still scaffolded stubs — see
+the database README's coverage table.
 
-### [Database](./database/README.md)
+### [sitemap/](sitemap/README.md)
 
-Technical specifications for the data layer and security enforcement.
+Per-route detail expansion of `brain.md`'s flat sitemap table — file paths, API endpoint tables,
+permissions, and component wiring for Auth and each dashboard domain.
 
-- **Schemas.md**: Overview of the relational model and domain boundaries.
-- **[Domain]/Tables.md**: Table definitions for Org, Projects, Finance, etc.
-- **[Domain]/Policies.md**: Row-Level Security (RLS) rules ensuring data isolation.
+### [packages/](packages/README.md)
 
-### [Server](./server/README.md)
+Package-level documentation for `@projective/data` and `@projective/ui`. Note: the former
+`packages/fields/` sub-folder was removed — it fully duplicated the component source already
+dumped in `codebase_context.md`. If you need Fields API detail, go to `codebase_context.md`.
 
-Architecture details for the Deno Fresh runtime and edge deployment.
+### [flows/](flows/Projects.md)
 
-- **Middleware.md**: Logic for JWT verification, rate limiting, and security headers.
-- **WASM.md**: Rust modules compiled to WebAssembly for performance-critical tasks.
+Implementation-level workflow detail (state diagrams, stage archetypes) complementing `brain.md`'s
+business-level "Projects & Services" description.
 
----
+### [user-stories/](user-stories/README.md)
 
-## 🛠 Technical Overview
+Concrete acceptance-criteria-format user stories (as a [persona], I want X, so that Y) with
+technical implementation notes, organized by domain (identity-access, organisational-structures,
+project-engine, finance-escrow).
 
-The platform is built on an edge-first stack designed for high performance and low operational cost.
+## Technical Overview
 
-- **Frontend**: Deno Fresh with Preact Islands for partial hydration.
-- **Database & Auth**: Supabase (PostgreSQL) with strict Row-Level Security.
-- **Compute**: Rust WASM modules for image optimization and file processing.
+- **Frontend:** Deno Fresh 2.x with Preact Islands (partial hydration) — see `brain2.md` §2 for the
+  Islands boundary rules.
+- **Database & Auth:** Supabase (PostgreSQL) with mandatory Row-Level Security.
+- **Compute:** Rust WASM modules for image/file processing and search performance.
 
-```text
-// Example logic: Account Switching
-User (U1) -> [FreelancerProfile (F1), BusinessProfile (B1), BusinessProfile (B2)]
-Session Context: { user_id: U1, active_profile_id: B2, active_profile_type: "business" }
-```
-
-## 🔐 Security Principles
-
-- **Isolation**: All data is filtered via RLS based on the `active_profile_id` in the JWT.
-- **Auth**: Short-lived JWT access tokens and rotated, Argon2id-hashed refresh tokens.
-- **Files**: All storage buckets are private by default, utilizing signed URLs for access.
+Full stack rationale lives in `brain.md`'s "Tech Stack" section; system directives for agents
+touching this stack live in `brain2.md`'s "System Directives" section.

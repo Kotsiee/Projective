@@ -434,7 +434,6 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 		</Modal>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\modals\NewStageModal.tsx
@@ -620,7 +619,8 @@ export default function NewStageModal(
 							<DateField
 								label='Start Date'
 								value={startDate.value}
-								onChange={(v) => startDate.value = v}
+								onChange={(v) =>
+									startDate.value = v}
 							/>
 							<DateField
 								label='Target End Date'
@@ -671,7 +671,6 @@ export default function NewStageModal(
 		</Modal>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\modals\NewTicketModal.tsx
@@ -873,7 +872,6 @@ export function NewTicketModal(
 		</Modal>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\modals\TicketModal.tsx
@@ -916,7 +914,6 @@ export function TicketModal() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\board\BoardDataView.tsx
@@ -1194,7 +1191,6 @@ export function BoardDataView({
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\board\BoardHeader.tsx
@@ -1374,7 +1370,6 @@ export function BoardMetric(
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\ProjectSidebarDetails.tsx
@@ -1699,7 +1694,6 @@ function ProjectSidebarDetailsChannelsListItem(
 }
 
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\ProjectSidebarStageItem.tsx
@@ -1745,7 +1739,6 @@ export default function ProjectSidebarStageItem({ stage, projectId }: StageListI
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\chat\AudioMessageInput.tsx
@@ -2008,7 +2001,6 @@ export default function AudioMessageInputVisualizer(
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\chat\StageChatMessage.tsx
@@ -2259,7 +2251,6 @@ export default function ChatMessage({ message, onRetry }: ChatMessageProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\chat\StageChatMessageInput.tsx
@@ -2516,7 +2507,6 @@ export default function ChatMessageInput({ onSend, files }: ChatMessageInputProp
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\chat\StageChatMessageInputAttach.tsx
@@ -2603,55 +2593,46 @@ export default function ChatMessageInputAttach(
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFIle3D.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileAudio.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileDocument.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileFooter.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileImage.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileMarkdown.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFileText.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\file\StageFIleVideo.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\StageFilesFooter.tsx
@@ -2777,7 +2758,6 @@ export default function StageFilesFooter(
 	);
 }
 /* #endregion */
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\files\StageFilesItem.tsx
@@ -2883,7 +2863,6 @@ export function StageFilesItem(
 	);
 }
 /* #endregion */
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\project\stage\StageHeader.tsx
@@ -2983,7 +2962,6 @@ export default function StageHeader() {
 	);
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\ProjectListItem.tsx
@@ -3038,7 +3016,6 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 		</a>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\ProjectSidebarList.tsx
@@ -3058,7 +3035,7 @@ import { ProjectListItem } from './ProjectListItem.tsx';
 import { useMemo } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { Button, IconButton } from '@projective/ui';
-import NewProjectModal from './new/NewProjectModal.tsx';
+import NewProjectModal from './modals/NewProjectModal.tsx';
 // #endregion
 
 export default function ProjectsSidebarList() {
@@ -3202,7 +3179,6 @@ export default function ProjectsSidebarList() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\components\ProjectsSidebar.tsx
@@ -3248,7 +3224,6 @@ export default function ProjectsSidebar() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contexts\ProjectContext.tsx
@@ -3431,7 +3406,6 @@ export function useProjectContext(): ProjectState {
 }
 
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contexts\StageContext.tsx
@@ -3512,7 +3486,6 @@ export function useStageContext() {
 	if (!ctx) throw new Error('useStageContext must be used within StageProvider');
 	return ctx;
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contracts\new\Project.ts
@@ -3567,7 +3540,6 @@ export interface Project {
 	stages?: Stage[];
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contracts\new\Stage.ts
@@ -3634,7 +3606,6 @@ export interface Stage {
 	open_seats: StageOpenSeat[];
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contracts\new\_validation.ts
@@ -3788,7 +3759,6 @@ export const CreateProjectSchema = z.object({
 export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
 export type StageInput = z.infer<typeof StageSchema>;
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\contracts\Projects.ts
@@ -3924,7 +3894,6 @@ export interface StageState {
 	error: Signal<string | null>;
 	refresh: () => void;
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\Board.tsx
@@ -4223,7 +4192,6 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\Project.tsx
@@ -4238,7 +4206,6 @@ export default function ProjectIsland() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\ChatNetworkSource.ts
@@ -4379,7 +4346,6 @@ export class ChatNetworkSource extends DataSource<ChatMessageData> {
 		}
 	}
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageChat.island.tsx
@@ -4552,7 +4518,6 @@ export default function ProjectChatIsland() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageFile.island.tsx
@@ -4565,13 +4530,11 @@ export default function ProjectFileIsland() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageFiles.island.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageFinance.island.tsx
@@ -4584,7 +4547,6 @@ export default function ProjectFileIsland() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageLayout.island.tsx
@@ -4671,13 +4633,11 @@ export default function StageLayoutIsland({
 	);
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageMemeber.island.tsx
 
 ```tsx
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageSubmissions.island.tsx
@@ -4690,7 +4650,6 @@ export default function ProjectFileIsland() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\project\stage\StageTasks.island.tsx
@@ -4920,7 +4879,6 @@ export default function ProjectTasksIsland() {
 	);
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\ProjectsHome.tsx
@@ -5131,7 +5089,6 @@ export default function ProjectsHome() {
 		</div>
 	);
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\islands\ProjectsLayout.island.tsx
@@ -5204,7 +5161,6 @@ export default function ProjectsLayoutIsland({ projectId, children }: ProjectsLa
 	);
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\ProjectsService.ts
@@ -5320,7 +5276,6 @@ export class ProjectsService {
 		return await res.json();
 	}
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\ProjectsServiceBackend.ts
@@ -5719,7 +5674,6 @@ export class ProjectsBackendService {
 	}
 }
 // #endregion
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\StagesService.ts
@@ -5770,7 +5724,6 @@ export class StagesService {
 		if (!res.ok) throw new Error(`Failed to delete stage: ${res.statusText}`);
 	}
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\StagesServiceBackend.ts
@@ -5860,7 +5813,6 @@ export class StagesServiceBackend {
 		return { success: true };
 	}
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\TicketsService.ts
@@ -5947,7 +5899,6 @@ export class TicketsService {
 		return await res.json();
 	}
 }
-
 ```
 
 ### File: apps\web\features\dashboard\projects\services\TicketsServiceBackend.ts
@@ -6073,25 +6024,23 @@ export class TicketsServiceBackend {
 		return { success: true, method };
 	}
 }
-
 ```
 
 ### File: packages\fields\deno.json
 
 ```json
 {
-  "name": "@projective/fields",
-  "version": "0.0.0",
-  "exports": "./mod.ts",
-  "tasks": {
-    "check": "deno fmt --check && deno lint && deno check mod.ts"
-  },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  }
+	"name": "@projective/fields",
+	"version": "0.0.0",
+	"exports": "./mod.ts",
+	"tasks": {
+		"check": "deno fmt --check && deno lint && deno check mod.ts"
+	},
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact"
+	}
 }
-
 ```
 
 ### File: packages\fields\mod.ts
@@ -6130,7 +6079,6 @@ export * from './src/components/datetime/Calendar.tsx';
 export * from './src/components/datetime/TimeClock.tsx';
 
 export * from './src/components/HelpTooltip.tsx';
-
 ```
 
 ### File: packages\fields\src\components\ComboboxField.tsx
@@ -6324,7 +6272,6 @@ export function ComboboxField<T = string>(props: ComboboxFieldProps<T>) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\DateField.tsx
@@ -6516,7 +6463,6 @@ export function DateField(props: DateFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\datetime\Calendar.tsx
@@ -6795,7 +6741,6 @@ export function Calendar(props: CalendarProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\datetime\TimeClock.tsx
@@ -7071,7 +7016,6 @@ export function TimeClock(props: TimeClockProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\DateTimeField.tsx
@@ -7302,7 +7246,6 @@ export function DateTimeField(props: DateTimeFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\FileDrop.tsx
@@ -7680,7 +7623,6 @@ export function FileDrop(props: FileFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\HelpTooltip.tsx
@@ -7735,7 +7677,6 @@ export function HelpTooltip({ content, href, icon, className, style }: HelpToolt
 		</span>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\MoneyField.tsx
@@ -7860,7 +7801,6 @@ export function MoneyField(props: MoneyFieldProps) {
 		/>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\RichTextField.tsx
@@ -8181,7 +8121,6 @@ export function RichTextField(props: RichTextFieldProps) {
 	);
 	// #endregion
 }
-
 ```
 
 ### File: packages\fields\src\components\SelectField.tsx
@@ -8555,7 +8494,6 @@ export function SelectField<T = string>(props: SelectFieldProps<T>) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\SliderField.tsx
@@ -8742,7 +8680,6 @@ export function SliderField(props: SliderFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\TagInput.tsx
@@ -8940,7 +8877,6 @@ export function TagInput(props: TagInputProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\TextField.tsx
@@ -9164,7 +9100,6 @@ export function TextField(props: TextFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\components\TimeField.tsx
@@ -9329,7 +9264,6 @@ export function TimeField(props: TimeFieldProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useCurrencyMask.ts
@@ -9404,7 +9338,6 @@ export function useCurrencyMask(
 		setProgrammaticValue,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useFieldState.ts
@@ -9494,7 +9427,6 @@ export function useFieldState<T>(props: FieldStateProps<T>): FieldState<T> {
 		validate,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useFileProcessor.ts
@@ -9596,7 +9528,6 @@ export function useFileProcessor(
 		removeFile,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useFocusNext.ts
@@ -9627,7 +9558,6 @@ export function focusNextElement(current: HTMLElement, explicitNext?: string | H
 		elements[index + 1].focus();
 	}
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useGlobalDrag.ts
@@ -9683,7 +9613,6 @@ export function useGlobalDrag() {
 
 	return isDragging;
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useInteraction.ts
@@ -9761,7 +9690,6 @@ export function useInteraction(initialValue?: unknown): InteractionState {
 		handleChange,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useSelectState.ts
@@ -10028,7 +9956,6 @@ export function useSelectState<T>({
 		handleKeyDown,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\hooks\useSliderState.ts
@@ -10244,7 +10171,6 @@ export function useSliderState({
 		handleTrackClick,
 	};
 }
-
 ```
 
 ### File: packages\fields\src\types\components\combobox-field.ts
@@ -10258,7 +10184,6 @@ import { SelectFieldProps } from './select-field.ts';
 export interface ComboboxFieldProps<T = string> extends SelectFieldProps<T> {
 	// Combobox specific props
 }
-
 ```
 
 ### File: packages\fields\src\types\components\date-field.ts
@@ -10324,7 +10249,6 @@ export interface DateFieldProps extends
 	maxDate?: DateTime;
 	format?: string;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\datetime-field.ts
@@ -10347,7 +10271,6 @@ export interface DateTimeFieldProps
 	max?: DateTime;
 	clearable?: boolean;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\file-drop.ts
@@ -10370,7 +10293,6 @@ export interface FileDropProps
 	maxSize?: number;
 	maxFiles?: number;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\money-field.ts
@@ -10394,7 +10316,6 @@ export interface MoneyFieldProps
 	onBlur?: (e: any) => void;
 	onFocus?: (e: any) => void;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\rich-text-field.ts
@@ -10436,7 +10357,6 @@ export interface RichTextFieldProps
 	/** Whether to show the character counter */
 	showCount?: boolean;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\select-field.ts
@@ -10509,7 +10429,6 @@ export interface SelectFieldProps<T = string> extends
 		valid?: JSX.Element;
 	};
 }
-
 ```
 
 ### File: packages\fields\src\types\components\slider-field.ts
@@ -10547,7 +10466,6 @@ export interface SliderFieldProps
 	height?: string;
 	passthrough?: boolean;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\tag-input.ts
@@ -10567,7 +10485,6 @@ export interface TagInputProps
 	tagColor?: string | ((tag: string) => string);
 	tagVariant?: 'solid' | 'transparent';
 }
-
 ```
 
 ### File: packages\fields\src\types\components\text-field.ts
@@ -10601,7 +10518,6 @@ export interface TextFieldProps
 	onBlur?: (e: any) => void;
 	onFocus?: (e: any) => void;
 }
-
 ```
 
 ### File: packages\fields\src\types\components\time-field.ts
@@ -10638,7 +10554,6 @@ export interface TimeFieldProps extends
 	 */
 	selectionMode?: TimeSelectionMode;
 }
-
 ```
 
 ### File: packages\fields\src\types\core.ts
@@ -10687,7 +10602,6 @@ export interface AdornmentProps {
 	onPrefixClick?: (e: MouseEvent) => void;
 	onSuffixClick?: (e: MouseEvent) => void;
 }
-
 ```
 
 ### File: packages\fields\src\types\file.ts
@@ -10735,7 +10649,6 @@ export interface FileFieldProps
 	listPosition?: 'top' | 'bottom' | 'none';
 	actionPosition?: 'below' | 'overlay';
 }
-
 ```
 
 ### File: packages\fields\src\types\wrappers.ts
@@ -10858,7 +10771,6 @@ export interface FieldArrayWrapperProps<T> {
 	className?: string;
 	maxItems?: number;
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\AdornmentWrapper.tsx
@@ -10892,7 +10804,6 @@ export function AdornmentWrapper(props: AdornmentWrapperProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\EffectWrapper.tsx
@@ -10948,7 +10859,6 @@ export function EffectWrapper(props: EffectWrapperProps) {
 
 // We also need to export the hook so components can use it if they want manual control
 export { useRipple };
-
 ```
 
 ### File: packages\fields\src\wrappers\FieldArrayWrapper.tsx
@@ -11021,7 +10931,6 @@ export function FieldArrayWrapper<T>(props: FieldArrayWrapperProps<T>) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\GlobalFileDrop.tsx
@@ -11085,7 +10994,6 @@ export default function GlobalFileDrop(props: GlobalFileDropProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\LabelWrapper.tsx
@@ -11160,7 +11068,6 @@ export function LabelWrapper(props: LabelWrapperProps) {
 		</>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\MessageWrapper.tsx
@@ -11205,7 +11112,6 @@ export function MessageWrapper(props: MessageWrapperProps) {
 		</div>
 	);
 }
-
 ```
 
 ### File: packages\fields\src\wrappers\SkeletonWrapper.tsx
@@ -11243,6 +11149,4 @@ export function SkeletonWrapper(props: SkeletonWrapperProps) {
 
 	return <div className={classes} style={style} aria-hidden='true' />;
 }
-
 ```
-
