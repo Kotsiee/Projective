@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
+import { IdentifiableSchema, TimestampedSchema } from '../core/base-response.ts';
 
 export const ReviewTargetTypeSchema = z.enum([
 	'user',

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { BookmarkEntityType } from './enums.ts';
-import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
+import { IdentifiableSchema, TimestampedSchema } from '../core/base-response.ts';
 
 export const UserUISettingsSchema = z.object({
 	primary_color: z.string().optional(),

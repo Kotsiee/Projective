@@ -4,14 +4,17 @@ import {
 	IdentifiableSchema,
 	RatableSchema,
 	TimestampedSchema,
-} from '../../core/base-response.ts';
+} from '../core/base-response.ts';
 import {
 	BudgetType,
 	IPOptionMode,
+	PaymentStatus,
 	ProjectFormat,
 	ProjectStatus,
 	StageStatus,
+	StructureVariation,
 	TicketStatus,
+	WorkloadReportStatus,
 } from './enums.ts';
 
 // #region 1. AUXILIARY / NESTED SCHEMAS
@@ -43,6 +46,8 @@ export const ProjectStageResponseSchema = IdentifiableSchema.extend({
 	start_date: z.iso.datetime({}).nullable(),
 	end_date: z.iso.datetime({}).nullable(),
 	sort_order: z.number().int().nonnegative().default(0),
+	/** Pipeline per-ticket unit price (minor units); source amount for ticket escrow holds. */
+	unit_price_cents: z.number().int().nonnegative().nullable(),
 });
 export type ProjectStageResponse = z.infer<typeof ProjectStageResponseSchema>;
 
@@ -67,8 +72,9 @@ export const FullProjectResponseSchema = IdentifiableSchema
 	.extend({
 		title: z.string().min(1),
 		description: z.union([z.record(z.string(), z.any()), z.string()]).nullable(),
-		// FIX 3: Replaced z.nativeEnum with modern z.enum(Object.values(...)) patterns
 		format: z.enum(Object.values(ProjectFormat) as [string, ...string[]]),
+		structure_variation: z.enum(Object.values(StructureVariation) as [string, ...string[]])
+			.default(StructureVariation.Standard),
 		status: z.enum(Object.values(ProjectStatus) as [string, ...string[]]),
 		is_active: z.boolean(),
 		industry_category_id: z.uuid(),
@@ -104,7 +110,39 @@ export const TicketResponseSchema = IdentifiableSchema
 
 		due_date: z.iso.datetime({}).nullable(),
 		workload_intensity: z.number().positive().default(1.0),
+
+		/** Escrow / installment tracking (minor units). */
+		payment_status: z.enum(Object.values(PaymentStatus) as [string, ...string[]])
+			.default(PaymentStatus.Unpaid),
+		unit_price_cents: z.number().int().nonnegative().nullable(),
+		total_amount_paid: z.number().int().nonnegative().default(0),
+
+		/** Manual ordering is only honored while the ticket is in the backlog ("New") stage. */
+		sort_order: z.number().int().nullable(),
+
+		/** Lifecycle markers. `hidden_until` bounds the 48-hour workload-report suspension window. */
+		claimed_at: z.iso.datetime({}).nullable(),
+		hidden_until: z.iso.datetime({}).nullable(),
+		workload_report_id: z.uuid().nullable(),
 	});
 export type TicketResponse = z.infer<typeof TicketResponseSchema>;
+
+/**
+ * @description Freelancer-filed workload-intensity mismatch report. Mirrors
+ * `projects.ticket_workload_reports`. Filing one suspends active work until `hidden_until`.
+ */
+export const WorkloadReportResponseSchema = IdentifiableSchema
+	.extend({
+		ticket_id: z.uuid(),
+		reporter_user_id: z.uuid(),
+		claimed_intensity: z.number().nullable(),
+		reported_intensity: z.number().nullable(),
+		reason: z.string().min(1),
+		status: z.enum(Object.values(WorkloadReportStatus) as [string, ...string[]]),
+		hidden_until: z.iso.datetime({}).nullable(),
+		created_at: z.iso.datetime({}),
+		resolved_at: z.iso.datetime({}).nullable(),
+	});
+export type WorkloadReportResponse = z.infer<typeof WorkloadReportResponseSchema>;
 
 // #endregion

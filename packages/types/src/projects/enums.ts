@@ -4,9 +4,24 @@
  */
 
 // #region 1. STATUS ENUMS
+/**
+ * @description Project work-flow format. Mirrors the `project_format` Postgres enum.
+ */
 export enum ProjectFormat {
 	OneOff = 'one_off',
 	Pipeline = 'pipeline',
+	Session = 'session',
+}
+
+/**
+ * @description Structural cardinality tier for a project, enforced at write time by
+ * `projects.fn_enforce_structure_variation`. Mirrors the `projects.structure_variation` enum.
+ */
+export enum StructureVariation {
+	Standard = 'standard',
+	OneOff = 'one_off',
+	SingleTask = 'single_task',
+	SingleStage = 'single_stage',
 }
 
 export enum ProjectStatus {
@@ -27,13 +42,42 @@ export enum StageStatus {
 	Paid = 'paid',
 }
 
+/**
+ * @description Pipeline ticket lifecycle state. Mirrors the `ticket_status` Postgres enum.
+ * `reported_hidden` marks a ticket suspended inside an active workload-report window.
+ */
 export enum TicketStatus {
 	Backlog = 'backlog',
 	Todo = 'todo',
+	Claimed = 'claimed',
 	InProgress = 'in_progress',
 	InReview = 'in_review',
 	Completed = 'completed',
 	Cancelled = 'cancelled',
+	ReportedHidden = 'reported_hidden',
+}
+
+/**
+ * @description Ticket escrow/installment payment state. Mirrors the `payment_status` Postgres enum.
+ */
+export enum PaymentStatus {
+	Unpaid = 'unpaid',
+	EscrowFunded = 'escrow_funded',
+	PartiallyReleased = 'partially_released',
+	Released = 'released',
+	Refunded = 'refunded',
+}
+
+/**
+ * @description Lifecycle of a freelancer workload-intensity mismatch report. Mirrors the
+ * `projects.workload_report_status` enum. Drives the 48-hour hidden window and penalty outcomes.
+ */
+export enum WorkloadReportStatus {
+	Open = 'open',
+	Acknowledged = 'acknowledged',
+	Adjusted = 'adjusted',
+	ExpiredPenalized = 'expired_penalized',
+	DismissedBadFaith = 'dismissed_bad_faith',
 }
 // #endregion
 

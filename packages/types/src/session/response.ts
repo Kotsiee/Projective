@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CohortStatus, SessionEventStatus, WaitlistStatus } from './enums.ts';
-import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
+import { IdentifiableSchema, TimestampedSchema } from '../core/base-response.ts';
 
 export const CohortResponseSchema = IdentifiableSchema
 	.extend(TimestampedSchema.shape)

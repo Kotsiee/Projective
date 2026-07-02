@@ -242,11 +242,17 @@ SELECT TO public USING (
         FROM projects.projects p
         WHERE p.id = project_stages.project_id
         AND (
-            p.owner_user_id = auth.uid() 
+            p.owner_user_id = auth.uid()
             OR (p.status = 'active'::project_status AND p.visibility = 'public'::visibility)
         )
     )
 );
+
+DROP POLICY IF EXISTS "Participants can view stages" ON projects.project_stages;
+
+-- Assigned freelancers / business members / team members can read stages of projects they work on.
+CREATE POLICY "Participants can view stages" ON projects.project_stages FOR
+SELECT TO public USING (projects.has_project_access (project_stages.project_id));
 
 DROP POLICY IF EXISTS "Insert own submissions" ON projects.stage_submissions;
 
@@ -273,33 +279,80 @@ SELECT TO public USING (
 
 DROP POLICY IF EXISTS "View tickets" ON projects.tickets;
 
+-- Assignee and project owner always see the ticket; other participants / the public see it unless it
+-- is suspended inside an active workload-report ("reported_hidden") window.
 CREATE POLICY "View tickets" ON projects.tickets FOR
 SELECT TO public USING (
-        assigned_to_user_id = auth.uid ()
+        current_assignee_id = auth.uid ()
         OR EXISTS (
-            SELECT 1
-            FROM projects.projects p
-            WHERE
-                p.id = project_id
-                AND (
-                    p.owner_user_id = auth.uid ()
-                    OR p.visibility = 'public'
+            SELECT 1 FROM projects.projects p
+            WHERE p.id = project_id AND p.owner_user_id = auth.uid ()
+        )
+        OR (
+            (
+                projects.has_project_access (project_id)
+                OR EXISTS (
+                    SELECT 1 FROM projects.projects p
+                    WHERE p.id = project_id
+                        AND p.status = 'active'::project_status
+                        AND p.visibility = 'public'::visibility
                 )
+            )
+            AND NOT (
+                status = 'reported_hidden'::ticket_status
+                AND hidden_until IS NOT NULL
+                AND hidden_until > now()
+            )
         )
     );
 
 DROP POLICY IF EXISTS "Manage tickets" ON projects.tickets;
 
+-- The assignee manages their claimed ticket; the project owner manages otherwise. Column-level
+-- immutability once claimed is enforced by projects.fn_ticket_immutability_guard (0007).
 CREATE POLICY "Manage tickets" ON projects.tickets FOR ALL TO public USING (
-    assigned_to_user_id = auth.uid ()
+    current_assignee_id = auth.uid ()
     OR EXISTS (
-        SELECT 1
-        FROM projects.projects p
-        WHERE
-            p.id = project_id
-            AND p.owner_user_id = auth.uid ()
+        SELECT 1 FROM projects.projects p
+        WHERE p.id = project_id AND p.owner_user_id = auth.uid ()
+    )
+)
+WITH CHECK (
+    current_assignee_id = auth.uid ()
+    OR EXISTS (
+        SELECT 1 FROM projects.projects p
+        WHERE p.id = project_id AND p.owner_user_id = auth.uid ()
     )
 );
+
+DROP POLICY IF EXISTS "File workload report" ON projects.ticket_workload_reports;
+
+-- Only the ticket's current assignee (the working freelancer) may flag a workload mismatch.
+CREATE POLICY "File workload report" ON projects.ticket_workload_reports FOR
+INSERT
+    TO public
+WITH
+    CHECK (
+        reporter_user_id = auth.uid ()
+        AND EXISTS (
+            SELECT 1 FROM projects.tickets t
+            WHERE t.id = ticket_id AND t.current_assignee_id = auth.uid ()
+        )
+    );
+
+DROP POLICY IF EXISTS "View workload reports" ON projects.ticket_workload_reports;
+
+CREATE POLICY "View workload reports" ON projects.ticket_workload_reports FOR
+SELECT TO public USING (
+        reporter_user_id = auth.uid ()
+        OR EXISTS (
+            SELECT 1
+            FROM projects.tickets t
+                JOIN projects.projects p ON p.id = t.project_id
+            WHERE t.id = ticket_id
+                AND (p.owner_user_id = auth.uid () OR projects.has_project_access (p.id))
+        )
+    );
 
 DROP POLICY IF EXISTS "View cohorts" ON projects.cohorts;
 

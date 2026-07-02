@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-	IdentifiableSchema,
-	ProfileTypeSchema,
-	TimestampedSchema,
-} from '../../core/base-response.ts';
+import { IdentifiableSchema, ProfileTypeSchema, TimestampedSchema } from '../core/base-response.ts';
 
 export const ProfileStatsResponseSchema = z.object({
 	rating_as_freelancer: z.number().min(0).max(5),

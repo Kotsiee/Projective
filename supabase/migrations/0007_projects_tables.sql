@@ -1,8 +1,12 @@
-CREATE TYPE project_format AS ENUM ('one_off', 'pipeline');
+CREATE TYPE project_format AS ENUM ('one_off', 'pipeline', 'session');
 
-CREATE TYPE ticket_status AS ENUM ('backlog', 'todo', 'in_progress', 'in_review', 'completed', 'cancelled');
+CREATE TYPE ticket_status AS ENUM ('backlog', 'todo', 'claimed', 'in_progress', 'in_review', 'completed', 'cancelled', 'reported_hidden');
 
-CREATE TYPE payment_status AS ENUM ('unpaid', 'escrow_funded', 'released');
+CREATE TYPE payment_status AS ENUM ('unpaid', 'escrow_funded', 'partially_released', 'released', 'refunded');
+
+CREATE TYPE projects.structure_variation AS ENUM ('standard', 'one_off', 'single_task', 'single_stage');
+
+CREATE TYPE projects.workload_report_status AS ENUM ('open', 'acknowledged', 'adjusted', 'expired_penalized', 'dismissed_bad_faith');
 
 CREATE TYPE projects.cohort_status AS ENUM ('enrolling', 'active', 'completed', 'cancelled');
 
@@ -23,6 +27,7 @@ CREATE TABLE projects.projects (
   description jsonb NOT NULL DEFAULT '{}'::jsonb,
   description_text text NOT NULL DEFAULT ''::text,
   format project_format NOT NULL DEFAULT 'pipeline'::project_format,
+  structure_variation projects.structure_variation NOT NULL DEFAULT 'standard'::projects.structure_variation,
   status project_status NOT NULL DEFAULT 'draft'::project_status,
   industry_category_id uuid,
   visibility visibility NOT NULL DEFAULT 'public'::visibility,
@@ -59,6 +64,9 @@ CREATE TABLE IF NOT EXISTS projects.project_stages (
   file_upload_required boolean NOT NULL DEFAULT false,
   default_tasks jsonb NOT NULL DEFAULT '[]'::jsonb,
   skills text[] DEFAULT '{}'::text[],
+
+  -- Pipeline per-ticket unit price (minor units); source amount for ticket escrow holds.
+  unit_price_cents bigint,
 
   start_trigger_type start_trigger_type NOT NULL DEFAULT 'on_project_start'::start_trigger_type,
   fixed_start_date timestamp with time zone,
@@ -110,7 +118,19 @@ CREATE TABLE IF NOT EXISTS projects.tickets (
     due_date timestamp with time zone NULL,
     workload_intensity numeric(4,2) NOT NULL DEFAULT 1.00,
     payment_status payment_status NOT NULL DEFAULT 'unpaid'::payment_status,
-    
+
+    -- Escrow / installment tracking (minor units, e.g. cents)
+    unit_price_cents bigint,
+    total_amount_paid bigint NOT NULL DEFAULT 0 CHECK (total_amount_paid >= 0),
+
+    -- Ordering: manual only while in the backlog ("New") stage; else ordered by updated_at DESC
+    sort_order integer,
+
+    -- Lifecycle markers
+    claimed_at timestamp with time zone,
+    hidden_until timestamp with time zone,
+    workload_report_id uuid,
+
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
@@ -120,6 +140,11 @@ CREATE INDEX IF NOT EXISTS idx_tickets_project ON projects.tickets (project_id);
 CREATE INDEX IF NOT EXISTS idx_tickets_stage ON projects.tickets (current_stage_id);
 
 CREATE INDEX IF NOT EXISTS idx_tickets_assignee ON projects.tickets (current_assignee_id);
+
+-- Backlog manual ordering vs. auto (updated_at DESC) ordering for all other stages
+CREATE INDEX IF NOT EXISTS idx_tickets_stage_sort ON projects.tickets (current_stage_id, sort_order);
+
+CREATE INDEX IF NOT EXISTS idx_tickets_stage_recent ON projects.tickets (current_stage_id, updated_at DESC);
 -- #endregion
 
 -- #region 4. Conditional Due Date Rule Enforcement
@@ -146,6 +171,169 @@ CREATE OR REPLACE TRIGGER trg_enforce_ticket_due_date
     BEFORE INSERT OR UPDATE OF due_date ON projects.tickets
     FOR EACH ROW
     EXECUTE FUNCTION projects.fn_enforce_ticket_due_date();
+-- #endregion
+
+-- #region 4b. Ticket Lifecycle State Machine
+
+-- Keep updated_at fresh so "order by updated_at DESC" (non-backlog stages) stays accurate.
+CREATE OR REPLACE FUNCTION projects.fn_ticket_touch_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_ticket_touch_updated_at
+    BEFORE UPDATE ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_touch_updated_at();
+
+-- Creation with only a title is allowed; a purchase/checkout transition requires a description.
+CREATE OR REPLACE FUNCTION projects.fn_enforce_ticket_checkout_desc()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_entering_checkout boolean;
+BEGIN
+    v_entering_checkout :=
+        (NEW.payment_status = 'escrow_funded'::payment_status
+            AND OLD.payment_status = 'unpaid'::payment_status)
+        OR (NEW.status IN ('claimed'::ticket_status, 'in_progress'::ticket_status)
+            AND OLD.status NOT IN ('claimed'::ticket_status, 'in_progress'::ticket_status));
+
+    IF v_entering_checkout THEN
+        IF (NEW.text_description IS NULL OR btrim(NEW.text_description) = '')
+            AND (NEW.description IS NULL OR NEW.description = '{}'::jsonb) THEN
+            RAISE EXCEPTION 'A ticket must have a description before it can be purchased or claimed.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_enforce_ticket_checkout_desc
+    BEFORE UPDATE ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_enforce_ticket_checkout_desc();
+
+-- Manual sort_order is only valid in the backlog ("New") stage; other stages auto-order by updated_at.
+CREATE OR REPLACE FUNCTION projects.fn_ticket_ordering_guard()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.sort_order IS DISTINCT FROM OLD.sort_order
+        AND NEW.status <> 'backlog'::ticket_status THEN
+        RAISE EXCEPTION 'Manual ticket ordering is only permitted in the backlog (New) stage.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_ticket_ordering_guard
+    BEFORE UPDATE OF sort_order ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_ordering_guard();
+
+-- Once claimed, client-owned content is locked; only the assignee (or an admin) may edit it.
+CREATE OR REPLACE FUNCTION projects.fn_ticket_immutability_guard()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.current_assignee_id IS NOT NULL
+        AND auth.uid() IS NOT NULL
+        AND auth.uid() <> OLD.current_assignee_id
+        AND NOT security.is_admin() THEN
+        IF NEW.title IS DISTINCT FROM OLD.title
+            OR NEW.description IS DISTINCT FROM OLD.description
+            OR NEW.text_description IS DISTINCT FROM OLD.text_description
+            OR NEW.unit_price_cents IS DISTINCT FROM OLD.unit_price_cents
+            OR NEW.required_stages IS DISTINCT FROM OLD.required_stages
+            OR NEW.workload_intensity IS DISTINCT FROM OLD.workload_intensity THEN
+            RAISE EXCEPTION 'This ticket has been claimed by a freelancer; its content is locked to the client.';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, security, auth;
+
+CREATE OR REPLACE TRIGGER trg_ticket_immutability_guard
+    BEFORE UPDATE ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_immutability_guard();
+
+-- Stamp claim time on claim; on freelancer removal, reset to backlog (re-enter the "New" backlog).
+CREATE OR REPLACE FUNCTION projects.fn_ticket_claim_before()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Claim: freelancer attaches themselves (or status flips to 'claimed')
+    IF (OLD.current_assignee_id IS NULL AND NEW.current_assignee_id IS NOT NULL)
+        OR (OLD.status <> 'claimed'::ticket_status AND NEW.status = 'claimed'::ticket_status) THEN
+        NEW.claimed_at := now();
+    END IF;
+
+    -- Freelancer removed mid-work: send the ticket back to the backlog.
+    IF OLD.current_assignee_id IS NOT NULL AND NEW.current_assignee_id IS NULL THEN
+        NEW.status := 'backlog'::ticket_status;
+        NEW.claimed_at := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_ticket_claim_before
+    BEFORE UPDATE OF current_assignee_id, status ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_claim_before();
+
+-- Escrow money movement (funds delegated to finance.* SECURITY DEFINER helpers in 0009).
+CREATE OR REPLACE FUNCTION projects.fn_ticket_escrow_sync()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Claim -> move ticket funds into the escrow pool (held).
+    IF (OLD.current_assignee_id IS NULL AND NEW.current_assignee_id IS NOT NULL)
+        OR (OLD.status <> 'claimed'::ticket_status AND NEW.status = 'claimed'::ticket_status) THEN
+        PERFORM finance.fn_hold_ticket_escrow(NEW.id);
+    END IF;
+
+    -- Stage-completion approval -> release payout to the payee.
+    IF OLD.status <> 'completed'::ticket_status AND NEW.status = 'completed'::ticket_status THEN
+        PERFORM finance.fn_release_ticket_escrow(NEW.id);
+    END IF;
+
+    -- Freelancer removed mid-work -> release held escrow to the removed freelancer.
+    IF OLD.current_assignee_id IS NOT NULL AND NEW.current_assignee_id IS NULL THEN
+        PERFORM finance.fn_release_ticket_escrow(NEW.id);
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, finance, org, auth;
+
+CREATE OR REPLACE TRIGGER trg_ticket_escrow_sync
+    AFTER UPDATE OF current_assignee_id, status ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_escrow_sync();
+
+-- Deletion protocol: unclaimed -> delete freely; claimed -> release escrowed funds first, then delete
+-- (prevents further client charges). Releasing before the row is removed keeps the ledger intact.
+CREATE OR REPLACE FUNCTION projects.fn_ticket_delete_protocol()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.current_assignee_id IS NOT NULL
+        OR EXISTS (
+            SELECT 1 FROM finance.escrows e
+            WHERE e.ticket_id = OLD.id AND e.status = 'held'
+        ) THEN
+        PERFORM finance.fn_release_ticket_escrow(OLD.id);
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, finance, org, auth;
+
+CREATE OR REPLACE TRIGGER trg_ticket_delete_protocol
+    BEFORE DELETE ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_ticket_delete_protocol();
 -- #endregion
 
 -- #region 5. Ticket History Table (Audit Trail Ledger)
@@ -448,3 +636,246 @@ CREATE TABLE projects.project_application_targets (
     CONSTRAINT project_application_targets_pkey PRIMARY KEY (id),
     CONSTRAINT pat_application_id_fkey FOREIGN KEY (application_id) REFERENCES projects.project_applications (id) ON DELETE CASCADE
 );
+
+-- #region Stage lifecycle & structural-variation enforcement
+
+-- Reordering is locked once a stage has been started or claimed; inner ticket sequence is preserved
+-- automatically since only project_stages.sort_order changes (ticket rows are untouched).
+CREATE OR REPLACE FUNCTION projects.fn_stage_reorder_lock()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.sort_order IS DISTINCT FROM OLD.sort_order THEN
+        IF OLD.status NOT IN ('open'::stage_status, 'assigned'::stage_status)
+            OR EXISTS (
+                SELECT 1 FROM projects.tickets t
+                WHERE t.current_stage_id = OLD.id
+                    AND t.status <> 'backlog'::ticket_status
+            )
+            OR EXISTS (
+                SELECT 1 FROM projects.stage_assignments sa
+                WHERE sa.project_stage_id = OLD.id
+            ) THEN
+            RAISE EXCEPTION 'Stages that have already been started or claimed cannot be reordered.';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_stage_reorder_lock
+    BEFORE UPDATE OF sort_order ON projects.project_stages
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_stage_reorder_lock();
+
+-- Deleting a stage releases held escrow for its active tickets and scrubs the stage id from any
+-- other ticket that lists it as a required prerequisite.
+CREATE OR REPLACE FUNCTION projects.fn_stage_delete_cascade()
+RETURNS TRIGGER AS $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN
+        SELECT id FROM projects.tickets WHERE current_stage_id = OLD.id
+    LOOP
+        PERFORM finance.fn_release_ticket_escrow(r.id);
+    END LOOP;
+
+    UPDATE projects.tickets t
+    SET required_stages = COALESCE((
+            SELECT jsonb_agg(elem)
+            FROM jsonb_array_elements(t.required_stages) elem
+            WHERE elem->>'stage_id' <> OLD.id::text
+        ), '[]'::jsonb)
+    WHERE EXISTS (
+        SELECT 1 FROM jsonb_array_elements(t.required_stages) e
+        WHERE e->>'stage_id' = OLD.id::text
+    );
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, finance, org, auth;
+
+CREATE OR REPLACE TRIGGER trg_stage_delete_cascade
+    BEFORE DELETE ON projects.project_stages
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_stage_delete_cascade();
+
+-- Structural project variations: enforce the ticket/stage cardinality caps at write time.
+CREATE OR REPLACE FUNCTION projects.fn_enforce_structure_variation()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_variation projects.structure_variation;
+    v_ticket_count integer;
+    v_stage_count integer;
+BEGIN
+    SELECT structure_variation INTO v_variation
+    FROM projects.projects WHERE id = NEW.project_id;
+
+    IF v_variation IS NULL OR v_variation = 'standard'::projects.structure_variation THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT count(*) INTO v_ticket_count FROM projects.tickets WHERE project_id = NEW.project_id;
+    SELECT count(*) INTO v_stage_count FROM projects.project_stages WHERE project_id = NEW.project_id;
+
+    IF TG_OP = 'INSERT' AND TG_TABLE_NAME = 'tickets' THEN
+        v_ticket_count := v_ticket_count + 1;
+    ELSIF TG_OP = 'INSERT' AND TG_TABLE_NAME = 'project_stages' THEN
+        v_stage_count := v_stage_count + 1;
+    END IF;
+
+    IF v_variation = 'one_off'::projects.structure_variation AND v_ticket_count > 1 THEN
+        RAISE EXCEPTION 'One-off projects are limited to a single ticket.';
+    ELSIF v_variation = 'single_task'::projects.structure_variation
+        AND (v_stage_count > 1 OR v_ticket_count > 1) THEN
+        RAISE EXCEPTION 'Single-task projects are limited to exactly one stage and one ticket.';
+    ELSIF v_variation = 'single_stage'::projects.structure_variation AND v_stage_count > 1 THEN
+        RAISE EXCEPTION 'Single-stage pipelines are limited to exactly one lifecycle stage.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_enforce_structure_variation_tickets
+    BEFORE INSERT ON projects.tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_enforce_structure_variation();
+
+CREATE OR REPLACE TRIGGER trg_enforce_structure_variation_stages
+    BEFORE INSERT ON projects.project_stages
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_enforce_structure_variation();
+-- #endregion
+
+-- #region Workload-intensity dispute loop
+
+CREATE TABLE projects.ticket_workload_reports (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id uuid NOT NULL REFERENCES projects.tickets(id) ON DELETE CASCADE,
+    reporter_user_id uuid NOT NULL REFERENCES org.users_public(user_id),
+    claimed_intensity numeric(4,2),
+    reported_intensity numeric(4,2),
+    reason text NOT NULL,
+    status projects.workload_report_status NOT NULL DEFAULT 'open'::projects.workload_report_status,
+    hidden_until timestamp with time zone,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    resolved_at timestamp with time zone
+);
+
+CREATE INDEX idx_workload_reports_ticket ON projects.ticket_workload_reports (ticket_id);
+
+CREATE INDEX idx_workload_reports_sweep ON projects.ticket_workload_reports (status, hidden_until);
+
+-- Filing a report suspends active work: the ticket is hidden for a configurable window.
+CREATE OR REPLACE FUNCTION projects.fn_open_workload_report()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_hours integer;
+BEGIN
+    SELECT (value #>> '{}')::integer INTO v_hours
+    FROM security.platform_params
+    WHERE key = 'workload_report_window_hours';
+    v_hours := COALESCE(v_hours, 48);
+
+    UPDATE projects.tickets
+    SET status = 'reported_hidden'::ticket_status,
+        hidden_until = now() + make_interval(hours => v_hours),
+        workload_report_id = NEW.id
+    WHERE id = NEW.ticket_id;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, security;
+
+CREATE OR REPLACE TRIGGER trg_open_workload_report
+    AFTER INSERT ON projects.ticket_workload_reports
+    FOR EACH ROW
+    EXECUTE FUNCTION projects.fn_open_workload_report();
+
+-- Sweep RPC (called by an Edge Function / external cron): if the client did not adjust the
+-- workload intensity within the window, apply the configurable client penalty and resume the ticket.
+CREATE OR REPLACE FUNCTION projects.fn_resolve_expired_workload_reports()
+RETURNS integer AS $$
+DECLARE
+    r record;
+    v_sev numeric;
+    v_count integer := 0;
+    v_subject_type text;
+    v_subject_id uuid;
+BEGIN
+    SELECT (value #>> '{}')::numeric INTO v_sev
+    FROM security.platform_params WHERE key = 'client_no_adjust_penalty';
+    v_sev := COALESCE(v_sev, 0);
+
+    FOR r IN
+        SELECT wr.id AS report_id, wr.ticket_id, p.owner_user_id, p.client_business_id
+        FROM projects.ticket_workload_reports wr
+        JOIN projects.tickets t ON t.id = wr.ticket_id
+        JOIN projects.projects p ON p.id = t.project_id
+        WHERE wr.status = 'open'::projects.workload_report_status
+            AND wr.hidden_until IS NOT NULL
+            AND wr.hidden_until <= now()
+    LOOP
+        UPDATE projects.ticket_workload_reports
+        SET status = 'expired_penalized'::projects.workload_report_status, resolved_at = now()
+        WHERE id = r.report_id;
+
+        UPDATE projects.tickets
+        SET status = 'in_progress'::ticket_status, hidden_until = NULL
+        WHERE id = r.ticket_id;
+
+        IF r.client_business_id IS NOT NULL THEN
+            v_subject_type := 'business'; v_subject_id := r.client_business_id;
+        ELSE
+            v_subject_type := 'user'; v_subject_id := r.owner_user_id;
+        END IF;
+
+        INSERT INTO security.penalties (
+            subject_type, subject_id, penalty_type, source_type, source_id, severity, reason
+        )
+        VALUES (
+            v_subject_type, v_subject_id, 'trust_score', 'workload_report', r.report_id, v_sev,
+            'Client failed to adjust workload intensity within the required window.'
+        );
+
+        v_count := v_count + 1;
+    END LOOP;
+
+    RETURN v_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, security;
+
+-- Audit outcome: a report found bad-faith / unsubstantiated penalizes the reporter's discovery rank.
+CREATE OR REPLACE FUNCTION projects.fn_flag_bad_faith_report(p_report_id uuid)
+RETURNS void AS $$
+DECLARE
+    v_sev numeric;
+    v_reporter uuid;
+    v_ticket uuid;
+BEGIN
+    SELECT (value #>> '{}')::numeric INTO v_sev
+    FROM security.platform_params WHERE key = 'freelancer_bad_faith_penalty';
+    v_sev := COALESCE(v_sev, 0);
+
+    SELECT reporter_user_id, ticket_id INTO v_reporter, v_ticket
+    FROM projects.ticket_workload_reports WHERE id = p_report_id;
+
+    UPDATE projects.ticket_workload_reports
+    SET status = 'dismissed_bad_faith'::projects.workload_report_status, resolved_at = now()
+    WHERE id = p_report_id;
+
+    UPDATE projects.tickets
+    SET status = 'in_progress'::ticket_status, hidden_until = NULL
+    WHERE id = v_ticket;
+
+    INSERT INTO security.penalties (
+        subject_type, subject_id, penalty_type, source_type, source_id, severity, reason
+    )
+    VALUES (
+        'freelancer', v_reporter, 'discovery_rank', 'workload_report', p_report_id, v_sev,
+        'Workload-intensity report audited as bad-faith / unsubstantiated.'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, projects, security;
+-- #endregion

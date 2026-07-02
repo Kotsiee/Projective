@@ -7,7 +7,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { TicketsServiceBackend } from '@features/dashboard/projects/services/TicketsServiceBackend.ts';
-import { UpdateTicketRequestSchema } from 'packages/types/src/entities/projects/request.ts';
+import { UpdateTicketRequestSchema } from '@projective/types';
 // #endregion
 
 export const handler = define.handlers({

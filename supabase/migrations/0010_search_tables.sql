@@ -19,7 +19,8 @@ rating_average numeric(3,2) DEFAULT 0.0,
     rating_count integer DEFAULT 0,
     current_workload_intensity integer DEFAULT 0,
     available_since timestamp with time zone,
-    
+    discovery_penalty numeric(6,2) DEFAULT 0,
+
     is_active boolean DEFAULT true,
     updated_at timestamp with time zone DEFAULT now(),
     PRIMARY KEY (entity_id, entity_type)

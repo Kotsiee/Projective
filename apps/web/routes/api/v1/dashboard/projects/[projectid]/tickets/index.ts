@@ -8,7 +8,7 @@
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
 import { TicketsServiceBackend } from '@features/dashboard/projects/services/TicketsServiceBackend.ts';
-import { CreateTicketRequestSchema } from 'packages/types/src/entities/projects/request.ts';
+import { CreateTicketRequestSchema } from '@projective/types';
 // #endregion
 
 export const handler = define.handlers({

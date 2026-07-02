@@ -8,7 +8,7 @@ import { useEffect, useMemo } from 'preact/hooks';
 import { Kanban, KanbanFieldProps } from '@projective/charts';
 import { ColumnDef, DataDisplay } from '@projective/data';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
-import { TicketStatus } from 'packages/types/src/entities/projects/enums.ts';
+import { TicketStatus } from '@projective/types';
 // #endregion
 
 // #region Interfaces

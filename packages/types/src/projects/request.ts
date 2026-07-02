@@ -8,6 +8,7 @@ import {
 	IPOptionMode,
 	ProjectFormat,
 	ProjectStatus,
+	StructureVariation,
 	TicketStatus,
 	TimelinePreset,
 } from './enums.ts';
@@ -29,6 +30,8 @@ export const CreateProjectRequestSchema = z.object({
 	timeline_preset: z.enum(Object.values(TimelinePreset) as [string, ...string[]]).default(
 		TimelinePreset.Sequential,
 	),
+	structure_variation: z.enum(Object.values(StructureVariation) as [string, ...string[]])
+		.default(StructureVariation.Standard),
 	nda_required: z.boolean().default(false),
 	ip_ownership_mode: z.enum(Object.values(IPOptionMode) as [string, ...string[]]).default(
 		IPOptionMode.ProjectivePartner,
@@ -69,6 +72,8 @@ export const CreateTicketRequestSchema = z.object({
 	})).optional(),
 	workload_intensity: z.number().positive().optional(),
 	due_date: z.string().nullable().optional(),
+	unit_price_cents: z.number().int().nonnegative().nullable().optional(),
+	sort_order: z.number().int().nullable().optional(),
 });
 
 export type CreateTicketRequest = z.infer<typeof CreateTicketRequestSchema>;
@@ -81,5 +86,21 @@ export const UpdateTicketRequestSchema = CreateTicketRequestSchema.partial().ext
 });
 
 export type UpdateTicketRequest = z.infer<typeof UpdateTicketRequestSchema>;
+
+// #endregion
+
+// #region 3. WORKLOAD REPORT REQUESTS
+
+/**
+ * @description Schema for a freelancer filing a workload-intensity mismatch report against a ticket.
+ */
+export const CreateWorkloadReportRequestSchema = z.object({
+	ticket_id: z.uuid(),
+	claimed_intensity: z.number().optional(),
+	reported_intensity: z.number().optional(),
+	reason: z.string().min(1),
+});
+
+export type CreateWorkloadReportRequest = z.infer<typeof CreateWorkloadReportRequestSchema>;
 
 // #endregion

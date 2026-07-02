@@ -86,7 +86,23 @@ ALTER TABLE projects.submission_files ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE projects.tickets ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE projects.ticket_workload_reports ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE projects.waitlists ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE finance.escrows ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE finance.spending_limits ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE finance.invoice_line_items ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE finance.contribution_agreements ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE finance.payout_splits ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE security.penalties ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE security.platform_params ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE reviews.entity_reviews ENABLE ROW LEVEL SECURITY;
 
