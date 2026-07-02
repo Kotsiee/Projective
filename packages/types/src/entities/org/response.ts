@@ -10,7 +10,7 @@ export const UserUISettingsSchema = z.object({
 export type UserUISettings = z.infer<typeof UserUISettingsSchema>;
 
 export const UserPreferencesResponseSchema = z.object({
-	user_id: z.string().uuid(),
+	user_id: z.uuid(),
 	theme: z.enum(['light', 'dark', 'system']),
 	notification_email: z.boolean(),
 	notification_push: z.boolean(),
@@ -20,10 +20,10 @@ export const UserPreferencesResponseSchema = z.object({
 export type UserPreferencesResponse = z.infer<typeof UserPreferencesResponseSchema>;
 
 export const BookmarkResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
+	.extend(TimestampedSchema.shape)
 	.extend({
-		user_id: z.string().uuid(),
+		user_id: z.uuid(),
 		entity_type: z.enum(Object.values(BookmarkEntityType) as [string, ...string[]]),
-		entity_id: z.string().uuid(),
+		entity_id: z.uuid(),
 	});
 export type BookmarkResponse = z.infer<typeof BookmarkResponseSchema>;

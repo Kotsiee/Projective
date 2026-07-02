@@ -1,6 +1,6 @@
 # Selected Codebase Context
 
-> Included paths: ./apps/web/features/dashboard/projects, ./packages/charts
+> Included paths: ./apps/web/features/dashboard/projects, ./packages/fields
 
 ## Project Tree (Selected)
 
@@ -8,10 +8,11 @@
 ./apps/web/features/dashboard/projects/
   projects/
   components/
-  new/
+  modals/
   NewProjectModal.tsx
   NewStageModal.tsx
   NewTicketModal.tsx
+  TicketModal.tsx
   project/
   board/
   BoardDataView.tsx
@@ -53,59 +54,83 @@
   services/
   ProjectsService.ts
   ProjectsServiceBackend.ts
+  StagesService.ts
+  StagesServiceBackend.ts
+  TicketsService.ts
+  TicketsServiceBackend.ts
   styles/
   components/
-  new/
+  modals/
   project/
   stage/
   layouts/
   pages/
   stage/
-./packages/charts/
-  charts/
+./packages/fields/
+  fields/
   deno.json
   mod.ts
   src/
   components/
-  flow/
-  gantt/
-  GanttChart.tsx
-  GanttHeader.tsx
-  GanttTaskCard.tsx
-  GanttTaskList.tsx
-  GanttTimeline.tsx
-  GanttTooltip.tsx
-  kanban/
-  index.ts
-  Kanban.tsx
-  KanbanCard.tsx
-  KanbanField.tsx
-  pie/
+  ComboboxField.tsx
+  DateField.tsx
+  datetime/
+  Calendar.tsx
+  TimeClock.tsx
+  DateTimeField.tsx
+  FileDrop.tsx
+  HelpTooltip.tsx
+  MoneyField.tsx
+  RichTextField.tsx
+  SelectField.tsx
+  SliderField.tsx
+  TagInput.tsx
+  TextField.tsx
+  TimeField.tsx
   core/
-  gantt/
-  gantt-manager.ts
-  header-utils.ts
-  interaction/
-  renderer/
-  store.ts
-  time-scale.ts
-  pie/
   hooks/
-  useKanbanDnD.ts
+  useCurrencyMask.ts
+  useFieldState.ts
+  useFileProcessor.ts
+  useFocusNext.ts
+  useGlobalDrag.ts
+  useInteraction.ts
+  useSelectState.ts
+  useSliderState.ts
   styles/
-  gantt/
-  kanban/
-  pie/
+  components/
+  fields/
+  overlays/
+  wrappers/
   types/
-  gantt.ts
-  kanban.ts
-  utils/
-  theme-bridge.ts
+  components/
+  combobox-field.ts
+  date-field.ts
+  datetime-field.ts
+  file-drop.ts
+  money-field.ts
+  rich-text-field.ts
+  select-field.ts
+  slider-field.ts
+  tag-input.ts
+  text-field.ts
+  time-field.ts
+  core.ts
+  file.ts
+  wrappers.ts
+  wrappers/
+  AdornmentWrapper.tsx
+  EffectWrapper.tsx
+  FieldArrayWrapper.tsx
+  GlobalFileDrop.tsx
+  LabelWrapper.tsx
+  MessageWrapper.tsx
+  SkeletonWrapper.tsx
 ```
 
 ## File Contents
 
-### File: apps\web\features\dashboard\projects\components\new\NewProjectModal.tsx
+### File: apps\web\features\dashboard\projects\components\modals\NewProjectModal.tsx
 
 ```tsx
 /**
@@ -412,7 +437,7 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 
 ```
 
-### File: apps\web\features\dashboard\projects\components\new\NewStageModal.tsx
+### File: apps\web\features\dashboard\projects\components\modals\NewStageModal.tsx
 
 ```tsx
 /**
@@ -422,6 +447,7 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 
 // #region Imports
 import { useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
 import {
 	Accordion,
 	AccordionContent,
@@ -433,22 +459,18 @@ import {
 	toast,
 } from '@projective/ui';
 import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
-import { IPOptionMode } from '@projective/types';
+import { DateTime, IPOptionMode } from '@projective/types';
 import { useProjectContext } from '../../contexts/ProjectContext.tsx';
-import { DateTime } from 'packages/types/src/core/datetime.ts';
-import { ProjectsService } from '../../services/ProjectsService.ts';
+import { StagesService } from '../../services/StagesService.ts';
 // #endregion
 
-// #region Interfaces
 export interface NewStageModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	projectId: string;
-	projectFormat?: 'one_off' | 'pipeline';
+	projectFormat?: 'one_off' | 'pipeline' | string;
 }
-// #endregion
 
-// #region Component
 export default function NewStageModal(
 	{ isOpen, onClose, projectId, projectFormat }: NewStageModalProps,
 ) {
@@ -462,19 +484,34 @@ export default function NewStageModal(
 	const defaultTasks = useSignal<string[]>([]);
 	const fileUploadRequired = useSignal('false');
 
-	// One-Off Specific
 	const startDate = useSignal<DateTime | undefined>(undefined);
 	const endDate = useSignal<DateTime | undefined>(undefined);
 
-	// Advanced
 	const ipModeOverride = useSignal<string>('none');
 	const ndaRequired = useSignal('false');
-
 	const isSubmitting = useSignal(false);
 	// #endregion
 
-	// #region Handlers
+	useEffect(() => {
+		if (isOpen) {
+			name.value = '';
+			description.value = null;
+			skills.value = [];
+			defaultTasks.value = [];
+			fileUploadRequired.value = 'false';
+			startDate.value = undefined;
+			endDate.value = undefined;
+			ipModeOverride.value = 'none';
+			ndaRequired.value = 'false';
+		}
+	}, [isOpen]);
+
 	const handleSubmit = async () => {
+		if (!projectId) {
+			toast.error('Unable to locate Project ID.');
+			return;
+		}
+
 		if (!name.value.trim()) {
 			toast.error('Stage Name is required.');
 			return;
@@ -489,16 +526,19 @@ export default function NewStageModal(
 				skills: skills.value,
 				default_tasks: defaultTasks.value,
 				file_upload_required: fileUploadRequired.value === 'true',
-				start_date: startDate.value,
-				end_date: endDate.value,
+				// FIX: Cast DateTime bounds to ISO Strings for Zod
+				// deno-lint-ignore no-explicit-any
+				start_date: startDate.value ? new Date(startDate.value as any).toISOString() : null,
+				// deno-lint-ignore no-explicit-any
+				end_date: endDate.value ? new Date(endDate.value as any).toISOString() : null,
 				ip_ownership_override: ipModeOverride.value !== 'none' ? ipModeOverride.value : null,
 				nda_required: ndaRequired.value === 'true',
 			};
 
-			await ProjectsService.createStage(projectId, payload);
+			await StagesService.createStage(projectId, payload);
 
 			toast.success('Stage created successfully!');
-			refresh(); // Refresh project context to pull the new stage into the sidebar
+			refresh();
 			onClose();
 		} catch (err: unknown) {
 			console.error(err);
@@ -507,9 +547,7 @@ export default function NewStageModal(
 			isSubmitting.value = false;
 		}
 	};
-	// #endregion
 
-	// #region Options
 	const booleanOptions = [
 		{ value: 'true', label: 'Yes' },
 		{ value: 'false', label: 'No' },
@@ -520,7 +558,6 @@ export default function NewStageModal(
 		{ value: IPOptionMode.ExclusiveTransfer, label: 'Exclusive Transfer' },
 		{ value: IPOptionMode.LicensedUse, label: 'Licensed Use' },
 	];
-	// #endregion
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} title='Create New Stage'>
@@ -537,7 +574,6 @@ export default function NewStageModal(
 				}
 			>
 				<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-					{/* Core Info */}
 					<TextField
 						label='Stage Name'
 						value={name}
@@ -579,14 +615,12 @@ export default function NewStageModal(
 						placeholder='e.g., Setup environment, Review docs'
 					/>
 
-					{/* Conditionally Rendered Dates */}
 					{projectFormat === 'one_off' && (
 						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 							<DateField
 								label='Start Date'
 								value={startDate.value}
-								onChange={(v) =>
-									startDate.value = v}
+								onChange={(v) => startDate.value = v}
 							/>
 							<DateField
 								label='Target End Date'
@@ -596,7 +630,6 @@ export default function NewStageModal(
 						</div>
 					)}
 
-					{/* Advanced Settings */}
 					<Accordion type='single' collapsible>
 						<AccordionItem value='advanced'>
 							<AccordionTrigger>Advanced Settings</AccordionTrigger>
@@ -638,107 +671,189 @@ export default function NewStageModal(
 		</Modal>
 	);
 }
-// #endregion
 
 ```
 
-### File: apps\web\features\dashboard\projects\components\new\NewTicketModal.tsx
+### File: apps\web\features\dashboard\projects\components\modals\NewTicketModal.tsx
 
 ```tsx
-import '../../styles/components/new/new-ticket-modal.css';
+import '../../styles/components/modals/new-ticket-modal.css';
 import { useSignal } from '@preact/signals';
 import { Button, Modal, ModalLayout, ToggleButton, ToggleButtonGroup } from '@projective/ui';
-import { DateField, SelectField, TextField } from '@projective/fields';
-import { DateTime } from '@projective/types';
+import { DateField, TextField } from '@projective/fields';
+import { DateTime, TicketStatus } from '@projective/types';
+import { IconGripVertical } from '@tabler/icons-preact';
+import { useEffect } from 'preact/hooks';
 
 interface NewTicketModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	availableStages: { label: string; value: string }[];
+	preselectedStageId?: string | null;
+	// deno-lint-ignore no-explicit-any
 	onSubmit: (payload: any) => void;
 }
 
+interface DraggableStage {
+	id: string;
+	label: string;
+	selected: boolean;
+}
+
 export function NewTicketModal(
-	{ isOpen, onClose, availableStages, onSubmit }: NewTicketModalProps,
+	{ isOpen, onClose, availableStages, preselectedStageId, onSubmit }: NewTicketModalProps,
 ) {
-	// Form State Signals
 	const title = useSignal('');
 	const description = useSignal('');
-	const selectedStages = useSignal<string[]>(availableStages.map((s) => s.value)); // All selected by default
-	const intensityTier = useSignal<'Low' | 'Standard' | 'High'>('Standard'); // Standard default
+	const intensityTier = useSignal<'Low' | 'Standard' | 'High'>('Standard');
 	const dueDate = useSignal<DateTime | null>(null);
 
+	const stagesList = useSignal<DraggableStage[]>([]);
+	const draggedIndex = useSignal<number | null>(null);
+
+	useEffect(() => {
+		if (isOpen) {
+			stagesList.value = availableStages.map((stage) => ({
+				id: stage.value,
+				label: stage.label,
+				selected: true,
+			}));
+
+			title.value = '';
+			description.value = '';
+			intensityTier.value = 'Standard';
+			dueDate.value = null;
+		}
+	}, [isOpen, availableStages]);
+
 	const handleSubmit = () => {
+		const required_stages = stagesList.value
+			.filter((s) => s.selected)
+			.map((s, index) => ({
+				stage_id: s.id,
+				order: index,
+			}));
+
+		// FIX: The Kanban board maps the backlog to the ID "new". Zod fails this because it expects a UUID.
+		// Here we catch it and force it back to null for the DB.
+		const resolvedStageId = (!preselectedStageId || preselectedStageId === 'new')
+			? null
+			: preselectedStageId;
+
 		onSubmit({
 			title: title.value,
-			description: description.value,
-			stages: selectedStages.value,
-			intensityTier: intensityTier.value,
-			dueDate: dueDate.value,
+			text_description: description.value,
+			description: {},
+			required_stages,
+			workload_intensity: intensityTier.value === 'Low'
+				? 0.5
+				: intensityTier.value === 'High'
+				? 2.0
+				: 1.0,
+			// deno-lint-ignore no-explicit-any
+			due_date: dueDate.value ? new Date(dueDate.value as any).toISOString() : null,
+			current_stage_id: resolvedStageId,
+			status: TicketStatus.Backlog,
 		});
-		onClose();
 	};
 
+	// #region Local Drag & Drop Handlers
+	const handleDragStart = (e: DragEvent, index: number) => {
+		draggedIndex.value = index;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', index.toString());
+		}
+	};
+
+	const handleDragOver = (e: DragEvent, index: number) => {
+		e.preventDefault();
+		if (draggedIndex.value === null || draggedIndex.value === index) return;
+
+		const list = [...stagesList.value];
+		const draggedItem = list[draggedIndex.value];
+
+		list.splice(draggedIndex.value, 1);
+		list.splice(index, 0, draggedItem);
+
+		draggedIndex.value = index;
+		stagesList.value = list;
+	};
+
+	const handleDrop = () => draggedIndex.value = null;
+
+	const toggleStageSelection = (index: number) => {
+		const list = [...stagesList.value];
+		list[index].selected = !list[index].selected;
+		stagesList.value = list;
+	};
+	// #endregion
+
 	return (
-		<Modal
-			isOpen={isOpen}
-			onClose={onClose}
-			title='Create New Ticket'
-			style={{ width: '600px', maxWidth: '90vw' }}
-		>
+		<Modal isOpen={isOpen} onClose={onClose} title='Create New Ticket'>
 			<ModalLayout
 				footer={
-					<div>
-						<Button ghost onClick={onClose}>Cancel</Button>
-						<Button variant='primary' onClick={handleSubmit}>Create Ticket</Button>
-					</div>
+					<>
+						<Button variant='secondary' ghost onClick={onClose}>Cancel</Button>
+						<Button variant='primary' onClick={handleSubmit} disabled={!title.value.trim()}>
+							Create Ticket
+						</Button>
+					</>
 				}
 			>
 				<div class='new-ticket-form'>
 					<TextField
 						label='Ticket Title'
-						value={title}
-						onChange={(v) => title.value = String(v)}
-						placeholder='e.g. Implement Navigation Header'
+						value={title.value}
+						onChange={(v) => title.value = v}
+						required
+						placeholder='e.g., Design Homepage Hero Section'
 					/>
 
 					<TextField
 						label='Description'
-						value={description}
-						onChange={(v) => description.value = String(v)}
+						value={description.value}
+						onChange={(v) => description.value = v}
 						multiline
-						placeholder='Detail the acceptance criteria...'
+						placeholder='Add any details, links, or requirements here...'
 						style={{ minHeight: '120px' }}
 					/>
 
-					{/* FileDropWrapper would go here for attachments. Placeholder: */}
 					<div class='new-ticket-form__section'>
-						<span class='new-ticket-form__section-label'>Attachments</span>
-						<div
-							style={{
-								border: '1px dashed var(--border-color)',
-								padding: '2rem',
-								textAlign: 'center',
-								borderRadius: 'var(--border-radius)',
-								color: 'var(--text-muted)',
-							}}
-						>
-							Drag and drop files here, or click to browse
+						<span class='new-ticket-form__section-label'>Required Stages (Drag to reorder)</span>
+						<div class='new-ticket-stage-list'>
+							{stagesList.value.map((stage, index) => (
+								<div
+									key={stage.id}
+									class={`new-ticket-stage-item ${draggedIndex.value === index ? 'dragging' : ''} ${
+										!stage.selected ? 'disabled' : ''
+									}`}
+									draggable={true}
+									onDragStart={(e) => handleDragStart(e, index)}
+									onDragOver={(e) => handleDragOver(e, index)}
+									onDragEnd={handleDrop}
+									onDrop={handleDrop}
+								>
+									<div class='new-ticket-stage-item__drag-handle'>
+										<IconGripVertical size={16} />
+									</div>
+									<input
+										type='checkbox'
+										checked={stage.selected}
+										onChange={() => toggleStageSelection(index)}
+										class='new-ticket-stage-item__checkbox'
+									/>
+									<span class='new-ticket-stage-item__label'>{stage.label}</span>
+								</div>
+							))}
 						</div>
 					</div>
-
-					<SelectField
-						label='Target Stages'
-						options={availableStages}
-						multiple
-						value={selectedStages.value}
-						onChange={(v) => selectedStages.value = v as string[]}
-					/>
 
 					<div class='new-ticket-form__section'>
 						<span class='new-ticket-form__section-label'>Intensity Tier (Wi Multiplier)</span>
 						<ToggleButtonGroup
 							value={intensityTier.value}
+							// deno-lint-ignore no-explicit-any
 							onChange={(v) => intensityTier.value = v as any}
 							optional={false}
 							fullWidth
@@ -749,12 +864,10 @@ export function NewTicketModal(
 						</ToggleButtonGroup>
 					</div>
 
-					<DateField
-						label='Due Date (Optional)'
-						variant='input'
-						value={dueDate.value}
-						onChange={(d) => dueDate.value = d}
-					/>
+					<div class='new-ticket-form__section'>
+						<span class='new-ticket-form__section-label'>Deadline (Optional)</span>
+						<DateField label='Due Date' value={dueDate.value} onChange={(v) => dueDate.value = v} />
+					</div>
 				</div>
 			</ModalLayout>
 		</Modal>
@@ -763,20 +876,72 @@ export function NewTicketModal(
 
 ```
 
+### File: apps\web\features\dashboard\projects\components\modals\TicketModal.tsx
+
+```tsx
+import '../../styles/components/new/ticket-modal.css';
+
+export function TicketModal() {
+	return (
+		<div class='ticket-modal'>
+			<div class='ticket-modal__header'>
+				<div class='ticket-modal__header-status'>
+				</div>
+				<div class='ticket-modal__header-title'>
+				</div>
+				<div class='ticket-modal__header-meta'>
+					Created, Created By, (if multiple project owners i.e., a business), Updated, Updated By,
+					Due (if any), Total Cost, Workload Intensity
+				</div>
+			</div>
+
+			<div class='ticket-modal__body'>
+				<div class='ticket-modal__body-view-mode'>
+					Details Attachments Financial Breakdown (Client only) - Shows full breakdown of costs,
+					including internal costs, profit margins, and any other financial details relevant to the
+					ticket.
+				</div>
+
+				<div class='ticket-modal__content'>
+					<div class='ticket-modal__content-description'>
+					</div>
+					<div class='ticket-modal__content-stages'>
+						Stage breakdown showing all stages, their current status, and any relevant details or
+						notes for each stage. This section provides a clear overview / timeline of the ticket's
+						progress through its lifecycle. Details include: Stage name, status, assigned team
+						members, start and end dates, and cost.
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+```
+
 ### File: apps\web\features\dashboard\projects\components\project\board\BoardDataView.tsx
 
 ```tsx
+/**
+ * @file BoardDataView.tsx
+ * @description Shared renderer for mapping tickets and stages to either a Kanban or Table view.
+ */
+
+// #region Imports
 import { useEffect, useMemo } from 'preact/hooks';
-import { Kanban, KanbanCardProps, KanbanFieldProps } from '@projective/charts';
+import { Kanban, KanbanFieldProps } from '@projective/charts';
 import { ColumnDef, DataDisplay } from '@projective/data';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
+import { TicketStatus } from 'packages/types/src/entities/projects/enums.ts';
+// #endregion
 
+// #region Interfaces
 export interface BoardTicket {
 	id: string;
 	title: string;
 	stageId: string;
 	stageName: string;
-	status: 'Backlog' | 'Todo' | 'In Progress' | 'In Review' | 'Completed' | 'Cancelled';
+	status: TicketStatus;
 	assigneeId: string | null;
 	assigneeName: string | null;
 	workloadIntensity: number;
@@ -800,9 +965,10 @@ interface BoardDataViewProps {
 	) => void;
 	onFieldMove: (sourceId: string, targetId: string, insertBefore: boolean) => void;
 	onAddStage: () => void;
+	onAddTicket?: (stageId: string | null) => void;
 }
+// #endregion
 
-// Columns for the DataDisplay Table
 const tableColumns: ColumnDef<BoardTicket>[] = [
 	{ id: 'title', field: 'title', label: 'Ticket Title', sortable: true, width: 250 },
 	{ id: 'stage', field: 'stageName', label: 'Stage', sortable: true, width: 150 },
@@ -816,7 +982,7 @@ const tableColumns: ColumnDef<BoardTicket>[] = [
 	},
 	{
 		id: 'wi',
-		field: (t) => t.workloadIntensity.toFixed(1),
+		field: (t) => t.workloadIntensity,
 		label: 'Intensity (Wi)',
 		sortable: true,
 		width: 100,
@@ -849,10 +1015,10 @@ export function BoardDataView({
 	onCardMove,
 	onFieldMove,
 	onAddStage,
+	onAddTicket,
 }: BoardDataViewProps) {
 	const { setCustomScrollEnabled } = useNavigationContext();
-	// 1. Define the mapper function FIRST so it's initialized before useMemo calls it.
-	// deno-lint-ignore no-explicit-any
+
 	const mapTicketToCard = (t: BoardTicket, orderIndex: number): any => {
 		const tags = [];
 		if (t.attachmentsScanned) {
@@ -863,7 +1029,7 @@ export function BoardDataView({
 		}
 		tags.push({
 			id: `wi-${t.id}`,
-			label: `Wi: ${t.workloadIntensity.toFixed(1)}`,
+			label: `Wi: ${t.workloadIntensity}`,
 			variant: 'solid',
 		});
 
@@ -874,9 +1040,8 @@ export function BoardDataView({
 		return {
 			id: t.id,
 			title: t.title,
-			description: `This ticket requires a workload intensity of ${
-				t.workloadIntensity.toFixed(1)
-			} and has ${t.revisionsRequested} revisions requested.`,
+			description:
+				`This ticket requires a workload intensity of ${t.workloadIntensity} and has ${t.revisionsRequested} revisions requested.`,
 			meta: `Created: ${dateString}`,
 			takenBy: t.assigneeName ? { name: t.assigneeName } : undefined,
 			order: orderIndex,
@@ -885,7 +1050,6 @@ export function BoardDataView({
 		};
 	};
 
-	// 2. Compute the fields safely using the initialized mapper.
 	const kanbanFields = useMemo<KanbanFieldProps[]>(() => {
 		const fieldsMap = new Map<string, KanbanFieldProps>();
 
@@ -896,7 +1060,8 @@ export function BoardDataView({
 				color: 'primary',
 				order: 0,
 				cards: [],
-				permissions: { canReorder: false },
+				permissions: { canReorder: false, canAddCard: isOwnerOrAdmin },
+				addCardLabel: 'New Ticket',
 			});
 
 			let orderCounter = 1;
@@ -917,35 +1082,61 @@ export function BoardDataView({
 				color: 'var(--success)',
 				order: 999,
 				cards: [],
-				permissions: { canReorder: false },
+				permissions: { canReorder: false, canAddCard: false },
 			});
 
 			tickets.forEach((t) => {
-				const targetField = t.status === 'Completed'
+				const targetField = t.status === TicketStatus.Completed
 					? 'Done'
-					: (t.status === 'Backlog' ? 'New' : t.stageId);
+					: (t.status === TicketStatus.Backlog ? 'New' : t.stageId);
 				const field = fieldsMap.get(targetField);
 
 				if (field) field.cards.push(mapTicketToCard(t, field.cards.length));
 			});
 		} else {
 			const statuses = [
-				{ id: 'Backlog', color: 'primary' },
-				{ id: 'Todo', color: 'secondary' },
-				{ id: 'In Progress', color: 'secondary' },
-				{ id: 'In Review', color: 'secondary' },
-				{ id: 'Completed', color: 'var(--success)' },
-				{ id: 'Cancelled', color: 'var(--danger)' },
+				{
+					id: TicketStatus.Backlog,
+					title: 'Backlog',
+					color: 'primary',
+					fields: { canAddCard: isOwnerOrAdmin },
+				},
+				{ id: TicketStatus.Todo, title: 'Todo', color: 'secondary', fields: { canAddCard: false } },
+				{
+					id: TicketStatus.InProgress,
+					title: 'In Progress',
+					color: 'secondary',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.InReview,
+					title: 'In Review',
+					color: 'secondary',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.Completed,
+					title: 'Completed',
+					color: 'var(--success)',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.Cancelled,
+					title: 'Cancelled',
+					color: 'var(--danger)',
+					fields: { canAddCard: false },
+				},
 			];
 
 			statuses.forEach((status, idx) => {
 				fieldsMap.set(status.id, {
 					id: status.id,
-					title: status.id,
+					title: status.title,
 					color: status.color,
 					order: idx,
 					cards: [],
-					permissions: { canReorder: false },
+					permissions: { canReorder: false, canAddCard: status.fields.canAddCard },
+					addCardLabel: status.id === TicketStatus.Backlog ? 'New Ticket' : 'Add Ticket',
 				});
 			});
 
@@ -962,13 +1153,17 @@ export function BoardDataView({
 		if (displayMode === 'kanban') {
 			setCustomScrollEnabled(true);
 		} else {
-			// Turn it off if they switch to the Table view
 			setCustomScrollEnabled(false);
 		}
-
-		// Cleanup: Always disable it when leaving the page entirely
 		return () => setCustomScrollEnabled(false);
 	}, [displayMode, setCustomScrollEnabled]);
+
+	const handleAddCardInternal = (fieldId: string) => {
+		if (onAddTicket) {
+			const sanitizedId = fieldId === 'New' || fieldId === TicketStatus.Backlog ? null : fieldId;
+			onAddTicket(sanitizedId);
+		}
+	};
 
 	if (displayMode === 'kanban') {
 		return (
@@ -978,6 +1173,7 @@ export function BoardDataView({
 					onCardClick={(card) => onCardClick(card.id)}
 					onCardMove={onCardMove}
 					onFieldMove={onFieldMove}
+					onAddCard={handleAddCardInternal}
 					onAddField={viewType === 'stages' && isOwnerOrAdmin ? onAddStage : undefined}
 					permissions={{ canAddField: viewType === 'stages' && isOwnerOrAdmin }}
 				/>
@@ -1004,9 +1200,22 @@ export function BoardDataView({
 ### File: apps\web\features\dashboard\projects\components\project\board\BoardHeader.tsx
 
 ```tsx
-import { DateTime } from '@projective/types';
+/**
+ * @file BoardHeader.tsx
+ * @description The top-level statistics, metadata, and toolbar display for the Project Board.
+ */
 
-// Shared interfaces can be extracted to a separate file, defining them here for completeness
+import { useSignal } from '@preact/signals';
+import { DateTime } from '@projective/types';
+import { Button } from '@projective/ui';
+import {
+	IconFilter,
+	IconSearch,
+	IconSortAscending,
+	IconSortDescending,
+} from '@tabler/icons-preact';
+
+// #region Interfaces
 export interface FiduciaryMetrics {
 	totalBudgetCents: number;
 	tvlEscrowCents: number;
@@ -1022,9 +1231,10 @@ export interface CapacityMetrics {
 interface BoardHeaderProps {
 	projectTitle: string;
 	projectFormat: string;
-	fiduciary: FiduciaryMetrics;
-	capacity: CapacityMetrics;
+	fiduciary?: FiduciaryMetrics;
+	capacity?: CapacityMetrics;
 }
+// #endregion
 
 const formatCurrency = (cents: number) => {
 	return (cents / 100).toLocaleString('en-US', {
@@ -1036,29 +1246,112 @@ const formatCurrency = (cents: number) => {
 export function BoardHeader(
 	{ projectTitle, projectFormat, fiduciary, capacity }: BoardHeaderProps,
 ) {
+	const isFilterOpen = useSignal(false);
+	const sortDesc = useSignal(true); // Toggle for Descending vs Ascending
+
+	// Fallback to 0 if metrics aren't fully resolved yet
+	const spent = fiduciary?.releasedBalanceCents ?? 0;
+	const activeTickets = capacity?.backlogQueueSize ?? 0;
+
 	return (
 		<header class='project-board__header'>
-			<div class='project-board__panel'>
-				<h1 class='project-board__title'>{projectTitle}</h1>
+			{/* 1. TOP ROW: Title & Metrics */}
+			<div class='project-board__header-top'>
+				<div class='project-board__panel'>
+					<h1 class='project-board__title'>{projectTitle}</h1>
+					<span class='project-board__subtitle'>
+						{projectFormat.replace('_', ' ').toUpperCase()}
+					</span>
+				</div>
+
+				<div class='project-board__details'>
+					<div class='project-board__details-section'>
+						<span class='project-board__details-label'>Tickets</span>
+						<div class='project-board__details-section__content'>
+							<BoardMetric name='New' rawValue={3} />
+							<BoardMetric name='Active' rawValue={activeTickets} />
+							<BoardMetric name='Total' rawValue={activeTickets + 3} />
+						</div>
+					</div>
+					<div class='project-board__details-section'>
+						<span class='project-board__details-label'>Budget</span>
+						<div class='project-board__details-section__content'>
+							<BoardMetric name='Avg.' rawValue={0} type='currency' />
+							<BoardMetric name='Spent' rawValue={spent} type='currency' />
+						</div>
+					</div>
+				</div>
 			</div>
 
-			<div class='project-board__details'>
-				<div class='project-board__details-section'>
-					<h3>Tickets</h3>
-					<div class='project-board__details-section__content'>
-						<BoardMetric name='New' rawValue={3} />
-						<BoardMetric name='Active' rawValue={5} />
-						<BoardMetric name='Total' rawValue={8} />
-					</div>
+			{/* 2. MIDDLE ROW: Toolbar */}
+			<div class='project-board__toolbar'>
+				<div class='project-board__search'>
+					<IconSearch size={18} class='project-board__search-icon' />
+					<input
+						type='text'
+						class='project-board__search-input'
+						placeholder='Search tickets by title or ID...'
+					/>
 				</div>
-				<div class='project-board__details-section'>
-					<h3>Budget</h3>
-					<div class='project-board__details-section__content'>
-						<BoardMetric name='Ave. Cost / Ticket' rawValue={98327} type='currency' />
-						<BoardMetric name='Spent' rawValue={3672353276} type='currency' />
-					</div>
+
+				<div class='project-board__toolbar-actions'>
+					<Button
+						variant='secondary'
+						onClick={() => sortDesc.value = !sortDesc.value}
+					>
+						{sortDesc.value ? <IconSortDescending size={18} /> : <IconSortAscending size={18} />}
+						Sort
+					</Button>
+					<Button
+						variant={isFilterOpen.value ? 'primary' : 'secondary'}
+						onClick={() => isFilterOpen.value = !isFilterOpen.value}
+					>
+						<IconFilter size={18} />
+						Filter
+					</Button>
 				</div>
 			</div>
+
+			{/* 3. BOTTOM ROW: Collapsible Filters */}
+			{isFilterOpen.value && (
+				<div class='project-board__filters'>
+					<div class='project-board__filter-group'>
+						<label>Status</label>
+						<select class='project-board__select'>
+							<option value='all'>All Statuses</option>
+							<option value='backlog'>Backlog</option>
+							<option value='todo'>Todo</option>
+							<option value='in_progress'>In Progress</option>
+							<option value='in_review'>In Review</option>
+							<option value='completed'>Completed</option>
+						</select>
+					</div>
+
+					<div class='project-board__filter-group'>
+						<label>Assignee</label>
+						<select class='project-board__select'>
+							<option value='all'>Anyone</option>
+							<option value='me'>Assigned to me</option>
+							<option value='unassigned'>Unassigned</option>
+						</select>
+					</div>
+
+					<div class='project-board__filter-group'>
+						<label>Start Date</label>
+						<input type='date' class='project-board__input' />
+					</div>
+
+					<div class='project-board__filter-group'>
+						<label>Last Updated</label>
+						<select class='project-board__select'>
+							<option value='any'>Any time</option>
+							<option value='today'>Today</option>
+							<option value='week'>Last 7 days</option>
+							<option value='month'>Last 30 days</option>
+						</select>
+					</div>
+				</div>
+			)}
 		</header>
 	);
 }
@@ -1075,9 +1368,9 @@ export function BoardMetric(
 	}
 
 	return (
-		<div class='project-board__details-metric'>
-			<p class='project-board__details-metric__name'>{name}</p>
-			<p class='project-board__details-metric__value'>{value}</p>
+		<div class='project-board__metric'>
+			<span class='project-board__metric-value'>{value}</span>
+			<span class='project-board__metric-name'>{name}</span>
 		</div>
 	);
 }
@@ -2961,30 +3254,77 @@ export default function ProjectsSidebar() {
 ### File: apps\web\features\dashboard\projects\contexts\ProjectContext.tsx
 
 ```tsx
+/**
+ * @file ProjectContext.tsx
+ * @description Global signal-based context for managing a single project and its board tickets.
+ */
+
 import { createContext } from 'preact';
 import { useContext, useEffect } from 'preact/hooks';
-import { useSignal } from '@preact/signals';
+import { Signal, useSignal } from '@preact/signals';
 import { ComponentChildren } from 'preact';
-import { ProjectDetails, ProjectState } from '../contracts/Projects.ts';
-import { ProjectsService } from '../services/ProjectsService.ts';
+import {
+	FullProjectResponse,
+	TicketResponse,
+	TicketStatus,
+	UpdateTicketRequest,
+} from '@projective/types';
 
-// 1. MUST BE EXPORTED to allow tunneling
+// #region 1. INTERFACES
+
+/**
+ * @interface ProjectState
+ * @description Re-establishes the exact runtime contract expected by the platform layouts.
+ */
+export interface ProjectState {
+	project_id: Signal<string | undefined>;
+	project: Signal<FullProjectResponse | null>;
+	tickets: Signal<TicketResponse[]>;
+	isLoading: Signal<boolean>;
+	error: Signal<string | null>;
+	refresh: () => Promise<void>;
+	loadTickets: (projectId: string) => Promise<void>;
+	moveTicket: (
+		ticketId: string,
+		newStageId: string | null,
+		newStatus: TicketStatus,
+	) => Promise<void>;
+}
+
+// #endregion
+
+// #region 2. CONTEXT INITIALIZATION
+
 export const ProjectContext = createContext<ProjectState | null>(null);
 
+// #endregion
+
+// #region 3. PROVIDER COMPONENT
+
+/**
+ * @function ProjectProvider
+ * @description Wraps layouts ensuring reactive sync boundaries match the layout pipelines.
+ */
 export function ProjectProvider(
 	{ id, children }: { id: string | undefined; children: ComponentChildren },
 ) {
-	const projectId = useSignal(id);
-	const project = useSignal<ProjectDetails | null>(null);
-	const isLoading = useSignal(false);
+	const projectId = useSignal<string | undefined>(id);
+	const project = useSignal<FullProjectResponse | null>(null);
+	const tickets = useSignal<TicketResponse[]>([]);
+	const isLoading = useSignal<boolean>(false);
 	const error = useSignal<string | null>(null);
 
+	// Multi-business/project switching dynamic guard rails
 	if (projectId.value !== id) {
 		projectId.value = id;
 		project.value = null;
+		tickets.value = [];
 		error.value = null;
 	}
 
+	/**
+	 * @description Fetches the project schema configuration.
+	 */
 	const fetchProject = async () => {
 		if (!projectId.value) return;
 
@@ -2992,43 +3332,105 @@ export function ProjectProvider(
 		error.value = null;
 
 		try {
-			const data = await ProjectsService.getProjectDetails(projectId.value);
+			const res = await fetch(`/api/v1/dashboard/projects/${projectId.value}`);
+			if (!res.ok) throw new Error(`Project fetch failed with status: ${res.status}`);
+
+			const data: FullProjectResponse = await res.json();
 			project.value = data;
-			// deno-lint-ignore no-explicit-any
 		} catch (err: any) {
-			console.error('Project Fetch Error:', err);
+			console.error('Project Context Fetch Error:', err);
 			error.value = err.message || 'An unexpected error occurred.';
 		} finally {
 			isLoading.value = false;
 		}
 	};
 
+	/**
+	 * @description Fetches the atomic workspace pipeline components.
+	 */
+	const loadTickets = async (pId: string) => {
+		try {
+			const res = await fetch(`/api/v1/dashboard/projects/${pId}/tickets`);
+			if (!res.ok) throw new Error('Failed to retrieve board tasks.');
+
+			const data: TicketResponse[] = await res.json();
+			tickets.value = data;
+		} catch (err: any) {
+			console.error('Tickets Fetch Error:', err);
+			error.value = err.message || 'Failed to fetch tickets.';
+		}
+	};
+
+	/**
+	 * @description Optimistically records Kanban changes across streams.
+	 */
+	const moveTicket = async (
+		ticketId: string,
+		newStageId: string | null,
+		newStatus: TicketStatus,
+	) => {
+		const previousState = [...tickets.value];
+		tickets.value = tickets.value.map((t) =>
+			t.id === ticketId ? { ...t, current_stage_id: newStageId, status: newStatus } : t
+		);
+
+		try {
+			const payload: UpdateTicketRequest = {
+				current_stage_id: newStageId,
+				status: newStatus,
+			};
+
+			const res = await fetch(`/api/v1/dashboard/projects/${projectId.value}/tickets/${ticketId}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload),
+			});
+
+			if (!res.ok) throw new Error('Persistence step failed.');
+		} catch (err: any) {
+			tickets.value = previousState;
+			error.value = err.message || 'Failed to sync ticket update.';
+		}
+	};
+
 	useEffect(() => {
 		if (projectId.value) {
 			fetchProject();
+			loadTickets(projectId.value);
 		}
 	}, [projectId.value]);
 
+	const state: ProjectState = {
+		project_id: projectId,
+		project,
+		tickets,
+		isLoading,
+		error,
+		refresh: fetchProject,
+		loadTickets,
+		moveTicket,
+	};
+
 	return (
-		<ProjectContext.Provider
-			value={{
-				project_id: projectId,
-				project,
-				isLoading,
-				error,
-				refresh: fetchProject,
-			}}
-		>
+		<ProjectContext.Provider value={state}>
 			{children}
 		</ProjectContext.Provider>
 	);
 }
 
-export function useProjectContext() {
-	const ctx = useContext(ProjectContext);
-	if (!ctx) throw new Error('useProjectContext must be used within ProjectProvider');
-	return ctx;
+// #endregion
+
+// #region 4. HOOKS
+
+export function useProjectContext(): ProjectState {
+	const context = useContext(ProjectContext);
+	if (!context) {
+		throw new Error('useProjectContext must be used within a ProjectProvider');
+	}
+	return context;
 }
+
+// #endregion
 
 ```
 
@@ -3528,183 +3930,90 @@ export interface StageState {
 ### File: apps\web\features\dashboard\projects\islands\project\Board.tsx
 
 ```tsx
+/**
+ * @file Board.tsx
+ * @description The main interactive Kanban/List island for managing project stages and tickets.
+ */
+
+// #region Imports
 import '../../styles/pages/board.css';
-import { useSignal } from '@preact/signals';
+import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { Button, ToggleButton, ToggleButtonGroup } from '@projective/ui';
+import { Button, toast, ToggleButton, ToggleButtonGroup } from '@projective/ui';
 import { IconBasket, IconLayoutKanban, IconList } from '@tabler/icons-preact';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
-import { NewTicketModal } from '@features/dashboard/projects/components/new/NewTicketModal.tsx';
+import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
+import { NewTicketModal } from '@features/dashboard/projects/components/modals/NewTicketModal.tsx';
+import NewStageModal from '@features/dashboard/projects/components/new/NewStageModal.tsx';
 import {
 	BoardDataView,
 	BoardTicket,
 } from '@features/dashboard/projects/components/project/board/BoardDataView.tsx';
 import { BoardHeader } from '@features/dashboard/projects/components/project/board/BoardHeader.tsx';
+import { TicketStatus } from '@projective/types';
+import { TicketsService } from '@features/dashboard/projects/services/TicketsService.ts';
+import { StagesService } from '@features/dashboard/projects/services/StagesService.ts';
+// #endregion
 
 export interface ProjectBoardIslandProps {
-	initialData?: any;
 	isOwnerOrAdmin?: boolean;
 }
 
-export default function ProjectBoardIsland(
-	{ initialData, isOwnerOrAdmin = true }: ProjectBoardIslandProps,
-) {
+export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoardIslandProps) {
 	const { setMiddleNav } = useNavigationContext();
+	const { project, tickets, loadTickets, refresh, moveTicket, isLoading } = useProjectContext();
+
+	// Safely resolve the active Project ID regardless of backend serialization nuances
+	// deno-lint-ignore no-explicit-any
+	const activeProjectId = project.value?.id || (project.value as any)?.projectId ||
+		(project.value as any)?.project_id;
 
 	// #region State Signals
 	const viewType = useSignal<'stages' | 'status'>('stages');
 	const displayMode = useSignal<'kanban' | 'list'>('kanban');
+
 	const isNewTicketOpen = useSignal(false);
+	const selectedStageForNewTicket = useSignal<string | null>(null);
+
 	const isNewStageOpen = useSignal(false);
 	// #endregion
 
-	// #region Fallback Data
-	const data = initialData || {
-		title: 'Alpha Platform Build',
-		format: 'pipeline',
-		fiduciary: { totalBudgetCents: 1500000, tvlEscrowCents: 500000, releasedBalanceCents: 1000000 },
-		capacity: { backlogQueueSize: 12, cumulativeWi: 28.5, accuracyPercentage: 94.2 },
-		tickets: [
-			// NEW (Backlog)
-			{
-				id: '1',
-				title: 'Spider-man is at it again!',
-				stageId: 's1',
-				stageName: 'UI/UX Design',
-				status: 'Backlog',
-				assigneeName: null,
-				workloadIntensity: 2.5,
-				revisionsRequested: 0,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-			{
-				id: '2',
-				title: 'Draft landing page copy',
-				stageId: 's2',
-				stageName: 'Web Development',
-				status: 'Backlog',
-				assigneeName: 'Alice',
-				workloadIntensity: 1.0,
-				revisionsRequested: 0,
-				attachmentsScanned: false,
-				createdAt: new Date().toISOString(),
-			},
+	// #region Computed Data
+	const availableStages = useComputed(() => {
+		if (!project.value) return [];
+		return project.value.stages
+			.map((s) => ({ label: s.name, value: s.id }))
+			.sort((a, b) => {
+				const s1 = project.value!.stages.find((s) => s.id === a.value)?.sort_order || 0;
+				const s2 = project.value!.stages.find((s) => s.id === b.value)?.sort_order || 0;
+				return s1 - s2;
+			});
+	});
 
-			// STAGE 1: UI/UX Design
-			{
-				id: '3',
-				title: 'Design user onboarding flow',
-				stageId: 's1',
-				stageName: 'UI/UX Design',
-				status: 'In Progress',
-				assigneeName: 'Bob',
-				workloadIntensity: 4.5,
-				revisionsRequested: 2,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-			{
-				id: '4',
-				title: 'Wireframe dashboard layout',
-				stageId: 's1',
-				stageName: 'UI/UX Design',
-				status: 'In Review',
-				assigneeName: 'Bob',
-				workloadIntensity: 3.0,
-				revisionsRequested: 1,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-			{
-				id: '5',
-				title: 'Update color palette',
-				stageId: 's1',
-				stageName: 'UI/UX Design',
-				status: 'Todo',
-				assigneeName: null,
-				workloadIntensity: 1.5,
+	const mappedTickets = useComputed<BoardTicket[]>(() => {
+		if (!tickets.value) return [];
+		return tickets.value.map((t) => {
+			const stage = project.value?.stages.find((s) => s.id === t.current_stage_id);
+			return {
+				id: t.id,
+				title: t.title,
+				stageId: t.current_stage_id || 'new',
+				stageName: stage ? stage.name : 'Backlog',
+				status: t.status as TicketStatus,
+				assigneeId: t.current_assignee_id,
+				assigneeName: t.current_assignee_id ? 'Assigned' : null,
+				workloadIntensity: t.workload_intensity,
 				revisionsRequested: 0,
-				attachmentsScanned: false,
-				createdAt: new Date().toISOString(),
-			},
+				attachmentsScanned: t.attachment_count > 0,
+				createdAt: t.created_at,
+			};
+		});
+	});
 
-			// STAGE 2: Web Development
-			{
-				id: '6',
-				title: 'Setup database schema',
-				stageId: 's2',
-				stageName: 'Web Development',
-				status: 'In Progress',
-				assigneeName: 'Charlie',
-				workloadIntensity: 5.0,
-				revisionsRequested: 0,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-			{
-				id: '7',
-				title: 'Implement Auth0 integration',
-				stageId: 's2',
-				stageName: 'Web Development',
-				status: 'In Progress',
-				assigneeName: 'Alice',
-				workloadIntensity: 3.5,
-				revisionsRequested: 0,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-
-			// STAGE 3: QA & Testing
-			{
-				id: '8',
-				title: 'Write E2E Cypress tests',
-				stageId: 's3',
-				stageName: 'QA & Testing',
-				status: 'Todo',
-				assigneeName: 'Diana',
-				workloadIntensity: 4.0,
-				revisionsRequested: 0,
-				attachmentsScanned: false,
-				createdAt: new Date().toISOString(),
-			},
-
-			// DONE (Completed)
-			{
-				id: '9',
-				title: 'Initial repository setup',
-				stageId: 's2',
-				stageName: 'Web Development',
-				status: 'Completed',
-				assigneeName: 'Charlie',
-				workloadIntensity: 1.0,
-				revisionsRequested: 0,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-			{
-				id: '10',
-				title: 'Competitor analysis',
-				stageId: 's1',
-				stageName: 'UI/UX Design',
-				status: 'Completed',
-				assigneeName: 'Bob',
-				workloadIntensity: 2.0,
-				revisionsRequested: 0,
-				attachmentsScanned: true,
-				createdAt: new Date().toISOString(),
-			},
-		] as BoardTicket[],
-		availableStages: [
-			{ label: 'UI/UX Design', value: 's1' },
-			{ label: 'Web Development', value: 's2' },
-			{ label: 'QA & Testing', value: 's3' },
-		],
-	};
-
-	// Convert data to mutable signals for Drag and Drop
-	const tickets = useSignal<BoardTicket[]>(data.tickets);
-	const availableStages = useSignal<{ label: string; value: string }[]>(data.availableStages);
+	const unpaidTicketsCount = useComputed(() => {
+		// deno-lint-ignore no-explicit-any
+		return tickets.value.filter((t: any) => t.payment_status === 'unpaid').length;
+	});
 	// #endregion
 
 	// #region Navigation Footer Injection
@@ -3714,6 +4023,7 @@ export default function ProjectBoardIsland(
 				<div class='project-board__footer-right'>
 					<ToggleButtonGroup
 						value={viewType.value}
+						// deno-lint-ignore no-explicit-any
 						onChange={(v) => viewType.value = v as any}
 						optional={false}
 						variant='secondary'
@@ -3723,18 +4033,27 @@ export default function ProjectBoardIsland(
 					</ToggleButtonGroup>
 
 					{isOwnerOrAdmin && (
-						<Button
-							variant='secondary'
-							onClick={() => isNewTicketOpen.value = true}
-						>
-							+ Add New Ticket
-						</Button>
+						<div style={{ display: 'flex', gap: '0.5rem' }}>
+							<Button variant='secondary' onClick={() => isNewStageOpen.value = true}>
+								+ Add Stage
+							</Button>
+							<Button
+								variant='secondary'
+								onClick={() => {
+									selectedStageForNewTicket.value = null;
+									isNewTicketOpen.value = true;
+								}}
+							>
+								+ Add New Ticket
+							</Button>
+						</div>
 					)}
 				</div>
 
 				<div class='project-board__footer-left'>
 					<ToggleButtonGroup
 						value={displayMode.value}
+						// deno-lint-ignore no-explicit-any
 						onChange={(v) => displayMode.value = v as any}
 						optional={false}
 						variant='secondary'
@@ -3747,153 +4066,160 @@ export default function ProjectBoardIsland(
 						</ToggleButton>
 					</ToggleButtonGroup>
 
-					<Button variant='primary'>
+					<Button
+						variant='primary'
+						href={`/checkout?project=${activeProjectId}`}
+						disabled={!activeProjectId}
+					>
 						<IconBasket /> Checkout
+						{unpaidTicketsCount.value > 0 && (
+							<div class='project-board__unpaid-badge'>
+								{unpaidTicketsCount.value}
+							</div>
+						)}
 					</Button>
 				</div>
 			</div>
 		);
 
-		setMiddleNav({
-			footerHeight: '64px',
-			footerContent,
-		});
-
-		return () => {
-			setMiddleNav({ footerHeight: '0px', footerContent: null });
-		};
-	}, [viewType.value, displayMode.value, isOwnerOrAdmin, setMiddleNav]);
+		setMiddleNav({ footerHeight: '64px', footerContent });
+		return () => setMiddleNav({ footerHeight: '0px', footerContent: null });
+	}, [
+		viewType.value,
+		displayMode.value,
+		isOwnerOrAdmin,
+		unpaidTicketsCount.value,
+		activeProjectId,
+		setMiddleNav,
+	]);
 	// #endregion
 
 	// #region Handlers
-	const handleAddTicket = (payload: any) => {
-		console.log('[New Ticket Payload]', payload);
-		// Add API logic here
+	// deno-lint-ignore no-explicit-any
+	const handleAddTicket = async (payload: any) => {
+		if (!activeProjectId) {
+			toast.error('Project ID is missing. Cannot create ticket.');
+			return;
+		}
+		try {
+			await TicketsService.createTicket(activeProjectId, payload);
+			await loadTickets(activeProjectId);
+			isNewTicketOpen.value = false;
+			toast.success('Ticket created successfully');
+		} catch (err: any) {
+			console.error('Failed to create ticket', err);
+			// Surfacing the Zod validation failure directly to the user
+			toast.error(err.message || 'Failed to create ticket. Check your inputs.');
+		}
+	};
+
+	const handleAddTicketTrigger = (stageId: string | null) => {
+		selectedStageForNewTicket.value = stageId;
+		isNewTicketOpen.value = true;
 	};
 
 	const handleAddStageTrigger = () => {
-		console.log('Open Add Stage Modal');
 		isNewStageOpen.value = true;
 	};
 
-	const handleCardMove = (
-		cardId: string,
-		sourceFieldId: string,
-		targetFieldId: string,
-		insertBeforeCardId: string | null,
-	) => {
-		const currentTickets = [...tickets.value];
-		const ticketIndex = currentTickets.findIndex((t) => t.id === cardId);
+	const handleCardMove = async (cardId: string, sourceFieldId: string, targetFieldId: string) => {
+		let newStatus: TicketStatus;
+		let newStageId: string | null = targetFieldId;
 
-		if (ticketIndex === -1) return;
-
-		// Clone the ticket to mutate it safely
-		const ticket = { ...currentTickets[ticketIndex] };
-
-		// 1. Update data based on view type context
 		if (viewType.value === 'stages') {
 			if (targetFieldId === 'New') {
-				ticket.status = 'Backlog';
+				newStatus = TicketStatus.Backlog;
+				newStageId = null;
 			} else if (targetFieldId === 'Done') {
-				ticket.status = 'Completed';
+				newStatus = TicketStatus.Completed;
+				newStageId = null;
 			} else {
-				ticket.stageId = targetFieldId;
-
-				// Lookup the stage name from the available stages
-				const stage = availableStages.value.find((s) => s.value === targetFieldId);
-				if (stage) ticket.stageName = stage.label;
-
-				// If it was backlog or completed, reset it to active
-				if (ticket.status === 'Backlog' || ticket.status === 'Completed') {
-					ticket.status = 'In Progress';
-				}
+				newStatus = TicketStatus.InProgress;
 			}
 		} else {
-			// If in status view, simply update the status
-			ticket.status = targetFieldId as any;
+			newStatus = targetFieldId as TicketStatus;
+			const existingTicket = tickets.value.find((t) => t.id === cardId);
+			newStageId = existingTicket?.current_stage_id || null;
 		}
 
-		// 2. Remove from old position
-		currentTickets.splice(ticketIndex, 1);
-
-		// 3. Insert into new position
-		if (insertBeforeCardId) {
-			const isAfter = insertBeforeCardId.endsWith('_after');
-			const targetId = isAfter ? insertBeforeCardId.replace('_after', '') : insertBeforeCardId;
-			let targetIndex = currentTickets.findIndex((t) => t.id === targetId);
-
-			if (targetIndex !== -1) {
-				if (isAfter) targetIndex += 1;
-				currentTickets.splice(targetIndex, 0, ticket);
-			} else {
-				currentTickets.push(ticket); // Fallback to end
-			}
-		} else {
-			currentTickets.push(ticket); // Insert at end of column
-		}
-
-		// 4. Commit to signal
-		tickets.value = currentTickets;
+		await moveTicket(cardId, newStageId, newStatus);
 	};
 
-	const handleFieldMove = (sourceId: string, targetId: string, insertBefore: boolean) => {
+	const handleFieldMove = async (sourceId: string, targetId: string, insertBefore: boolean) => {
+		if (!activeProjectId) return;
+
 		const currentStages = [...availableStages.value];
 		const sourceIndex = currentStages.findIndex((s) => s.value === sourceId);
 		const targetIndex = currentStages.findIndex((s) => s.value === targetId);
 
 		if (sourceIndex === -1 || targetIndex === -1) return;
 
-		// Remove the stage being dragged
 		const [movedStage] = currentStages.splice(sourceIndex, 1);
-
-		// Find the newly adjusted target index
 		const adjustedTargetIndex = currentStages.findIndex((s) => s.value === targetId);
 
-		// Insert the stage back into the array
 		if (insertBefore) {
 			currentStages.splice(adjustedTargetIndex, 0, movedStage);
 		} else {
 			currentStages.splice(adjustedTargetIndex + 1, 0, movedStage);
 		}
 
-		// Commit to signal
-		availableStages.value = currentStages;
+		const orderedIds = currentStages.map((s) => s.value);
+		try {
+			await StagesService.reorderStages(activeProjectId, orderedIds);
+			await refresh();
+		} catch (err: any) {
+			console.error('Failed to reorder stages', err);
+			toast.error(err.message || 'Failed to reorder stages.');
+		}
 	};
 	// #endregion
+
+	if (isLoading.value && !project.value) {
+		return <div class='project-board__loading'>Loading board...</div>;
+	}
 
 	return (
 		<div class='project-board'>
 			<BoardHeader
-				projectTitle={data.title}
-				projectFormat={data.format}
-				fiduciary={data.fiduciary}
-				capacity={data.capacity}
+				projectTitle={project.value?.title || 'Loading...'}
+				projectFormat={project.value?.format || 'pipeline'}
+				fiduciary={{ totalBudgetCents: 0, tvlEscrowCents: 0, releasedBalanceCents: 0 }}
+				capacity={{
+					backlogQueueSize: tickets.value.length,
+					cumulativeWi: 0,
+					accuracyPercentage: 100,
+				}}
 			/>
 
 			<main class='project-board__content'>
-				<main class='project-board__content'>
-					<BoardDataView
-						tickets={tickets.value}
-						stages={availableStages.value}
-						viewType={viewType.value}
-						displayMode={displayMode.value}
-						isOwnerOrAdmin={isOwnerOrAdmin}
-						onCardClick={(id) => console.log('Ticket clicked:', id)}
-						onCardMove={handleCardMove}
-						onFieldMove={handleFieldMove}
-						onAddStage={handleAddStageTrigger}
-					/>
-				</main>
+				<BoardDataView
+					tickets={mappedTickets.value}
+					stages={availableStages.value}
+					viewType={viewType.value}
+					displayMode={displayMode.value}
+					isOwnerOrAdmin={isOwnerOrAdmin}
+					onCardClick={(id) => console.log('Ticket clicked:', id)}
+					onCardMove={handleCardMove}
+					onFieldMove={handleFieldMove}
+					onAddStage={handleAddStageTrigger}
+					onAddTicket={handleAddTicketTrigger}
+				/>
 			</main>
 
 			<NewTicketModal
 				isOpen={isNewTicketOpen.value}
 				onClose={() => isNewTicketOpen.value = false}
 				availableStages={availableStages.value}
+				preselectedStageId={selectedStageForNewTicket.value}
 				onSubmit={handleAddTicket}
 			/>
 
-			{isNewStageOpen.value && <div style={{ display: 'none' }}>Stage Modal Mount Point</div>}
+			<NewStageModal
+				isOpen={isNewStageOpen.value}
+				onClose={() => isNewStageOpen.value = false}
+				projectId={activeProjectId || ''}
+				projectFormat={project.value?.format as 'pipeline' | 'one_off' | undefined}
+			/>
 		</div>
 	);
 }
@@ -5396,11 +5722,365 @@ export class ProjectsBackendService {
 
 ```
 
-### File: packages\charts\deno.json
+### File: apps\web\features\dashboard\projects\services\StagesService.ts
+
+```ts
+/**
+ * @file StagesService.ts
+ * @description Frontend Service layer for Project Stages.
+ */
+// deno-lint-ignore-file no-explicit-any
+import { getCsrfToken } from '@projective/utils';
+
+export class StagesService {
+	static async createStage(projectId: string, data: any): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify(data),
+		});
+		if (!res.ok) throw new Error(`Failed to create stage: ${res.statusText}`);
+		return await res.json();
+	}
+
+	static async updateStage(projectId: string, stageId: string, data: any): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify(data),
+		});
+		if (!res.ok) throw new Error(`Failed to update stage: ${res.statusText}`);
+		return await res.json();
+	}
+
+	static async reorderStages(projectId: string, orderedStageIds: string[]): Promise<void> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/reorder`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify({ orderedIds: orderedStageIds }),
+		});
+		if (!res.ok) throw new Error(`Failed to reorder stages: ${res.statusText}`);
+	}
+
+	static async deleteStage(projectId: string, stageId: string): Promise<void> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}`, {
+			method: 'DELETE',
+			headers: { 'X-CSRF': getCsrfToken() || '' },
+		});
+		if (!res.ok) throw new Error(`Failed to delete stage: ${res.statusText}`);
+	}
+}
+
+```
+
+### File: apps\web\features\dashboard\projects\services\StagesServiceBackend.ts
+
+```ts
+/**
+ * @file StagesServiceBackend.ts
+ * @description Backend service layer for Stage operations.
+ */
+import { supabaseClient } from '@projective/backend';
+
+export class StagesServiceBackend {
+	static async createStage(projectId: string, data: any) {
+		const supabase = await supabaseClient();
+
+		// 1. Find the highest sort_order
+		const { data: stages } = await supabase
+			.schema('projects')
+			.from('project_stages')
+			.select('sort_order')
+			.eq('project_id', projectId)
+			.order('sort_order', { ascending: false })
+			.limit(1);
+
+		const nextSortOrder = (stages?.[0]?.sort_order ?? -1) + 1;
+
+		// 2. Insert
+		const { data: newStage, error } = await supabase
+			.schema('projects')
+			.from('project_stages')
+			.insert({
+				project_id: projectId,
+				name: data.name,
+				sort_order: nextSortOrder,
+				// ... map other stage fields ...
+			})
+			.select()
+			.single();
+
+		if (error) throw error;
+		return newStage;
+	}
+
+	static async reorderStages(projectId: string, orderedIds: string[]) {
+		const supabase = await supabaseClient();
+		// Supabase doesn't support bulk upsert easily with standard clients without an RPC.
+		// For safety, iterate and update.
+		for (let i = 0; i < orderedIds.length; i++) {
+			await supabase
+				.schema('projects')
+				.from('project_stages')
+				.update({ sort_order: i })
+				.eq('id', orderedIds[i])
+				.eq('project_id', projectId);
+		}
+		return { success: true };
+	}
+
+	static async deleteStage(projectId: string, stageId: string) {
+		const supabase = await supabaseClient();
+
+		// 1. Release escrow for any tickets CURRENTLY in this stage
+		const { data: activeTickets } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.select('id, current_assignee_id')
+			.eq('current_stage_id', stageId)
+			.not('current_assignee_id', 'is', null);
+
+		if (activeTickets && activeTickets.length > 0) {
+			// Trigger Finance Escrow Release Logic Here
+			// e.g., FinanceServiceBackend.releaseEscrows(activeTickets.map(t => t.id));
+		}
+
+		// 2. Remove this stage from the JSONB required_stages array of ALL tickets in the project
+		// Note: In production, this is best done via a Postgres Trigger or RPC function for performance.
+
+		// 3. Delete the stage
+		const { error } = await supabase
+			.schema('projects')
+			.from('project_stages')
+			.delete()
+			.eq('id', stageId)
+			.eq('project_id', projectId);
+
+		if (error) throw error;
+		return { success: true };
+	}
+}
+
+```
+
+### File: apps\web\features\dashboard\projects\services\TicketsService.ts
+
+```ts
+/**
+ * @file TicketsService.ts
+ * @description Frontend Service layer for Tickets.
+ */
+// deno-lint-ignore-file no-explicit-any
+import { getCsrfToken } from '@projective/utils';
+
+export class TicketsService {
+	static async createTicket(
+		projectId: string,
+		data: any,
+	): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify(data),
+		});
+
+		if (!res.ok) {
+			const errData = await res.json().catch(() => ({}));
+			const msg = errData.details
+				? JSON.stringify(errData.details)
+				: (errData.error?.message || errData.error || res.statusText);
+
+			throw new Error(msg);
+		}
+
+		return await res.json();
+	}
+
+	static async updateTicket(projectId: string, ticketId: string, data: any): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify(data),
+		});
+		if (!res.ok) {
+			const err = await res.json();
+			throw new Error(err.error || `Failed to update ticket`);
+		}
+		return await res.json();
+	}
+
+	static async deleteTicket(projectId: string, ticketId: string): Promise<void> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}`, {
+			method: 'DELETE',
+			headers: { 'X-CSRF': getCsrfToken() || '' },
+		});
+		if (!res.ok) throw new Error(`Failed to delete ticket`);
+	}
+
+	static async reportTicketWorkload(
+		projectId: string,
+		ticketId: string,
+		reason: string,
+	): Promise<void> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}/report`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify({ reason }),
+		});
+		if (!res.ok) throw new Error(`Failed to report ticket`);
+	}
+
+	static async purchaseTicket(
+		projectId: string,
+		ticketId: string,
+		method: 'buy_now' | 'basket' | 'invoice',
+	): Promise<any> {
+		const res = await fetch(
+			`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}/purchase`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+				body: JSON.stringify({ method }),
+			},
+		);
+		if (!res.ok) throw new Error(`Failed to purchase ticket. Ensure description is provided.`);
+		return await res.json();
+	}
+}
+
+```
+
+### File: apps\web\features\dashboard\projects\services\TicketsServiceBackend.ts
+
+```ts
+/**
+ * @file TicketsServiceBackend.ts
+ * @description Backend service layer for Ticket operations.
+ */
+import { supabaseClient } from '@projective/backend';
+
+export class TicketsServiceBackend {
+	static async createTicket(projectId: string, data: { title: string; description?: any }) {
+		const supabase = await supabaseClient();
+
+		const { data: newTicket, error } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.insert({
+				project_id: projectId,
+				title: data.title,
+				description: data.description || {},
+				status: 'backlog',
+				// Purchase blocked flags can be computed fields: if description == {}, purchasable = false
+			})
+			.select()
+			.single();
+
+		if (error) throw error;
+		return newTicket;
+	}
+
+	static async updateTicket(projectId: string, ticketId: string, data: any) {
+		const supabase = await supabaseClient();
+
+		// 1. Check if claimed
+		const { data: currentTicket } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.select('current_assignee_id')
+			.eq('id', ticketId)
+			.single();
+
+		if (currentTicket?.current_assignee_id) {
+			throw new Error('Cannot edit a ticket that has already been claimed by a freelancer.');
+		}
+
+		// 2. Update
+		const { data: updated, error } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.update({
+				...data,
+				updated_at: new Date().toISOString(),
+			})
+			.eq('id', ticketId)
+			.select()
+			.single();
+
+		if (error) throw error;
+		return updated;
+	}
+
+	static async deleteTicket(projectId: string, ticketId: string) {
+		const supabase = await supabaseClient();
+
+		const { data: ticket } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.select('current_assignee_id, status')
+			.eq('id', ticketId)
+			.single();
+
+		if (ticket?.current_assignee_id) {
+			// Freelancer has claimed it. Delete releases escrow to Freelancer.
+			// Client's payment has already been taken out, so they don't get a refund here.
+			// await FinanceServiceBackend.releaseTicketEscrowToFreelancer(ticketId);
+		} else {
+			// Ticket not claimed. Delete and potentially refund/void invoice.
+			// await FinanceServiceBackend.refundTicketEscrow(ticketId);
+		}
+
+		const { error } = await supabase.schema('projects').from('tickets').delete().eq('id', ticketId);
+		if (error) throw error;
+		return { success: true };
+	}
+
+	static async reportTicket(projectId: string, ticketId: string) {
+		const supabase = await supabaseClient();
+
+		// Sets a dispute flag that hides it from the UI for 48 hours
+		const { error } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.update({
+				status: 'disputed', // or custom flag 'workload_dispute_active: true'
+				// update internal timestamp for 48hr penalty timer
+			})
+			.eq('id', ticketId);
+
+		if (error) throw error;
+		return { success: true };
+	}
+
+	static async purchaseTicket(projectId: string, ticketId: string, method: string) {
+		const supabase = await supabaseClient();
+
+		// 1. Verify description exists
+		const { data: ticket } = await supabase
+			.schema('projects')
+			.from('tickets')
+			.select('description')
+			.eq('id', ticketId)
+			.single();
+
+		if (!ticket?.description || Object.keys(ticket.description).length === 0) {
+			throw new Error('A detailed description is required before purchasing a ticket.');
+		}
+
+		// 2. Route to finance mechanisms (Basket / Buy Now / Invoice)
+		// await FinanceServiceBackend.initiateTicketPurchase(ticketId, method);
+
+		return { success: true, method };
+	}
+}
+
+```
+
+### File: packages\fields\deno.json
 
 ```json
 {
-  "name": "@projective/charts",
+  "name": "@projective/fields",
   "version": "0.0.0",
   "exports": "./mod.ts",
   "tasks": {
@@ -5414,2669 +6094,5154 @@ export class ProjectsBackendService {
 
 ```
 
-### File: packages\charts\mod.ts
+### File: packages\fields\mod.ts
 
 ```ts
-export * from './src/types/gantt.ts';
-export * from './src/core/gantt/store.ts';
-export * from './src/core/gantt/time-scale.ts';
-export { default as GanttChart } from './src/components/gantt/GanttChart.tsx';
+// Types
+export * from './src/types/core.ts';
+export * from './src/types/components/select-field.ts';
 
-export * from './src/components/kanban/index.ts';
+// Wrappers
+export * from './src/wrappers/LabelWrapper.tsx';
+export * from './src/wrappers/AdornmentWrapper.tsx';
+export * from './src/wrappers/SkeletonWrapper.tsx';
+export * from './src/wrappers/MessageWrapper.tsx';
+export * from './src/wrappers/EffectWrapper.tsx';
+export * from './src/wrappers/FieldArrayWrapper.tsx';
 
-```
+// Hooks
+export * from './src/hooks/useInteraction.ts';
+export * from './src/hooks/useCurrencyMask.ts';
+export * from './src/hooks/useGlobalDrag.ts';
 
-### File: packages\charts\src\components\gantt\GanttChart.tsx
+// Components
+export * from './src/components/TextField.tsx';
+export * from './src/components/SelectField.tsx';
+export * from './src/components/SliderField.tsx';
+export * from './src/components/DateField.tsx';
+export * from './src/components/TimeField.tsx';
+export * from './src/components/FileDrop.tsx';
+export * from './src/components/TagInput.tsx';
+export * from './src/components/MoneyField.tsx';
+export * from './src/components/ComboboxField.tsx';
+export * from './src/components/DateTimeField.tsx';
+export * from './src/components/RichTextField.tsx';
+export * from './src/components/datetime/Calendar.tsx';
+export * from './src/components/datetime/TimeClock.tsx';
 
-```tsx
-import '../../styles/gantt/gantt.css';
-import { GanttStore } from '../../core/gantt/store.ts';
-import { GanttHeader } from './GanttHeader.tsx';
-import { GanttTimeline } from './GanttTimeline.tsx';
-import { GanttTaskList } from './GanttTaskList.tsx';
-import { useEffect, useMemo } from 'preact/hooks';
-import { DependencyLink, GanttRow, GanttTask } from '../../types/gantt.ts';
-
-// #region Interfaces
-interface GanttChartProps {
-	initialData: {
-		rows: GanttRow[];
-		tasks: GanttTask[];
-		dependencies: DependencyLink[];
-	};
-	selectedRowId?: string;
-	onRowSelect?: (rowId: string) => void;
-}
-// #endregion
-
-export default function GanttChart({ initialData, selectedRowId, onRowSelect }: GanttChartProps) {
-	const store = useMemo(() => {
-		const defaultStart = initialData?.tasks?.[0]?.startAt ||
-			(Date.now() - (7 * 24 * 60 * 60 * 1000));
-
-		return new GanttStore({
-			visibleWidth: 1000,
-			visibleHeight: 500,
-			startDate: defaultStart,
-		});
-	}, []);
-
-	useEffect(() => {
-		store.onRowSelect = onRowSelect;
-	}, [onRowSelect, store]);
-
-	useEffect(() => {
-		if (selectedRowId !== undefined) {
-			store.selectedRowId.value = selectedRowId;
-		}
-	}, [selectedRowId, store]);
-
-	useEffect(() => {
-		if (initialData) {
-			store.loadData(initialData.rows, initialData.tasks, initialData.dependencies);
-
-			if (initialData.tasks.length > 0) {
-				const earliestTask = initialData.tasks.reduce(
-					(min, t) => t.startAt < min.startAt ? t : min,
-					initialData.tasks[0],
-				);
-				const currentStart = store.timelineStart.value;
-
-				if (
-					earliestTask.startAt < currentStart - (3 * 86400000) ||
-					earliestTask.startAt > currentStart + (7 * 86400000)
-				) {
-					store.setStartDate(earliestTask.startAt - (3 * 86400000));
-					store.scrollX.value = 0;
-				}
-			}
-		}
-	}, [initialData, store]);
-
-	return (
-		<div
-			className='gantt-chart'
-			style={{
-				display: 'flex',
-				flexDirection: 'column',
-				gap: '1rem',
-				width: '100%',
-				flex: 1, // CRITICAL: Use flex: 1 instead of height: 100% to resolve CSS minimum height collapse bounds
-				minHeight: 0,
-				minWidth: 0,
-				overflow: 'hidden',
-			}}
-		>
-			<div class='gantt-controls' style={{ width: '100%', flexShrink: 0 }}>
-				<GanttHeader store={store} />
-			</div>
-
-			<div
-				class='gantt-body'
-				style={{
-					display: 'flex',
-					flex: 1,
-					width: '100%',
-					minHeight: 0,
-					minWidth: 0,
-					backgroundColor: 'var(--card)',
-					border: '1px solid var(--border-color)',
-					borderRadius: 'var(--border-radius)',
-					overflow: 'hidden',
-				}}
-			>
-				<GanttTaskList store={store} width={store.containerWidth.value} />
-				<GanttTimeline store={store} />
-			</div>
-		</div>
-	);
-}
+export * from './src/components/HelpTooltip.tsx';
 
 ```
 
-### File: packages\charts\src\components\gantt\GanttHeader.tsx
+### File: packages\fields\src\components\ComboboxField.tsx
 
 ```tsx
-import '../../styles/gantt/gantt-header.css';
-import { useComputed } from '@preact/signals';
-import { GanttStore } from '../../core/gantt/store.ts';
-import { IconButton } from '@projective/ui';
-import { SliderField } from '@projective/fields';
-import { IconChevronLeft, IconChevronRight, IconMinus, IconPlus } from '@tabler/icons-preact';
-import { DateTime } from '@projective/types';
-import { useCallback, useEffect, useMemo, useRef } from 'preact/hooks';
-
-// #region Helper Hook
-function useHoldRepeat(callback: () => void, delay = 400, interval = 50) {
-	// deno-lint-ignore no-explicit-any
-	const timeoutRef = useRef<any>(null);
-	// deno-lint-ignore no-explicit-any
-	const intervalRef = useRef<any>(null);
-
-	const stop = useCallback(() => {
-		if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
-		if (intervalRef.current !== null) clearInterval(intervalRef.current);
-	}, []);
-
-	const start = useCallback((e: PointerEvent) => {
-		if (e.button !== 0) return;
-		callback();
-		timeoutRef.current = setTimeout(() => {
-			intervalRef.current = setInterval(callback, interval);
-		}, delay);
-	}, [callback, delay, interval]);
-
-	useEffect(() => stop, [stop]);
-
-	return {
-		onPointerDown: start,
-		onPointerUp: stop,
-		onPointerLeave: stop,
-		onContextMenu: (e: Event) => e.preventDefault(),
-	};
-}
-// #endregion
-
-interface GanttHeaderProps {
-	store: GanttStore;
-}
-
-export function GanttHeader({ store }: GanttHeaderProps) {
-	const minDays = 1;
-	const maxDays = 90;
-
-	const dateLabel = useComputed(() => {
-		const x = store.scrollX.value;
-		const days = store.visibleDays.value;
-
-		const startMs = store.timeScale.xToDate(-x);
-		const startDt = new DateTime(new Date(startMs));
-		const endDt = startDt.add(days, 'days');
-
-		return `${startDt.toFormat('dd MMM')} - ${endDt.toFormat('dd MMM')}`;
-	});
-
-	const handleNav = (direction: -1 | 1) => {
-		const shift = (store.containerWidth.value / 4) * direction;
-		store.scrollX.value -= shift;
-	};
-
-	const handleAddDay = useCallback(() => {
-		const current = store.visibleDays.value;
-		if (current < maxDays) store.setVisibleDays(current + 1);
-	}, [store]);
-
-	const handleSubDay = useCallback(() => {
-		const current = store.visibleDays.value;
-		if (current > minDays) store.setVisibleDays(current - 1);
-	}, [store]);
-
-	const addProps = useHoldRepeat(handleAddDay);
-	const subProps = useHoldRepeat(handleSubDay);
-
-	const dynamicMarks = useMemo(() => {
-		const arr = [];
-		for (let i = minDays; i <= maxDays; i++) {
-			let className = 'gantt-slider-mark--day';
-			let label = undefined;
-
-			if (i === minDays) {
-				label = `${i}d`;
-				className += ' gantt-slider-mark--min';
-			} else if (i === maxDays) {
-				label = `${i}d`;
-				className += ' gantt-slider-mark--max';
-			}
-
-			if (i % 30 === 0) {
-				className += ' gantt-slider-mark--month';
-			}
-
-			arr.push({ value: i, label, className });
-		}
-		return arr;
-	}, [minDays, maxDays]);
-
-	return (
-		<div
-			class='gantt-header'
-			style={{
-				display: 'flex',
-				width: '100%',
-				alignItems: 'center',
-				justifyContent: 'space-between',
-				padding: '0.25rem 0',
-			}}
-		>
-			{/* Left section: Slider block */}
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					gap: '1rem',
-					flex: '1 1 0%',
-					minWidth: '250px',
-					padding: '0 1rem',
-				}}
-			>
-				<IconButton variant='secondary' size='small' aria-label='Decrease days' {...subProps}>
-					<IconMinus size={16} />
-				</IconButton>
-
-				<div style={{ flex: 1, minWidth: '150px' }}>
-					<SliderField
-						value={store.visibleDays.value}
-						onChange={(val) => store.setVisibleDays(val as number)}
-						min={minDays}
-						max={maxDays}
-						step={1}
-						marks={dynamicMarks}
-					/>
-				</div>
-
-				<IconButton variant='secondary' size='small' aria-label='Increase days' {...addProps}>
-					<IconPlus size={16} />
-				</IconButton>
-			</div>
-
-			{/* Middle section: Date block */}
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-					flex: '1 1 0%',
-					gap: '0.5rem',
-				}}
-			>
-				<IconButton
-					variant='secondary'
-					size='medium'
-					aria-label='Previous'
-					onClick={() => handleNav(-1)}
-					outlined
-					ghost
-				>
-					<IconChevronLeft />
-				</IconButton>
-
-				<span
-					style={{ minWidth: '150px', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem' }}
-				>
-					{dateLabel.value}
-				</span>
-
-				<IconButton
-					variant='secondary'
-					size='medium'
-					aria-label='Next'
-					onClick={() => handleNav(1)}
-					outlined
-					ghost
-				>
-					<IconChevronRight />
-				</IconButton>
-			</div>
-
-			{/* Right section: Spacer to maintain perfect center alignment for dates */}
-			<div style={{ flex: '1 1 0%' }}></div>
-		</div>
-	);
-}
-
-```
-
-### File: packages\charts\src\components\gantt\GanttTaskCard.tsx
-
-```tsx
-import { GanttRow } from '../../types/gantt.ts';
-import { GanttStore } from './../../core/gantt/store.ts';
-import { DateTime } from '@projective/types';
-
-interface GanttTaskCardProps {
-	row: GanttRow;
-	store: GanttStore;
-}
-
-export function GanttTaskCard({ row, store }: GanttTaskCardProps) {
-	const startDt = new DateTime(new Date(row.data?.startMs || Date.now()));
-	const endDt = new DateTime(new Date(row.data?.endMs || Date.now() + 86400000));
-	const dateStr = `${startDt.toFormat('dd/MM/yy')} - ${endDt.toFormat('dd/MM/yy')}`;
-
-	const isSelected = store.selectedRowId.value === row.id;
-
-	return (
-		<div
-			class='gantt-task-card__container'
-			style={`--task-height: ${store.rowHeight.value}px`}
-		>
-			<div
-				class='gantt-task-card'
-				data-selected={isSelected}
-				onClick={() => store.selectRow(row.id)}
-			>
-				<div class='gantt-task-card__content'>
-					<div>
-						<h4 class='gantt-task-card__title'>{row.label}</h4>
-					</div>
-
-					<div class='gantt-task-card__meta'>
-						<span class='gantt-task-card__type'>
-							{row.data?.originalType?.replace('_', ' ') || row.type}
-						</span>
-						<span class='gantt-task-card__date'>
-							{dateStr}
-						</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-```
-
-### File: packages\charts\src\components\gantt\GanttTaskList.tsx
-
-```tsx
-import '../../styles/gantt/gantt-task-list.css';
-import { effect, useComputed } from '@preact/signals';
-import { GanttStore } from '../../core/gantt/store.ts';
-import { GanttTaskCard } from './GanttTaskCard.tsx';
+import '../styles/fields/combobox-field.css';
+import { JSX } from 'preact';
+import { computed, Signal, useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
+import { ComboboxFieldProps } from '../types/components/combobox-field.ts';
+import { SelectOption } from '../types/components/select-field.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { EffectWrapper } from '../wrappers/EffectWrapper.tsx';
 
-interface GanttTaskListProps {
-	store: GanttStore;
-	width: number;
-}
+export function ComboboxField<T = string>(props: ComboboxFieldProps<T>) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		options,
+		error,
+		disabled,
+		placeholder,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+	} = props;
 
-export function GanttTaskList({ store, width }: GanttTaskListProps) {
-	const listRef = useRef<HTMLDivElement>(null);
-	const tasksRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const menuPosition = useSignal<'down' | 'up'>('down');
+	const interaction = useInteraction(
+		value instanceof Signal ? value.value : value,
+	);
+	const isOpen = useSignal(false);
+	const inputValue = useSignal('');
 
-	const startIndex = useComputed(() => {
-		return Math.floor(store.scrollY.value / store.rowHeight.value);
+	const isValueSignal = value instanceof Signal;
+	const internalSignal = useSignal(
+		isValueSignal ? value.peek() : (value ?? defaultValue),
+	);
+
+	if (!isValueSignal && value !== undefined && value !== internalSignal.peek()) {
+		internalSignal.value = value;
+	}
+
+	const signalValue = isValueSignal ? value : internalSignal;
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = error instanceof Signal ? error.value : error;
+
+	if (signalValue.value && !inputValue.value) {
+		const selected = options.find((opt) => opt.value === signalValue.value);
+		if (selected) {
+			inputValue.value = selected.label;
+		}
+	}
+
+	const filteredOptions = computed(() => {
+		const term = inputValue.value.toLowerCase();
+		return options.filter((opt) => opt.label.toLowerCase().includes(term));
 	});
 
-	const visibleRows = useComputed(() => {
-		const start = startIndex.value;
-		const end = start + 15;
-
-		return [...store.rows.value]
-			.sort((a, b) => a.orderIndex - b.orderIndex)
-			.slice(start, end);
-	});
-
+	// --- Positioning Logic ---
 	useEffect(() => {
-		const dispose = effect(() => {
-			if (tasksRef.current) {
-				const offset = store.scrollY.value % store.rowHeight.value;
-				tasksRef.current.style.transform = `translateY(-${offset}px)`;
-			}
-		});
+		if (isOpen.value && containerRef.current) {
+			const rect = containerRef.current.getBoundingClientRect();
+			const spaceBelow = globalThis.innerHeight - rect.bottom;
+			menuPosition.value = spaceBelow < 250 ? 'up' : 'down';
+		}
+	}, [isOpen.value]);
 
-		return () => dispose();
-	}, [store]);
+	const handleInput = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+		inputValue.value = e.currentTarget.value;
+		isOpen.value = true;
+	};
 
-	const handleWheel = (e: WheelEvent) => {
-		e.preventDefault();
+	const handleOptionClick = (option: SelectOption<T>) => {
+		if (option.disabled) return;
 
-		const currentY = store.scrollY.value;
-		const delta = e.deltaY * 0.6;
-
-		const contentHeight = store.contentHeight.value;
-		const viewportHeight = store.containerHeight.value;
-		const maxScrollY = Math.max(0, contentHeight - viewportHeight);
-
-		let newY = currentY + delta;
-		if (newY < 0) newY = 0;
-		if (newY > maxScrollY) newY = maxScrollY;
-
-		store.scrollY.value = newY;
+		if (isValueSignal) {
+			(value as Signal<T>).value = option.value;
+		} else {
+			internalSignal.value = option.value;
+		}
+		inputValue.value = option.label;
+		onChange?.(option.value);
+		isOpen.value = false;
 	};
 
 	return (
-		<aside
-			class='gantt-task-list'
-			style={{
-				flex: '0 0 320px',
-				width: '320px',
-				display: 'flex',
-				flexDirection: 'column',
-				borderRight: '1px solid var(--border-color)',
-				backgroundColor: 'var(--card)',
-				overflow: 'hidden',
-				zIndex: 10,
-			}}
+		<div
+			className={`field-combobox ${className || ''} ${
+				menuPosition.value === 'up' ? 'field-combobox--up' : ''
+			}`}
+			style={style}
+			ref={containerRef}
 		>
-			<div class='gantt-task-list__header'>
-				<span class='gantt-task-list__header__title'>Stages</span>
-			</div>
-			<div class='gantt-task-list__container' onWheel={handleWheel} ref={listRef}>
-				<div class='gantt-task-list__container__tasks' ref={tasksRef}>
-					{visibleRows.value.map((row) => <GanttTaskCard key={row.id} row={row} store={store} />)}
+			<div
+				className={[
+					'field-combobox__container',
+					interaction.focused.value &&
+					'field-combobox__container--focused',
+					errorMessage && 'field-combobox__container--error',
+					isDisabled && 'field-combobox__container--disabled',
+				].filter(Boolean).join(' ')}
+			>
+				<EffectWrapper
+					focused={interaction.focused}
+					disabled={isDisabled}
+				/>
+
+				<input
+					id={id}
+					className='field-combobox__input'
+					value={inputValue.value}
+					onInput={handleInput}
+					onFocus={(e) => {
+						interaction.handleFocus(e);
+						isOpen.value = true;
+					}}
+					onBlur={(e) => {
+						setTimeout(() => {
+							isOpen.value = false;
+							interaction.handleBlur(e);
+						}, 200);
+					}}
+					disabled={!!isDisabled}
+					placeholder={placeholder}
+				/>
+
+				<div
+					className={`field-combobox__menu ${
+						isOpen.value && filteredOptions.value.length > 0 ? 'field-combobox__menu--open' : ''
+					}`}
+				>
+					{filteredOptions.value.map((option) => (
+						<div
+							key={String(option.value)}
+							className={[
+								'field-combobox__option',
+								option.value === signalValue.value &&
+								'field-combobox__option--selected',
+								option.disabled &&
+								'field-combobox__option--disabled',
+							].filter(Boolean).join(' ')}
+							onMouseDown={(e) => {
+								e.preventDefault();
+								handleOptionClick(option);
+							}}
+						>
+							{option.label}
+						</div>
+					))}
+					{filteredOptions.value.length === 0 && (
+						<div
+							className='field-combobox__option'
+							style={{
+								cursor: 'default',
+								color: 'var(--field-text-disabled)',
+							}}
+						>
+							No options found
+						</div>
+					)}
 				</div>
 			</div>
-		</aside>
+
+			<LabelWrapper
+				id={id}
+				label={label}
+				active={interaction.focused.value || !!inputValue.value ||
+					!!placeholder}
+				error={!!errorMessage}
+				disabled={isDisabled}
+				required={required}
+				floating={floating}
+				position={position}
+				floatingRule={floatingRule}
+			/>
+
+			<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+		</div>
 	);
 }
 
 ```
 
-### File: packages\charts\src\components\gantt\GanttTimeline.tsx
+### File: packages\fields\src\components\DateField.tsx
 
 ```tsx
-import { useEffect, useRef } from 'preact/hooks';
-import { useComputed } from '@preact/signals';
-import { GanttStore } from '../../core/gantt/store.ts';
-import { GanttManager } from '../../core/gantt/gantt-manager.ts';
-import { generateHeaderBlocks, getHeaderTier } from '../../core/gantt/header-utils.ts';
+import '../styles/fields/date-field.css';
+import { computed, Signal, useSignal } from '@preact/signals';
+import { DateFieldProps, DateValue } from '../types/components/date-field.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { useFieldState } from '../hooks/useFieldState.ts';
+import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
 import { DateTime } from '@projective/types';
-import { GanttTooltip } from './GanttTooltip.tsx';
-import '../../styles/gantt/gantt-timeline.css';
+import { Popover } from '@projective/ui';
+import { Calendar } from './datetime/Calendar.tsx';
+import { TextField } from './TextField.tsx';
+import { IconCalendar } from '@tabler/icons-preact';
 
-interface GanttTimelineProps {
-	store: GanttStore;
-}
+export function DateField(props: DateFieldProps) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		minDate,
+		maxDate,
+		format = 'yyyy-MM-dd',
+		error,
+		disabled,
+		prefix,
+		suffix,
+		onPrefixClick,
+		onSuffixClick,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		variant = 'popup', // Default to existing behavior
+		selectionMode = 'single',
+		modifiers,
+	} = props;
 
-export function GanttTimeline({ store }: GanttTimelineProps) {
-	const canvasRootRef = useRef<HTMLDivElement>(null);
-	const ganttManager = useRef<GanttManager | null>(null);
+	const fieldState = useFieldState({
+		value,
+		defaultValue,
+		required,
+		disabled,
+		error,
+		onChange,
+	});
 
-	useEffect(() => {
-		if (canvasRootRef.current && !ganttManager.current) {
-			ganttManager.current = new GanttManager(canvasRootRef.current, store);
+	const interaction = useInteraction(fieldState.value.value);
+	const isOpen = useSignal(false);
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = fieldState.error.value;
+
+	// Computed string value for the input display
+	const displayValue = computed(() => {
+		const val = fieldState.value.value;
+		if (!val) return '';
+
+		if (Array.isArray(val)) {
+			// Range
+			if (selectionMode === 'range' && val.length === 2) {
+				const start = val[0] ? val[0].toFormat(format) : '...';
+				const end = val[1] ? val[1].toFormat(format) : '...';
+				return `${start} - ${end}`;
+			}
+			// Multiple
+			if (selectionMode === 'multiple') {
+				return `${val.length} dates selected`;
+			}
 		}
+		// Single
+		if (val instanceof DateTime) return val.toFormat(format);
 
-		return () => {
-			ganttManager.current?.destroy();
-			ganttManager.current = null;
-		};
-	}, []);
+		return '';
+	});
 
-	const dynamicHeaders = useComputed(() => {
-		const currentX = store.scrollX.value;
-		const width = store.containerWidth.value;
-		const days = store.visibleDays.value;
+	const handleDateSelect = (date: DateValue) => {
+		fieldState.setValue(date);
 
-		const buffer = 2000;
-		const renderStartX = -currentX - buffer;
-		const renderEndX = -currentX + width + buffer;
+		// Auto-close popover rules:
+		// Single: Close on select
+		// Range: Close if both start/end selected? Maybe keep open for adjustments.
+		// Multiple: Keep open.
+		if (selectionMode === 'single') {
+			isOpen.value = false;
+			interaction.handleBlur();
+		}
+	};
 
-		const startDate = new DateTime(new Date(store.timeScale.xToDate(renderStartX)));
-		const endDate = new DateTime(new Date(store.timeScale.xToDate(renderEndX)));
+	// --- Render Logic Based on Variant ---
 
-		const tier = getHeaderTier(days, width);
-		const dateToX = (t: number) => store.timeScale.dateToX(t);
-
-		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, tier.topStep, dateToX);
-		const bottomRows = generateHeaderBlocks(
-			startDate,
-			endDate,
-			tier.bottom,
-			tier.bottomStep,
-			dateToX,
+	if (variant === 'inline') {
+		return (
+			<div
+				className={`field-date field-date--inline ${className || ''}`}
+				style={style}
+			>
+				<Calendar
+					value={fieldState.value.value}
+					onChange={handleDateSelect}
+					min={minDate}
+					max={maxDate}
+					selectionMode={selectionMode}
+					modifiers={modifiers}
+					className='field-date__calendar--inline'
+				/>
+				<MessageWrapper
+					error={error}
+					hint={hint}
+					warning={warning}
+					info={info}
+				/>
+			</div>
 		);
+	}
 
-		return {
-			topRows,
-			bottomRows,
-			tier,
-		};
-	});
+	// Default: Popup Mode
+	return (
+		<div className={`field-date ${className || ''}`} style={style}>
+			<Popover
+				isOpen={isOpen.value}
+				onClose={() => {
+					isOpen.value = false;
+					interaction.handleBlur();
+				}}
+				// Forward position prop if we want manual control, otherwise let Popover auto-flip
+				trigger={
+					<div
+						onClick={() => !isDisabled && (isOpen.value = !isOpen.value)}
+					>
+						<TextField
+							id={id}
+							label={label}
+							value={displayValue.value}
+							placeholder={format.toUpperCase()}
+							error={errorMessage}
+							disabled={isDisabled}
+							required={required}
+							floating={floating}
+							position={position}
+							floatingRule={floatingRule}
+							readonly // Prevent manual typing for complex modes for now
+							suffix={
+								<AdornmentWrapper
+									position='suffix'
+									onClick={(e) => {
+										e.stopPropagation();
+										!isDisabled &&
+											(isOpen.value = !isOpen.value);
+									}}
+								>
+									{suffix || <IconCalendar size={18} />}
+								</AdornmentWrapper>
+							}
+							prefix={prefix}
+							onPrefixClick={onPrefixClick}
+							onFocus={interaction.handleFocus}
+							onBlur={() => {}}
+						/>
+					</div>
+				}
+				content={
+					<Calendar
+						value={fieldState.value.value}
+						onChange={handleDateSelect}
+						min={minDate}
+						max={maxDate}
+						selectionMode={selectionMode}
+						modifiers={modifiers}
+					/>
+				}
+			/>
+			<MessageWrapper
+				error={error}
+				hint={hint}
+				warning={warning}
+				info={info}
+			/>
+		</div>
+	);
+}
 
-	// deno-lint-ignore no-explicit-any
-	const renderBlock = (block: any, content: string, isTop: boolean) => {
-		// Hardware-accelerated GPU translation instead of expanding the DOM width
-		const screenX = block.x + store.scrollX.value;
+```
+
+### File: packages\fields\src\components\datetime\Calendar.tsx
+
+```tsx
+/* #region Imports */
+import '../../styles/components/calendar.css';
+import { useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-preact';
+import { DateTime } from '@projective/types';
+import { DateModifiers, DateSelectionMode, DateValue } from '../../types/components/date-field.ts';
+/* #endregion */
+
+export interface CalendarProps {
+	value?: DateValue;
+	onChange?: (date: any) => void;
+	min?: DateTime;
+	max?: DateTime;
+	startOfWeek?: 0 | 1;
+	selectionMode?: DateSelectionMode;
+	modifiers?: DateModifiers;
+	className?: string;
+}
+
+type CalendarScope = 'day' | 'month' | 'year';
+
+export function Calendar(props: CalendarProps) {
+	const {
+		value,
+		onChange,
+		min,
+		max,
+		startOfWeek = 1,
+		selectionMode = 'single',
+		modifiers = {},
+		className,
+	} = props;
+
+	// #region State
+	const viewDate = useSignal(new DateTime());
+	const scope = useSignal<CalendarScope>('day');
+
+	// Sync internal viewDate with the selected value on mount
+	useEffect(() => {
+		if (value) {
+			if (value instanceof DateTime) {
+				viewDate.value = value;
+			} else if (Array.isArray(value) && value.length > 0) {
+				const start = value[0];
+				if (start) viewDate.value = start;
+			}
+		}
+	}, []);
+	// #endregion
+
+	// #region Logic Helpers
+	const isDateDisabled = (date: DateTime) => {
+		if (min && date.isBefore(min.startOf('day'))) return true;
+		if (max && date.isAfter(max.endOf('day'))) return true;
+		return modifiers.disabled?.(date) ?? false;
+	};
+
+	// Helper to set date parts (since DateTime is immutable)
+	const setDatePart = (base: DateTime, unit: 'month' | 'year', val: number) => {
+		const d = new Date(base.getTime());
+		if (unit === 'month') d.setMonth(val);
+		if (unit === 'year') d.setFullYear(val);
+		return new DateTime(d);
+	};
+
+	// --- Grid Generators ---
+	const getCalendarGrid = (currentDate: DateTime, weekStart: 0 | 1) => {
+		const startOfMonth = currentDate.startOf('month');
+		const startDay = startOfMonth.getDay();
+
+		let lead = startDay - weekStart;
+		if (lead < 0) lead += 7;
+
+		const startDate = startOfMonth.minus(lead, 'days');
+		const grid = [];
+
+		for (let i = 0; i < 42; i++) {
+			const d = startDate.add(i, 'days');
+			grid.push({
+				date: d,
+				isCurrentMonth: d.getMonth() === currentDate.getMonth(),
+				isToday: d.isSameDay(DateTime.today()),
+			});
+		}
+		return grid;
+	};
+
+	const getWeekLabels = (weekStart: 0 | 1) => {
+		const base = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+		if (weekStart === 1) {
+			const sun = base.shift();
+			base.push(sun!);
+		}
+		return base;
+	};
+	// #endregion
+
+	// #region Handlers
+	const handlePrev = (e: Event) => {
+		e.stopPropagation();
+		// FIX: Use plural units ('months', 'years') to match DateTime.ts
+		if (scope.value === 'day') viewDate.value = viewDate.value.minus(1, 'months');
+		else if (scope.value === 'month') viewDate.value = viewDate.value.minus(1, 'years');
+		else if (scope.value === 'year') viewDate.value = viewDate.value.minus(10, 'years');
+	};
+
+	const handleNext = (e: Event) => {
+		e.stopPropagation();
+		// FIX: Use plural units ('months', 'years') to match DateTime.ts
+		if (scope.value === 'day') viewDate.value = viewDate.value.add(1, 'months');
+		else if (scope.value === 'month') viewDate.value = viewDate.value.add(1, 'years');
+		else if (scope.value === 'year') viewDate.value = viewDate.value.add(10, 'years');
+	};
+
+	const handleTitleClick = (e: Event) => {
+		e.stopPropagation();
+		if (scope.value === 'day') scope.value = 'month';
+		else if (scope.value === 'month') scope.value = 'year';
+	};
+
+	const handleDaySelect = (date: DateTime) => {
+		if (selectionMode === 'single') {
+			onChange?.(date);
+		}
+	};
+
+	const handleMonthSelect = (monthIndex: number) => {
+		viewDate.value = setDatePart(viewDate.value, 'month', monthIndex);
+		scope.value = 'day';
+	};
+
+	const handleYearSelect = (year: number) => {
+		viewDate.value = setDatePart(viewDate.value, 'year', year);
+		scope.value = 'month';
+	};
+	// #endregion
+
+	// #region Renderers
+	const renderHeader = () => {
+		let title = '';
+		if (scope.value === 'day') title = viewDate.value.toFormat('MMMM yyyy');
+		else if (scope.value === 'month') title = viewDate.value.toFormat('yyyy');
+		else {
+			const startYear = Math.floor(viewDate.value.getYear() / 10) * 10;
+			title = `${startYear} - ${startYear + 9}`;
+		}
+
+		return (
+			<div className='calendar__header'>
+				<button type='button' className='calendar__nav-btn' onClick={handlePrev}>
+					<IconChevronLeft size={18} />
+				</button>
+				<button type='button' className='calendar__title' onClick={handleTitleClick}>
+					{title}
+				</button>
+				<button type='button' className='calendar__nav-btn' onClick={handleNext}>
+					<IconChevronRight size={18} />
+				</button>
+			</div>
+		);
+	};
+
+	const renderDays = () => {
+		const grid = getCalendarGrid(viewDate.value, startOfWeek);
+		const weekLabels = getWeekLabels(startOfWeek);
+
+		return (
+			<>
+				<div className='calendar__weekdays'>
+					{weekLabels.map((day) => <div key={day} className='calendar__weekday'>{day}</div>)}
+				</div>
+				<div className='calendar__grid calendar__grid--days'>
+					{grid.map((dayItem, idx) => {
+						const isDisabled = isDateDisabled(dayItem.date);
+						let isSelected = false;
+						if (value instanceof DateTime) isSelected = value.isSameDay(dayItem.date);
+
+						const classes = [
+							'calendar__day',
+							isDisabled ? 'calendar__day--disabled' : '',
+							!dayItem.isCurrentMonth ? 'calendar__day--muted' : '',
+							dayItem.isToday ? 'calendar__day--today' : '',
+							isSelected ? 'calendar__day--selected' : '',
+						].filter(Boolean).join(' ');
+
+						return (
+							<button
+								key={idx}
+								type='button'
+								className={classes}
+								disabled={isDisabled}
+								onClick={(e) => {
+									e.stopPropagation();
+									handleDaySelect(dayItem.date);
+								}}
+							>
+								{dayItem.date.getDate()}
+							</button>
+						);
+					})}
+				</div>
+			</>
+		);
+	};
+
+	const renderMonths = () => {
+		const months = Array.from({ length: 12 }, (_, i) => {
+			const d = new DateTime(new Date(2000, i, 1));
+			return d.toFormat('MMM');
+		});
+
+		const currentMonth = viewDate.value.getMonth() - 1;
+
+		return (
+			<div className='calendar__grid calendar__grid--months'>
+				{months.map((m, idx) => (
+					<button
+						key={m}
+						type='button'
+						className={`calendar__cell-lg ${
+							idx === currentMonth ? 'calendar__cell-lg--selected' : ''
+						}`}
+						onClick={(e) => {
+							e.stopPropagation();
+							handleMonthSelect(idx);
+						}}
+					>
+						{m}
+					</button>
+				))}
+			</div>
+		);
+	};
+
+	const renderYears = () => {
+		const currentYear = viewDate.value.getYear();
+		const startYear = Math.floor(currentYear / 10) * 10;
+		const years = Array.from({ length: 12 }, (_, i) => startYear - 1 + i);
+
+		return (
+			<div className='calendar__grid calendar__grid--years'>
+				{years.map((y) => (
+					<button
+						key={y}
+						type='button'
+						className={`calendar__cell-lg ${
+							y === currentYear ? 'calendar__cell-lg--selected' : ''
+						} ${y < startYear || y > startYear + 9 ? 'calendar__day--muted' : ''}`}
+						onClick={(e) => {
+							e.stopPropagation();
+							handleYearSelect(y);
+						}}
+					>
+						{y}
+					</button>
+				))}
+			</div>
+		);
+	};
+	// #endregion
+
+	return (
+		<div className={`calendar ${className || ''}`}>
+			{renderHeader()}
+			<div className='calendar__body'>
+				{scope.value === 'day' && renderDays()}
+				{scope.value === 'month' && renderMonths()}
+				{scope.value === 'year' && renderYears()}
+			</div>
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\datetime\TimeClock.tsx
+
+```tsx
+import '../../styles/components/time-clock.css';
+import { useSignal } from '@preact/signals';
+import { useRef } from 'preact/hooks';
+import { DateTime } from '@projective/types';
+import { getAngleValue, getPosition } from '@projective/utils';
+
+export type TimeSelectionMode = 'single' | 'multiple';
+
+interface TimeClockProps {
+	value?: DateTime | DateTime[];
+	onChange?: (date: any) => void;
+	selectionMode?: TimeSelectionMode;
+}
+
+type ViewMode = 'hours' | 'minutes';
+
+export function TimeClock(props: TimeClockProps) {
+	const { value, onChange, selectionMode = 'single' } = props;
+
+	// Helper to get the primary "view" date (for header display)
+	const getPrimaryDate = () => {
+		if (Array.isArray(value)) {
+			return value.length > 0 ? value[value.length - 1] : new DateTime();
+		}
+		return value || new DateTime();
+	};
+
+	const displayDate = getPrimaryDate();
+
+	// State
+	const mode = useSignal<ViewMode>('hours');
+	const isPm = useSignal(displayDate.getHour() >= 12);
+	const isDragging = useSignal(false);
+	const clockRef = useRef<HTMLDivElement>(null);
+
+	// Display values
+	const hours12 = displayDate.getHour() % 12 || 12;
+	const minutes = displayDate.getMinute();
+
+	// --- Handlers ---
+
+	const updateValue = (newDate: DateTime, isFinish: boolean) => {
+		let result: any;
+
+		if (selectionMode === 'single') {
+			result = newDate;
+		} else {
+			// Multi-select logic
+			const current = (Array.isArray(value) ? value : (value ? [value] : [])) as DateTime[];
+
+			// Check if we are toggling an existing time
+			// We compare based on the current mode (Hour match or Minute match)
+			// Simplification: For multi-time, we usually just add the new timestamp.
+			// However, UX for multi-time on a clock is tricky.
+			// We will assume "Add/Update" logic.
+
+			// For this implementation, we replace the last entry if dragging,
+			// or add new if clicking fresh?
+			// To keep it simple: Multi-mode on a clock usually implies picking slots.
+			// We will append if it doesn't exist, remove if it does (Toggle).
+
+			// Check for exact hour/minute match in current array
+			const existsIndex = current.findIndex((d) =>
+				d.getHour() === newDate.getHour() && d.getMinute() === newDate.getMinute()
+			);
+
+			if (existsIndex >= 0) {
+				if (isFinish) {
+					// Toggle off on release
+					result = current.filter((_, i) => i !== existsIndex);
+				} else {
+					result = current; // Don't toggle while dragging
+				}
+			} else {
+				result = [...current, newDate];
+			}
+		}
+
+		onChange?.(result);
+
+		// Auto-switch to minutes only in single mode
+		if (isFinish && mode.value === 'hours' && selectionMode === 'single') {
+			mode.value = 'minutes';
+		}
+	};
+
+	const handlePointer = (e: PointerEvent, isFinish: boolean) => {
+		if (!clockRef.current) return;
+
+		const rect = clockRef.current.getBoundingClientRect();
+		const centerX = rect.width / 2;
+		const centerY = rect.height / 2;
+		const x = e.clientX - rect.left - centerX;
+		const y = e.clientY - rect.top - centerY;
+
+		const steps = mode.value === 'hours' ? 12 : 60;
+		let val = getAngleValue(x, y, steps);
+
+		// Calculate new date based on primary
+		const d = new Date(displayDate.getTime());
+
+		if (mode.value === 'hours') {
+			if (isPm.value && val < 12) val += 12;
+			if (!isPm.value && val === 12) val = 0;
+			d.setHours(val);
+		} else {
+			d.setMinutes(val);
+		}
+
+		const newDateTime = new DateTime(d);
+		updateValue(newDateTime, isFinish);
+	};
+
+	const toggleAmPm = (pm: boolean) => {
+		isPm.value = pm;
+		// Update ALL selected dates or just display?
+		// Usually AM/PM toggles the context for future clicks.
+		// For single value, we update immediately.
+		if (selectionMode === 'single') {
+			let h = displayDate.getHour();
+			if (pm && h < 12) h += 12;
+			if (!pm && h >= 12) h -= 12;
+
+			const d = new Date(displayDate.getTime());
+			d.setHours(h);
+			onChange?.(new DateTime(d));
+		}
+	};
+
+	// --- Rendering ---
+
+	const renderFace = () => {
+		const total = mode.value === 'hours' ? 12 : 12; // 12 visual segments
+		const numbers = [];
+		const radius = 100;
+
+		// Determine highlighted values
+		const selectedValues = Array.isArray(value) ? value : (value ? [value] : []);
+
+		for (let i = 1; i <= total; i++) {
+			const numVal = mode.value === 'hours' ? i : i * 5;
+			const pos = getPosition(i, 12, radius);
+
+			// Check if this number is selected
+			let isActive = false;
+			let isMulti = false;
+
+			if (mode.value === 'hours') {
+				// Match hour (considering AM/PM context of the toggle)
+				// We highlight if ANY selected date matches this hour in current AM/PM context
+				const checkHour = isPm.value ? (i === 12 ? 12 : i + 12) : (i === 12 ? 0 : i);
+
+				isActive = selectedValues.some((d) => d.getHour() === checkHour);
+			} else {
+				// Match minute (rough match for 5-min intervals)
+				const checkMin = numVal === 60 ? 0 : numVal;
+				isActive = selectedValues.some((d) => Math.round(d.getMinute() / 5) * 5 === checkMin);
+			}
+
+			// Style distinction for primary vs multi
+			if (isActive) {
+				const isPrimary = mode.value === 'hours'
+					? (displayDate.getHour() % 12 || 12) === i
+					: Math.round(displayDate.getMinute() / 5) * 5 === numVal;
+				if (!isPrimary && selectionMode === 'multiple') isMulti = true;
+			}
+
+			numbers.push(
+				<div
+					key={i}
+					className={`clock__number ${isActive ? 'clock__number--active' : ''} ${
+						isMulti ? 'clock__number--multi' : ''
+					}`}
+					style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+				>
+					{numVal === 60 ? '00' : numVal}
+				</div>,
+			);
+		}
+
+		// Hand logic (only points to primary display value)
+		const currentVal = mode.value === 'hours' ? hours12 : minutes;
+		const handSteps = mode.value === 'hours' ? 12 : 60;
+		const handPos = getPosition(
+			currentVal === 0 && mode.value === 'hours' ? 12 : currentVal,
+			handSteps,
+			radius,
+		);
 
 		return (
 			<div
-				key={block.key}
-				class='gantt-time-block'
-				style={{
-					position: 'absolute',
-					left: 0,
-					top: 0,
-					height: '100%',
-					width: `${block.width}px`,
-					transform: `translateX(${screenX}px)`,
-					willChange: 'transform',
+				className='clock__face'
+				ref={clockRef}
+				onPointerDown={(e) => {
+					e.preventDefault();
+					clockRef.current?.setPointerCapture(e.pointerId);
+					isDragging.value = true;
+					handlePointer(e, false);
+				}}
+				onPointerMove={(e) => {
+					if (isDragging.value) handlePointer(e, false);
+				}}
+				onPointerUp={(e) => {
+					clockRef.current?.releasePointerCapture(e.pointerId);
+					isDragging.value = false;
+					handlePointer(e, true);
 				}}
 			>
-				<span class={isTop ? 'gantt-sticky-label' : 'gantt-centered-label'}>
-					{content}
-				</span>
+				<div className='clock__center-dot'></div>
+				<div
+					className='clock__hand'
+					style={{
+						height: `${radius}px`,
+						transform: `rotate(${Math.atan2(handPos.y, handPos.x) * (180 / Math.PI) + 90}deg)`,
+					}}
+				>
+					<div className='clock__hand-knob'></div>
+				</div>
+				{numbers}
 			</div>
 		);
 	};
 
-	const header = dynamicHeaders.value;
-
 	return (
-		<section
-			class='gantt-timeline'
-			style={{
-				flex: 1,
-				display: 'flex',
-				flexDirection: 'column',
-				minWidth: 0,
-				width: '100%',
-				overflow: 'hidden',
-			}}
-		>
-			<div
-				class='gantt-timeline__header'
-				style={{ overflow: 'hidden', width: '100%', position: 'relative' }}
-			>
-				<div
-					class='gantt-header-content'
-					style={{ width: '100%', position: 'relative', height: '100%' }}
-				>
-					{/* CRITICAL FIX: Removed conflicting inline relative positioning */}
-					<div class='gantt-header-row top'>
-						{header.topRows.map((block) =>
-							renderBlock(
-								block,
-								header.tier.formatTop(block.date),
-								true,
-							)
-						)}
-					</div>
+		<div className='time-clock'>
+			<div className='time-clock__header'>
+				<div className='time-clock__digital'>
+					<button
+						type='button'
+						className={`time-clock__val ${mode.value === 'hours' ? 'time-clock__val--active' : ''}`}
+						onClick={() => mode.value = 'hours'}
+					>
+						{hours12.toString().padStart(2, '0')}
+					</button>
+					<span className='time-clock__sep'>:</span>
+					<button
+						type='button'
+						className={`time-clock__val ${
+							mode.value === 'minutes' ? 'time-clock__val--active' : ''
+						}`}
+						onClick={() => mode.value = 'minutes'}
+					>
+						{minutes.toString().padStart(2, '0')}
+					</button>
+				</div>
 
-					<div class='gantt-header-row bottom'>
-						{header.bottomRows.map((block) =>
-							renderBlock(
-								block,
-								header.tier.formatBottom(block.date),
-								false,
-							)
-						)}
-					</div>
+				<div className='time-clock__ampm'>
+					<button
+						type='button'
+						className={`time-clock__meridiem ${!isPm.value ? 'time-clock__meridiem--active' : ''}`}
+						onClick={() => toggleAmPm(false)}
+					>
+						AM
+					</button>
+					<button
+						type='button'
+						className={`time-clock__meridiem ${isPm.value ? 'time-clock__meridiem--active' : ''}`}
+						onClick={() => toggleAmPm(true)}
+					>
+						PM
+					</button>
 				</div>
 			</div>
 
-			<div
-				class='gantt-timeline__viewport'
-				style={{ flex: 1, position: 'relative', overflow: 'hidden', width: '100%' }}
-			>
-				<div
-					class='gantt-timeline__canvas'
-					ref={canvasRootRef}
-					style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-				/>
-				<GanttTooltip store={store} />
+			<div className='time-clock__body'>
+				{renderFace()}
 			</div>
-		</section>
+		</div>
 	);
 }
 
 ```
 
-### File: packages\charts\src\components\gantt\GanttTooltip.tsx
+### File: packages\fields\src\components\DateTimeField.tsx
 
 ```tsx
-import { GanttStore } from '../../core/gantt/store.ts';
+import '../styles/components/datetime-field.css';
+import { Signal, useSignal } from '@preact/signals';
+import { IconCalendar, IconClock } from '@tabler/icons-preact';
 import { DateTime } from '@projective/types';
-import '../../styles/gantt/gantt-tooltip.css';
+import { DateTimeFieldProps } from '../types/components/datetime-field.ts';
+import { TextField } from './TextField.tsx';
+import { Calendar } from './datetime/Calendar.tsx';
+import { TimeClock } from './datetime/TimeClock.tsx';
+import { Popover } from '@projective/ui';
 
-interface GanttTooltipProps {
-	store: GanttStore;
-}
+type TabView = 'date' | 'time';
 
-export function GanttTooltip({ store }: GanttTooltipProps) {
-	const task = store.hoveredTask.value;
-	const pos = store.pointerPos.value;
+export function DateTimeField(props: DateTimeFieldProps) {
+	const {
+		value,
+		defaultValue,
+		onChange,
+		min,
+		max,
+		placeholder,
+		...rest
+	} = props;
 
-	// Hide if nothing hovered, or if the user is actively dragging the canvas around
-	if (!task || store.isMouseDown.value) return null;
+	const isOpen = useSignal(false);
+	const activeTab = useSignal<TabView>('date');
+	const inputValue = useSignal('');
 
-	const startDt = new DateTime(new Date(task.startAt));
-	const endDt = new DateTime(new Date(task.endAt));
-
-	const isSinglePoint = task.startAt === task.endAt;
-
-	// Collision Detection:
-	// If near the top roof, flip it below the cursor.
-	// If near the right edge, shift it left of the cursor.
-	const isHitRoof = pos.y < 120;
-	const isHitWall = pos.x > store.containerWidth.value - 280;
-
-	// Diagonal offset of 15px so it doesn't cover the mouse pointer
-	const transformX = isHitWall ? 'calc(-100% - 15px)' : '15px';
-	const transformY = isHitRoof ? '15px' : 'calc(-100% - 15px)';
-
-	const style = {
-		left: `${pos.x}px`,
-		top: `${pos.y}px`,
-		transform: `translate(${transformX}, ${transformY})`,
-	};
-
-	return (
-		<div class='gantt-tooltip' style={style}>
-			<div class='gantt-tooltip__header'>
-				<span class='gantt-tooltip__type'>{task.isMilestone ? 'Milestone' : 'Task'}</span>
-			</div>
-
-			<div class='gantt-tooltip__title'>{task.name}</div>
-
-			<div class='gantt-tooltip__meta'>
-				{isSinglePoint
-					? (
-						<div class='gantt-tooltip__meta-row'>
-							<span class='gantt-tooltip__meta-label'>Scheduled:</span>
-							<span>{startDt.toFormat('dd MMM yyyy, HH:mm')}</span>
-						</div>
-					)
-					: (
-						<>
-							<div class='gantt-tooltip__meta-row'>
-								<span class='gantt-tooltip__meta-label'>Starts:</span>
-								<span>{startDt.toFormat('dd MMM yyyy, HH:mm')}</span>
-							</div>
-							<div class='gantt-tooltip__meta-row'>
-								<span class='gantt-tooltip__meta-label'>Ends:</span>
-								<span>{endDt.toFormat('dd MMM yyyy, HH:mm')}</span>
-							</div>
-						</>
-					)}
-			</div>
-		</div>
+	// Normalize signal
+	const isValueSignal = value instanceof Signal;
+	const internalSignal = useSignal(
+		isValueSignal ? value.peek() : (value ?? defaultValue),
 	);
-}
 
-```
-
-### File: packages\charts\src\components\kanban\index.ts
-
-```ts
-export * from './Kanban.tsx';
-export * from './KanbanField.tsx';
-export * from './KanbanCard.tsx';
-export * from '../../types/kanban.ts';
-
-```
-
-### File: packages\charts\src\components\kanban\Kanban.tsx
-
-```tsx
-import { Fragment } from 'preact';
-import { KanbanField } from './KanbanField.tsx';
-import { KanbanCard } from './KanbanCard.tsx';
-import { Button } from '@projective/ui';
-import { KanbanFieldProps, KanbanProps } from '../../types/kanban.ts';
-import { useKanbanDnD } from '../../hooks/useKanbanDnD.ts';
-import '../../styles/kanban/kanban.css';
-
-const sortFields = (fields: KanbanFieldProps[]): KanbanFieldProps[] => {
-	return [...fields].sort((a, b) => {
-		if (a.order >= 0 && b.order >= 0) return a.order - b.order;
-		if (a.order < 0 && b.order < 0) return b.order - a.order;
-		if (a.order >= 0 && b.order < 0) return -1;
-		return 1;
-	});
-};
-
-export function Kanban({
-	fields,
-	minHeight = '400px',
-	permissions,
-	onCardClick,
-	onAddCard,
-	onAddField,
-	onCardMove,
-	onFieldMove,
-}: KanbanProps) {
-	const dragData = useKanbanDnD(onCardMove, onFieldMove);
-	const sortedFields = sortFields(fields);
-
-	const classes = ['kanban', dragData.value.isDragging ? 'kanban--dragging' : ''].filter(Boolean)
-		.join(' ');
-
-	return (
-		<div class={classes} style={{ '--kanban-min-height': minHeight } as any}>
-			<div class='kanban__track'>
-				{sortedFields.map((field) => {
-					const isDraggingThisField = dragData.value.type === 'field' &&
-						dragData.value.id === field.id;
-					const isDropTarget = dragData.value.isDragging && dragData.value.type === 'field' &&
-						dragData.value.targetFieldId === field.id && !isDraggingThisField;
-
-					return (
-						<Fragment key={field.id}>
-							{isDropTarget && dragData.value.insertPosition === 'before' && (
-								<div class='kanban__field-ghost' style={{ height: `${dragData.value.height}px` }} />
-							)}
-
-							<div
-								class='kanban__field-wrapper'
-								data-kanban-field-wrapper-id={field.id}
-								style={{ display: isDraggingThisField ? 'none' : 'flex' }}
-							>
-								<KanbanField
-									{...field}
-									onCardClick={onCardClick}
-									onAddCard={field.permissions?.canAddCard && onAddCard
-										? () => onAddCard(field.id)
-										: undefined}
-								/>
-							</div>
-
-							{isDropTarget && dragData.value.insertPosition === 'after' && (
-								<div class='kanban__field-ghost' style={{ height: `${dragData.value.height}px` }} />
-							)}
-						</Fragment>
-					);
-				})}
-
-				{permissions?.canAddField && onAddField && (
-					<div class='kanban__add-action'>
-						<Button ghost onClick={onAddField} className='kanban__add-btn'>
-							<span class='kanban__add-icon'>+</span> Add Stage
-						</Button>
-					</div>
-				)}
-			</div>
-
-			{dragData.value.isDragging && (
-				<div
-					class='kanban__drag-avatar'
-					style={{
-						left: `${dragData.value.clientX - dragData.value.offsetX}px`,
-						top: `${dragData.value.clientY - dragData.value.offsetY}px`,
-						width: `${dragData.value.width}px`,
-						height: `${dragData.value.height}px`,
-					}}
-				>
-					{dragData.value.type === 'field'
-						? <KanbanField {...dragData.value.fieldData!} cards={[]} />
-						: <KanbanCard {...dragData.value.cardData!} fieldId='' />}
-				</div>
-			)}
-		</div>
-	);
-}
-
-```
-
-### File: packages\charts\src\components\kanban\KanbanCard.tsx
-
-```tsx
-import type { KanbanCardProps } from '../../types/kanban.ts';
-import { useDraggable, useDropzone } from '../../hooks/useKanbanDnD.ts';
-import '../../styles/kanban/kanban-card.css';
-
-interface ExtendedCardProps extends KanbanCardProps {
-	fieldId: string;
-	onClick?: () => void;
-}
-
-export function KanbanCard({
-	fieldId,
-	id,
-	title,
-	description,
-	meta,
-	tags,
-	takenBy,
-	permissions,
-	onClick,
-	...rest
-}: ExtendedCardProps) {
-	const isLocked = permissions?.canReorder !== true;
-	const draggableProps = useDraggable(
-		'card',
-		{ id, title, description, tags, takenBy, permissions, ...rest },
-		fieldId,
-		isLocked,
-	);
-	const dropzoneProps = useDropzone('card', id);
-
-	return (
-		<div
-			class='kanban-card'
-			{...dropzoneProps}
-			{...draggableProps}
-			onClick={onClick}
-			role='button'
-			tabIndex={0}
-		>
-			<div class='kanban-card__header'>
-				<h4 class='kanban-card__title'>{title}</h4>
-				{meta && <span class='kanban-card__meta'>{meta}</span>}
-			</div>
-
-			{description && (
-				<div class='kanban-card__body'>
-					<p class='kanban-card__desc'>{description}</p>
-				</div>
-			)}
-
-			<div class='kanban-card__footer'>
-				<div class='kanban-card__tags'>
-					{tags?.map((tag) => (
-						<span
-							key={tag.id}
-							class={`kanban-card__tag kanban-card__tag--${tag.variant || 'solid'}`}
-							style={tag.color ? { color: tag.color } : {}}
-						>
-							{tag.icon && <span class='kanban-card__tag-icon'>{tag.icon}</span>}
-							{tag.label}
-						</span>
-					))}
-				</div>
-
-				{takenBy && (
-					<div class='kanban-card__assignee'>
-						{takenBy.avatarUrl
-							? <img src={takenBy.avatarUrl} alt={takenBy.name} class='kanban-card__avatar-img' />
-							: (
-								<div class='kanban-card__avatar' title={takenBy.name}>
-									{takenBy.name.charAt(0).toUpperCase()}
-								</div>
-							)}
-					</div>
-				)}
-			</div>
-		</div>
-	);
-}
-
-```
-
-### File: packages\charts\src\components\kanban\KanbanField.tsx
-
-```tsx
-import { Fragment } from 'preact';
-import { Button } from '@projective/ui';
-import { KanbanCard } from './KanbanCard.tsx';
-import { KanbanCardProps, KanbanFieldProps } from '../../types/kanban.ts';
-import { dragData, useDraggable, useDropzone } from '../../hooks/useKanbanDnD.ts';
-import '../../styles/kanban/kanban-field.css';
-
-const getTimestamp = (date: any): number => date ? new Date(date).getTime() : 0;
-
-const sortCards = (cards: KanbanCardProps[]): KanbanCardProps[] => {
-	return [...cards].sort((a, b) => {
-		if (a.order !== b.order) return a.order - b.order;
-		return getTimestamp(a.created) - getTimestamp(b.created);
-	});
-};
-
-const resolveColor = (c: string) => {
-	if (c === 'primary') return 'var(--primary)';
-	if (!c || c === 'secondary') return 'var(--text-muted)';
-	return c;
-};
-
-interface ExtendedFieldProps extends KanbanFieldProps {
-	onCardClick?: (card: KanbanCardProps) => void;
-	onAddCard?: () => void;
-}
-
-export function KanbanField({
-	id,
-	title,
-	color = 'secondary',
-	cards,
-	limit,
-	order,
-	permissions,
-	addCardLabel = 'Add Ticket',
-	onCardClick,
-	onAddCard,
-}: ExtendedFieldProps) {
-	const sortedCards = sortCards(cards);
-	const cardCount = cards.length;
-	const isOverLimit = limit !== undefined && cardCount > limit;
-
-	// Locks/Hooks Setup
-	const isLocked = permissions?.canReorder !== true;
-	const draggableProps = useDraggable(
-		'field',
-		{ id, title, color, cards, limit, order, permissions },
-		id,
-		isLocked,
-	);
-	const dropzoneProps = useDropzone('field', id);
-
-	return (
-		<div
-			class='kanban-field'
-			style={{ '--field-solid': resolveColor(color) } as any}
-			{...dropzoneProps}
-		>
-			<div class='kanban-field__header' {...draggableProps}>
-				<h3 class='kanban-field__title'>{title}</h3>
-				<div class={`kanban-field__metrics ${isOverLimit ? 'kanban-field__metrics--danger' : ''}`}>
-					<span class='kanban-field__count'>{cardCount}</span>
-				</div>
-			</div>
-
-			<div class='kanban-field__body'>
-				{sortedCards.map((card) => {
-					const isDraggingThisCard = dragData.value.type === 'card' &&
-						dragData.value.id === card.id;
-					const isDropTarget = dragData.value.isDragging && dragData.value.type === 'card' &&
-						dragData.value.targetCardId === card.id && !isDraggingThisCard;
-
-					return (
-						<Fragment key={card.id}>
-							{isDropTarget && dragData.value.insertPosition === 'before' && (
-								<div class='kanban-card-ghost' style={{ height: `${dragData.value.height}px` }} />
-							)}
-
-							<div style={{ display: isDraggingThisCard ? 'none' : 'block' }}>
-								<KanbanCard
-									{...card}
-									fieldId={id}
-									onClick={() => onCardClick?.(card)}
-								/>
-							</div>
-
-							{isDropTarget && dragData.value.insertPosition === 'after' && (
-								<div class='kanban-card-ghost' style={{ height: `${dragData.value.height}px` }} />
-							)}
-						</Fragment>
-					);
-				})}
-
-				{dragData.value.isDragging && dragData.value.type === 'card' &&
-					dragData.value.targetFieldId === id && !dragData.value.targetCardId && (
-					<div class='kanban-card-ghost' style={{ height: `${dragData.value.height}px` }} />
-				)}
-
-				{permissions?.canAddCard && onAddCard && (
-					<div class='kanban-field__add-wrapper'>
-						<Button ghost variant='secondary' onClick={onAddCard} className='kanban-field__add-btn'>
-							+ {addCardLabel}
-						</Button>
-					</div>
-				)}
-			</div>
-		</div>
-	);
-}
-
-```
-
-### File: packages\charts\src\core\gantt\gantt-manager.ts
-
-```ts
-import { effect } from '@preact/signals';
-import { TaskRenderer } from './renderer/task-renderer.ts';
-import { GridRenderer } from './renderer/grid-renderer.ts';
-import { ScrollRenderer } from './renderer/scroll-renderer.ts';
-import { GanttStore } from './store.ts';
-import * as PIXI from 'pixi.js';
-import { ScrollManager } from './interaction/scroll.ts';
-
-export class GanttManager {
-	private app: PIXI.Application;
-	private store: GanttStore;
-	private scroll: ScrollManager;
-	// deno-lint-ignore no-explicit-any
-	private renderers: any[] = [];
-	private resizeObserver: ResizeObserver;
-	private themeObserver?: MutationObserver;
-
-	constructor(container: HTMLElement, store: GanttStore) {
-		this.store = store;
-		this.app = new PIXI.Application();
-		this.scroll = new ScrollManager(this.store);
-
-		this.resizeObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const { width, height } = entry.contentRect;
-				if (width === 0 || height === 0) continue;
-
-				this.store.resize(width, height);
-
-				if (this.app.renderer) {
-					this.app.renderer.resize(width, height);
-				}
-			}
-		});
-
-		this.init(container);
+	if (
+		!isValueSignal && value !== undefined && value !== internalSignal.peek()
+	) {
+		internalSignal.value = value;
 	}
 
-	private async init(container: HTMLElement) {
-		await this.app.init({
-			width: 800,
-			height: 600,
-			backgroundAlpha: 0,
-			antialias: true,
-			resolution: globalThis.devicePixelRatio || 1,
-			autoDensity: true,
-		});
+	const signalValue = isValueSignal ? value : internalSignal;
 
-		container.appendChild(this.app.canvas);
-		this.resizeObserver.observe(container);
+	// --- Format Helper ---
+	const formatValue = (val?: DateTime) => {
+		if (!val) return '';
+		return val.toFormat('dd/MM/yyyy HH:mm');
+	};
 
-		this.themeObserver = new MutationObserver((mutations) => {
-			for (const m of mutations) {
-				if (m.attributeName === 'data-theme') {
-					this.store.themeTrigger.value++;
-				}
+	// Sync Input (Unidirectional)
+	// We watch signalValue
+	const currentVal = signalValue.value;
+	if (currentVal && !isOpen.value) {
+		const formatted = formatValue(currentVal);
+		if (inputValue.value !== formatted) inputValue.value = formatted;
+	}
+
+	// --- State Logic ---
+
+	const updateDatePart = (newDate: DateTime) => {
+		const current = signalValue.value || new DateTime();
+
+		const d = new Date(current.getTime());
+		d.setFullYear(newDate.getYear());
+		d.setMonth(newDate.getMonth() - 1);
+		d.setDate(newDate.getDate());
+
+		const nextVal = new DateTime(d);
+
+		if (isValueSignal) {
+			(value as Signal<DateTime>).value = nextVal;
+		} else {
+			internalSignal.value = nextVal;
+		}
+		onChange?.(nextVal);
+		inputValue.value = formatValue(nextVal);
+
+		activeTab.value = 'time';
+	};
+
+	const updateTimePart = (newTime: DateTime) => {
+		const current = signalValue.value || new DateTime();
+
+		const d = new Date(current.getTime());
+		d.setHours(newTime.getHour());
+		d.setMinutes(newTime.getMinute());
+
+		const nextVal = new DateTime(d);
+
+		if (isValueSignal) {
+			(value as Signal<DateTime>).value = nextVal;
+		} else {
+			internalSignal.value = nextVal;
+		}
+		onChange?.(nextVal);
+		inputValue.value = formatValue(nextVal);
+	};
+
+	const handleInputChange = (val: string) => {
+		inputValue.value = val;
+		if (val === '') {
+			// Handle clear
+			// We can't set undefined to DateTime signal easily if strict?
+			// But ValueFieldProps<DateTime> implies it might be undefined?
+			// Let's assume we can set it to undefined if the type allows.
+			// But signalValue is Signal<DateTime | undefined> (inferred).
+			// Actually internalSignal is initialized with value ?? defaultValue.
+			// If both undefined, it's Signal<undefined>.
+
+			// If we want to support clearing:
+			// if (isValueSignal) (value as Signal<DateTime | undefined>).value = undefined;
+			// else internalSignal.value = undefined;
+			// onChange?.(undefined);
+			return;
+		}
+		try {
+			const dt = new DateTime(val, 'dd/MM/yyyy HH:mm', true);
+			// Check validity? DateTime constructor throws if invalid format?
+			// Assuming it's valid if no throw.
+
+			if (isValueSignal) {
+				(value as Signal<DateTime>).value = dt;
+			} else {
+				internalSignal.value = dt;
 			}
-		});
-		this.themeObserver.observe(document.documentElement, {
-			attributes: true,
-			attributeFilter: ['data-theme'],
-		});
+			onChange?.(dt);
+		} catch {
+			// Ignore invalid dates
+		}
+	};
 
-		const grid = new GridRenderer(this.store);
-		const tasks = new TaskRenderer(this.store);
-		const scrollbars = new ScrollRenderer(this.store);
+	// Tabs Header
+	const renderTabs = () => (
+		<div className='datetime-field__tabs'>
+			<button
+				type='button'
+				className={`datetime-field__tab ${
+					activeTab.value === 'date' ? 'datetime-field__tab--active' : ''
+				}`}
+				onClick={() => activeTab.value = 'date'}
+			>
+				<IconCalendar size={16} />
+				<span>Date</span>
+				<span className='datetime-field__tab-val'>
+					{signalValue.value ? signalValue.value.toFormat('dd MMM') : '--'}
+				</span>
+			</button>
 
-		this.app.stage.addChild(grid.container);
-		this.app.stage.addChild(tasks.container);
-		this.app.stage.addChild(scrollbars.container);
+			<button
+				type='button'
+				className={`datetime-field__tab ${
+					activeTab.value === 'time' ? 'datetime-field__tab--active' : ''
+				}`}
+				onClick={() => activeTab.value = 'time'}
+			>
+				<IconClock size={16} />
+				<span>Time</span>
+				<span className='datetime-field__tab-val'>
+					{signalValue.value ? signalValue.value.toFormat('HH:mm') : '--:--'}
+				</span>
+			</button>
+		</div>
+	);
 
-		this.renderers.push(grid, tasks, scrollbars);
+	return (
+		<div className='datetime-field'>
+			<Popover
+				isOpen={isOpen.value}
+				onClose={() => isOpen.value = false}
+				trigger={
+					<TextField
+						name='datetime-field'
+						{...rest}
+						type='text'
+						placeholder={placeholder || 'DD/MM/YYYY HH:mm'}
+						value={inputValue.value}
+						onInput={(e) => handleInputChange(e.currentTarget.value)}
+						suffix={
+							<button
+								type='button'
+								className='datetime-field__icon-btn'
+								onClick={(e) => {
+									e.preventDefault();
+									isOpen.value = !isOpen.value;
+								}}
+								tabIndex={-1}
+							>
+								<IconCalendar size={18} />
+							</button>
+						}
+						onFocus={() => isOpen.value = true}
+					/>
+				}
+				content={
+					<div className='datetime-field__popup'>
+						{renderTabs()}
 
-		this.app.canvas.addEventListener('pointerdown', () => {
-			if (this.store.hoveredScrollbar.value) return;
-			this.scroll.handlePointerDown();
-		});
+						<div className='datetime-field__body'>
+							{activeTab.value === 'date'
+								? (
+									<Calendar
+										value={signalValue.value}
+										onChange={(v) => {
+											if (v instanceof DateTime) {
+												updateDatePart(v);
+											}
+										}}
+										min={min}
+										max={max}
+										className='datetime-field__calendar'
+									/>
+								)
+								: (
+									<div className='datetime-field__clock-wrapper'>
+										<TimeClock
+											value={signalValue.value}
+											onChange={updateTimePart}
+										/>
+									</div>
+								)}
+						</div>
+					</div>
+				}
+			/>
+		</div>
+	);
+}
 
-		this.app.canvas.addEventListener('wheel', (e) => {
-			if (e.ctrlKey || e.metaKey) {
-				e.preventDefault();
+```
 
-				const zoomFactor = Math.exp(e.deltaY * 0.002);
-				const currentDays = this.store.visibleDays.value;
-				let newDays = currentDays * zoomFactor;
-				newDays = Math.max(1, Math.min(newDays, 3650));
+### File: packages\fields\src\components\FileDrop.tsx
 
-				const firstTask = this.store.tasks.value.length > 0 ? this.store.tasks.value[0] : null;
-				const anchorDate = firstTask ? firstTask.startAt : this.store.timelineStart.value;
-				const currentScreenX = this.store.timeScale.dateToX(anchorDate) + this.store.scrollX.value;
+```tsx
+/* #region Imports */
+import '../styles/fields/file-drop.css';
+import { JSX } from 'preact';
+import { useSignal } from '@preact/signals';
+import {
+	IconBooks,
+	IconCloudUpload,
+	IconFile,
+	IconFilePlus,
+	IconLoader2,
+	IconPhoto,
+	IconRefresh,
+	IconTrash,
+} from '@tabler/icons-preact';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { FileWithMeta, getFileCategory } from '@projective/types';
+import { FileFieldProps } from '../types/file.ts';
+import { TargetedEvent } from 'preact';
+import { toast } from '@projective/ui'; // Required for notifications
+/* #endregion */
 
-				this.store.setVisibleDays(newDays);
+export function FileDrop(props: FileFieldProps) {
+	const {
+		id,
+		label,
+		value,
+		onChange,
+		accept,
+		multiple,
+		disabled,
+		className,
+		style,
+		error,
+		required,
+		variant = 'split',
+		listPosition = 'below',
+		onLibraryClick,
+		maxSize = 10 * 1024 * 1024,
+		maxFiles = 10,
+		floatingRule = 'never',
+		actionPosition = 'below',
+	} = props;
 
-				const newAbsoluteX = this.store.timeScale.dateToX(anchorDate);
-				this.store.scrollX.value = currentScreenX - newAbsoluteX;
+	const isDragging = useSignal(false);
+	const inputRef = useSignal<HTMLInputElement | null>(null);
 
+	const files = value?.value || [];
+
+	// #region Helpers
+	const processFiles = (incomingFiles: File[]) => {
+		if (disabled) return;
+
+		let validFiles = incomingFiles;
+
+		// 1. Validate File Type (Accept) - CRITICAL FOR DRAG & DROP
+		if (accept) {
+			const acceptedTypes = accept.split(',').map((t) => t.trim().toLowerCase());
+
+			validFiles = validFiles.filter((f) => {
+				const fType = f.type.toLowerCase();
+				const fName = f.name.toLowerCase();
+
+				const isValid = acceptedTypes.some((type) => {
+					// Check extension (e.g., .png)
+					if (type.startsWith('.')) return fName.endsWith(type);
+					// Check mime type (e.g., image/*)
+					if (type.endsWith('/*')) return fType.startsWith(type.replace('/*', ''));
+					// Check exact mime type (e.g., image/png)
+					return fType === type;
+				});
+
+				if (!isValid) {
+					toast.error(`File "${f.name}" format is not supported.`);
+					return false;
+				}
+				return true;
+			});
+		}
+
+		// 2. Validate Max Files
+		if (!multiple && validFiles.length > 1) {
+			// If single mode, just take the last one dropped
+			validFiles = [validFiles[validFiles.length - 1]];
+		} else if (multiple && (files.length + validFiles.length) > maxFiles) {
+			const slotsRemaining = maxFiles - files.length;
+			if (slotsRemaining <= 0) {
+				toast.error(`Maximum file limit (${maxFiles}) reached.`);
 				return;
 			}
 
-			this.store.isShiftDown.value = e.shiftKey;
-			this.scroll.handleWheel(e);
-		}, { passive: false });
+			toast.warning(`Limit exceeded. Only adding ${slotsRemaining} file(s).`);
+			validFiles = validFiles.slice(0, slotsRemaining);
+		}
 
-		globalThis.addEventListener('pointermove', (e) => this.scroll.handlePointerMove(e.movementX));
-		globalThis.addEventListener('pointerup', () => this.scroll.handlePointerUp());
-
-		this.app.ticker.add(() => {
-			if (this.store.isMouseDown.value) return;
-
-			if (Math.abs(Math.round(this.store.deltaX.value)) > 0) {
-				this.store.scrollX.value += this.store.deltaX.value;
-				this.store.deltaX.value = this.store.deltaX.value * 0.9;
-			} else {
-				this.store.deltaX.value = 0;
+		// 3. Validate Size
+		validFiles = validFiles.filter((f) => {
+			if (f.size > maxSize) {
+				const sizeMb = Math.round(maxSize / 1024 / 1024);
+				toast.error(`"${f.name}" is too large (Max ${sizeMb}MB).`);
+				return false;
 			}
+			return true;
 		});
 
-		effect(() => {
-			this.store.scrollX.value;
-			this.store.scrollY.value;
-			this.store.tasks.value;
-			this.store.visibleDays.value;
-			this.store.headerData.value;
-			this.store.selectedRowId.value;
+		if (validFiles.length === 0) return;
 
-			this.store.containerWidth.value;
-			this.store.containerHeight.value;
-			this.store.themeTrigger.value;
+		// 4. Create FileWithMeta
+		const processed: FileWithMeta[] = validFiles.map((f) => ({
+			file: f,
+			id: crypto.randomUUID(),
+			status: 'pending',
+			progress: 0,
+			errors: [],
+			type: getFileCategory(f),
+			meta: {
+				uploadedAt: new Date().toISOString(),
+			},
+		}));
 
-			this.app.stage.y = -this.store.scrollY.value;
-			this.app.stage.x = this.store.scrollX.value;
-
-			this.renderAll();
-		});
-	}
-
-	public renderAll() {
-		this.renderers.forEach((r) => r.render());
-	}
-
-	public destroy() {
-		this.resizeObserver.disconnect();
-		this.themeObserver?.disconnect();
-		this.app.destroy(true, { children: true });
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\header-utils.ts
-
-```ts
-import { DateTime } from '@projective/types';
-
-// #region Interfaces
-export type HeaderUnit = 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
-
-export interface HeaderTier {
-	top: HeaderUnit;
-	topStep: number;
-	bottom: HeaderUnit;
-	bottomStep: number;
-	formatTop: (d: DateTime) => string;
-	formatBottom: (d: DateTime) => string;
-}
-
-export interface HeaderBlock {
-	key: string;
-	label: string;
-	x: number;
-	width: number;
-	date: DateTime;
-}
-// #endregion
-
-// #region Helpers
-function toPlural(unit: HeaderUnit): string {
-	switch (unit) {
-		case 'hour':
-			return 'hours';
-		case 'day':
-			return 'days';
-		case 'week':
-			return 'weeks';
-		case 'month':
-			return 'months';
-		case 'year':
-			return 'years';
-		case 'quarter':
-			return 'months';
-		default:
-			return unit;
-	}
-}
-// #endregion
-
-// #region Configuration
-export function getHeaderTier(visibleDays: number, containerWidth: number): HeaderTier {
-	const pixelsPerDay = containerWidth / Math.max(1, visibleDays);
-
-	// Reduced from 45. A two digit day ("24") only needs about 20-25px to render cleanly.
-	const MIN_DAY_WIDTH = 25;
-
-	if (pixelsPerDay >= 120) {
-		const pixelsPerHour = pixelsPerDay / 24;
-		const hourStepRaw = Math.ceil(MIN_DAY_WIDTH / pixelsPerHour);
-		const validHourSteps = [1, 2, 3, 4, 6, 12];
-		const hourStep = validHourSteps.find((s) => s >= hourStepRaw) || 12;
-
-		return {
-			top: 'day',
-			topStep: 1,
-			bottom: 'hour',
-			bottomStep: hourStep,
-			formatTop: (d) => d.toFormat('ddd d MMM yyyy'),
-			formatBottom: (d) => d.toFormat('HH:mm'),
-		};
-	} else if (pixelsPerDay >= MIN_DAY_WIDTH) {
-		// Single Days (If there is enough physical room, show every single day)
-		return {
-			top: 'month',
-			topStep: 1,
-			bottom: 'day',
-			bottomStep: 1,
-			formatTop: (d) => d.toFormat('MMMM yyyy'),
-			formatBottom: (d) => d.toFormat('dd'),
-		};
-	} else {
-		// Grouped Days
-		const dayStepRaw = Math.ceil(MIN_DAY_WIDTH / pixelsPerDay);
-		const validDaySteps = [2, 3, 4, 5, 7, 10, 14, 15];
-
-		if (dayStepRaw <= 15) {
-			const dayStep = validDaySteps.find((s) => s >= dayStepRaw) || 15;
-			return {
-				top: 'month',
-				topStep: 1,
-				bottom: 'day',
-				bottomStep: dayStep,
-				formatTop: (d) => d.toFormat('MMMM yyyy'),
-				formatBottom: (d) => d.toFormat('dd'),
-			};
+		if (onChange) {
+			if (multiple) {
+				onChange([...files, ...processed]);
+			} else {
+				// Replace in single mode
+				onChange([processed[processed.length - 1]]);
+			}
 		}
+	};
 
-		// Months
-		const pixelsPerMonth = pixelsPerDay * 30;
-		if (pixelsPerMonth >= MIN_DAY_WIDTH) {
-			const monthStepRaw = Math.ceil(MIN_DAY_WIDTH / pixelsPerMonth);
-			const validMonthSteps = [1, 2, 3, 4, 6];
-			const monthStep = validMonthSteps.find((s) => s >= monthStepRaw) || 6;
-
-			return {
-				top: 'year',
-				topStep: 1,
-				bottom: 'month',
-				bottomStep: monthStep,
-				formatTop: (d) => d.toFormat('yyyy'),
-				formatBottom: (d) => d.toFormat('MMM'),
-			};
+	const handleRemove = (fileId: string, e?: Event) => {
+		e?.stopPropagation();
+		if (onChange) {
+			onChange(files.filter((f) => f.id !== fileId));
 		}
+	};
+	// #endregion
 
-		// Quarters / Years
-		return {
-			top: 'year',
-			topStep: 1,
-			bottom: 'quarter',
-			bottomStep: 1,
-			formatTop: (d) => d.toFormat('yyyy'),
-			formatBottom: (d) => `Q${Math.ceil((d.getMonth() + 1) / 3)}`,
-		};
-	}
-}
-// #endregion
-
-// #region Generators
-export function generateHeaderBlocks(
-	start: DateTime,
-	end: DateTime,
-	unit: HeaderUnit,
-	step: number,
-	dateToX: (ms: number) => number,
-): HeaderBlock[] {
-	const blocks: HeaderBlock[] = [];
-
-	// 1. ANCHOR TO EPOCH: Always snap to the absolute beginning of the relevant calendar unit.
-	// This ensures that when scrolling, the math doesn't shift relative to the scrollbar.
-	let current = new DateTime(new Date(start.getTime()));
-
-	if (unit === 'hour') {
-		current = current.startOf('day');
-	} else if (unit === 'day') {
-		current = current.startOf('month');
-	} else if (unit === 'week') {
-		const dayOfWeek = current.getDay();
-		const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-		current = new DateTime(new Date(current.getTime() - diff * 86400000)).startOf('day');
-	} else {
-		current = current.startOf('year');
-	}
-
-	const startMs = start.getTime();
-	const endTime = end.getTime();
-	const pluralUnit = toPlural(unit);
-
-	// 2. FAST FORWARD: Skip iterations until we reach the visible viewport
-	let safety = 0;
-	while (safety < 5000) {
-		let next: DateTime;
-		if (unit === 'quarter') {
-			next = current.add(3 * step, 'months');
-		} else {
-			// @ts-ignore
-			next = current.add(step, pluralUnit);
-		}
-
-		if (next.getTime() > startMs) break;
-
-		current = next;
-		safety++;
-	}
-
-	// 3. GENERATE RENDER BLOCKS
-	safety = 0;
-	while (current.getTime() < endTime && safety < 5000) {
-		let next: DateTime;
-		if (unit === 'quarter') {
-			next = current.add(3 * step, 'months');
-		} else {
-			// @ts-ignore
-			next = current.add(step, pluralUnit);
-		}
-
-		const xStart = dateToX(current.getTime());
-		const xEnd = dateToX(next.getTime());
-
-		if (xEnd > xStart) {
-			blocks.push({
-				key: `${unit}-${current.getTime()}`,
-				label: '',
-				x: xStart,
-				width: xEnd - xStart,
-				date: current.clone(),
-			});
-		}
-
-		current = next;
-		safety++;
-	}
-
-	return blocks;
-}
-// #endregion
-
-```
-
-### File: packages\charts\src\core\gantt\interaction\scroll.ts
-
-```ts
-import { GanttStore } from '../store.ts';
-
-export class ScrollManager {
-	private store: GanttStore;
-	private readonly BOTTOM_BUFFER = 50;
-
-	constructor(store: GanttStore) {
-		this.store = store;
-	}
-
-	public handlePointerDown() {
-		if (!this.store.canDrag.value) return;
-
-		this.store.isMouseDown.value = true;
-	}
-
-	public handlePointerMove(x: number) {
-		if (!this.store.isMouseDown.value) return;
-		this.store.scrollX.value += x;
-		this.store.deltaX.value = x;
-	}
-
-	public handlePointerUp() {
-		this.store.isMouseDown.value = false;
-	}
-
-	public handleWheel(e: WheelEvent) {
+	// #region Event Handlers
+	const handleDragEnter = (e: DragEvent) => {
 		e.preventDefault();
-
-		if (this.store.isShiftDown.value) {
-			this.store.scrollX.value -= e.deltaY;
-		} else {
-			const currentY = this.store.scrollY.value;
-			const delta = e.deltaY * 0.6;
-
-			const contentHeight = this.store.contentHeight.value;
-			const viewportHeight = this.store.containerHeight.value;
-
-			const maxScrollY = Math.max(0, contentHeight - viewportHeight);
-
-			let newY = currentY + delta;
-
-			if (newY < 0) newY = 0;
-			if (newY > maxScrollY) newY = maxScrollY;
-
-			this.store.scrollY.value = newY;
-		}
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\renderer\base-renderer.ts
-
-```ts
-import * as PIXI from 'pixi.js';
-import { GanttStore } from '../store.ts';
-
-/**
- * Base class for all Gantt canvas layers.
- */
-export abstract class BaseRenderer {
-	public container: PIXI.Container;
-	protected store: GanttStore;
-
-	constructor(store: GanttStore) {
-		this.store = store;
-		this.container = new PIXI.Container();
-	}
-
-	/**
-	 * Called every frame or on state change to redraw the layer.
-	 */
-	abstract render(): void;
-
-	/**
-	 * Cleanup resources if necessary.
-	 */
-	public destroy(): void {
-		this.container.destroy({ children: true });
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\renderer\grid-renderer.ts
-
-```ts
-import * as PIXI from 'pixi.js';
-import { BaseRenderer } from './base-renderer.ts';
-import { GanttStore } from '../store.ts';
-import { getThemeColor } from '../../../utils/theme-bridge.ts';
-import { DateTime } from '@projective/types';
-import { generateHeaderBlocks, getHeaderTier } from '../header-utils.ts';
-
-export class GridRenderer extends BaseRenderer {
-	private graphics: PIXI.Graphics;
-
-	constructor(store: GanttStore) {
-		super(store);
-		this.graphics = new PIXI.Graphics();
-		this.container.addChild(this.graphics);
-	}
-
-	public render(): void {
-		this.graphics.clear();
-
-		const cPrimary = getThemeColor('--primary');
-		const cSecondary = getThemeColor('--border-color');
-
-		const currentX = this.store.scrollX.value;
-		const width = this.store.containerWidth.value;
-		const days = this.store.visibleDays.value;
-
-		const buffer = 500;
-		const renderStartX = -currentX - buffer;
-		const renderEndX = -currentX + width + buffer;
-
-		const startDate = new DateTime(new Date(this.store.timeScale.xToDate(renderStartX)));
-		const endDate = new DateTime(new Date(this.store.timeScale.xToDate(renderEndX)));
-
-		const tier = getHeaderTier(days, width);
-		const dateToX = (t: number) => this.store.timeScale.dateToX(t);
-
-		const topRows = generateHeaderBlocks(startDate, endDate, tier.top, tier.topStep, dateToX);
-		const bottomRows = generateHeaderBlocks(
-			startDate,
-			endDate,
-			tier.bottom,
-			tier.bottomStep,
-			dateToX,
-		);
-
-		// Calculate drawing boundaries relative to scroll to ensure lines reach bottom of viewport
-		const startY = this.store.scrollY.value;
-		const endY = startY + this.store.containerHeight.value;
-
-		// Render secondary (bottom) vertical lines using standard border color
-		this.graphics.beginPath();
-		for (const block of bottomRows) {
-			const x = block.x;
-			this.graphics.moveTo(x, startY);
-			this.graphics.lineTo(x, endY);
-		}
-		this.graphics.stroke({ width: 1, color: cSecondary, alpha: 0.3 });
-
-		// Render primary (top) vertical lines using accent
-		this.graphics.beginPath();
-		for (const block of topRows) {
-			const x = block.x;
-			this.graphics.moveTo(x, startY);
-			this.graphics.lineTo(x, endY);
-		}
-		this.graphics.stroke({ width: 1, color: cPrimary, alpha: 0.2 });
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\renderer\scroll-renderer.ts
-
-```ts
-import * as PIXI from 'pixi.js';
-import { BaseRenderer } from './base-renderer.ts';
-import { GanttStore } from '../store.ts';
-import { getThemeColor } from '../../../utils/theme-bridge.ts';
-
-export class ScrollRenderer extends BaseRenderer {
-	private vThumb: PIXI.Graphics;
-	private hThumb: PIXI.Graphics;
-
-	private vHovered = false;
-	private hHovered = false;
-
-	// Dragging State
-	private dragging = false;
-	private activeThumb: 'v' | 'h' | null = null;
-	private dragStartY = 0;
-	private dragStartX = 0;
-	private startScrollY = 0;
-	private startScrollX = 0;
-
-	// Dynamic Boundaries captured at the exact moment a drag starts
-	private dragTotalWidth = 0;
-	private dragMinX = 0;
-
-	constructor(store: GanttStore) {
-		super(store);
-
-		this.vThumb = new PIXI.Graphics();
-		this.vThumb.eventMode = 'static';
-		this.vThumb.cursor = 'default';
-
-		this.hThumb = new PIXI.Graphics();
-		this.hThumb.eventMode = 'static';
-		this.hThumb.cursor = 'default';
-
-		this.bindInteraction();
-
-		this.container.addChild(this.vThumb);
-		this.container.addChild(this.hThumb);
-	}
-
-	private bindInteraction() {
-		// Hover States (Communicates to Canvas to yield priority)
-		this.vThumb.on('pointerenter', () => {
-			this.vHovered = true;
-			this.store.hoveredScrollbar.value = true;
-			this.render();
-		});
-		this.vThumb.on('pointerleave', () => {
-			this.vHovered = false;
-			if (!this.hHovered && !this.dragging) this.store.hoveredScrollbar.value = false;
-			this.render();
-		});
-
-		this.hThumb.on('pointerenter', () => {
-			this.hHovered = true;
-			this.store.hoveredScrollbar.value = true;
-			this.render();
-		});
-		this.hThumb.on('pointerleave', () => {
-			this.hHovered = false;
-			if (!this.vHovered && !this.dragging) this.store.hoveredScrollbar.value = false;
-			this.render();
-		});
-
-		// Start Vertical Drag
-		this.vThumb.on('pointerdown', (e) => {
-			this.dragging = true;
-			this.activeThumb = 'v';
-			this.dragStartY = e.client.y; // Use raw client pixels to match DOM window events
-			this.startScrollY = this.store.scrollY.value;
-			this.store.hoveredScrollbar.value = true;
-		});
-
-		// Start Horizontal Drag
-		this.hThumb.on('pointerdown', (e) => {
-			this.dragging = true;
-			this.activeThumb = 'h';
-			this.dragStartX = e.client.x;
-			this.startScrollX = this.store.scrollX.value;
-			this.store.hoveredScrollbar.value = true;
-
-			// Snapshot the virtual boundaries so the scale doesn't warp while actively dragging
-			const vWidth = this.store.containerWidth.value;
-			const vLeft = -this.startScrollX;
-			const timelineStartMs = this.store.timelineStart.value;
-
-			let maxEndMs = timelineStartMs;
-			this.store.tasks.value.forEach((t) => {
-				if (t.endAt > maxEndMs) maxEndMs = t.endAt;
-			});
-			maxEndMs += 14 * 86400000;
-
-			const dataStartX = this.store.timeScale.dateToX(timelineStartMs);
-			const dataEndX = this.store.timeScale.dateToX(maxEndMs);
-
-			this.dragMinX = Math.min(vLeft, dataStartX);
-			const maxX = Math.max(vLeft + vWidth, dataEndX);
-			this.dragTotalWidth = maxX - this.dragMinX;
-		});
-
-		// Bind move/up to the global window so we don't drop the drag if the cursor flies off the canvas
-		globalThis.addEventListener('pointermove', this.onPointerMove);
-		globalThis.addEventListener('pointerup', this.onPointerUp);
-	}
-
-	private onPointerMove = (e: PointerEvent) => {
-		if (!this.dragging) return;
-
-		if (this.activeThumb === 'v') {
-			const vHeight = this.store.containerHeight.value;
-			const cHeight = this.store.contentHeight.value;
-			const maxScroll = Math.max(0, cHeight - vHeight);
-
-			const margin = 4;
-			const minThumbHeight = 40;
-			const thumbHeight = Math.max((vHeight / cHeight) * vHeight, minThumbHeight);
-			const maxThumbTravel = vHeight - thumbHeight - margin * 2;
-
-			if (maxThumbTravel <= 0) return;
-
-			const deltaY = e.clientY - this.dragStartY;
-			const multiplier = maxScroll / maxThumbTravel;
-
-			let newScroll = this.startScrollY + (deltaY * multiplier);
-			newScroll = Math.max(0, Math.min(newScroll, maxScroll));
-
-			this.store.scrollY.value = newScroll;
-		} else if (this.activeThumb === 'h') {
-			const vWidth = this.store.containerWidth.value;
-			const margin = 4;
-			const minThumbWidth = 40;
-
-			const thumbWidth = Math.max((vWidth / this.dragTotalWidth) * vWidth, minThumbWidth);
-			const maxThumbTravel = vWidth - thumbWidth - margin * 2;
-			const maxScroll = this.dragTotalWidth - vWidth;
-
-			if (maxThumbTravel <= 0) return;
-
-			const deltaX = e.clientX - this.dragStartX;
-			const multiplier = maxScroll / maxThumbTravel;
-
-			const startVLeft = -this.startScrollX;
-			let newVLeft = startVLeft + (deltaX * multiplier);
-
-			newVLeft = Math.max(this.dragMinX, Math.min(newVLeft, this.dragMinX + maxScroll));
-
-			// Store uses inverted scroll logic for canvas panning
-			this.store.scrollX.value = -newVLeft;
-		}
+		e.stopPropagation();
+		if (!disabled) isDragging.value = true;
 	};
 
-	private onPointerUp = () => {
-		if (this.dragging) {
-			this.dragging = false;
-			this.activeThumb = null;
-			this.store.hoveredScrollbar.value = false;
-			this.render();
-		}
-	};
-
-	public render(): void {
-		this.container.x = -this.store.scrollX.value;
-		this.container.y = this.store.scrollY.value;
-
-		this.renderVertical();
-		this.renderHorizontal();
-	}
-
-	private renderVertical() {
-		this.vThumb.clear();
-
-		const vHeight = this.store.containerHeight.value;
-		const cHeight = this.store.contentHeight.value;
-
-		if (cHeight <= vHeight) return;
-
-		const scrollY = this.store.scrollY.value;
-		const maxScroll = cHeight - vHeight;
-
-		const isHovering = this.vHovered || this.activeThumb === 'v';
-		const width = isHovering ? 8 : 6;
-		const margin = 4;
-
-		const minThumbHeight = 40;
-		const thumbHeight = Math.max((vHeight / cHeight) * vHeight, minThumbHeight);
-		const scrollRatio = scrollY / maxScroll;
-
-		const rawThumbY = margin + scrollRatio * (vHeight - thumbHeight - margin * 2);
-		const thumbY = Math.max(margin, Math.min(rawThumbY, vHeight - thumbHeight - margin));
-		const x = this.store.containerWidth.value - width - margin;
-
-		const cTextMain = getThemeColor('--text-main');
-		const alpha = isHovering ? 0.6 : 0.2;
-
-		// Invisible fill allows hit detection on the hollow inside of the outline
-		this.vThumb.roundRect(x, thumbY, width, thumbHeight, width / 2);
-		this.vThumb.fill({ color: 0xffffff, alpha: 0.001 });
-		this.vThumb.stroke({ width: 1.5, color: cTextMain, alpha });
-	}
-
-	private renderHorizontal() {
-		this.hThumb.clear();
-
-		const vWidth = this.store.containerWidth.value;
-		const vLeft = -this.store.scrollX.value;
-		const vRight = vLeft + vWidth;
-
-		const timelineStartMs = this.store.timelineStart.value;
-		let maxEndMs = timelineStartMs;
-		this.store.tasks.value.forEach((t) => {
-			if (t.endAt > maxEndMs) maxEndMs = t.endAt;
-		});
-		maxEndMs += 14 * 86400000;
-
-		const dataStartX = this.store.timeScale.dateToX(timelineStartMs);
-		const dataEndX = this.store.timeScale.dateToX(maxEndMs);
-
-		const minX = Math.min(vLeft, dataStartX);
-		const maxX = Math.max(vRight, dataEndX);
-		const totalWidth = maxX - minX;
-
-		if (totalWidth <= vWidth + 1) return;
-
-		const isHovering = this.hHovered || this.activeThumb === 'h';
-		const height = isHovering ? 8 : 6;
-		const margin = 4;
-
-		const minThumbWidth = 40;
-		const thumbWidth = Math.max((vWidth / totalWidth) * vWidth, minThumbWidth);
-
-		const scrollRatio = (vLeft - minX) / (totalWidth - vWidth);
-		const rawThumbX = margin + scrollRatio * (vWidth - thumbWidth - margin * 2);
-		const thumbX = Math.max(margin, Math.min(rawThumbX, vWidth - thumbWidth - margin));
-
-		const y = this.store.containerHeight.value - height - margin;
-
-		const cTextMain = getThemeColor('--text-main');
-		const alpha = isHovering ? 0.6 : 0.2;
-
-		// Invisible fill allows hit detection on the hollow inside of the outline
-		this.hThumb.roundRect(thumbX, y, thumbWidth, height, height / 2);
-		this.hThumb.fill({ color: 0xffffff, alpha: 0.001 });
-		this.hThumb.stroke({ width: 1.5, color: cTextMain, alpha });
-	}
-
-	public override destroy() {
-		super.destroy();
-		globalThis.removeEventListener('pointermove', this.onPointerMove);
-		globalThis.removeEventListener('pointerup', this.onPointerUp);
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\renderer\task-renderer.ts
-
-```ts
-// deno-lint-ignore-file no-explicit-any
-import * as PIXI from 'pixi.js';
-import { BaseRenderer } from './base-renderer.ts';
-import { GanttStore } from '../store.ts';
-import { DateTime } from '@projective/types';
-import { getThemeColor } from '../../../utils/theme-bridge.ts';
-import { GanttTask } from '../../../types/gantt.ts';
-
-export class TaskRenderer extends BaseRenderer {
-	constructor(store: GanttStore) {
-		super(store);
-	}
-
-	public render(): void {
-		this.container.removeChildren();
-
-		const tasks = this.store.tasks.value;
-		const rows = [...this.store.rows.value].sort((a, b) => a.orderIndex - b.orderIndex);
-		const rowHeight = this.store.rowHeight.value;
-
-		const rowMap = new Map<string, number>();
-		rows.forEach((row, index) => rowMap.set(row.id, index));
-
-		const cBg = getThemeColor('--bg');
-		const cAccent = getThemeColor('--primary');
-		const cTextMain = getThemeColor('--text-main');
-		const cTextMuted = getThemeColor('--text-muted');
-		const cMilestone = getThemeColor('--warning');
-
-		const titleStyle = new PIXI.TextStyle({
-			fontFamily: 'Inter, system-ui, sans-serif',
-			fontSize: 12,
-			fill: cTextMain,
-			fontWeight: '600',
-		});
-
-		const dateStyle = new PIXI.TextStyle({
-			fontFamily: 'Inter, system-ui, sans-serif',
-			fontSize: 10,
-			fill: cTextMuted,
-			fontWeight: '500',
-		});
-
-		for (const task of tasks) {
-			const rowIndex = rowMap.get(task.rowId);
-			if (rowIndex === undefined) continue;
-
-			const coords = this.store.getTaskCoordinates(task);
-			const safeWidth = Math.min(Math.max(coords.width, 2), 16000);
-
-			const margin = 12;
-			const barHeight = rowHeight - (margin * 2);
-			const y = (rowIndex * rowHeight) + margin;
-
-			const isSelected = task.rowId === this.store.selectedRowId.value;
-
-			if (task.isMilestone) {
-				this.renderMilestone(task, isSelected, coords.x, y, barHeight, {
-					cBg,
-					cMilestone,
-					cAccent,
-				});
-			} else {
-				this.renderTaskBar(
-					task,
-					isSelected,
-					coords.x,
-					safeWidth,
-					y,
-					barHeight,
-					{ cAccent },
-					{ titleStyle, dateStyle },
-				);
-			}
-		}
-	}
-
-	private renderTaskBar(
-		task: GanttTask,
-		isSelected: boolean,
-		x: number,
-		width: number,
-		y: number,
-		height: number,
-		colors: { cAccent: number },
-		styles: { titleStyle: PIXI.TextStyle; dateStyle: PIXI.TextStyle },
-	): void {
-		const group = new PIXI.Container();
-		group.x = x;
-		group.y = y;
-
-		const bg = new PIXI.Graphics();
-		const radius = 4;
-
-		const strokeAlpha = isSelected ? 1 : 0.4;
-		const strokeWidth = isSelected ? 2 : 1;
-
-		bg.roundRect(0, 0, width, height, radius);
-		bg.fill({ color: colors.cAccent, alpha: 0.15 });
-		bg.stroke({ width: strokeWidth, color: colors.cAccent, alpha: strokeAlpha });
-
-		bg.beginPath();
-		bg.roundRect(0, 0, 4, height, radius);
-		bg.fill({ color: colors.cAccent, alpha: 1 });
-
-		group.addChild(bg);
-
-		const textPadX = 12;
-		if (width > 40) {
-			const title = new PIXI.Text({ text: task.name, style: styles.titleStyle });
-			title.x = textPadX;
-			title.y = 5;
-			group.addChild(title);
-		}
-
-		if (width > 120) {
-			const dateStr = `${new DateTime(new Date(task.startAt)).toFormat('dd/MM')} - ${
-				new DateTime(new Date(task.endAt)).toFormat('dd/MM')
-			}`;
-			const dateText = new PIXI.Text({ text: dateStr, style: styles.dateStyle });
-			dateText.x = textPadX;
-			dateText.y = 20;
-			group.addChild(dateText);
-		}
-
-		this.bindInteraction(group, task);
-		this.container.addChild(group);
-	}
-
-	private renderMilestone(
-		task: GanttTask,
-		isSelected: boolean,
-		x: number,
-		y: number,
-		size: number,
-		colors: { cBg: number; cMilestone: number; cAccent: number },
-	): void {
-		const graphics = new PIXI.Graphics();
-
-		const centerX = x;
-		const centerY = y + size / 2;
-		const diamondRadius = 10;
-
-		graphics.beginPath();
-		graphics.moveTo(centerX, centerY - diamondRadius);
-		graphics.lineTo(centerX + diamondRadius, centerY);
-		graphics.lineTo(centerX, centerY + diamondRadius);
-		graphics.lineTo(centerX - diamondRadius, centerY);
-		graphics.closePath();
-
-		graphics.fill({ color: colors.cMilestone, alpha: 1 });
-
-		const strokeColor = isSelected ? colors.cAccent : colors.cBg;
-		graphics.stroke({ width: 3, color: strokeColor, alpha: 1 });
-
-		this.bindInteraction(graphics, task);
-		this.container.addChild(graphics);
-	}
-
-	private bindInteraction(element: PIXI.Container, task: GanttTask) {
-		element.eventMode = 'static';
-		element.cursor = 'pointer';
-
-		element.on('pointerenter', (e) => {
-			this.store.hoveredTask.value = task;
-			this.store.pointerPos.value = { x: e.global.x, y: e.global.y };
-		});
-
-		element.on('pointermove', (e) => {
-			if (this.store.hoveredTask.value?.id === task.id) {
-				this.store.pointerPos.value = { x: e.global.x, y: e.global.y };
-			}
-		});
-
-		element.on('pointerleave', () => {
-			this.store.hoveredTask.value = null;
-		});
-
-		element.on('pointerdown', () => {
-			this.store.selectRow(task.rowId);
-		});
-	}
-}
-
-```
-
-### File: packages\charts\src\core\gantt\store.ts
-
-```ts
-import { DateTime } from '@projective/types';
-import { batch, computed, type Signal, signal } from '@preact/signals';
-import { GanttTimeScale } from './time-scale.ts';
-import {
-	generateHeaderBlocks,
-	getHeaderTier,
-	type HeaderBlock,
-	type HeaderTier,
-} from './header-utils.ts';
-import type { DependencyLink, GanttRow, GanttTask } from '../../types/gantt.ts';
-
-export interface GanttStoreOptions {
-	visibleWidth: number;
-	visibleHeight: number;
-	startDate: number;
-	endDate?: number;
-}
-
-export interface HeaderData {
-	topRows: HeaderBlock[];
-	bottomRows: HeaderBlock[];
-	tier: HeaderTier;
-	totalWidth: number;
-}
-
-export class GanttStore {
-	public rows: Signal<GanttRow[]>;
-	public tasks: Signal<GanttTask[]>;
-	public dependencies: Signal<DependencyLink[]>;
-
-	public visibleDays: Signal<number>;
-
-	public scrollX: Signal<number>;
-	public scrollY: Signal<number>;
-	public deltaX: Signal<number>;
-	public canDrag: Signal<boolean>;
-
-	public isMouseDown: Signal<boolean>;
-	public isShiftDown: Signal<boolean>;
-
-	// Hover & Tooltip State
-	public hoveredTask: Signal<GanttTask | null>;
-	public pointerPos: Signal<{ x: number; y: number }>;
-
-	// Interaction Overrides
-	public hoveredScrollbar: Signal<boolean>;
-
-	// Selection State
-	public selectedRowId: Signal<string | null>;
-	public onRowSelect?: (rowId: string) => void;
-
-	public containerWidth: Signal<number>;
-	public containerHeight: Signal<number>;
-
-	public rowHeight: Signal<number>;
-	public rowGap: Signal<number>;
-
-	public timelineStart: Signal<number>;
-	public timeScale: GanttTimeScale;
-
-	public themeTrigger: Signal<number>;
-
-	constructor(options: GanttStoreOptions) {
-		this.rows = signal([]);
-		this.tasks = signal([]);
-		this.dependencies = signal([]);
-
-		this.visibleDays = signal(30);
-		this.scrollX = signal(0);
-		this.scrollY = signal(0);
-		this.deltaX = signal(0);
-		this.canDrag = signal(true);
-
-		this.isMouseDown = signal(false);
-		this.isShiftDown = signal(false);
-
-		this.hoveredTask = signal(null);
-		this.pointerPos = signal({ x: 0, y: 0 });
-		this.hoveredScrollbar = signal(false);
-
-		this.selectedRowId = signal(null);
-
-		this.containerWidth = signal(options.visibleWidth);
-		this.containerHeight = signal(options.visibleHeight);
-
-		this.rowHeight = signal(60);
-		this.rowGap = signal(40);
-		this.themeTrigger = signal(0);
-
-		this.timelineStart = signal(options.startDate);
-
-		this.timeScale = new GanttTimeScale({
-			visibleDays: this.visibleDays.value,
-			width: options.visibleWidth,
-			startDate: options.startDate,
-		});
-	}
-
-	public selectRow(rowId: string) {
-		this.selectedRowId.value = rowId;
-		if (this.onRowSelect) {
-			this.onRowSelect(rowId);
-		}
-	}
-
-	public contentHeight = computed(() => {
-		return this.rows.value.length * this.rowHeight.value;
-	});
-
-	public loadData(rows: GanttRow[], tasks: GanttTask[], links: DependencyLink[]) {
-		batch(() => {
-			this.rows.value = rows;
-			this.tasks.value = tasks;
-			this.dependencies.value = links;
-		});
-	}
-
-	public resize(width: number, height: number) {
-		this.timeScale.update(this.visibleDays.value, width, this.timelineStart.value);
-		batch(() => {
-			this.containerWidth.value = width;
-			this.containerHeight.value = height;
-		});
-	}
-
-	public setVisibleDays(days: number) {
-		const validDays = Math.max(1, days);
-		this.timeScale.update(validDays, this.containerWidth.value, this.timelineStart.value);
-		this.visibleDays.value = validDays;
-	}
-
-	public setStartDate(start: number) {
-		this.timeScale.update(this.visibleDays.value, this.containerWidth.value, start);
-		this.timelineStart.value = start;
-	}
-
-	public getTaskCoordinates(task: GanttTask): { x: number; width: number } {
-		const x1 = this.timeScale.dateToX(task.startAt);
-		const x2 = this.timeScale.dateToX(task.endAt);
-		return { x: x1, width: Math.max(x2 - x1, 2) };
-	}
-
-	public headerData = computed<HeaderData>(() => {
-		const days = this.visibleDays.value;
-		const width = this.containerWidth.value;
-		const startMs = this.timelineStart.value;
-
-		const tier = getHeaderTier(days, width);
-
-		const startDT = new DateTime(new Date(startMs));
-		const endDT = startDT.add(days, 'days').endOf('day');
-
-		this.timeScale.update(days, width, startMs);
-		const dateToX = (t: number) => this.timeScale.dateToX(t);
-
-		const topRows = generateHeaderBlocks(startDT, endDT, tier.top, tier.topStep, dateToX);
-		const bottomRows = generateHeaderBlocks(startDT, endDT, tier.bottom, tier.bottomStep, dateToX);
-
-		return {
-			topRows,
-			bottomRows,
-			tier,
-			totalWidth: width,
-		};
-	});
-}
-
-```
-
-### File: packages\charts\src\core\gantt\time-scale.ts
-
-```ts
-import { DateTime } from '@projective/types';
-
-// #region Interfaces
-
-export interface TimeScaleConfig {
-	visibleDays: number;
-	width: number;
-	startDate: number; // Timestamp
-}
-
-// #endregion
-
-/**
- * Manages the "Time Domain" -> "Pixel Range" mapping.
- * Calculates coordinates based on a specific number of visible days.
- */
-export class GanttTimeScale {
-	private _visibleDays: number;
-	private _width: number;
-	private _start: number;
-	private _msPerPixel: number;
-
-	constructor(config: TimeScaleConfig) {
-		this._visibleDays = config.visibleDays;
-		this._width = config.width;
-		this._start = config.startDate;
-
-		this._msPerPixel = this.calculateRatio();
-	}
-
-	/**
-	 * Recalculates the ratio of milliseconds per pixel.
-	 * Total MS in View / Total Pixels
-	 */
-	private calculateRatio(): number {
-		const totalMs = this._visibleDays * 86400000; // days * 24 * 60 * 60 * 1000
-		return totalMs / (this._width || 1);
-	}
-
-	/**
-	 * Updates the configuration and recalculates ratio.
-	 */
-	public update(visibleDays: number, width: number, startDate: number) {
-		this._visibleDays = visibleDays;
-		this._width = width;
-		this._start = startDate;
-		this._msPerPixel = this.calculateRatio();
-	}
-
-	/**
-	 * Converts a timestamp to a generic X pixel coordinate.
-	 * @param date Timestamp in ms
-	 */
-	public dateToX(date: number): number {
-		const diffMs = date - this._start;
-		return diffMs / this._msPerPixel;
-	}
-
-	/**
-	 * Converts an X pixel coordinate back to a timestamp.
-	 * @param x Pixel coordinate
-	 */
-	public xToDate(x: number): number {
-		const msToAdd = x * this._msPerPixel;
-		return this._start + msToAdd;
-	}
-
-	/**
-	 * Returns the Date object for the right-most edge of the view.
-	 */
-	public getEndDate(): DateTime {
-		const start = new DateTime(new Date(this._start));
-		return start.add(this._visibleDays, 'days');
-	}
-
-	/**
-	 * Returns the visible width of a single day in pixels.
-	 */
-	public getDayWidth(): number {
-		return this._width / this._visibleDays;
-	}
-}
-
-```
-
-### File: packages\charts\src\hooks\useKanbanDnD.ts
-
-```ts
-import { useEffect } from 'preact/hooks';
-import { signal } from '@preact/signals';
-import { DragData, INITIAL_DRAG_DATA, KanbanCardProps, KanbanFieldProps } from '../types/kanban.ts';
-
-export const dragData = signal<DragData>(INITIAL_DRAG_DATA);
-
-export function useDraggable(
-	type: 'card' | 'field',
-	data: any,
-	sourceId: string,
-	isLocked: boolean,
-) {
-	const onPointerDown = (e: PointerEvent) => {
-		if (isLocked) return;
-		if ((e.target as HTMLElement).closest('button')) return;
-
-		// Prevent default to capture pointer completely
+	const handleDragLeave = (e: DragEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		const el = e.currentTarget as HTMLElement;
-		const rect = el.getBoundingClientRect();
+		// Fix: Only disable dragging if we actually left the container
+		// (prevents flickering when dragging over child elements like icons)
+		const container = e.currentTarget as HTMLElement;
+		const enteringElement = e.relatedTarget as HTMLElement;
 
-		dragData.value = {
-			...INITIAL_DRAG_DATA,
-			isDragging: true,
-			type,
-			id: data.id,
-			sourceFieldId: type === 'card' ? sourceId : null,
-			clientX: e.clientX,
-			clientY: e.clientY,
-			offsetX: e.clientX - rect.left,
-			offsetY: e.clientY - rect.top,
-			width: rect.width,
-			height: rect.height,
-			...(type === 'card' ? { cardData: data } : { fieldData: data }),
-		};
-	};
-
-	return {
-		onPointerDown,
-		'data-reorderable': !isLocked,
-	};
-}
-
-export function useDropzone(type: 'card' | 'field', id: string) {
-	return {
-		[`data-kanban-${type}-id`]: id,
-	};
-}
-
-export function useKanbanDnD(
-	onCardMove?: (
-		cardId: string,
-		sourceFieldId: string,
-		targetFieldId: string,
-		insertBeforeId: string | null,
-	) => void,
-	onFieldMove?: (sourceFieldId: string, targetFieldId: string, insertBefore: boolean) => void,
-) {
-	useEffect(() => {
-		const handlePointerMove = (e: PointerEvent) => {
-			if (!dragData.value.isDragging) return;
-			e.preventDefault();
-
-			const targetEl = document.elementFromPoint(e.clientX, e.clientY);
-			let targetFieldId = dragData.value.targetFieldId;
-			let targetCardId = dragData.value.targetCardId;
-			let insertPosition = dragData.value.insertPosition;
-
-			if (dragData.value.type === 'card') {
-				const cardEl = targetEl?.closest('[data-kanban-card-id]');
-				const fieldEl = targetEl?.closest('[data-kanban-field-id]');
-
-				if (cardEl) {
-					targetFieldId = fieldEl?.getAttribute('data-kanban-field-id') || null;
-					targetCardId = cardEl.getAttribute('data-kanban-card-id');
-					const rect = cardEl.getBoundingClientRect();
-					insertPosition = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
-				} else if (fieldEl) {
-					const hoveredFieldId = fieldEl.getAttribute('data-kanban-field-id');
-					if (hoveredFieldId !== targetFieldId) {
-						targetFieldId = hoveredFieldId;
-						targetCardId = null;
-						insertPosition = 'after';
-					}
-				}
-			} else if (dragData.value.type === 'field') {
-				const fieldEl = targetEl?.closest('[data-kanban-field-wrapper-id]');
-				if (fieldEl) {
-					targetFieldId = fieldEl.getAttribute('data-kanban-field-wrapper-id');
-					const rect = fieldEl.getBoundingClientRect();
-					insertPosition = e.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
-				}
-			}
-
-			dragData.value = {
-				...dragData.value,
-				clientX: e.clientX,
-				clientY: e.clientY,
-				targetFieldId,
-				targetCardId,
-				insertPosition,
-			};
-		};
-
-		const handlePointerUp = () => {
-			if (!dragData.value.isDragging) return;
-
-			const { type, id, sourceFieldId, targetFieldId, targetCardId, insertPosition } =
-				dragData.value;
-
-			if (type === 'card' && id && sourceFieldId && targetFieldId) {
-				let insertBeforeId = null;
-				if (targetCardId) {
-					insertBeforeId = insertPosition === 'before'
-						? targetCardId
-						: `${targetCardId}_after`;
-				}
-				if (!(sourceFieldId === targetFieldId && targetCardId === id)) {
-					onCardMove?.(id, sourceFieldId, targetFieldId, insertBeforeId);
-				}
-			} else if (type === 'field' && id && targetFieldId && id !== targetFieldId) {
-				onFieldMove?.(id, targetFieldId, insertPosition === 'before');
-			}
-
-			dragData.value = INITIAL_DRAG_DATA;
-		};
-
-		if (dragData.value.isDragging) {
-			globalThis.addEventListener('pointermove', handlePointerMove, { passive: false });
-			globalThis.addEventListener('pointerup', handlePointerUp);
+		if (!container.contains(enteringElement)) {
+			isDragging.value = false;
 		}
+	};
+
+	const handleDrop = (e: DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		isDragging.value = false;
+
+		if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+			processFiles(Array.from(e.dataTransfer.files));
+			e.dataTransfer.clearData();
+		}
+	};
+
+	const handleFileInput = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+		if (e.currentTarget.files) {
+			processFiles(Array.from(e.currentTarget.files));
+			e.currentTarget.value = '';
+		}
+	};
+
+	const triggerUpload = () => inputRef.value?.click();
+	// #endregion
+
+	// #region Renderers
+	const renderIcon = (file: FileWithMeta) => {
+		if (file.status === 'processing') {
+			return <IconLoader2 size={24} className='file-drop__spinner' />;
+		}
+		if (file.type === 'Image') return <IconPhoto size={24} />;
+		return <IconFile size={24} />;
+	};
+
+	const renderFileList = () => (
+		<div className='file-drop__list'>
+			{files.map((file) => (
+				<div key={file.id} className='file-drop__item'>
+					{file.status === 'processing' && (
+						<div className='file-drop__progress-bg' style={{ width: `${file.progress}%` }} />
+					)}
+
+					<div className='file-drop__item-info'>
+						{file.type === 'Image'
+							? (
+								<img
+									src={URL.createObjectURL(file.file)}
+									className='file-drop__preview-thumb'
+									alt={file.file.name}
+								/>
+							)
+							: (
+								<div style={{ color: 'var(--text-secondary)' }}>
+									{renderIcon(file)}
+								</div>
+							)}
+
+						<div className='file-drop__meta'>
+							<span className='file-drop__filename'>{file.file.name}</span>
+							<span className='file-drop__filesize'>
+								{(file.file.size / 1024 / 1024).toFixed(2)} MB
+								{file.status === 'processing' && ` • ${Math.round(file.progress)}%`}
+								{file.status === 'error' && (
+									<span style={{ color: 'var(--error-500)' }}>• Failed</span>
+								)}
+							</span>
+						</div>
+					</div>
+
+					<button
+						type='button'
+						className='file-drop__remove'
+						onClick={(e) => handleRemove(file.id!, e)}
+						title='Remove file'
+					>
+						<IconTrash size={18} />
+					</button>
+				</div>
+			))}
+		</div>
+	);
+
+	const renderSinglePreview = (file: FileWithMeta) => (
+		<div
+			className={`file-drop__container ${disabled ? 'file-drop__container--disabled' : ''}`}
+			style={{ flexDirection: 'column', height: 'auto', padding: 0 }}
+		>
+			<div className={`file-drop__single-preview file-drop__single-preview--${actionPosition}`}>
+				<img
+					src={URL.createObjectURL(file.file)}
+					className='file-drop__single-img'
+					alt='Preview'
+				/>
+
+				{actionPosition === 'overlay' && (
+					<button type='button' className='file-drop__change-btn' onClick={triggerUpload}>
+						<IconRefresh size={32} />
+						<span>Change Image</span>
+					</button>
+				)}
+			</div>
+
+			{actionPosition === 'below' && (
+				<button
+					type='button'
+					className='file-drop__remove-bar'
+					onClick={() => handleRemove(file.id!)}
+				>
+					<IconTrash size={16} /> Remove & Change
+				</button>
+			)}
+		</div>
+	);
+	// #endregion
+
+	const hasSingleFile = !multiple && files.length > 0;
+
+	return (
+		<div className={`field-file ${className || ''}`} style={style}>
+			<LabelWrapper
+				id={id}
+				label={label}
+				disabled={disabled}
+				required={required}
+				error={!!error}
+				floatingRule={floatingRule}
+			/>
+
+			{/* LIST ABOVE */}
+			{listPosition === 'top' && multiple && files.length > 0 && renderFileList()}
+
+			{/* DROPZONE OR SINGLE PREVIEW */}
+			{hasSingleFile
+				? (
+					renderSinglePreview(files[0])
+				)
+				: (
+					<div
+						className={[
+							'file-drop__container',
+							disabled && 'file-drop__container--disabled',
+							!!error && 'file-drop__container--error',
+							variant === 'single' && 'file-drop__container--single',
+						].filter(Boolean).join(' ')}
+						onDragEnter={handleDragEnter}
+						onDragOver={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+						onDragLeave={handleDragLeave}
+						onDrop={handleDrop}
+						onClick={variant === 'single' ? triggerUpload : undefined}
+					>
+						<input
+							ref={(el) => (inputRef.value = el) as any}
+							type='file'
+							id={id}
+							multiple={multiple}
+							accept={accept}
+							onChange={handleFileInput}
+							style={{ display: 'none' }}
+						/>
+
+						{isDragging.value && (
+							<div className='file-drop__overlay'>
+								<div className='file-drop__overlay-content'>
+									<IconFilePlus size={48} />
+									<span>Drop files to add them</span>
+								</div>
+							</div>
+						)}
+
+						{variant === 'split' && (
+							<>
+								<div
+									className='file-drop__split-action'
+									onClick={(e) => {
+										e.stopPropagation();
+										triggerUpload();
+									}}
+								>
+									<IconCloudUpload size={32} stroke={1.5} />
+									<div>
+										<div className='file-drop__label'>Upload from Device</div>
+										<div className='file-drop__sub'>JPG, PNG, PDF (Max 10MB)</div>
+									</div>
+								</div>
+								<div className='file-drop__divider' />
+								<div
+									className='file-drop__split-action'
+									onClick={(e) => {
+										e.stopPropagation();
+										onLibraryClick?.();
+									}}
+								>
+									<IconBooks size={32} stroke={1.5} />
+									<div>
+										<div className='file-drop__label'>Select from Library</div>
+										<div className='file-drop__sub'>Reuse existing assets</div>
+									</div>
+								</div>
+							</>
+						)}
+
+						{variant === 'single' && (
+							<div className='file-drop__split-action' style={{ width: '100%', border: 'none' }}>
+								<IconCloudUpload size={32} stroke={1.5} />
+								<div className='file-drop__label'>Click to Upload</div>
+							</div>
+						)}
+					</div>
+				)}
+
+			{/* LIST BELOW */}
+			{listPosition === 'below' && multiple && files.length > 0 && renderFileList()}
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\HelpTooltip.tsx
+
+```tsx
+import { JSX } from 'preact';
+import { IconHelp } from '@tabler/icons-preact';
+import '../styles/components/help-tooltip.css';
+
+export interface HelpTooltipProps {
+	/** The content to show in the tooltip */
+	content: string | JSX.Element;
+	/** Optional link to navigate to on click */
+	href?: string;
+	/** Optional override for the icon */
+	icon?: JSX.Element;
+	className?: string;
+	style?: JSX.CSSProperties;
+}
+
+export function HelpTooltip({ content, href, icon, className, style }: HelpTooltipProps) {
+	const Icon = icon || <IconHelp size={16} />;
+
+	// If it's a link, we render an anchor tag
+	if (href) {
+		return (
+			<a
+				href={href}
+				target='_blank'
+				rel='noopener noreferrer'
+				className={`help-tooltip ${className || ''}`}
+				style={style}
+				onClick={(e) => e.stopPropagation()} // Prevent triggering parent label clicks
+			>
+				<span className='help-tooltip__icon'>{Icon}</span>
+				<span className='help-tooltip__popup'>
+					{content}
+					<span className='help-tooltip__arrow' />
+				</span>
+			</a>
+		);
+	}
+
+	// Otherwise, just a span
+	return (
+		<span className={`help-tooltip ${className || ''}`} style={style}>
+			<span className='help-tooltip__icon'>{Icon}</span>
+			<span className='help-tooltip__popup'>
+				{content}
+				<span className='help-tooltip__arrow' />
+			</span>
+		</span>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\MoneyField.tsx
+
+```tsx
+import { TargetedEvent } from 'preact';
+import { Signal, useSignal } from '@preact/signals';
+import { MoneyFieldProps } from '../types/components/money-field.ts';
+import { TextField } from './TextField.tsx';
+import { useCurrencyMask } from '../hooks/useCurrencyMask.ts';
+
+export function MoneyField(props: MoneyFieldProps) {
+	const {
+		value,
+		defaultValue,
+		onChange,
+		onBlur,
+		onFocus,
+		currency = 'USD',
+		locale = 'en-US',
+		placeholder = '0.00',
+		...rest
+	} = props;
+
+	const isValueSignal = value instanceof Signal;
+	const internalSignal = useSignal(
+		isValueSignal ? value.peek() : (value ?? defaultValue),
+	);
+
+	if (!isValueSignal && value !== undefined && value !== internalSignal.peek()) {
+		internalSignal.value = value;
+	}
+
+	const signalValue = isValueSignal ? value : internalSignal;
+
+	const { displayValue, handleBlur, handleFocus, handleChange, setProgrammaticValue } =
+		useCurrencyMask(
+			signalValue as Signal<number | undefined>,
+			currency,
+			locale,
+		);
+
+	const lastX = useSignal<number | null>(null);
+	const lastTime = useSignal<number | null>(null);
+
+	const handlePointerDown = (e: PointerEvent) => {
+		const target = e.currentTarget as HTMLElement;
+		target.setPointerCapture(e.pointerId);
+		lastX.value = e.clientX;
+		lastTime.value = performance.now();
+		e.preventDefault();
+	};
+
+	const handlePointerMove = (e: PointerEvent) => {
+		if (lastX.value === null || lastTime.value === null) return;
+
+		const currentX = e.clientX;
+		const currentTime = performance.now();
+
+		const dx = currentX - lastX.value;
+		const dt = currentTime - lastTime.value;
+
+		if (dt > 0 && dx !== 0) {
+			const velocity = Math.abs(dx / dt);
+
+			const speedMultiplier = 1 + Math.log1p(velocity * 10);
+
+			const delta = dx * 0.2 * speedMultiplier;
+
+			const currentVal = signalValue.peek() ?? 0;
+			const newVal = Math.max(0, currentVal + delta);
+
+			setProgrammaticValue(newVal);
+			onChange?.(newVal);
+		}
+
+		lastX.value = currentX;
+		lastTime.value = currentTime;
+	};
+
+	const handlePointerUp = (e: PointerEvent) => {
+		if (lastX.value !== null) {
+			const target = e.currentTarget as HTMLElement;
+			target.releasePointerCapture(e.pointerId);
+			lastX.value = null;
+			lastTime.value = null;
+		}
+	};
+
+	return (
+		<TextField
+			{...rest}
+			value={displayValue}
+			placeholder={placeholder}
+			onInput={(e: TargetedEvent<HTMLInputElement>) => {
+				handleChange(e.currentTarget.value);
+				onChange?.(signalValue.peek() as number);
+			}}
+			onBlur={(e) => {
+				handleBlur();
+				onBlur?.(e);
+			}}
+			onFocus={(e) => {
+				handleFocus();
+				onFocus?.(e);
+			}}
+			prefixProps={{
+				onPointerDown: handlePointerDown,
+				onPointerMove: handlePointerMove,
+				onPointerUp: handlePointerUp,
+				style: { cursor: 'ew-resize', touchAction: 'none' },
+			}}
+			prefix={
+				<span style={{ fontSize: '0.9em', fontWeight: 'bold' }}>
+					{new Intl.NumberFormat(locale, {
+						style: 'currency',
+						currency,
+					}).formatToParts(0).find((p) => p.type === 'currency')
+						?.value}
+				</span>
+			}
+		/>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\RichTextField.tsx
+
+```tsx
+/* #region Imports */
+import '../styles/fields/rich-text-field.css';
+import { useEffect, useRef } from 'preact/hooks';
+import { Signal, useComputed, useSignal } from '@preact/signals';
+import { RichTextFieldProps } from '../types/components/rich-text-field.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+/* #endregion */
+
+let Quill: any = null;
+
+/**
+ * @function RichTextField
+ * @description A high-performance rich text editor powered by Quill, integrated
+ * with the projective design system.
+ * * @param {RichTextFieldProps} props - Component properties.
+ * @returns {JSX.Element}
+ */
+export function RichTextField(props: RichTextFieldProps) {
+	// #region State & Destructuring
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		outputFormat = 'delta',
+		toolbar = 'basic',
+		variant = 'framed',
+		secureLinks = true,
+		placeholder,
+		readOnly,
+		onImageUpload,
+		error,
+		hint,
+		warning,
+		info,
+		disabled,
+		required,
+		minHeight = '150px',
+		maxHeight,
+		maxLength,
+		showCount,
+		className,
+		style,
+	} = props;
+
+	const editorRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const quillInstance = useRef<any>(null);
+	const parserRef = useRef<any>(null);
+
+	const length = useSignal(0);
+
+	const getRawValue = () => {
+		if (value instanceof Signal) return value.value;
+		return value || defaultValue || '';
+	};
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const isReadOnly = !!readOnly || isDisabled;
+	const isError = error instanceof Signal ? error.value : error;
+	const isWarning = warning instanceof Signal ? warning.value : warning;
+
+	const isOverLimit = useComputed(() => maxLength ? length.value > maxLength : false);
+	// #endregion
+
+	// #region Helper Logic: Links & Images
+	/**
+	 * @function registerSecureLink
+	 * @description Sanitizes and secures link creation within the editor.
+	 */
+	const registerSecureLink = (QuillArg: any) => {
+		const Link = QuillArg.import('formats/link');
+		class SecureLink extends Link {
+			static create(value: string) {
+				const node = super.create(value);
+				value = this.sanitize(value);
+				node.setAttribute('href', value);
+				node.setAttribute('rel', 'noopener noreferrer');
+				node.setAttribute('target', '_blank');
+				return node;
+			}
+			static sanitize(url: string) {
+				const protocol = url.slice(0, url.indexOf(':'));
+				if (['javascript', 'vbscript', 'data'].includes(protocol.toLowerCase())) {
+					return 'about:blank';
+				}
+				return super.sanitize(url);
+			}
+		}
+		if (secureLinks) {
+			QuillArg.register(SecureLink, true);
+		}
+	};
+
+	const insertImage = (url: string) => {
+		const quill = quillInstance.current;
+		if (!quill) return;
+		const range = quill.getSelection(true);
+		quill.insertEmbed(range.index, 'image', url);
+		quill.setSelection(range.index + 1);
+	};
+
+	const handleFiles = async (files: FileList | File[]) => {
+		if (!onImageUpload) return;
+		for (let i = 0; i < files.length; i++) {
+			const file = files[i];
+			if (file.type.startsWith('image/')) {
+				try {
+					const url = await onImageUpload(file);
+					insertImage(url);
+				} catch (err) {
+					console.error('Image upload failed', err);
+				}
+			}
+		}
+	};
+
+	const imageHandler = () => {
+		const input = document.createElement('input');
+		input.setAttribute('type', 'file');
+		input.setAttribute('accept', 'image/*');
+		input.click();
+
+		input.onchange = () => {
+			if (input.files && input.files[0]) {
+				if (onImageUpload) {
+					handleFiles([input.files[0]]);
+				} else {
+					const reader = new FileReader();
+					reader.onload = (e) => {
+						insertImage(e.target?.result as string);
+					};
+					reader.readAsDataURL(input.files[0]);
+				}
+			}
+		};
+	};
+	// #endregion
+
+	// #region Lifecycle: Quill Initialization
+	useEffect(() => {
+		if (typeof window === 'undefined' || !editorRef.current) return;
+
+		const init = async () => {
+			if (!Quill) {
+				const mod = await import('quill');
+				Quill = mod.default;
+				registerSecureLink(Quill);
+			}
+
+			if (!parserRef.current) {
+				const { MarkdownParser } = await import('../../../utils/src/markdown/QuillParser.ts');
+				parserRef.current = new MarkdownParser();
+			}
+
+			if (quillInstance.current) {
+				if (quillInstance.current.isEnabled() === isReadOnly) {
+					quillInstance.current.enable(!isReadOnly);
+				}
+				return;
+			}
+
+			let toolbarConfig = toolbar;
+			if (toolbar === 'basic') {
+				toolbarConfig = [
+					['bold', 'italic', 'underline', 'strike'],
+					['link', 'blockquote'],
+					[{ 'list': 'ordered' }, { 'list': 'bullet' }],
+					['clean'],
+				];
+			} else if (toolbar === 'full') {
+				toolbarConfig = [
+					[{ 'header': [1, 2, 3, false] }],
+					['bold', 'italic', 'underline', 'strike'],
+					[{ 'color': [] }, { 'background': [] }],
+					[{ 'script': 'sub' }, { 'script': 'super' }],
+					['link', 'blockquote', 'code-block', 'image'],
+					[{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+					[{ 'align': [] }],
+					['clean'],
+				];
+			}
+
+			const modules = {
+				toolbar: isReadOnly ? false : {
+					container: toolbarConfig,
+					handlers: { image: imageHandler },
+				},
+			};
+
+			quillInstance.current = new Quill(editorRef.current, {
+				theme: 'snow',
+				modules,
+				placeholder: isReadOnly ? '' : placeholder,
+				readOnly: isReadOnly,
+			});
+
+			const toolbarC = containerRef.current?.querySelector('.ql-toolbar');
+			if (toolbarC) {
+				const controls = toolbarC.querySelectorAll('button, select');
+				controls.forEach((control) => control.setAttribute('tabindex', '-1'));
+			}
+
+			if (!isReadOnly) {
+				quillInstance.current.root.addEventListener('drop', (e: DragEvent) => {
+					if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+						e.preventDefault();
+						handleFiles(e.dataTransfer.files);
+					}
+				});
+			}
+
+			const raw = getRawValue();
+			if (raw) {
+				try {
+					if (typeof raw === 'object' && raw !== null) {
+						quillInstance.current.setContents(raw);
+					} else if (typeof raw === 'string') {
+						const trimmed = raw.trim();
+						if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+							quillInstance.current.setContents(JSON.parse(trimmed));
+						} else if (trimmed.startsWith('<')) {
+							const delta = quillInstance.current.clipboard.convert(trimmed);
+							quillInstance.current.setContents(delta);
+						} else {
+							if (parserRef.current) {
+								parserRef.current.markdownToDelta(raw).then((delta: any) => {
+									quillInstance.current.setContents(delta);
+								});
+							} else {
+								quillInstance.current.setText(raw);
+							}
+						}
+					}
+				} catch {
+					quillInstance.current.setText(String(raw));
+				}
+			}
+
+			length.value = Math.max(0, quillInstance.current.getLength() - 1);
+
+			quillInstance.current.on('text-change', () => {
+				const delta = quillInstance.current.getContents();
+				length.value = Math.max(0, quillInstance.current.getLength() - 1);
+
+				let output = '';
+				if (outputFormat === 'delta') output = JSON.stringify(delta);
+				else if (outputFormat === 'html') output = quillInstance.current.root.innerHTML;
+				else if (outputFormat === 'markdown' && parserRef.current) {
+					output = parserRef.current.deltaToMarkdown(delta);
+				}
+
+				if (value instanceof Signal) value.value = output;
+				onChange?.(output);
+			});
+		};
+
+		init();
+	}, [isReadOnly]);
+	// #endregion
+
+	// #region Render
+	return (
+		<div
+			className={`field-rich-text field-rich-text--${variant} ${
+				isReadOnly ? 'field-rich-text--readonly' : ''
+			} ${className || ''}`}
+			style={style}
+		>
+			<LabelWrapper
+				id={id}
+				label={label}
+				required={required}
+				error={!!isError}
+				disabled={isDisabled}
+				position='top'
+				floatingRule='never'
+			/>
+
+			<div
+				ref={containerRef}
+				className={`field-rich-text__container ${
+					isError ? 'field-rich-text__container--error' : ''
+				} ${isWarning ? 'field-rich-text__container--warning' : ''}`}
+			>
+				<div
+					ref={editorRef}
+					style={{
+						minHeight: variant === 'inline' ? 'auto' : minHeight,
+						maxHeight: maxHeight,
+					}}
+				/>
+			</div>
+
+			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+				<div style={{ flex: 1 }}>
+					<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+				</div>
+
+				{showCount && (
+					<div
+						className={`field-rich-text__count ${
+							isOverLimit.value ? 'field-rich-text__count--limit' : ''
+						}`}
+					>
+						{length}/{maxLength || '∞'}
+					</div>
+				)}
+			</div>
+		</div>
+	);
+	// #endregion
+}
+
+```
+
+### File: packages\fields\src\components\SelectField.tsx
+
+```tsx
+import '../styles/fields/select-field.css';
+import { Signal } from '@preact/signals';
+import { useEffect, useRef } from 'preact/hooks';
+import { IconCheck, IconChevronDown, IconLoader2, IconSelector, IconX } from '@tabler/icons-preact';
+import { SelectFieldProps, SelectOption } from '../types/components/select-field.ts';
+import { useSelectState } from '../hooks/useSelectState.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { EffectWrapper, useRipple } from '../wrappers/EffectWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
+
+export function SelectField<T = string>(props: SelectFieldProps<T>) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		options,
+		error,
+		disabled,
+		placeholder,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		multiple,
+		searchable,
+		clearable,
+		loading,
+		displayMode = 'chips-inside',
+		enableSelectAll,
+		groupSelectMode = 'value',
+		icons,
+		nextField,
+		onKeyDown,
+	} = props;
+
+	const containerRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const listRef = useRef<HTMLDivElement>(null);
+
+	const interaction = useInteraction(
+		value instanceof Signal ? value.value : value,
+	);
+	const { ripples, addRipple } = useRipple();
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = error instanceof Signal ? error.value : error;
+
+	const {
+		isOpen,
+		highlightedIndex,
+		searchQuery,
+		filteredOptions,
+		selectedValues,
+		toggleOpen,
+		selectOption,
+		removeValue,
+		toggleSelectAll,
+		handleKeyDown,
+	} = useSelectState({
+		options,
+		value,
+		onChange,
+		multiple,
+		disabled: !!isDisabled,
+		groupSelectMode,
+	});
+
+	useEffect(() => {
+		if (isOpen.value && containerRef.current) {
+			const rect = containerRef.current.getBoundingClientRect();
+			const spaceBelow = globalThis.innerHeight - rect.bottom;
+			if (containerRef.current.classList.contains('field-select--up')) {
+				if (spaceBelow > 250) containerRef.current.classList.remove('field-select--up');
+			} else {
+				if (spaceBelow < 250) containerRef.current.classList.add('field-select--up');
+			}
+
+			if (searchable && inputRef.current) {
+				inputRef.current.focus();
+			}
+
+			if (listRef.current && highlightedIndex.value >= 0) {
+				const highlightedEl = listRef.current.children[highlightedIndex.value] as HTMLElement;
+				if (highlightedEl) {
+					highlightedEl.scrollIntoView({ block: 'nearest' });
+				}
+			}
+		}
+	}, [isOpen.value, highlightedIndex.value]);
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+				toggleOpen(false);
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
+
+	const getLabelForValue = (val: T) => {
+		const findInTree = (opts: SelectOption<T>[]): SelectOption<T> | undefined => {
+			for (const o of opts) {
+				if (o.value === val) return o;
+				if (o.options) {
+					const found = findInTree(o.options);
+					if (found) return found;
+				}
+			}
+			return undefined;
+		};
+		const opt = findInTree(options);
+		return opt ? opt.label : String(val);
+	};
+
+	const renderStatusIcon = () => {
+		if (loading) return icons?.loading || <IconLoader2 className='field-select__spin' size={18} />;
+		if (errorMessage) return icons?.invalid;
+		if (isOpen.value) return icons?.arrowOpen || <IconChevronDown size={18} />;
+		return icons?.arrow || <IconChevronDown size={18} />;
+	};
+
+	const renderChips = () => {
+		return selectedValues.value.map((val) => {
+			const label = getLabelForValue(val);
+			return (
+				<span key={String(val)} className='field-select__chip'>
+					{label}
+					<span
+						className='field-select__chip-remove'
+						onMouseDown={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							removeValue(val);
+						}}
+					>
+						{icons?.remove || <IconX size={14} />}
+					</span>
+				</span>
+			);
+		});
+	};
+
+	const renderValue = () => {
+		if (displayMode === 'count' && selectedValues.value.length > 0) {
+			return <span className='field-select__summary'>{selectedValues.value.length} selected</span>;
+		}
+
+		if (multiple && displayMode === 'chips-inside') {
+			return renderChips();
+		}
+
+		if (!multiple && selectedValues.value.length > 0) {
+			const val = selectedValues.value[0];
+			const label = getLabelForValue(val);
+
+			if (searchable && searchQuery.value) return null;
+			return (
+				<div className='field-select__single'>
+					{label}
+				</div>
+			);
+		}
+
+		return null;
+	};
+
+	const handleContainerClick = (e: MouseEvent) => {
+		if (isDisabled) return;
+		if (searchable && isOpen.value && e.target === inputRef.current) return;
+
+		addRipple(e);
+		toggleOpen();
+		if (!isOpen.value) interaction.handleFocus(e);
+	};
+
+	const handleFieldKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Tab' && !e.shiftKey && nextField && !isOpen.value) {
+			e.preventDefault();
+			focusNextElement(inputRef.current || containerRef.current!, nextField);
+		}
+
+		handleKeyDown(e);
+		onKeyDown?.(e);
+	};
+
+	return (
+		<div
+			className={`field-select ${className || ''}`}
+			style={style}
+			ref={containerRef}
+		>
+			<LabelWrapper
+				id={id}
+				label={label}
+				active={isOpen.value || selectedValues.value.length > 0 || !!placeholder ||
+					!!searchQuery.value}
+				error={!!errorMessage}
+				disabled={isDisabled}
+				required={required}
+				floating={floating}
+				position={position}
+				floatingRule={floatingRule}
+			/>
+
+			<div
+				className={[
+					'field-select__container',
+					isOpen.value && 'field-select__container--open',
+					interaction.focused.value && 'field-select__container--focused',
+					errorMessage && 'field-select__container--error',
+					isDisabled && 'field-select__container--disabled',
+				].filter(Boolean).join(' ')}
+				onClick={handleContainerClick}
+				onMouseDown={(e) => {
+					if (e.target !== inputRef.current) e.preventDefault();
+				}}
+			>
+				<EffectWrapper focused={interaction.focused} disabled={isDisabled} />
+
+				<div
+					className='field-ripple-container'
+					style={{
+						position: 'absolute',
+						inset: 0,
+						overflow: 'hidden',
+						pointerEvents: 'none',
+						borderRadius: 'inherit',
+					}}
+				>
+					{ripples.value.map((r) => (
+						<span key={r.id} className='field-ripple' style={{ left: r.x, top: r.y }} />
+					))}
+				</div>
+
+				<div className='field-select__content'>
+					{renderValue()}
+
+					{(searchable || (selectedValues.value.length === 0 && placeholder)) && (
+						<input
+							ref={inputRef}
+							className='field-select__input'
+							value={searchQuery.value}
+							placeholder={selectedValues.value.length === 0
+								? (placeholder || (floating ? '' : 'Select...'))
+								: ''}
+							onInput={(e) => searchQuery.value = e.currentTarget.value}
+							onKeyDown={handleFieldKeyDown}
+							onFocus={interaction.handleFocus}
+							onBlur={() => {
+								setTimeout(() => interaction.handleBlur(), 100);
+							}}
+							disabled={!!isDisabled}
+							readOnly={!searchable}
+						/>
+					)}
+				</div>
+
+				{clearable && !loading && selectedValues.value.length > 0 && (
+					<div
+						className='field-select__clear'
+						onClick={(e) => {
+							e.stopPropagation();
+							if (multiple) {
+								if (value instanceof Signal) value.value = [];
+								onChange?.([]);
+							} else {
+								if (value instanceof Signal) value.value = undefined as any;
+								onChange?.(undefined as any);
+							}
+						}}
+					>
+						<IconX size={16} />
+					</div>
+				)}
+
+				<div className={`field-select__arrow ${isOpen.value ? 'field-select__arrow--flip' : ''}`}>
+					{renderStatusIcon()}
+				</div>
+
+				<div
+					className={`field-select__menu ${isOpen.value ? 'field-select__menu--open' : ''}`}
+					ref={listRef}
+				>
+					{multiple && enableSelectAll && filteredOptions.value.length > 0 && (
+						<div
+							className='field-select__action-bar'
+							onClick={(e) => {
+								e.stopPropagation();
+								toggleSelectAll();
+							}}
+						>
+							<IconSelector size={16} />
+							<span>Select All</span>
+						</div>
+					)}
+
+					{filteredOptions.value.length === 0
+						? <div className='field-select__no-options'>No options found</div>
+						: (
+							filteredOptions.value.map((option, index) => {
+								const isHighlighted = index === highlightedIndex.value;
+
+								let isSelected = false;
+								if (option.isGroup && groupSelectMode === 'members' && multiple) {
+									isSelected = option.descendantValues.length > 0 &&
+										option.descendantValues.every((v) => selectedValues.value.includes(v));
+								} else {
+									isSelected = selectedValues.value.includes(option.value);
+								}
+
+								return (
+									<div
+										key={String(option.value) + index}
+										className={[
+											'field-select__option',
+											isSelected && 'field-select__option--selected',
+											isHighlighted && 'field-select__option--highlighted',
+											option.disabled && 'field-select__option--disabled',
+											option.isGroup && 'field-select__option--group',
+										].filter(Boolean).join(' ')}
+										style={{ paddingLeft: `${(option.depth * 12) + 12}px` }} // Indentation
+										onClick={(e) => {
+											e.stopPropagation();
+											selectOption(option);
+										}}
+										onMouseEnter={() => highlightedIndex.value = index}
+									>
+										{option.icon && (
+											<span className='field-select__option-icon'>{option.icon}</span>
+										)}
+										{option.avatarUrl && (
+											<img src={option.avatarUrl} className='field-select__avatar' />
+										)}
+
+										<span className='field-select__option-label'>{option.label}</span>
+
+										{isSelected && (
+											<span className='field-select__check'>
+												{icons?.check || <IconCheck size={16} />}
+											</span>
+										)}
+									</div>
+								);
+							})
+						)}
+				</div>
+			</div>
+
+			{multiple && displayMode === 'chips-below' && selectedValues.value.length > 0 && (
+				<div className='field-select__chips-external'>
+					{renderChips()}
+				</div>
+			)}
+
+			<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\SliderField.tsx
+
+```tsx
+import '../styles/fields/slider-field.css';
+import { Signal } from '@preact/signals';
+import { SliderFieldProps, SliderMark } from '../types/components/slider-field.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { useSliderState } from '../hooks/useSliderState.ts';
+import { valueToPercent, valueToPercentLog } from '@projective/utils';
+
+export function SliderField(props: SliderFieldProps) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		min = 0,
+		max = 100,
+		step = 1,
+		disabled,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		error,
+		range,
+		marks,
+		snapToMarks,
+		vertical,
+		scale,
+		minDistance,
+		passthrough,
+	} = props;
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = error instanceof Signal ? error.value : error;
+
+	const rawValue = value instanceof Signal ? value.value : (value ?? defaultValue);
+
+	const {
+		trackRef,
+		internalValues,
+		activeHandleIdx,
+		handleStyles,
+		trackFillStyle,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		handleTrackClick,
+	} = useSliderState({
+		value: rawValue,
+		onChange: (val) => {
+			if (value instanceof Signal) {
+				(value as Signal<number | number[]>).value = val;
+			}
+			onChange?.(val);
+		},
+		min,
+		max,
+		step,
+		range,
+		disabled: !!isDisabled,
+		marks,
+		snapToMarks,
+		vertical,
+		scale,
+		minDistance,
+		passthrough,
+	});
+
+	const renderMarks = () => {
+		if (!marks) return null;
+		let points: SliderMark[] = [];
+		if (Array.isArray(marks)) {
+			points = marks.map((m) => (typeof m === 'number' ? { value: m } : m));
+		} else if (marks === true) {
+			if (scale === 'logarithmic') return null;
+			const count = (max - min) / step;
+			if (count > 100) return null;
+			for (let i = min; i <= max; i += step) points.push({ value: i });
+		}
+
+		return (
+			<div className='field-slider__marks'>
+				{points.map((mark, i) => {
+					const pct = scale === 'logarithmic'
+						? valueToPercentLog(mark.value, min, max)
+						: valueToPercent(mark.value, min, max);
+					if (pct < 0 || pct > 100) return null;
+
+					const markStyle = vertical
+						? { bottom: `${pct}%`, left: '50%' }
+						: { left: `${pct}%`, top: '50%' };
+
+					const markClass = ['field-slider__mark', mark.className].filter(Boolean).join(' ');
+
+					return (
+						<div key={i} className={markClass} style={markStyle}>
+							<div className='field-slider__mark-tick'></div>
+							{mark.label && <div className='field-slider__mark-label'>{mark.label}</div>}
+						</div>
+					);
+				})}
+			</div>
+		);
+	};
+
+	const containerClasses = [
+		'field-slider',
+		className,
+		isDisabled ? 'field-slider--disabled' : '',
+		range ? 'field-slider--range' : '',
+		marks ? 'field-slider--has-marks' : '',
+		vertical ? 'field-slider--vertical' : '',
+	].filter(Boolean).join(' ');
+
+	const wrapperStyle = vertical && props.height ? { height: props.height } : {};
+
+	return (
+		<div className={containerClasses} style={style}>
+			<LabelWrapper
+				id={id}
+				label={label}
+				disabled={isDisabled}
+				position={position}
+				floatingRule={floatingRule ?? 'never'}
+				required={required}
+				floating={floating}
+			/>
+
+			<div className='field-slider__control' style={wrapperStyle}>
+				<div
+					className='field-slider__container'
+					onClick={(e: MouseEvent) => handleTrackClick(e as PointerEvent)}
+				>
+					<div className='field-slider__track' ref={trackRef}>
+						<div className='field-slider__fill' style={trackFillStyle.value}></div>
+
+						{renderMarks()}
+
+						{handleStyles.value.map((thumbStyle, index) => {
+							const isActive = activeHandleIdx.value === index;
+							const val = internalValues.value[index];
+
+							return (
+								<div
+									key={index}
+									className={`field-slider__thumb ${isActive ? 'field-slider__thumb--active' : ''}`}
+									style={thumbStyle}
+									tabIndex={isDisabled ? -1 : 0}
+									role='slider'
+									aria-orientation={vertical ? 'vertical' : 'horizontal'}
+									aria-valuemin={min}
+									aria-valuemax={max}
+									aria-valuenow={val}
+									onPointerDown={(e) => {
+										(e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+										handlePointerDown(index, e);
+									}}
+									onPointerMove={handlePointerMove}
+									onPointerUp={(e) => {
+										(e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
+										handlePointerUp(e);
+									}}
+									onContextMenu={(e) => e.preventDefault()}
+								>
+								</div>
+							);
+						})}
+					</div>
+				</div>
+			</div>
+
+			<MessageWrapper error={errorMessage} hint={hint} warning={warning} info={info} />
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\TagInput.tsx
+
+```tsx
+import '../styles/fields/tag-input.css';
+import { Signal, useSignal } from '@preact/signals';
+import { TagInputProps } from '../types/components/tag-input.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { EffectWrapper } from '../wrappers/EffectWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
+import { generateTagTheme } from '@projective/utils';
+
+export function TagInput(props: TagInputProps) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		error,
+		disabled,
+		placeholder,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		nextField,
+		onKeyDown,
+		tagColor,
+		tagVariant = 'transparent',
+	} = props;
+
+	const interaction = useInteraction(
+		value instanceof Signal ? value.value : value,
+	);
+	const inputValue = useSignal('');
+
+	const isValueSignal = value instanceof Signal;
+	const internalSignal = useSignal(
+		isValueSignal ? value.peek() : (value ?? defaultValue ?? []),
+	);
+
+	if (!isValueSignal && value !== undefined && value !== internalSignal.peek()) {
+		internalSignal.value = value;
+	}
+
+	const signalValue = isValueSignal ? value : internalSignal;
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = error instanceof Signal ? error.value : error;
+
+	const handleKeyDown = (e: KeyboardEvent) => {
+		// Tab Navigation
+		if (e.key === 'Tab' && !e.shiftKey && nextField) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		}
+
+		// Tag Creation
+		if (e.key === 'Enter' || e.key === ',') {
+			e.preventDefault();
+			const val = inputValue.value.trim();
+			if (val) {
+				const currentTags = signalValue.value || [];
+				if (!currentTags.includes(val)) {
+					const newTags = [...currentTags, val];
+					if (isValueSignal) {
+						(value as Signal<string[]>).value = newTags;
+					} else {
+						internalSignal.value = newTags;
+					}
+					onChange?.(newTags);
+				}
+				inputValue.value = '';
+			}
+		} else if (
+			e.key === 'Backspace' && !inputValue.value &&
+			signalValue.value?.length
+		) {
+			const newTags = signalValue.value.slice(0, -1);
+			if (isValueSignal) {
+				(value as Signal<string[]>).value = newTags;
+			} else {
+				internalSignal.value = newTags;
+			}
+			onChange?.(newTags);
+		}
+
+		onKeyDown?.(e);
+	};
+
+	const removeTag = (tagToRemove: string) => {
+		const currentTags = signalValue.value || [];
+		const newTags = currentTags.filter((tag) => tag !== tagToRemove);
+		if (isValueSignal) {
+			(value as Signal<string[]>).value = newTags;
+		} else {
+			internalSignal.value = newTags;
+		}
+		onChange?.(newTags);
+	};
+
+	const handleContainerClick = (e: MouseEvent) => {
+		if (isDisabled) return;
+		const input = (e.currentTarget as HTMLElement).querySelector('input');
+		input?.focus();
+	};
+
+	const getTagStyles = (tag: string) => {
+		if (!tagColor) return {};
+		const colorStr = typeof tagColor === 'function' ? tagColor(tag) : tagColor;
+		return generateTagTheme(colorStr, tagVariant);
+	};
+
+	return (
+		<div className={`field-tag ${className || ''}`} style={style}>
+			<div
+				className={[
+					'field-tag__container',
+					interaction.focused.value &&
+					'field-tag__container--focused',
+					errorMessage && 'field-tag__container--error',
+					isDisabled && 'field-tag__container--disabled',
+				].filter(Boolean).join(' ')}
+				onClick={handleContainerClick}
+			>
+				<EffectWrapper
+					focused={interaction.focused}
+					disabled={isDisabled}
+				/>
+
+				{signalValue.value?.map((tag) => (
+					<div key={tag} className='field-tag__chip' style={getTagStyles(tag)}>
+						<span>{tag}</span>
+						<span
+							className='field-tag__chip-remove'
+							onClick={(e) => {
+								e.stopPropagation();
+								removeTag(tag);
+							}}
+						>
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								width='14'
+								height='14'
+								viewBox='0 0 24 24'
+								fill='none'
+								stroke='currentColor'
+								strokeWidth='2'
+								strokeLinecap='round'
+								strokeLinejoin='round'
+							>
+								<path d='M18 6 6 18' />
+								<path d='m6 6 12 12' />
+							</svg>
+						</span>
+					</div>
+				))}
+
+				<input
+					id={id}
+					className='field-tag__input'
+					value={inputValue.value}
+					onInput={(e) => inputValue.value = e.currentTarget.value}
+					onKeyDown={handleKeyDown}
+					onFocus={interaction.handleFocus}
+					onBlur={interaction.handleBlur}
+					disabled={!!isDisabled}
+					placeholder={signalValue.value?.length ? '' : placeholder}
+				/>
+			</div>
+
+			<LabelWrapper
+				id={id}
+				label={label}
+				active={interaction.focused.value ||
+					(signalValue.value && signalValue.value.length > 0) ||
+					!!placeholder}
+				error={!!errorMessage}
+				disabled={isDisabled}
+				required={required}
+				floating={floating}
+				position={position}
+				floatingRule={floatingRule}
+			/>
+
+			<MessageWrapper error={error} hint={hint} warning={warning} info={info} />
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\TextField.tsx
+
+```tsx
+import '../styles/fields/text-field.css';
+import { TargetedEvent } from 'preact';
+import { computed, Signal } from '@preact/signals';
+import { TextFieldProps } from '../types/components/text-field.ts';
+import { useFieldState } from '../hooks/useFieldState.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { LabelWrapper } from '../wrappers/LabelWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { EffectWrapper } from '../wrappers/EffectWrapper.tsx';
+import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
+import { focusNextElement } from '../hooks/useFocusNext.ts';
+
+export function TextField(props: TextFieldProps) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		error,
+		disabled,
+		placeholder,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		help,
+		helpLink,
+		helpPosition,
+		type = 'text',
+		multiline,
+		rows = 3,
+		maxRows,
+		autoComplete,
+		pattern,
+		min,
+		max,
+		minLength,
+		maxLength,
+		showCount,
+		prefix,
+		suffix,
+		prefixProps,
+		suffixProps,
+		onPrefixClick,
+		onSuffixClick,
+		onInput,
+		onFocus,
+		onBlur,
+		nextField,
+		onKeyDown,
+	} = props;
+
+	const fieldState = useFieldState({
+		value,
+		defaultValue: defaultValue ?? '',
+		required,
+		disabled,
+		error,
+		onChange,
+	});
+
+	const interaction = useInteraction(fieldState.value.value);
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = fieldState.error.value;
+	const val = fieldState.value.value || '';
+
+	const length = computed(() => val.length);
+	const isOverLimit = computed(() => maxLength ? length.value > maxLength : false);
+
+	const handleContainerClick = (e: MouseEvent) => {
+		if (isDisabled) return;
+		const input = (e.currentTarget as HTMLElement).querySelector<
+			HTMLInputElement | HTMLTextAreaElement
+		>('.field-text__input');
+		input?.focus();
+	};
+
+	const handleInput = (e: TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		const newValue = e.currentTarget.value;
+		fieldState.setValue(newValue);
+		interaction.handleChange(newValue);
+		onInput?.(e);
+	};
+
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter' && !multiline) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		} else if (e.key === 'Tab' && !e.shiftKey && nextField) {
+			e.preventDefault();
+			focusNextElement(e.currentTarget as HTMLElement, nextField);
+		}
+		onKeyDown?.(e);
+	};
+
+	const renderInput = () => {
+		const commonProps = {
+			id,
+			className: 'field-text__input',
+			value: val,
+			onInput: handleInput,
+			onKeyDown: handleKeyDown,
+			onFocus: (e: any) => {
+				interaction.handleFocus(e);
+				onFocus?.(e);
+			},
+			onBlur: (e: any) => {
+				interaction.handleBlur(e);
+				fieldState.validate();
+				onBlur?.(e);
+			},
+			disabled: !!isDisabled,
+			placeholder: placeholder,
+			autoComplete,
+			maxLength,
+			minLength,
+			min,
+			max,
+		};
+
+		if (multiline) {
+			return (
+				<textarea
+					{...commonProps}
+					rows={rows}
+					style={maxRows ? { maxHeight: `${maxRows * 1.5}em` } : undefined}
+				/>
+			);
+		}
+
+		return (
+			<input
+				{...commonProps}
+				type={type}
+				pattern={pattern}
+			/>
+		);
+	};
+
+	return (
+		<div className={`field-text ${className || ''}`} style={style}>
+			<div
+				className={[
+					'field-text__container',
+					interaction.focused.value && 'field-text__container--focused',
+					errorMessage && 'field-text__container--error',
+					isDisabled && 'field-text__container--disabled',
+				].filter(Boolean).join(' ')}
+				onClick={handleContainerClick}
+			>
+				<EffectWrapper
+					focused={interaction.focused}
+					disabled={isDisabled}
+				/>
+
+				<AdornmentWrapper
+					position='prefix'
+					onClick={onPrefixClick}
+					{...prefixProps}
+				>
+					{prefix}
+				</AdornmentWrapper>
+
+				<LabelWrapper
+					id={id}
+					label={label}
+					active={interaction.focused.value || !!val || !!placeholder}
+					error={!!errorMessage}
+					disabled={isDisabled}
+					required={required}
+					floating={floating}
+					position={position}
+					floatingRule={floatingRule}
+					multiline={multiline}
+					help={help}
+					helpLink={helpLink}
+					helpPosition={helpPosition} // Passed down
+				/>
+
+				{renderInput()}
+
+				<AdornmentWrapper
+					position='suffix'
+					onClick={onSuffixClick}
+					{...suffixProps}
+				>
+					{suffix}
+				</AdornmentWrapper>
+			</div>
+
+			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+				<div style={{ flex: 1 }}>
+					<MessageWrapper
+						error={fieldState.error}
+						hint={hint}
+						warning={warning}
+						info={info}
+					/>
+				</div>
+
+				{showCount && maxLength && (
+					<div
+						className={`field-text__count ${isOverLimit.value ? 'field-text__count--limit' : ''}`}
+					>
+						{length}/{maxLength}
+					</div>
+				)}
+			</div>
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\components\TimeField.tsx
+
+```tsx
+import '../styles/fields/date-field.css';
+import { computed, Signal, useSignal } from '@preact/signals';
+import { TimeFieldProps, TimeValue } from '../types/components/time-field.ts';
+import { useInteraction } from '../hooks/useInteraction.ts';
+import { useFieldState } from '../hooks/useFieldState.ts';
+import { AdornmentWrapper } from '../wrappers/AdornmentWrapper.tsx';
+import { MessageWrapper } from '../wrappers/MessageWrapper.tsx';
+import { DateTime } from '@projective/types';
+import { Popover } from '@projective/ui';
+import { TimeClock } from './datetime/TimeClock.tsx';
+import { TextField } from './TextField.tsx';
+import { IconClock } from '@tabler/icons-preact';
+
+export function TimeField(props: TimeFieldProps) {
+	const {
+		id,
+		label,
+		value,
+		defaultValue,
+		onChange,
+		error,
+		disabled,
+		placeholder,
+		className,
+		style,
+		position,
+		floatingRule,
+		required,
+		floating,
+		hint,
+		warning,
+		info,
+		variant = 'popup',
+		selectionMode = 'single',
+	} = props;
+
+	// FIX: Explicitly type the field state to allow DateTime arrays
+	const fieldState = useFieldState<TimeValue | undefined>({
+		value,
+		defaultValue,
+		required,
+		disabled,
+		error,
+		onChange: onChange as (val: TimeValue | undefined) => void,
+	});
+
+	const interaction = useInteraction(fieldState.value.value);
+	const isOpen = useSignal(false);
+
+	const isDisabled = disabled instanceof Signal ? disabled.value : disabled;
+	const errorMessage = fieldState.error.value;
+
+	const displayValue = computed(() => {
+		const val = fieldState.value.value;
+		if (!val) return '';
+
+		if (Array.isArray(val)) {
+			if (val.length === 0) return '';
+			if (val.length === 1) return val[0].toFormat('HH:mm');
+			return `${val.length} times selected`;
+		}
+
+		return (val as DateTime).toFormat('HH:mm');
+	});
+
+	const handleTimeSelect = (date: TimeValue) => {
+		fieldState.setValue(date);
+
+		// Auto-close logic
+		if (selectionMode === 'single' && !Array.isArray(date)) {
+			// Small delay to allow visual feedback
+			setTimeout(() => {
+				isOpen.value = false;
+				interaction.handleBlur();
+			}, 100);
+		}
+	};
+
+	// --- Inline Variant ---
+	if (variant === 'inline') {
+		return (
+			<div
+				className={`field-date field-date--inline ${className || ''}`}
+				style={style}
+			>
+				<TimeClock
+					value={fieldState.value.value}
+					onChange={handleTimeSelect}
+					selectionMode={selectionMode}
+				/>
+				<MessageWrapper
+					error={error}
+					hint={hint}
+					warning={warning}
+					info={info}
+				/>
+			</div>
+		);
+	}
+
+	// --- Popup Variant ---
+	return (
+		<div className={`field-date ${className || ''}`} style={style}>
+			<Popover
+				isOpen={isOpen.value}
+				onClose={() => {
+					isOpen.value = false;
+					interaction.handleBlur();
+				}}
+				trigger={
+					<div
+						onClick={() => !isDisabled && (isOpen.value = !isOpen.value)}
+					>
+						<TextField
+							id={id}
+							label={label}
+							value={displayValue.value}
+							placeholder={placeholder || 'HH:MM'}
+							error={errorMessage}
+							disabled={isDisabled}
+							required={required}
+							floating={floating}
+							position={position}
+							floatingRule={floatingRule}
+							readonly
+							suffix={
+								<AdornmentWrapper
+									position='suffix'
+									onClick={(e) => {
+										e.stopPropagation();
+										!isDisabled &&
+											(isOpen.value = !isOpen.value);
+									}}
+								>
+									<IconClock size={18} />
+								</AdornmentWrapper>
+							}
+							onFocus={interaction.handleFocus}
+							onBlur={() => {}}
+						/>
+					</div>
+				}
+				content={
+					<TimeClock
+						value={fieldState.value.value}
+						onChange={handleTimeSelect}
+						selectionMode={selectionMode}
+					/>
+				}
+			/>
+			<MessageWrapper
+				error={error}
+				hint={hint}
+				warning={warning}
+				info={info}
+			/>
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\hooks\useCurrencyMask.ts
+
+```ts
+import { Signal, useSignal } from '@preact/signals';
+
+export function useCurrencyMask(
+	value: Signal<number | undefined>,
+	currency = 'USD',
+	locale = 'en-US',
+) {
+	const displayValue = useSignal('');
+
+	const formatCurrency = (val: number) => {
+		return new Intl.NumberFormat(locale, {
+			style: 'decimal',
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(val);
+	};
+
+	const handleBlur = () => {
+		if (value.value !== undefined && !isNaN(value.value)) {
+			displayValue.value = formatCurrency(value.value);
+		} else {
+			value.value = 0;
+			displayValue.value = formatCurrency(0);
+		}
+	};
+
+	const handleFocus = () => {
+		if (value.value !== undefined && !isNaN(value.value) && value.value !== 0) {
+			displayValue.value = value.value.toString();
+		} else {
+			displayValue.value = '';
+		}
+	};
+
+	const handleChange = (val: string) => {
+		let sanitized = val.replace(/[^0-9.]/g, '');
+
+		const parts = sanitized.split('.');
+		if (parts.length > 2) {
+			sanitized = parts[0] + '.' + parts.slice(1).join('');
+		}
+
+		displayValue.value = sanitized;
+
+		if (sanitized === '' || sanitized === '.') {
+			value.value = undefined;
+		} else {
+			value.value = parseFloat(sanitized);
+		}
+	};
+
+	const setProgrammaticValue = (newVal: number) => {
+		const rounded = Math.round(newVal * 100) / 100;
+		value.value = rounded;
+		displayValue.value = formatCurrency(rounded);
+	};
+
+	if (value.value !== undefined && !displayValue.value) {
+		displayValue.value = formatCurrency(value.value);
+	}
+
+	return {
+		displayValue,
+		handleBlur,
+		handleFocus,
+		handleChange,
+		setProgrammaticValue,
+	};
+}
+
+```
+
+### File: packages\fields\src\hooks\useFieldState.ts
+
+```ts
+import { Signal, useSignal } from '@preact/signals';
+
+export interface FieldStateProps<T> {
+	value?: T | Signal<T>;
+	defaultValue?: T;
+	required?: boolean;
+	disabled?: boolean | Signal<boolean>;
+	error?: string | Signal<string | undefined>;
+	onChange?: (value: T) => void;
+}
+
+export interface FieldState<T> {
+	value: Signal<T>;
+	error: Signal<string | undefined>;
+	dirty: Signal<boolean>;
+	touched: Signal<boolean>;
+	setValue: (newValue: T) => void;
+	validate: () => boolean;
+}
+
+export function useFieldState<T>(props: FieldStateProps<T>): FieldState<T> {
+	// Normalize value signal
+	const isValueSignal = props.value instanceof Signal;
+	const internalValue = useSignal<T>(
+		isValueSignal ? (props.value as Signal<T>).peek() : (props.value ?? props.defaultValue) as T,
+	);
+
+	// Sync if prop changes and is not a signal
+	if (!isValueSignal && props.value !== undefined && props.value !== internalValue.peek()) {
+		internalValue.value = props.value as T;
+	}
+
+	const valueSignal = isValueSignal ? (props.value as Signal<T>) : internalValue;
+
+	const errorSignal = useSignal<string | undefined>(
+		props.error instanceof Signal ? props.error.peek() : props.error,
+	);
+
+	// Sync error prop
+	if (
+		props.error !== undefined && !(props.error instanceof Signal) &&
+		props.error !== errorSignal.peek()
+	) {
+		errorSignal.value = props.error;
+	}
+
+	const dirty = useSignal(false);
+	const touched = useSignal(false);
+
+	const validate = () => {
+		if (props.required) {
+			const val = valueSignal.value;
+			const isEmpty = val === undefined || val === null || val === '' ||
+				(Array.isArray(val) && val.length === 0);
+			if (isEmpty) {
+				errorSignal.value = 'This field is required';
+				return false;
+			}
+		}
+		// Clear error if it was "This field is required" but now has value
+		if (errorSignal.value === 'This field is required') {
+			errorSignal.value = undefined;
+		}
+		return true;
+	};
+
+	const setValue = (newValue: T) => {
+		valueSignal.value = newValue;
+		dirty.value = true;
+		props.onChange?.(newValue);
+		if (touched.value) {
+			validate();
+		}
+	};
+
+	return {
+		value: valueSignal,
+		error: errorSignal,
+		dirty,
+		touched,
+		setValue,
+		validate,
+	};
+}
+
+```
+
+### File: packages\fields\src\hooks\useFileProcessor.ts
+
+```ts
+import { useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
+import { FileProcessor } from '../types/file.ts';
+import { FileWithMeta } from '@projective/types';
+
+const generateId = () => Math.random().toString(36).substring(2, 15);
+
+export function useFileProcessor(
+	files: FileWithMeta[],
+	processors: FileProcessor[] = [],
+	onChange: (files: FileWithMeta[]) => void,
+) {
+	const processingQueue = useSignal<string[]>([]);
+
+	useEffect(() => {
+		const pendingFiles = files.filter(
+			(f) => f.id && f.status === 'pending' && !processingQueue.value.includes(f.id),
+		);
+
+		if (pendingFiles.length === 0) return;
+
+		pendingFiles.forEach((fileMeta) => {
+			processFile(fileMeta as FileWithMeta & { id: string });
+		});
+	}, [files]);
+
+	const processFile = async (fileMeta: FileWithMeta & { id: string }) => {
+		const fileId = fileMeta.id;
+
+		processingQueue.value = [...processingQueue.value, fileId];
+
+		updateFile(fileId, { status: 'processing', progress: 0 });
+
+		const processor = processors.find((p) => p.match(fileMeta.file));
+
+		if (!processor) {
+			updateFile(fileId, { status: 'ready', progress: 100 });
+			removeFromQueue(fileId);
+			return;
+		}
+
+		try {
+			const result = await processor.process(fileMeta.file, (pct) => {
+				updateFile(fileId, { progress: pct });
+			});
+
+			updateFile(fileId, {
+				file: result.file,
+				processingMeta: result.metadata,
+				status: 'ready',
+				progress: 100,
+			});
+		} catch (err: any) {
+			updateFile(fileId, {
+				status: 'error',
+				errors: [{ code: 'PROCESSING_ERROR', message: err.message || 'Unknown error' }],
+			});
+		} finally {
+			removeFromQueue(fileId);
+		}
+	};
+
+	const updateFile = (id: string | undefined, updates: Partial<FileWithMeta>) => {
+		if (!id) return;
+		const newFiles = files.map((f) => (f.id === id ? { ...f, ...updates } : f));
+		onChange(newFiles);
+	};
+
+	const removeFromQueue = (id: string | undefined) => {
+		if (!id) return;
+		processingQueue.value = processingQueue.value.filter((pid) => pid !== id);
+	};
+
+	const addFiles = (newFiles: File[]) => {
+		const newFileMetas: FileWithMeta[] = newFiles.map((f) => ({
+			file: f,
+			originalFile: f,
+			id: generateId(),
+			status: 'pending',
+			progress: 0,
+			errors: [],
+		}));
+
+		onChange([...files, ...newFileMetas]);
+	};
+
+	const removeFile = (id: string | undefined) => {
+		if (!id) return;
+		onChange(files.filter((f) => f.id !== id));
+	};
+
+	return {
+		addFiles,
+		removeFile,
+	};
+}
+
+```
+
+### File: packages\fields\src\hooks\useFocusNext.ts
+
+```ts
+export function focusNextElement(current: HTMLElement, explicitNext?: string | HTMLElement) {
+	if (explicitNext) {
+		const target = typeof explicitNext === 'string'
+			? document.getElementById(explicitNext)
+			: explicitNext;
+		if (target) {
+			target.focus();
+			return;
+		}
+	}
+
+	const focusableSelector =
+		'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+	const root = current.closest('form') || document.body;
+
+	const elements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+		.filter((el) => {
+			return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+		});
+
+	const index = elements.indexOf(current);
+	if (index > -1 && index < elements.length - 1) {
+		elements[index + 1].focus();
+	}
+}
+
+```
+
+### File: packages\fields\src\hooks\useGlobalDrag.ts
+
+```ts
+import { useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
+
+export function useGlobalDrag() {
+	const isDragging = useSignal(false);
+
+	useEffect(() => {
+		let dragCounter = 0;
+
+		const handleDragEnter = (e: DragEvent) => {
+			e.preventDefault();
+			dragCounter++;
+			if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+				isDragging.value = true;
+			}
+		};
+
+		const handleDragLeave = (e: DragEvent) => {
+			e.preventDefault();
+			dragCounter--;
+			if (dragCounter === 0) {
+				isDragging.value = false;
+			}
+		};
+
+		const handleDragOver = (e: DragEvent) => {
+			e.preventDefault();
+		};
+
+		const handleDrop = (e: DragEvent) => {
+			e.preventDefault();
+			dragCounter = 0;
+			isDragging.value = false;
+		};
+
+		globalThis.addEventListener('dragenter', handleDragEnter);
+		globalThis.addEventListener('dragleave', handleDragLeave);
+		globalThis.addEventListener('dragover', handleDragOver);
+		globalThis.addEventListener('drop', handleDrop);
 
 		return () => {
-			globalThis.removeEventListener('pointermove', handlePointerMove);
-			globalThis.removeEventListener('pointerup', handlePointerUp);
+			globalThis.removeEventListener('dragenter', handleDragEnter);
+			globalThis.removeEventListener('dragleave', handleDragLeave);
+			globalThis.removeEventListener('dragover', handleDragOver);
+			globalThis.removeEventListener('drop', handleDrop);
 		};
-	}, [dragData.value.isDragging, onCardMove, onFieldMove]);
+	}, []);
 
-	return dragData;
+	return isDragging;
 }
 
 ```
 
-### File: packages\charts\src\types\gantt.ts
+### File: packages\fields\src\hooks\useInteraction.ts
 
 ```ts
-import { z } from 'zod';
+import { Signal, useSignal } from '@preact/signals';
 
-// #region 1. Enums & Constants
-
-/**
- * Defines the granularity of the timeline view.
- */
-export enum ZoomLevel {
-	Hour = 'hour',
-	Day = 'day',
-	Week = 'week',
-	Month = 'month',
-	Quarter = 'quarter',
-	Year = 'year',
+export interface InteractionState {
+	focused: Signal<boolean>;
+	hovered: Signal<boolean>;
+	active: Signal<boolean>;
+	dirty: Signal<boolean>;
+	touched: Signal<boolean>;
+	handleFocus: (e?: FocusEvent | MouseEvent) => void;
+	handleBlur: (e?: FocusEvent | MouseEvent) => void;
+	handleMouseEnter: (e: MouseEvent) => void;
+	handleMouseLeave: (e: MouseEvent) => void;
+	handleMouseDown: (e: MouseEvent) => void;
+	handleMouseUp: (e: MouseEvent) => void;
+	handleChange: (value: unknown) => void;
 }
 
-/**
- * Defines the relationship type between two tasks.
- */
-export enum DependencyType {
-	FS = 'FS',
-	SS = 'SS',
-	FF = 'FF',
-	SF = 'SF',
+export function useInteraction(initialValue?: unknown): InteractionState {
+	const focused = useSignal(false);
+	const hovered = useSignal(false);
+	const active = useSignal(false);
+	const dirty = useSignal(false);
+	const touched = useSignal(false);
+
+	// Track initial value to determine dirty state
+	const _initialValue = initialValue;
+
+	const handleFocus = (_e?: FocusEvent | MouseEvent) => {
+		focused.value = true;
+		touched.value = true;
+	};
+
+	const handleBlur = (_e?: FocusEvent | MouseEvent) => {
+		focused.value = false;
+	};
+
+	const handleMouseEnter = (_e: MouseEvent) => {
+		hovered.value = true;
+	};
+
+	const handleMouseLeave = (_e: MouseEvent) => {
+		hovered.value = false;
+		active.value = false; // Ensure active is cleared
+	};
+
+	const handleMouseDown = (_e: MouseEvent) => {
+		active.value = true;
+	};
+
+	const handleMouseUp = (_e: MouseEvent) => {
+		active.value = false;
+	};
+
+	const handleChange = (value: unknown) => {
+		dirty.value = value !== _initialValue;
+	};
+
+	return {
+		focused,
+		hovered,
+		active,
+		dirty,
+		touched,
+		handleFocus,
+		handleBlur,
+		handleMouseEnter,
+		handleMouseLeave,
+		handleMouseDown,
+		handleMouseUp,
+		handleChange,
+	};
 }
-
-/**
- * Visual style of the row in the left grid.
- */
-export enum RowType {
-	Task = 'task',
-	Group = 'group',
-	Milestone = 'milestone',
-	Divider = 'divider',
-}
-
-// #endregion
-
-// #region 2. Zod Schemas
-
-/**
- * Schema for a visual dependency link between tasks.
- * Corrected nativeEnum to avoid deprecated signature.
- */
-export const DependencyLinkSchema = z.object({
-	id: z.uuid(),
-	fromTaskId: z.uuid(),
-	toTaskId: z.uuid(),
-	type: z.nativeEnum(DependencyType).default(DependencyType.FS),
-	lagMs: z.number().default(0),
-	style: z.record(z.string(), z.string()).optional(), // Fixed: Explicit key and value types
-});
-
-/**
- * Schema for a specific marker (vertical line, flag, etc.).
- */
-export const MarkerSchema = z.object({
-	id: z.uuid(),
-	type: z.enum(['verticalLine', 'point', 'range', 'flag']),
-	scope: z.enum(['global', 'row', 'task']),
-	at: z.number().optional(), // Timestamp
-	startAt: z.number().optional(), // For ranges
-	endAt: z.number().optional(), // For ranges
-	label: z.string(),
-	color: z.string().optional(),
-});
-
-/**
- * Schema for a task rendered as a bar on the timeline.
- */
-export const GanttTaskSchema = z.object({
-	id: z.uuid(),
-	rowId: z.uuid(),
-	name: z.string(),
-	startAt: z.number(), // Timestamp (ms)
-	endAt: z.number(), // Timestamp (ms)
-	progress: z.number().min(0).max(100).default(0),
-	status: z.string().default('todo'),
-	assignees: z.array(z.string()).default([]), // User IDs
-
-	// Relationships
-	dependencies: z.array(z.uuid()).default([]), // IDs of DependencyLinks
-
-	// Configuration
-	isMilestone: z.boolean().default(false),
-	baseline: z.object({
-		startAt: z.number(),
-		endAt: z.number(),
-	}).optional(),
-
-	// Constraints & Metadata
-	constraints: z.object({
-		lockStart: z.boolean().optional(),
-		lockEnd: z.boolean().optional(),
-		allowMove: z.boolean().default(true),
-		allowResize: z.boolean().default(true),
-	}).optional(),
-	meta: z.record(z.string(), z.any()).default({}), // Fixed: Explicit key and value types
-});
-
-/**
- * Schema for a row in the "Left Table".
- */
-export const GanttRowSchema = z.object({
-	id: z.uuid(),
-	type: z.enum(RowType).default(RowType.Task),
-	parentId: z.uuid().nullable().optional(),
-	orderIndex: z.number(),
-	collapsed: z.boolean().default(false),
-
-	// Display Fields
-	label: z.string(),
-	height: z.number().optional(),
-	style: z.record(z.string(), z.string()).optional(), // Fixed: Explicit key and value types
-
-	// Data Payload (Projective specific)
-	data: z.record(z.string(), z.any()).default({}), // Fixed: Explicit key and value types
-});
-
-/**
- * Schema for the Project context.
- */
-export const GanttProjectSchema = z.object({
-	id: z.uuid(),
-	name: z.string(),
-	timezone: z.string().default('UTC'),
-	workingDays: z.array(z.number()).default([1, 2, 3, 4, 5]), // Mon-Fri
-	holidays: z.array(z.number()).default([]), // Array of timestamps
-});
-
-// #endregion
-
-// #region 3. TypeScript Interfaces
-
-export type DependencyLink = z.infer<typeof DependencyLinkSchema>;
-export type GanttMarker = z.infer<typeof MarkerSchema>;
-export type GanttTask = z.infer<typeof GanttTaskSchema>;
-export type GanttRow = z.infer<typeof GanttRowSchema>;
-export type GanttProject = z.infer<typeof GanttProjectSchema>;
-
-// #endregion
 
 ```
 
-### File: packages\charts\src\types\kanban.ts
+### File: packages\fields\src\hooks\useSelectState.ts
 
 ```ts
-import type { DateTime } from '@projective/types';
+import { computed, Signal, useSignal } from '@preact/signals';
+import { SelectOption } from '../types/components/select-field.ts';
 
-export interface KanbanTag {
-	id: string;
-	label: string;
-	icon?: any; // e.g., Preact component or string emoji
-	color?: string; // CSS color variable or hex
-	variant?: 'solid' | 'ghost' | 'text';
+interface UseSelectStateProps<T> {
+	options: SelectOption<T>[];
+	value?: T | T[] | Signal<T | T[]>;
+	onChange?: (val: T | T[]) => void;
+	multiple?: boolean;
+	disabled?: boolean;
+	groupSelectMode?: 'value' | 'members';
 }
 
-export interface KanbanCardProps {
-	id: string;
-	title: string;
-	description?: string;
-	meta?: string; // e.g., "Created: 4 Hours ago • Due: 30th July"
-	tags?: KanbanTag[];
-	takenBy?: {
-		name: string;
-		avatarUrl?: string;
+// Internal Interface for the flattened list
+export interface FlatOption<T> extends SelectOption<T> {
+	depth: number;
+	isGroup: boolean;
+	// Cache all descendant values for quick "select all members" logic
+	descendantValues: T[];
+}
+
+export function useSelectState<T>({
+	options,
+	value,
+	onChange,
+	multiple,
+	disabled,
+	groupSelectMode = 'value',
+}: UseSelectStateProps<T>) {
+	const isOpen = useSignal(false);
+	const highlightedIndex = useSignal(-1);
+	const searchQuery = useSignal('');
+
+	// Helper: Flatten tree to list
+	const flattenOptions = (
+		opts: SelectOption<T>[],
+		depth = 0,
+		accum: FlatOption<T>[] = [],
+	): FlatOption<T>[] => {
+		for (const opt of opts) {
+			const isGroup = !!(opt.options && opt.options.length > 0);
+
+			// Recursively get descendants if it's a group
+			let descendantValues: T[] = [];
+			let childrenFlat: FlatOption<T>[] = [];
+
+			if (isGroup && opt.options) {
+				childrenFlat = flattenOptions(opt.options, depth + 1);
+				// Collect leaf values from children
+				descendantValues = childrenFlat
+					.filter((c) => !c.isGroup || groupSelectMode === 'value') // If mode is value, groups are valid values too
+					.map((c) => c.value);
+
+				// Also include children's descendants
+				childrenFlat.forEach((c) => {
+					if (c.isGroup) descendantValues.push(...c.descendantValues);
+				});
+
+				// Dedup
+				descendantValues = Array.from(new Set(descendantValues));
+			}
+
+			accum.push({
+				...opt,
+				depth,
+				isGroup,
+				descendantValues,
+			});
+
+			if (isGroup) {
+				accum.push(...childrenFlat);
+			}
+		}
+		return accum;
 	};
-	order: number;
-	permissions?: {
-		canEdit?: boolean;
-		canDelete?: boolean;
-		canReorder?: boolean;
+
+	// Flatten once (memoized by computed if options change)
+	const flatOptions = computed(() => flattenOptions(options));
+
+	const selectedValues = computed(() => {
+		const val = value instanceof Signal ? value.value : (value ?? []);
+		return Array.isArray(val) ? val : (val ? [val] : []);
+	});
+
+	const filteredOptions = computed(() => {
+		const query = searchQuery.value.toLowerCase();
+		if (!query) return flatOptions.value;
+		return flatOptions.value.filter((opt) => opt.label.toLowerCase().includes(query));
+	});
+
+	const toggleOpen = (forceState?: boolean) => {
+		if (disabled) return;
+		const newState = forceState !== undefined ? forceState : !isOpen.value;
+		isOpen.value = newState;
+
+		if (newState) {
+			// Find first selected index to highlight
+			const firstSelected = filteredOptions.value.findIndex((o) =>
+				selectedValues.value.includes(o.value)
+			);
+			highlightedIndex.value = firstSelected >= 0 ? firstSelected : 0;
+		} else {
+			searchQuery.value = '';
+			highlightedIndex.value = -1;
+		}
+	};
+
+	const selectOption = (option: FlatOption<T>) => {
+		if (option.disabled) return;
+
+		let newValue: T | T[];
+
+		if (multiple) {
+			const current = selectedValues.value as T[];
+
+			// Logic for Group Members Selection
+			if (option.isGroup && groupSelectMode === 'members') {
+				const targets = option.descendantValues;
+				const allSelected = targets.every((v) => current.includes(v));
+
+				if (allSelected) {
+					// Deselect all members
+					newValue = current.filter((v) => !targets.includes(v));
+				} else {
+					// Select all members (union)
+					const toAdd = targets.filter((v) => !current.includes(v));
+					newValue = [...current, ...toAdd];
+				}
+			} else {
+				// Standard Toggle
+				const exists = current.includes(option.value);
+				if (exists) {
+					newValue = current.filter((v) => v !== option.value);
+				} else {
+					newValue = [...current, option.value];
+				}
+			}
+
+			searchQuery.value = '';
+			if (value instanceof Signal) value.value = newValue;
+		} else {
+			// Single Select
+			// If clicking a group in 'members' mode, do nothing or expand?
+			// Usually single select can't select multiple members, so we treat group as unselectable label
+			// or we treat it as selecting the group value itself if allowGroupSelection is true.
+
+			if (option.isGroup && groupSelectMode === 'members') {
+				// In single mode, 'members' doesn't make sense for assignment.
+				// We assume clicking it does nothing or perhaps expands (if we had collapsible).
+				return;
+			}
+
+			newValue = option.value;
+			if (value instanceof Signal) value.value = newValue;
+			toggleOpen(false);
+		}
+
+		onChange?.(newValue);
+	};
+
+	const removeValue = (valToRemove: T) => {
+		if (!multiple) {
+			if (value instanceof Signal) value.value = undefined as any;
+			onChange?.(undefined as any);
+			return;
+		}
+
+		const current = selectedValues.value as T[];
+		const newValue = current.filter((v) => v !== valToRemove);
+
+		if (value instanceof Signal) value.value = newValue;
+		onChange?.(newValue);
+	};
+
+	const toggleSelectAll = () => {
+		if (!multiple) return;
+
+		// Filter out groups if we are only selecting leaf nodes, OR select everything if mode is value
+		const candidateOptions = filteredOptions.value.filter((o) =>
+			!o.disabled && (!o.isGroup || groupSelectMode === 'value')
+		);
+
+		const enabledValues = candidateOptions.map((o) => o.value);
+		const current = selectedValues.value as T[];
+
+		const allSelected = enabledValues.every((v) => current.includes(v));
+
+		let newValue: T[];
+		if (allSelected) {
+			newValue = current.filter((v) => !enabledValues.includes(v));
+		} else {
+			const toAdd = enabledValues.filter((v) => !current.includes(v));
+			newValue = [...current, ...toAdd];
+		}
+
+		if (value instanceof Signal) value.value = newValue;
+		onChange?.(newValue);
+	};
+
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (disabled) return;
+
+		if (!isOpen.value && ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
+			e.preventDefault();
+			toggleOpen(true);
+			return;
+		}
+
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				if (highlightedIndex.value < filteredOptions.value.length - 1) {
+					highlightedIndex.value++;
+				}
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				if (highlightedIndex.value > 0) {
+					highlightedIndex.value--;
+				}
+				break;
+			case 'Enter':
+				e.preventDefault();
+				if (isOpen.value) {
+					if (highlightedIndex.value >= 0) {
+						const opt = filteredOptions.value[highlightedIndex.value];
+						if (opt) selectOption(opt);
+					} else {
+						// If open but nothing is highlighted, Enter closes the menu
+						toggleOpen(false);
+					}
+				}
+				break;
+			case 'Escape':
+				e.preventDefault();
+				toggleOpen(false);
+				break;
+			case 'Backspace':
+				if (searchQuery.value === '' && multiple && selectedValues.value.length > 0) {
+					const last = selectedValues.value[selectedValues.value.length - 1];
+					removeValue(last);
+				}
+				break;
+			case 'Tab':
+				if (isOpen.value) toggleOpen(false);
+				break;
+		}
+	};
+
+	return {
+		isOpen,
+		highlightedIndex,
+		searchQuery,
+		filteredOptions,
+		selectedValues,
+		toggleOpen,
+		selectOption,
+		removeValue,
+		toggleSelectAll,
+		handleKeyDown,
 	};
 }
 
-export interface KanbanFieldProps {
-	id: string;
-	title: string;
-	description?: string;
-	color?: 'primary' | 'secondary' | string; // Supports presets or custom hex/rgb
-	cards: KanbanCardProps[];
-	limit?: number;
-	order: number;
-	addCardLabel?: string;
-	permissions?: {
-		canAddCard?: boolean;
-		canEdit?: boolean;
-		canDelete?: boolean;
-		canReorder?: boolean; // Acts as our lock
+```
+
+### File: packages\fields\src\hooks\useSliderState.ts
+
+```ts
+import { useComputed, useSignal } from '@preact/signals';
+import { useEffect, useRef } from 'preact/hooks';
+import {
+	clamp,
+	percentToValue,
+	percentToValueLog,
+	roundToStep,
+	snapToClosest,
+	valueToPercent,
+	valueToPercentLog,
+} from '@projective/utils';
+import { SliderMark } from '../types/components/slider-field.ts';
+
+interface UseSliderStateProps {
+	value?: number | number[];
+	onChange?: (val: number | number[]) => void;
+	min: number;
+	max: number;
+	step: number;
+	range?: boolean;
+	disabled?: boolean;
+	marks?: boolean | number[] | SliderMark[];
+	snapToMarks?: boolean;
+	vertical?: boolean;
+	scale?: 'linear' | 'logarithmic';
+	minDistance?: number;
+	passthrough?: boolean;
+}
+
+export function useSliderState({
+	value,
+	onChange,
+	min,
+	max,
+	step,
+	range,
+	disabled,
+	marks,
+	snapToMarks,
+	vertical,
+	scale = 'linear',
+	minDistance = 0,
+	passthrough = false,
+}: UseSliderStateProps) {
+	const trackRef = useRef<HTMLDivElement>(null);
+	const activeHandleIdx = useSignal<number | null>(null);
+	const internalValues = useSignal<number[]>([]);
+
+	const isLog = scale === 'logarithmic';
+
+	useEffect(() => {
+		if (activeHandleIdx.value !== null) return;
+		if (range) {
+			if (Array.isArray(value)) internalValues.value = value;
+			else internalValues.value = [min, max];
+		} else {
+			if (typeof value === 'number') internalValues.value = [value];
+			else internalValues.value = [min];
+		}
+	}, [value, range, min, max, activeHandleIdx.value]);
+
+	const snapPoints = useComputed(() => {
+		if (!snapToMarks || !marks) return null;
+		if (Array.isArray(marks)) {
+			return marks.map((m) => (typeof m === 'number' ? m : m.value));
+		}
+		return null;
+	});
+
+	const calcValueFromPointer = (e: { clientX: number; clientY: number }) => {
+		if (!trackRef.current) return min;
+		const rect = trackRef.current.getBoundingClientRect();
+
+		let percent = 0;
+		if (vertical) {
+			percent = ((rect.bottom - e.clientY) / rect.height) * 100;
+		} else {
+			percent = ((e.clientX - rect.left) / rect.width) * 100;
+		}
+
+		const rawValue = isLog
+			? percentToValueLog(percent, min, max)
+			: percentToValue(percent, min, max);
+
+		if (snapToMarks && snapPoints.value) {
+			return snapToClosest(rawValue, snapPoints.value);
+		}
+		return roundToStep(rawValue, step);
+	};
+
+	const handlePointerDown = (index: number, e: PointerEvent) => {
+		if (disabled) return;
+		e.preventDefault();
+		e.stopPropagation();
+
+		const target = e.target as HTMLElement;
+		target.setPointerCapture(e.pointerId);
+		activeHandleIdx.value = index;
+		target.focus();
+	};
+
+	const handleTrackClick = (e: PointerEvent) => {
+		if (disabled || activeHandleIdx.value !== null) return;
+
+		const val = calcValueFromPointer(e);
+		const current = internalValues.value;
+
+		let closestIdx = 0;
+		let minDiff = Infinity;
+
+		current.forEach((v, i) => {
+			const diff = Math.abs(v - val);
+			if (diff < minDiff) {
+				minDiff = diff;
+				closestIdx = i;
+			}
+		});
+
+		updateValue(closestIdx, val);
+	};
+
+	const handlePointerMove = (e: PointerEvent) => {
+		if (activeHandleIdx.value === null || disabled) return;
+		const newVal = calcValueFromPointer(e);
+		updateValue(activeHandleIdx.value, newVal);
+	};
+
+	const handlePointerUp = (e: PointerEvent) => {
+		if (activeHandleIdx.value !== null) {
+			const target = e.target as HTMLElement;
+			target.releasePointerCapture(e.pointerId);
+			activeHandleIdx.value = null;
+		}
+	};
+
+	const updateValue = (index: number, rawNewValue: number) => {
+		const current = [...internalValues.value];
+		let newValue = clamp(rawNewValue, min, max);
+
+		// Collision / Passthrough Logic
+		if (!passthrough) {
+			const dist = minDistance;
+
+			// Check Previous
+			if (index > 0) {
+				const prevVal = current[index - 1];
+				if (newValue < prevVal + dist) newValue = prevVal + dist;
+			}
+
+			// Check Next
+			if (index < current.length - 1) {
+				const nextVal = current[index + 1];
+				if (newValue > nextVal - dist) newValue = nextVal - dist;
+			}
+		}
+
+		newValue = clamp(newValue, min, max);
+
+		if (current[index] !== newValue) {
+			current[index] = newValue;
+			internalValues.value = current;
+			if (range) onChange?.(current);
+			else onChange?.(current[0]);
+		}
+	};
+
+	const handleStyles = useComputed(() => {
+		return internalValues.value.map((v) => {
+			const pct = isLog ? valueToPercentLog(v, min, max) : valueToPercent(v, min, max);
+
+			return vertical ? { bottom: `${pct}%`, left: '50%' } : { left: `${pct}%`, top: '50%' };
+		});
+	});
+
+	const trackFillStyle = useComputed(() => {
+		const count = internalValues.value.length;
+		if (count === 0) return {};
+
+		// For Track Fill, we always want min to max visually,
+		// regardless of which handle is which (if passthrough is on).
+		const values = [...internalValues.value].sort((a, b) => a - b);
+		const firstVal = values[0];
+		const lastVal = values[count - 1];
+
+		const startPct = range
+			? (isLog ? valueToPercentLog(firstVal, min, max) : valueToPercent(firstVal, min, max))
+			: 0;
+
+		const endPct = isLog ? valueToPercentLog(lastVal, min, max) : valueToPercent(lastVal, min, max);
+
+		const size = Math.abs(endPct - startPct);
+		const startPos = Math.min(startPct, endPct);
+
+		return vertical
+			? { bottom: `${startPos}%`, height: `${size}%`, left: 0, width: '100%' }
+			: { left: `${startPos}%`, width: `${size}%`, top: 0, height: '100%' };
+	});
+
+	return {
+		trackRef,
+		internalValues,
+		activeHandleIdx,
+		handleStyles,
+		trackFillStyle,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		handleTrackClick,
 	};
 }
 
-export interface KanbanProps {
-	fields: KanbanFieldProps[];
-	minHeight?: string;
-	permissions?: {
-		canAddField?: boolean;
-	};
-	onCardClick?: (card: KanbanCardProps) => void;
-	onFieldClick?: (field: KanbanFieldProps) => void;
-	onAddCard?: (fieldId: string) => void;
-	onAddField?: () => void;
-	onCardMove?: (
-		cardId: string,
-		sourceFieldId: string,
-		targetFieldId: string,
-		insertBeforeCardId: string | null,
-	) => void;
-	onFieldMove?: (sourceFieldId: string, targetFieldId: string, insertBefore: boolean) => void;
+```
+
+### File: packages\fields\src\types\components\combobox-field.ts
+
+```ts
+import { SelectFieldProps } from './select-field.ts';
+
+/**
+ * ComboboxField specific props.
+ */
+export interface ComboboxFieldProps<T = string> extends SelectFieldProps<T> {
+	// Combobox specific props
 }
 
-export interface DragData {
-	isDragging: boolean;
-	type: 'field' | 'card' | null;
-	id: string | null;
-	sourceFieldId: string | null;
-	clientX: number;
-	clientY: number;
-	offsetX: number;
-	offsetY: number;
-	width: number;
-	height: number;
-	targetFieldId: string | null;
-	targetCardId: string | null;
-	insertPosition: 'before' | 'after' | null;
-	fieldData?: KanbanFieldProps;
-	cardData?: KanbanCardProps;
-}
+```
 
-export const INITIAL_DRAG_DATA: DragData = {
-	isDragging: false,
-	type: null,
-	id: null,
-	sourceFieldId: null,
-	clientX: 0,
-	clientY: 0,
-	offsetX: 0,
-	offsetY: 0,
-	width: 0,
-	height: 0,
-	targetFieldId: null,
-	targetCardId: null,
-	insertPosition: null,
+### File: packages\fields\src\types\components\date-field.ts
+
+```ts
+import { AdornmentProps, ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+import { DateTime } from '@projective/types';
+
+export type DateSelectionMode = 'single' | 'multiple' | 'range';
+export type DateFieldVariant = 'popup' | 'inline' | 'input';
+
+// The value type changes based on mode
+export type SingleDateValue = DateTime | null;
+export type MultipleDateValue = DateTime[];
+export type RangeDateValue = [DateTime | null, DateTime | null];
+
+export type DateValue = SingleDateValue | MultipleDateValue | RangeDateValue;
+
+/**
+ * Modifiers allow external logic to style specific dates.
+ * e.g. { disabled: (d) => d.isWeekend(), highlighted: (d) => d.day === 1 }
+ */
+export type DateModifiers = {
+	disabled?: (date: DateTime) => boolean;
+	highlighted?: (date: DateTime) => boolean;
+	hidden?: (date: DateTime) => boolean;
+	[key: string]: ((date: DateTime) => boolean) | undefined;
 };
 
+export interface DateFieldProps extends
+	// We override ValueFieldProps because 'value' is dynamic here
+	Omit<ValueFieldProps<any>, 'value' | 'onChange'>,
+	AdornmentProps,
+	Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+	Omit<MessageWrapperProps, 'error' | 'hint'> {
+	value?: DateValue;
+	onChange?: (value: any) => void; // Typed loosely here, narrowed in component
+
+	/**
+	 * How the component behaves.
+	 * - popup: Standard input with dropdown (Default)
+	 * - inline: Calendar rendered directly in page
+	 * - input: Text input only (validation only)
+	 */
+	variant?: DateFieldVariant;
+
+	/**
+	 * Selection logic.
+	 * - single: One date
+	 * - multiple: Array of dates
+	 * - range: [Start, End]
+	 */
+	selectionMode?: DateSelectionMode;
+
+	/**
+	 * External logic to style/disable dates.
+	 * Use this for "Every Monday" or "Blocked Dates" logic.
+	 */
+	modifiers?: DateModifiers;
+
+	minDate?: DateTime;
+	maxDate?: DateTime;
+	format?: string;
+}
+
 ```
 
-### File: packages\charts\src\utils\theme-bridge.ts
+### File: packages\fields\src\types\components\datetime-field.ts
 
 ```ts
-/**
- * Global cache to prevent DOM thrashing during 60FPS PIXI renders.
- * Keys are formatted as `${themeMode}:${varName}` to support dynamic theme toggling.
- */
-const colorCache = new Map<string, number>();
+import { AdornmentProps, ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+import { DateTime } from '@projective/types';
 
 /**
- * Resolves a CSS variable (e.g., "--primary") to a Hex number (0xffffff).
- * Uses a hidden DOM element to force the browser to evaluate nested var() and calc()
- * statements, safely converting them into absolute RGB values.
+ * DateTimeField specific props.
  */
-export function getThemeColor(varName: string): number {
-	if (typeof window === 'undefined') return 0x000000;
+export interface DateTimeFieldProps
+	extends
+		ValueFieldProps<DateTime>,
+		AdornmentProps,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	min?: DateTime;
+	max?: DateTime;
+	clearable?: boolean;
+}
 
-	// Determine current theme to invalidate cache correctly if user switches to Dark Mode
-	const theme = document.documentElement.getAttribute('data-theme') || 'light';
-	const cacheKey = `${theme}:${varName}`;
+```
 
-	if (colorCache.has(cacheKey)) {
-		return colorCache.get(cacheKey)!;
+### File: packages\fields\src\types\components\file-drop.ts
+
+```ts
+import { BaseFieldProps, ValueFieldProps } from '../core.ts';
+import { Signal } from '@preact/signals';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+/**
+ * FileDrop specific props.
+ */
+export interface FileDropProps
+	extends
+		ValueFieldProps<File[]>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	accept?: string;
+	multiple?: boolean;
+	maxSize?: number;
+	maxFiles?: number;
+}
+
+```
+
+### File: packages\fields\src\types\components\money-field.ts
+
+```ts
+// deno-lint-ignore-file no-explicit-any
+import { ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+/**
+ * MoneyField specific props.
+ */
+export interface MoneyFieldProps
+	extends
+		ValueFieldProps<number>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	currency?: string;
+	locale?: string;
+	onInput?: (e: any) => void;
+	onBlur?: (e: any) => void;
+	onFocus?: (e: any) => void;
+}
+
+```
+
+### File: packages\fields\src\types\components\rich-text-field.ts
+
+```ts
+import { JSX } from 'preact';
+import { Signal } from '@preact/signals';
+import { ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+export type RichTextFormat = 'delta' | 'html' | 'markdown';
+export type RichTextVariant = 'framed' | 'inline';
+
+export interface RichTextFieldProps
+	extends
+		ValueFieldProps<string>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	outputFormat?: RichTextFormat;
+
+	toolbar?: 'basic' | 'full' | any[];
+	variant?: RichTextVariant;
+	secureLinks?: boolean;
+
+	onImageUpload?: (file: File) => Promise<string>;
+
+	placeholder?: string;
+	readOnly?: boolean;
+
+	/** Minimum height of the editor area (e.g. "150px") */
+	minHeight?: string | number;
+
+	/** Maximum height before scrolling occurs (e.g. "300px") */
+	maxHeight?: string | number;
+
+	/** Soft limit for character count. Shows red counter if exceeded. */
+	maxLength?: number;
+
+	/** Whether to show the character counter */
+	showCount?: boolean;
+}
+
+```
+
+### File: packages\fields\src\types\components\select-field.ts
+
+```ts
+import { JSX } from 'preact';
+import { AdornmentProps, ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+/**
+ * Select option interface.
+ */
+export interface SelectOption<T = string> {
+	label: string;
+	value: T;
+	disabled?: boolean;
+	icon?: JSX.Element;
+	avatarUrl?: string;
+	/**
+	 * Nested options for groups.
+	 */
+	options?: SelectOption<T>[];
+	/**
+	 * Legacy flat grouping (deprecated in favor of options nesting)
+	 */
+	group?: string;
+}
+
+export type SelectDisplayMode = 'chips-inside' | 'chips-below' | 'count' | 'text';
+
+/**
+ * SelectField specific props.
+ */
+export interface SelectFieldProps<T = string> extends
+	// We allow T | T[] for value
+	Omit<ValueFieldProps<T | T[]>, 'value' | 'onChange'>,
+	AdornmentProps,
+	Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+	Omit<MessageWrapperProps, 'error' | 'hint'> {
+	// Value & Change override for generics
+	value?: T | T[] | any;
+	onChange?: (value: T | T[]) => void;
+
+	options: SelectOption<T>[];
+	multiple?: boolean;
+	searchable?: boolean;
+	clearable?: boolean;
+	loading?: boolean;
+
+	// Multi-select config
+	displayMode?: SelectDisplayMode;
+	enableSelectAll?: boolean;
+
+	/**
+	 * Defines behavior when a group option is clicked.
+	 * - 'value': Selects the group's own value (treated as a selectable item).
+	 * - 'members': Selects/Deselects all descendant leaf options (only valid if multiple=true).
+	 * @default 'value'
+	 */
+	groupSelectMode?: 'value' | 'members';
+
+	// Custom Icons
+	icons?: {
+		arrow?: JSX.Element;
+		arrowOpen?: JSX.Element;
+		check?: JSX.Element;
+		remove?: JSX.Element;
+		loading?: JSX.Element;
+		invalid?: JSX.Element;
+		valid?: JSX.Element;
+	};
+}
+
+```
+
+### File: packages\fields\src\types\components\slider-field.ts
+
+```ts
+import { ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+/**
+ * SliderField specific props.
+ */
+export interface SliderMark {
+	value: number;
+	label?: string;
+	className?: string; // ADDED: Allows custom CSS targeting per mark type
+}
+
+/**
+ * SliderField specific props.
+ */
+export interface SliderFieldProps
+	extends
+		ValueFieldProps<number | number[]>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	min?: number;
+	max?: number;
+	step?: number;
+	marks?: boolean | number[] | SliderMark[];
+	range?: boolean;
+	vertical?: boolean;
+	scale?: 'linear' | 'logarithmic';
+	minDistance?: number;
+	snapToMarks?: boolean;
+	height?: string;
+	passthrough?: boolean;
+}
+
+```
+
+### File: packages\fields\src\types\components\tag-input.ts
+
+```ts
+import { ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+/**
+ * TagInput specific props.
+ */
+export interface TagInputProps
+	extends
+		ValueFieldProps<string[]>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	tagColor?: string | ((tag: string) => string);
+	tagVariant?: 'solid' | 'transparent';
+}
+
+```
+
+### File: packages\fields\src\types\components\text-field.ts
+
+```ts
+// deno-lint-ignore-file no-explicit-any
+import { HTMLAttributes } from 'preact';
+import { AdornmentProps, ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+export interface TextFieldProps
+	extends
+		ValueFieldProps<string>,
+		AdornmentProps,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url' | 'search';
+	multiline?: boolean;
+	rows?: number;
+	maxRows?: number;
+	autoComplete?: string;
+	pattern?: string;
+	min?: number | string;
+	max?: number | string;
+	minLength?: number;
+	maxLength?: number;
+	showCount?: boolean;
+	prefixProps?: HTMLAttributes<HTMLDivElement>;
+	suffixProps?: HTMLAttributes<HTMLDivElement>;
+	onInput?: (e: any) => void;
+	onBlur?: (e: any) => void;
+	onFocus?: (e: any) => void;
+}
+
+```
+
+### File: packages\fields\src\types\components\time-field.ts
+
+```ts
+import { DateTime } from '@projective/types';
+import { AdornmentProps, ValueFieldProps } from '../core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from '../wrappers.ts';
+
+export type TimeSelectionMode = 'single' | 'multiple';
+export type TimeValue = DateTime | DateTime[];
+
+/**
+ * TimeField specific props.
+ */
+export interface TimeFieldProps extends
+	// Override generic ValueFieldProps to support arrays
+	Omit<ValueFieldProps<any>, 'value' | 'onChange'>,
+	AdornmentProps,
+	Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+	Omit<MessageWrapperProps, 'error' | 'hint'> {
+	value?: TimeValue;
+	onChange?: (value: TimeValue) => void;
+
+	/**
+	 * Visual variant
+	 * @default 'popup'
+	 */
+	variant?: 'popup' | 'inline' | 'input';
+
+	/**
+	 * Selection mode
+	 * @default 'single'
+	 */
+	selectionMode?: TimeSelectionMode;
+}
+
+```
+
+### File: packages\fields\src\types\core.ts
+
+```ts
+import { Signal } from '@preact/signals';
+import { CSSProperties, JSX } from 'preact';
+
+export interface BaseFieldProps {
+	id?: string;
+	name?: string;
+	label?: string;
+	placeholder?: string;
+	disabled?: boolean | Signal<boolean>;
+	readonly?: boolean | Signal<boolean>;
+	loading?: boolean | Signal<boolean>;
+	required?: boolean;
+	floating?: boolean;
+	className?: string;
+	style?: CSSProperties;
+	nextField?: string | HTMLElement;
+	onKeyDown?: (e: KeyboardEvent) => void;
+}
+
+export type FieldVariant = 'outlined' | 'filled' | 'standard';
+export type FieldDensity = 'compact' | 'normal' | 'comfortable';
+
+export type ValidationStatus =
+	| 'success'
+	| 'warning'
+	| 'error'
+	| 'info'
+	| 'neutral';
+
+export interface ValueFieldProps<T> extends BaseFieldProps {
+	value?: T | Signal<T>;
+	defaultValue?: T;
+	onChange?: (value: T) => void;
+	error?: string | Signal<string | undefined>;
+	hint?: string;
+}
+
+export interface AdornmentProps {
+	prefix?: JSX.Element | string;
+	suffix?: JSX.Element | string;
+	onPrefixClick?: (e: MouseEvent) => void;
+	onSuffixClick?: (e: MouseEvent) => void;
+}
+
+```
+
+### File: packages\fields\src\types\file.ts
+
+```ts
+import { FileWithMeta } from '@projective/types';
+import { ValueFieldProps } from './core.ts';
+import { LabelWrapperProps, MessageWrapperProps } from './wrappers.ts';
+import { Signal } from '@preact/signals';
+
+export type FileStatus = 'pending' | 'processing' | 'ready' | 'error';
+
+export interface FileError {
+	code: string;
+	message: string;
+}
+
+export interface FileProcessor {
+	id: string;
+	name: string;
+	match: (file: File) => boolean;
+	process: (
+		file: File,
+		onProgress?: (pct: number) => void,
+	) => Promise<{ file: File; metadata?: any }>;
+}
+
+export interface FileFieldProps
+	extends
+		ValueFieldProps<FileWithMeta[]>,
+		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
+		Omit<MessageWrapperProps, 'error' | 'hint'> {
+	accept?: string;
+	maxSize?: number;
+	maxFiles?: number;
+	multiple?: boolean;
+	layout?: 'list' | 'grid';
+	dropzoneLabel?: string;
+	processors?: FileProcessor[];
+	onDrop?: (acceptedFiles: File[], rejectedFiles: FileWithMeta[]) => void;
+	value?: Signal<FileWithMeta[]>;
+	onChange?: (files: FileWithMeta[]) => void;
+	variant?: 'split' | 'single';
+	onLibraryClick?: () => void;
+	listPosition?: 'top' | 'bottom' | 'none';
+	actionPosition?: 'below' | 'overlay';
+}
+
+```
+
+### File: packages\fields\src\types\wrappers.ts
+
+```ts
+import { Signal } from '@preact/signals';
+import { JSX } from 'preact';
+
+export type HelpPosition = 'inline' | 'top-right' | 'bottom-right' | 'bottom-left';
+
+/**
+ * Props for the LabelWrapper component.
+ */
+export interface LabelWrapperProps {
+	id?: string;
+	label?: string;
+	required?: boolean;
+	floating?: boolean;
+
+	/**
+	 * Tooltip text to display.
+	 */
+	help?: string | JSX.Element;
+
+	/**
+	 * Optional URL to navigate to when the help icon is clicked.
+	 */
+	helpLink?: string;
+
+	/**
+	 * Position of the help icon.
+	 * - 'inline': Next to the label text (moves with label).
+	 * - 'top-right': Fixed to the top-right of the component.
+	 * - 'bottom-right': Fixed to the bottom-right.
+	 * - 'bottom-left': Fixed to the bottom-left.
+	 * @default 'inline'
+	 */
+	helpPosition?: HelpPosition;
+
+	active?: boolean | Signal<boolean>;
+	error?: boolean | Signal<boolean>;
+	disabled?: boolean | Signal<boolean>;
+	className?: string;
+	/** Inline styles for precise control */
+	style?: JSX.CSSProperties;
+	/**
+	 * Position of the label relative to the field.
+	 * @default "top"
+	 */
+	position?: 'top' | 'left' | 'right' | 'bottom';
+	/**
+	 * Floating behavior rules.
+	 * - auto: Floats when focused or has value (default)
+	 * - always: Always floating (static top)
+	 * - never: Never floats (placeholder style)
+	 */
+	floatingRule?: 'auto' | 'always' | 'never';
+	/**
+	 * Origin point for floating animation.
+	 * - top-left: Standard Material (default)
+	 * - center: Starts as placeholder, moves up
+	 */
+	floatingOrigin?: 'top-left' | 'center';
+	/**
+	 * If true, adjusts start position for textareas (top aligned vs center aligned)
+	 */
+	multiline?: boolean;
+}
+
+/**
+ * Props for the AdornmentWrapper component.
+ */
+export interface AdornmentWrapperProps {
+	children?: JSX.Element | string;
+	position?: 'prefix' | 'suffix';
+	onClick?: (e: MouseEvent) => void;
+	className?: string;
+}
+
+/**
+ * Props for the MessageWrapper component.
+ */
+export interface MessageWrapperProps {
+	error?: string | Signal<string | undefined>;
+	warning?: string | Signal<string | undefined>;
+	info?: string | Signal<string | undefined>;
+	hint?: string;
+}
+
+/**
+ * Props for the SkeletonWrapper component.
+ */
+export interface SkeletonWrapperProps {
+	loading?: boolean | Signal<boolean>;
+	variant?: 'rect' | 'circle' | 'pill';
+	width?: string | number;
+	height?: string | number;
+	className?: string;
+}
+
+/**
+ * Props for the EffectWrapper component.
+ */
+export interface EffectWrapperProps {
+	focused?: boolean | Signal<boolean>;
+	disabled?: boolean | Signal<boolean>;
+	children?: JSX.Element | JSX.Element[];
+}
+
+/**
+ * Props for the FieldArrayWrapper component.
+ */
+export interface FieldArrayWrapperProps<T> {
+	items: T[] | Signal<T[]>;
+	onAdd?: () => void;
+	onRemove?: (index: number) => void;
+	renderItem: (item: T, index: number) => JSX.Element;
+	renderAddButton?: (onClick: () => void) => JSX.Element;
+	renderRemoveButton?: (onClick: () => void) => JSX.Element;
+	className?: string;
+	maxItems?: number;
+}
+
+```
+
+### File: packages\fields\src\wrappers\AdornmentWrapper.tsx
+
+```tsx
+import { JSX } from 'preact';
+import '../styles/wrappers/adornment-wrapper.css';
+
+export interface AdornmentWrapperProps extends JSX.HTMLAttributes<HTMLDivElement> {
+	children?: JSX.Element | string;
+	position: 'prefix' | 'suffix';
+}
+
+export function AdornmentWrapper(props: AdornmentWrapperProps) {
+	const { children, position, className, onClick, ...rest } = props;
+
+	if (!children) return null;
+
+	const classes = [
+		'field-adornment',
+		`field-adornment--${position}`,
+		(onClick || rest.onPointerDown) && 'field-adornment--interactive',
+		className,
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	return (
+		<div className={classes} onClick={onClick} {...rest}>
+			{children}
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\wrappers\EffectWrapper.tsx
+
+```tsx
+import { JSX } from 'preact';
+import { Signal } from '@preact/signals';
+import { useRipple } from '@projective/ui';
+import '../styles/wrappers/effect-wrapper.css';
+
+interface EffectWrapperProps {
+	focused?: boolean | Signal<boolean>;
+	disabled?: boolean | Signal<boolean>;
+	children?: JSX.Element | JSX.Element[];
+}
+
+export function EffectWrapper(props: EffectWrapperProps) {
+	const isFocused = props.focused instanceof Signal ? props.focused.value : props.focused;
+	const isDisabled = props.disabled instanceof Signal ? props.disabled.value : props.disabled;
+
+	const { ripples } = useRipple();
+
+	if (isDisabled) return null;
+	return (
+		<>
+			<div
+				className={`field-focus-ring ${isFocused ? 'field-focus-ring--active' : ''}`}
+			/>
+			<div
+				className='field-ripple-container'
+				style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					overflow: 'hidden',
+					pointerEvents: 'none',
+					borderRadius: 'inherit',
+				}}
+			>
+				{ripples.value.map((r) => (
+					<span
+						key={r.id}
+						className='field-ripple'
+						style={{ left: r.x, top: r.y }}
+					/>
+				))}
+			</div>
+		</>
+	);
+}
+
+// We also need to export the hook so components can use it if they want manual control
+export { useRipple };
+
+```
+
+### File: packages\fields\src\wrappers\FieldArrayWrapper.tsx
+
+```tsx
+import { JSX } from 'preact';
+import { Signal } from '@preact/signals';
+import '../styles/wrappers/field-array-wrapper.css';
+
+interface FieldArrayWrapperProps<T> {
+	items: T[] | Signal<T[]>;
+	onAdd?: () => void;
+	onRemove?: (index: number) => void;
+	renderItem: (item: T, index: number) => JSX.Element;
+	renderAddButton?: (onClick: () => void) => JSX.Element;
+	renderRemoveButton?: (onClick: () => void) => JSX.Element;
+	className?: string;
+	maxItems?: number;
+}
+
+export function FieldArrayWrapper<T>(props: FieldArrayWrapperProps<T>) {
+	const items = props.items instanceof Signal ? props.items.value : props.items;
+
+	return (
+		<div className={`field-array ${props.className || ''}`}>
+			{items.map((item, index) => (
+				<div key={index} className='field-array__item'>
+					<div style={{ flex: 1 }}>
+						{props.renderItem(item, index)}
+					</div>
+					{props.onRemove && (
+						<div className='field-array__action'>
+							{props.renderRemoveButton
+								? (
+									props.renderRemoveButton(() => props.onRemove!(index))
+								)
+								: (
+									<button
+										type='button'
+										onClick={() => props.onRemove!(index)}
+										className='field-array__remove-btn'
+										aria-label='Remove item'
+									>
+										&times;
+									</button>
+								)}
+						</div>
+					)}
+				</div>
+			))}
+
+			{props.onAdd &&
+				(!props.maxItems || items.length < props.maxItems) && (
+				<div className='field-array__add'>
+					{props.renderAddButton
+						? (
+							props.renderAddButton(props.onAdd)
+						)
+						: (
+							<button
+								type='button'
+								onClick={props.onAdd}
+								className='field-array__add-btn'
+							>
+								+ Add Item
+							</button>
+						)}
+				</div>
+			)}
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\wrappers\GlobalFileDrop.tsx
+
+```tsx
+import { ComponentChildren } from 'preact';
+import { useGlobalDrag } from '../hooks/useGlobalDrag.ts';
+import { FileFieldProps } from '../types/file.ts';
+import { FileDrop } from '../components/FileDrop.tsx';
+
+interface GlobalFileDropProps extends FileFieldProps {
+	children: ComponentChildren;
+	overlayText?: string;
+}
+
+export default function GlobalFileDrop(props: GlobalFileDropProps) {
+	const isDragging = useGlobalDrag();
+	const { children, overlayText, ...fileDropProps } = props;
+
+	return (
+		<div
+			className='global-drop-wrapper'
+			style={{ position: 'relative', height: '100%', minHeight: '100vh' }}
+		>
+			{/* 1. Main Content */}
+			<div className='global-drop-content'>
+				{children}
+			</div>
+
+			{/* 2. Overlay (Visible on Drag) */}
+			{isDragging.value && (
+				<div
+					className='global-drop-overlay'
+					style={{
+						position: 'fixed',
+						inset: 0,
+						zIndex: 9999,
+						background: 'rgba(255, 255, 255, 0.9)',
+						backdropFilter: 'blur(4px)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						padding: '3rem',
+					}}
+				>
+					{
+						/* We reuse FileDrop but apply specific styles to make it fill the modal
+            and hide the default list, acting purely as a target.
+          */
+					}
+					<div style={{ width: '100%', height: '100%', maxWidth: '800px', maxHeight: '600px' }}>
+						<FileDrop
+							{...fileDropProps}
+							className='file-drop--global-active'
+							dropzoneLabel={overlayText || 'Drop files anywhere to upload'}
+							layout='list'
+						/>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
+```
+
+### File: packages\fields\src\wrappers\LabelWrapper.tsx
+
+```tsx
+import '../styles/wrappers/label-wrapper.css';
+import '../styles/components/help-tooltip.css';
+import { Signal } from '@preact/signals';
+import { LabelWrapperProps } from '../types/wrappers.ts';
+import { HelpTooltip } from '../components/HelpTooltip.tsx';
+
+export function LabelWrapper(props: LabelWrapperProps) {
+	if (!props.label) return null;
+
+	const isActive = props.active instanceof Signal ? props.active.value : props.active;
+	const isError = props.error instanceof Signal ? props.error.value : props.error;
+	const isDisabled = props.disabled instanceof Signal ? props.disabled.value : props.disabled;
+
+	const {
+		position = 'top',
+		floatingRule = 'auto',
+		floatingOrigin = 'top-left',
+		helpPosition = 'inline',
+	} = props;
+
+	// Determine if floating styles should be applied (Absolute positioning)
+	const canFloat = position === 'top' && floatingRule !== 'never';
+	const isFloating = canFloat;
+
+	// Determine if the label is currently in the "up" (active) state
+	const isFloatedUp = floatingRule === 'always' || (floatingRule === 'auto' && isActive);
+
+	const labelClasses = [
+		'field-label',
+		`field-label--pos-${position}`,
+		isFloating && 'field-label--floating',
+		isFloating && `field-label--float-from-${floatingOrigin}`,
+		props.multiline && 'field-label--multiline',
+		isFloatedUp && 'field-label--active',
+		isError && 'field-label--error',
+		isDisabled && 'field-label--disabled',
+		props.className,
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	// Render Helper
+	const tooltip = props.help
+		? (
+			<HelpTooltip
+				content={props.help}
+				href={props.helpLink}
+				className={helpPosition !== 'inline' ? `help-tooltip--${helpPosition}` : ''}
+			/>
+		)
+		: null;
+
+	return (
+		<>
+			<div className={labelClasses} style={props.style}>
+				<label htmlFor={props.id}>
+					{props.label}
+					{props.required && <span className='field-label__required'>*</span>}
+				</label>
+
+				{/* Render inline if position is inline */}
+				{helpPosition === 'inline' && tooltip}
+			</div>
+
+			{/* Render outside if position is corner-based (Detached from label transforms) */}
+			{helpPosition !== 'inline' && tooltip}
+		</>
+	);
+}
+
+```
+
+### File: packages\fields\src\wrappers\MessageWrapper.tsx
+
+```tsx
+import { Signal } from '@preact/signals';
+import '../styles/wrappers/message-wrapper.css';
+
+interface MessageWrapperProps {
+	error?: string | Signal<string | undefined>;
+	warning?: string | Signal<string | undefined>;
+	info?: string | Signal<string | undefined>;
+	hint?: string;
+}
+
+export function MessageWrapper(props: MessageWrapperProps) {
+	const error = props.error instanceof Signal ? props.error.value : props.error;
+	const warning = props.warning instanceof Signal ? props.warning.value : props.warning;
+	const info = props.info instanceof Signal ? props.info.value : props.info;
+
+	// Priority: Error > Warning > Info > Hint
+	const message = error || warning || info || props.hint;
+	const type = error ? 'error' : warning ? 'warning' : info ? 'info' : 'hint';
+
+	if (!message) {
+		return (
+			<div
+				className='field-message field-message--hidden'
+				aria-hidden='true'
+			/>
+		);
 	}
 
-	// Create a temporary element to force browser CSS evaluation
-	const tempEl = document.createElement('div');
-	tempEl.style.color = `var(${varName})`;
-	tempEl.style.display = 'none';
-	document.body.appendChild(tempEl);
+	const classes = [
+		'field-message',
+		`field-message--${type}`,
+	].join(' ');
 
-	// The browser automatically resolves hsl() and var() into standard rgb() format for the 'color' property
-	const computedColor = getComputedStyle(tempEl).color;
+	return (
+		<div className={classes} role={type === 'error' ? 'alert' : 'status'}>
+			{message}
+		</div>
+	);
+}
 
-	// Cleanup
-	document.body.removeChild(tempEl);
+```
 
-	let result = 0x22d3ee; // Default cyan fallback
+### File: packages\fields\src\wrappers\SkeletonWrapper.tsx
 
-	// Parse the clean rgb(r, g, b) string
-	if (computedColor.startsWith('rgb')) {
-		const match = computedColor.match(/\d+/g);
-		if (match && match.length >= 3) {
-			const [r, g, b] = match.map(Number);
-			result = (r << 16) + (g << 8) + b;
-		}
-	}
+```tsx
+import { Signal } from '@preact/signals';
+import '../styles/wrappers/skeleton-wrapper.css';
 
-	// Cache the hex value so subsequent render frames are instant
-	colorCache.set(cacheKey, result);
+interface SkeletonWrapperProps {
+	loading?: boolean | Signal<boolean>;
+	variant?: 'rect' | 'circle' | 'pill';
+	width?: string | number;
+	height?: string | number;
+	className?: string;
+}
 
-	return result;
+export function SkeletonWrapper(props: SkeletonWrapperProps) {
+	const isLoading = props.loading instanceof Signal ? props.loading.value : props.loading;
+
+	if (!isLoading) return null;
+
+	const classes = [
+		'field-skeleton',
+		'field-skeleton--pulse',
+		`field-skeleton--${props.variant || 'rect'}`,
+		props.className,
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	const style = {
+		width: props.width,
+		height: props.height,
+	};
+
+	return <div className={classes} style={style} aria-hidden='true' />;
 }
 
 ```

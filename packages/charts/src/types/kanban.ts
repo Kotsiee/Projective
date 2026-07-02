@@ -19,6 +19,7 @@ export interface KanbanCardProps {
 		avatarUrl?: string;
 	};
 	order: number;
+	created: DateTime;
 	permissions?: {
 		canEdit?: boolean;
 		canDelete?: boolean;

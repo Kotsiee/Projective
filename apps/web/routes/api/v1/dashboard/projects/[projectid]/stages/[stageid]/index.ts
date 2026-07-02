@@ -1,8 +1,20 @@
+/**
+ * @file index.ts
+ * @description API route controller for fetching and managing an existing project stage.
+ */
+
+// #region IMPORTS
+// deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { supabaseClient } from '@projective/backend';
 import { ProjectsBackendService } from '@features/dashboard/projects/services/ProjectsServiceBackend.ts';
+import { StagesServiceBackend } from '@features/dashboard/projects/services/StagesServiceBackend.ts';
+// #endregion
 
 export const handler = define.handlers({
+	/**
+	 * @description Fetches the details of a specific stage.
+	 */
 	async GET(ctx) {
 		const project_id = ctx.params.projectid;
 		const stage_id = ctx.params.stageid;
@@ -35,6 +47,23 @@ export const handler = define.handlers({
 		} catch (err) {
 			console.error('API Error:', err);
 			return new Response(JSON.stringify({ error: 'Failed to fetch stage' }), {
+				status: 500,
+			});
+		}
+	},
+
+	/**
+	 * @description Deletes a project stage and handles related ticket escrow dependencies.
+	 */
+	async DELETE(ctx) {
+		const { projectid, stageid } = ctx.params;
+
+		try {
+			await StagesServiceBackend.deleteStage(projectid, stageid);
+			return new Response(null, { status: 204 });
+		} catch (err: any) {
+			console.error('[API] DELETE Stage Error:', err);
+			return new Response(JSON.stringify({ error: err.message || 'Failed to delete stage' }), {
 				status: 500,
 			});
 		}

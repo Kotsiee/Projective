@@ -1,8 +1,8 @@
-import '../../styles/components/new/new-ticket-modal.css';
+import '../../styles/components/modals/new-ticket-modal.css';
 import { useSignal } from '@preact/signals';
 import { Button, Modal, ModalLayout, ToggleButton, ToggleButtonGroup } from '@projective/ui';
 import { DateField, TextField } from '@projective/fields';
-import { DateTime } from '@projective/types';
+import { DateTime, TicketStatus } from '@projective/types';
 import { IconGripVertical } from '@tabler/icons-preact';
 import { useEffect } from 'preact/hooks';
 
@@ -10,6 +10,8 @@ interface NewTicketModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	availableStages: { label: string; value: string }[];
+	preselectedStageId?: string | null;
+	// deno-lint-ignore no-explicit-any
 	onSubmit: (payload: any) => void;
 }
 
@@ -20,31 +22,32 @@ interface DraggableStage {
 }
 
 export function NewTicketModal(
-	{ isOpen, onClose, availableStages, onSubmit }: NewTicketModalProps,
+	{ isOpen, onClose, availableStages, preselectedStageId, onSubmit }: NewTicketModalProps,
 ) {
-	// Form State Signals
 	const title = useSignal('');
 	const description = useSignal('');
 	const intensityTier = useSignal<'Low' | 'Standard' | 'High'>('Standard');
 	const dueDate = useSignal<DateTime | null>(null);
 
-	// Drag & Drop Stages State
 	const stagesList = useSignal<DraggableStage[]>([]);
 	const draggedIndex = useSignal<number | null>(null);
 
-	// Initialize list when modal opens
 	useEffect(() => {
 		if (isOpen) {
 			stagesList.value = availableStages.map((stage) => ({
 				id: stage.value,
 				label: stage.label,
-				selected: true, // Enabled by default
+				selected: true,
 			}));
+
+			title.value = '';
+			description.value = '';
+			intensityTier.value = 'Standard';
+			dueDate.value = null;
 		}
 	}, [isOpen, availableStages]);
 
 	const handleSubmit = () => {
-		// Map only the selected stages, maintaining their new sorted order
 		const required_stages = stagesList.value
 			.filter((s) => s.selected)
 			.map((s, index) => ({
@@ -52,14 +55,27 @@ export function NewTicketModal(
 				order: index,
 			}));
 
+		// FIX: The Kanban board maps the backlog to the ID "new". Zod fails this because it expects a UUID.
+		// Here we catch it and force it back to null for the DB.
+		const resolvedStageId = (!preselectedStageId || preselectedStageId === 'new')
+			? null
+			: preselectedStageId;
+
 		onSubmit({
 			title: title.value,
-			description: description.value,
+			text_description: description.value,
+			description: {},
 			required_stages,
-			intensityTier: intensityTier.value,
-			dueDate: dueDate.value,
+			workload_intensity: intensityTier.value === 'Low'
+				? 0.5
+				: intensityTier.value === 'High'
+				? 2.0
+				: 1.0,
+			// deno-lint-ignore no-explicit-any
+			due_date: dueDate.value ? new Date(dueDate.value as any).toISOString() : null,
+			current_stage_id: resolvedStageId,
+			status: TicketStatus.Backlog,
 		});
-		onClose();
 	};
 
 	// #region Local Drag & Drop Handlers
@@ -67,19 +83,17 @@ export function NewTicketModal(
 		draggedIndex.value = index;
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
-			// Required for Firefox
 			e.dataTransfer.setData('text/plain', index.toString());
 		}
 	};
 
 	const handleDragOver = (e: DragEvent, index: number) => {
-		e.preventDefault(); // Necessary to allow dropping
+		e.preventDefault();
 		if (draggedIndex.value === null || draggedIndex.value === index) return;
 
 		const list = [...stagesList.value];
 		const draggedItem = list[draggedIndex.value];
 
-		// Swap the items
 		list.splice(draggedIndex.value, 1);
 		list.splice(index, 0, draggedItem);
 
@@ -87,9 +101,7 @@ export function NewTicketModal(
 		stagesList.value = list;
 	};
 
-	const handleDrop = () => {
-		draggedIndex.value = null;
-	};
+	const handleDrop = () => draggedIndex.value = null;
 
 	const toggleStageSelection = (index: number) => {
 		const list = [...stagesList.value];
@@ -162,6 +174,7 @@ export function NewTicketModal(
 						<span class='new-ticket-form__section-label'>Intensity Tier (Wi Multiplier)</span>
 						<ToggleButtonGroup
 							value={intensityTier.value}
+							// deno-lint-ignore no-explicit-any
 							onChange={(v) => intensityTier.value = v as any}
 							optional={false}
 							fullWidth
@@ -174,11 +187,7 @@ export function NewTicketModal(
 
 					<div class='new-ticket-form__section'>
 						<span class='new-ticket-form__section-label'>Deadline (Optional)</span>
-						<DateField
-							label='Due Date'
-							value={dueDate.value}
-							onChange={(v) => dueDate.value = v}
-						/>
+						<DateField label='Due Date' value={dueDate.value} onChange={(v) => dueDate.value = v} />
 					</div>
 				</div>
 			</ModalLayout>

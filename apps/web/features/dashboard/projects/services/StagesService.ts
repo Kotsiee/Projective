@@ -2,6 +2,7 @@
  * @file StagesService.ts
  * @description Frontend Service layer for Project Stages.
  */
+// deno-lint-ignore-file no-explicit-any
 import { getCsrfToken } from '@projective/utils';
 
 export class StagesService {

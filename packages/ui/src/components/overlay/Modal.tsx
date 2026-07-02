@@ -17,6 +17,9 @@ export function Modal(props: OverlayProps) {
 		isOpen,
 		onClose,
 		title,
+		width,
+		height,
+		fullScreen = false,
 		isSticky,
 		children,
 		className,
@@ -28,12 +31,38 @@ export function Modal(props: OverlayProps) {
 	// Apply Accessibility (Focus Trap & ESC to close)
 	useOverlayA11y(containerRef, isOpen, onClose);
 
+	// #region Dimensional Formatting
+	const parseDimension = (val?: string | number) => typeof val === 'number' ? `${val}px` : val;
+
+	const dynamicStyles = {
+		...(width ? { width: parseDimension(width), maxWidth: '100vw' } : {}),
+		...(height ? { height: parseDimension(height), maxHeight: '100vh' } : {}),
+		...(fullScreen
+			? {
+				width: '100vw',
+				height: '100vh',
+				maxWidth: '100vw',
+				maxHeight: '100vh',
+				margin: 0,
+				borderRadius: 0,
+			}
+			: {}),
+		...style,
+	};
+
+	const classes = [
+		'overlay-modal',
+		fullScreen && 'overlay-modal--fullscreen',
+		className,
+	].filter(Boolean).join(' ');
+	// #endregion
+
 	return (
 		<OverlayPortal isOpen={isOpen} onClose={onClose} isSticky={isSticky}>
 			<div
 				ref={containerRef}
-				className={`overlay-modal ${className || ''}`}
-				style={style}
+				className={classes}
+				style={dynamicStyles}
 				role='dialog'
 				aria-modal='true'
 				aria-labelledby={title ? 'modal-title' : undefined}

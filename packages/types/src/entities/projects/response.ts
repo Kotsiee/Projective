@@ -34,16 +34,15 @@ export type ProjectRoleResponse = z.infer<typeof ProjectRoleResponseSchema>;
  */
 export const ProjectStageResponseSchema = IdentifiableSchema.extend({
 	name: z.string().min(1),
-	// FIX 1: Explicitly typed key and value for z.record to prevent argument length mismatches
 	description: z.union([z.record(z.string(), z.any()), z.string()]).nullable(),
 	description_text: z.string().nullable(),
 	skills: z.array(z.string()).default([]),
 	status: z.enum(Object.values(StageStatus) as [string, ...string[]]),
 	file_upload_required: z.boolean().default(false),
 	default_tasks: z.array(z.record(z.string(), z.any())).default([]),
-	// FIX 2: Passed empty config object to satisfy the modern .datetime signature
 	start_date: z.iso.datetime({}).nullable(),
 	end_date: z.iso.datetime({}).nullable(),
+	sort_order: z.number().int().nonnegative().default(0),
 });
 export type ProjectStageResponse = z.infer<typeof ProjectStageResponseSchema>;
 
@@ -63,8 +62,8 @@ export const TicketRequiredStageSchema = z.object({
  * @description Canonical schema representing the full project context payload.
  */
 export const FullProjectResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
-	.merge(RatableSchema)
+	.extend(TimestampedSchema.shape)
+	.extend(RatableSchema.shape)
 	.extend({
 		title: z.string().min(1),
 		description: z.union([z.record(z.string(), z.any()), z.string()]).nullable(),
@@ -89,7 +88,7 @@ export type FullProjectResponse = z.infer<typeof FullProjectResponseSchema>;
  * @description Canonical schema for tracking atomic task components flowing across columns.
  */
 export const TicketResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
+	.extend(TimestampedSchema.shape)
 	.extend({
 		project_id: z.uuid(),
 		current_stage_id: z.uuid().nullable(),

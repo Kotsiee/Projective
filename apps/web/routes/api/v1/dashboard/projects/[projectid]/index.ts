@@ -15,6 +15,7 @@ export const handler = define.handlers({
 
 		try {
 			const getClient = () =>
+				// deno-lint-ignore no-explicit-any
 				Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
 			const res = await ProjectsBackendService.getProject(project_id, {

@@ -1,14 +1,23 @@
+/**
+ * @file BoardDataView.tsx
+ * @description Shared renderer for mapping tickets and stages to either a Kanban or Table view.
+ */
+
+// #region Imports
 import { useEffect, useMemo } from 'preact/hooks';
-import { Kanban, KanbanCardProps, KanbanFieldProps } from '@projective/charts';
+import { Kanban, KanbanFieldProps } from '@projective/charts';
 import { ColumnDef, DataDisplay } from '@projective/data';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
+import { TicketStatus } from 'packages/types/src/entities/projects/enums.ts';
+// #endregion
 
+// #region Interfaces
 export interface BoardTicket {
 	id: string;
 	title: string;
 	stageId: string;
 	stageName: string;
-	status: 'Backlog' | 'Todo' | 'In Progress' | 'In Review' | 'Completed' | 'Cancelled';
+	status: TicketStatus;
 	assigneeId: string | null;
 	assigneeName: string | null;
 	workloadIntensity: number;
@@ -32,9 +41,10 @@ interface BoardDataViewProps {
 	) => void;
 	onFieldMove: (sourceId: string, targetId: string, insertBefore: boolean) => void;
 	onAddStage: () => void;
+	onAddTicket?: (stageId: string | null) => void;
 }
+// #endregion
 
-// Columns for the DataDisplay Table
 const tableColumns: ColumnDef<BoardTicket>[] = [
 	{ id: 'title', field: 'title', label: 'Ticket Title', sortable: true, width: 250 },
 	{ id: 'stage', field: 'stageName', label: 'Stage', sortable: true, width: 150 },
@@ -48,7 +58,7 @@ const tableColumns: ColumnDef<BoardTicket>[] = [
 	},
 	{
 		id: 'wi',
-		field: (t) => t.workloadIntensity.toFixed(1),
+		field: (t) => t.workloadIntensity,
 		label: 'Intensity (Wi)',
 		sortable: true,
 		width: 100,
@@ -81,10 +91,10 @@ export function BoardDataView({
 	onCardMove,
 	onFieldMove,
 	onAddStage,
+	onAddTicket,
 }: BoardDataViewProps) {
 	const { setCustomScrollEnabled } = useNavigationContext();
-	// 1. Define the mapper function FIRST so it's initialized before useMemo calls it.
-	// deno-lint-ignore no-explicit-any
+
 	const mapTicketToCard = (t: BoardTicket, orderIndex: number): any => {
 		const tags = [];
 		if (t.attachmentsScanned) {
@@ -95,7 +105,7 @@ export function BoardDataView({
 		}
 		tags.push({
 			id: `wi-${t.id}`,
-			label: `Wi: ${t.workloadIntensity.toFixed(1)}`,
+			label: `Wi: ${t.workloadIntensity}`,
 			variant: 'solid',
 		});
 
@@ -106,9 +116,8 @@ export function BoardDataView({
 		return {
 			id: t.id,
 			title: t.title,
-			description: `This ticket requires a workload intensity of ${
-				t.workloadIntensity.toFixed(1)
-			} and has ${t.revisionsRequested} revisions requested.`,
+			description:
+				`This ticket requires a workload intensity of ${t.workloadIntensity} and has ${t.revisionsRequested} revisions requested.`,
 			meta: `Created: ${dateString}`,
 			takenBy: t.assigneeName ? { name: t.assigneeName } : undefined,
 			order: orderIndex,
@@ -117,7 +126,6 @@ export function BoardDataView({
 		};
 	};
 
-	// 2. Compute the fields safely using the initialized mapper.
 	const kanbanFields = useMemo<KanbanFieldProps[]>(() => {
 		const fieldsMap = new Map<string, KanbanFieldProps>();
 
@@ -128,7 +136,8 @@ export function BoardDataView({
 				color: 'primary',
 				order: 0,
 				cards: [],
-				permissions: { canReorder: false },
+				permissions: { canReorder: false, canAddCard: isOwnerOrAdmin },
+				addCardLabel: 'New Ticket',
 			});
 
 			let orderCounter = 1;
@@ -149,35 +158,61 @@ export function BoardDataView({
 				color: 'var(--success)',
 				order: 999,
 				cards: [],
-				permissions: { canReorder: false },
+				permissions: { canReorder: false, canAddCard: false },
 			});
 
 			tickets.forEach((t) => {
-				const targetField = t.status === 'Completed'
+				const targetField = t.status === TicketStatus.Completed
 					? 'Done'
-					: (t.status === 'Backlog' ? 'New' : t.stageId);
+					: (t.status === TicketStatus.Backlog ? 'New' : t.stageId);
 				const field = fieldsMap.get(targetField);
 
 				if (field) field.cards.push(mapTicketToCard(t, field.cards.length));
 			});
 		} else {
 			const statuses = [
-				{ id: 'Backlog', color: 'primary' },
-				{ id: 'Todo', color: 'secondary' },
-				{ id: 'In Progress', color: 'secondary' },
-				{ id: 'In Review', color: 'secondary' },
-				{ id: 'Completed', color: 'var(--success)' },
-				{ id: 'Cancelled', color: 'var(--danger)' },
+				{
+					id: TicketStatus.Backlog,
+					title: 'Backlog',
+					color: 'primary',
+					fields: { canAddCard: isOwnerOrAdmin },
+				},
+				{ id: TicketStatus.Todo, title: 'Todo', color: 'secondary', fields: { canAddCard: false } },
+				{
+					id: TicketStatus.InProgress,
+					title: 'In Progress',
+					color: 'secondary',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.InReview,
+					title: 'In Review',
+					color: 'secondary',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.Completed,
+					title: 'Completed',
+					color: 'var(--success)',
+					fields: { canAddCard: false },
+				},
+				{
+					id: TicketStatus.Cancelled,
+					title: 'Cancelled',
+					color: 'var(--danger)',
+					fields: { canAddCard: false },
+				},
 			];
 
 			statuses.forEach((status, idx) => {
 				fieldsMap.set(status.id, {
 					id: status.id,
-					title: status.id,
+					title: status.title,
 					color: status.color,
 					order: idx,
 					cards: [],
-					permissions: { canReorder: false },
+					permissions: { canReorder: false, canAddCard: status.fields.canAddCard },
+					addCardLabel: status.id === TicketStatus.Backlog ? 'New Ticket' : 'Add Ticket',
 				});
 			});
 
@@ -194,13 +229,17 @@ export function BoardDataView({
 		if (displayMode === 'kanban') {
 			setCustomScrollEnabled(true);
 		} else {
-			// Turn it off if they switch to the Table view
 			setCustomScrollEnabled(false);
 		}
-
-		// Cleanup: Always disable it when leaving the page entirely
 		return () => setCustomScrollEnabled(false);
 	}, [displayMode, setCustomScrollEnabled]);
+
+	const handleAddCardInternal = (fieldId: string) => {
+		if (onAddTicket) {
+			const sanitizedId = fieldId === 'New' || fieldId === TicketStatus.Backlog ? null : fieldId;
+			onAddTicket(sanitizedId);
+		}
+	};
 
 	if (displayMode === 'kanban') {
 		return (
@@ -210,6 +249,7 @@ export function BoardDataView({
 					onCardClick={(card) => onCardClick(card.id)}
 					onCardMove={onCardMove}
 					onFieldMove={onFieldMove}
+					onAddCard={handleAddCardInternal}
 					onAddField={viewType === 'stages' && isOwnerOrAdmin ? onAddStage : undefined}
 					permissions={{ canAddField: viewType === 'stages' && isOwnerOrAdmin }}
 				/>

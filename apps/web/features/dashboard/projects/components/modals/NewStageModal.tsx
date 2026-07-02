@@ -5,6 +5,7 @@
 
 // #region Imports
 import { useSignal } from '@preact/signals';
+import { useEffect } from 'preact/hooks';
 import {
 	Accordion,
 	AccordionContent,
@@ -16,22 +17,18 @@ import {
 	toast,
 } from '@projective/ui';
 import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
-import { IPOptionMode } from '@projective/types';
+import { DateTime, IPOptionMode } from '@projective/types';
 import { useProjectContext } from '../../contexts/ProjectContext.tsx';
-import { DateTime } from 'packages/types/src/core/datetime.ts';
-import { ProjectsService } from '../../services/ProjectsService.ts';
+import { StagesService } from '../../services/StagesService.ts';
 // #endregion
 
-// #region Interfaces
 export interface NewStageModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	projectId: string;
-	projectFormat?: 'one_off' | 'pipeline';
+	projectFormat?: 'one_off' | 'pipeline' | string;
 }
-// #endregion
 
-// #region Component
 export default function NewStageModal(
 	{ isOpen, onClose, projectId, projectFormat }: NewStageModalProps,
 ) {
@@ -45,19 +42,34 @@ export default function NewStageModal(
 	const defaultTasks = useSignal<string[]>([]);
 	const fileUploadRequired = useSignal('false');
 
-	// One-Off Specific
 	const startDate = useSignal<DateTime | undefined>(undefined);
 	const endDate = useSignal<DateTime | undefined>(undefined);
 
-	// Advanced
 	const ipModeOverride = useSignal<string>('none');
 	const ndaRequired = useSignal('false');
-
 	const isSubmitting = useSignal(false);
 	// #endregion
 
-	// #region Handlers
+	useEffect(() => {
+		if (isOpen) {
+			name.value = '';
+			description.value = null;
+			skills.value = [];
+			defaultTasks.value = [];
+			fileUploadRequired.value = 'false';
+			startDate.value = undefined;
+			endDate.value = undefined;
+			ipModeOverride.value = 'none';
+			ndaRequired.value = 'false';
+		}
+	}, [isOpen]);
+
 	const handleSubmit = async () => {
+		if (!projectId) {
+			toast.error('Unable to locate Project ID.');
+			return;
+		}
+
 		if (!name.value.trim()) {
 			toast.error('Stage Name is required.');
 			return;
@@ -72,16 +84,19 @@ export default function NewStageModal(
 				skills: skills.value,
 				default_tasks: defaultTasks.value,
 				file_upload_required: fileUploadRequired.value === 'true',
-				start_date: startDate.value,
-				end_date: endDate.value,
+				// FIX: Cast DateTime bounds to ISO Strings for Zod
+				// deno-lint-ignore no-explicit-any
+				start_date: startDate.value ? new Date(startDate.value as any).toISOString() : null,
+				// deno-lint-ignore no-explicit-any
+				end_date: endDate.value ? new Date(endDate.value as any).toISOString() : null,
 				ip_ownership_override: ipModeOverride.value !== 'none' ? ipModeOverride.value : null,
 				nda_required: ndaRequired.value === 'true',
 			};
 
-			await ProjectsService.createStage(projectId, payload);
+			await StagesService.createStage(projectId, payload);
 
 			toast.success('Stage created successfully!');
-			refresh(); // Refresh project context to pull the new stage into the sidebar
+			refresh();
 			onClose();
 		} catch (err: unknown) {
 			console.error(err);
@@ -90,9 +105,7 @@ export default function NewStageModal(
 			isSubmitting.value = false;
 		}
 	};
-	// #endregion
 
-	// #region Options
 	const booleanOptions = [
 		{ value: 'true', label: 'Yes' },
 		{ value: 'false', label: 'No' },
@@ -103,7 +116,6 @@ export default function NewStageModal(
 		{ value: IPOptionMode.ExclusiveTransfer, label: 'Exclusive Transfer' },
 		{ value: IPOptionMode.LicensedUse, label: 'Licensed Use' },
 	];
-	// #endregion
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} title='Create New Stage'>
@@ -120,7 +132,6 @@ export default function NewStageModal(
 				}
 			>
 				<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-					{/* Core Info */}
 					<TextField
 						label='Stage Name'
 						value={name}
@@ -162,14 +173,12 @@ export default function NewStageModal(
 						placeholder='e.g., Setup environment, Review docs'
 					/>
 
-					{/* Conditionally Rendered Dates */}
 					{projectFormat === 'one_off' && (
 						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 							<DateField
 								label='Start Date'
 								value={startDate.value}
-								onChange={(v) =>
-									startDate.value = v}
+								onChange={(v) => startDate.value = v}
 							/>
 							<DateField
 								label='Target End Date'
@@ -179,7 +188,6 @@ export default function NewStageModal(
 						</div>
 					)}
 
-					{/* Advanced Settings */}
 					<Accordion type='single' collapsible>
 						<AccordionItem value='advanced'>
 							<AccordionTrigger>Advanced Settings</AccordionTrigger>
@@ -221,4 +229,3 @@ export default function NewStageModal(
 		</Modal>
 	);
 }
-// #endregion

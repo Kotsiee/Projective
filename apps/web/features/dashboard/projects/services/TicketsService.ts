@@ -2,19 +2,29 @@
  * @file TicketsService.ts
  * @description Frontend Service layer for Tickets.
  */
+// deno-lint-ignore-file no-explicit-any
 import { getCsrfToken } from '@projective/utils';
 
 export class TicketsService {
 	static async createTicket(
 		projectId: string,
-		data: { title: string; description?: any },
+		data: any,
 	): Promise<any> {
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
 			body: JSON.stringify(data),
 		});
-		if (!res.ok) throw new Error(`Failed to create ticket: ${res.statusText}`);
+
+		if (!res.ok) {
+			const errData = await res.json().catch(() => ({}));
+			const msg = errData.details
+				? JSON.stringify(errData.details)
+				: (errData.error?.message || errData.error || res.statusText);
+
+			throw new Error(msg);
+		}
+
 		return await res.json();
 	}
 

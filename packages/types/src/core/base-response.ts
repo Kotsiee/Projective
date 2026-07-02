@@ -21,8 +21,8 @@ export const IdentifiableSchema = z.object({
 export type Identifiable = z.infer<typeof IdentifiableSchema>;
 
 export const TimestampedSchema = z.object({
-	created_at: z.string().datetime({}),
-	updated_at: z.string().datetime({}).optional(),
+	created_at: z.iso.datetime({}),
+	updated_at: z.iso.datetime({}).optional(),
 });
 export type Timestamped = z.infer<typeof TimestampedSchema>;
 
@@ -39,10 +39,10 @@ export const OwnableSchema = z.object({
 export type Ownable = z.infer<typeof OwnableSchema>;
 
 export const ImageVariantsSchema = z.object({
-	original: z.string().url().nullable(),
-	sm: z.string().url().nullable().optional(),
-	md: z.string().url().nullable().optional(),
-	lg: z.string().url().nullable().optional(),
+	original: z.url().nullable(),
+	sm: z.url().nullable().optional(),
+	md: z.url().nullable().optional(),
+	lg: z.url().nullable().optional(),
 });
 export type ImageVariants = z.infer<typeof ImageVariantsSchema>;
 
@@ -58,9 +58,9 @@ export type BaseOwner = z.infer<typeof BaseOwnerSchema>;
 // #region 2. NORMALIZED PARTIAL RESPONSE (For Explore/Lists)
 
 export const PartialEntityResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
-	.merge(RatableSchema)
-	.merge(OwnableSchema)
+	.extend(TimestampedSchema.shape)
+	.extend(RatableSchema.shape)
+	.extend(OwnableSchema.shape)
 	.extend({
 		entity_type: EntityTypeSchema,
 		display_title: z.string().min(1),

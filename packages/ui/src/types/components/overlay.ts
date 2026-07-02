@@ -1,4 +1,4 @@
-import { ComponentChildren, JSX } from 'preact';
+import { ComponentChildren, CSSProperties } from 'preact';
 
 // #region 1. Overlay Definitions
 export type OverlayType = 'modal' | 'mobile' | 'side';
@@ -23,6 +23,15 @@ export interface OverlayProps {
 	/** Text displayed in the header */
 	title?: string;
 
+	/** Explicit width of the overlay (Modal/Side primarily) */
+	width?: string | number;
+
+	/** Explicit height of the overlay (Modal/Side primarily) */
+	height?: string | number;
+
+	/** If true, the modal expands to fill the entire viewport */
+	fullScreen?: boolean;
+
 	/** If true, disables the automatic switch to the Mobile Drawer on small screens */
 	preventAutoSwitch?: boolean;
 
@@ -40,7 +49,7 @@ export interface OverlayProps {
 
 	children: ComponentChildren;
 	className?: string;
-	style?: JSX.CSSProperties;
+	style?: CSSProperties;
 }
 
 /**

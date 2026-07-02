@@ -18,15 +18,15 @@ export const ProfileStatsResponseSchema = z.object({
 export type ProfileStatsResponse = z.infer<typeof ProfileStatsResponseSchema>;
 
 export const FullProfileResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
+	.extend(TimestampedSchema.shape)
 	.extend({
 		entity_type: ProfileTypeSchema,
 		handle: z.string().min(1),
 		name: z.string().min(1),
 		headline: z.string().default(''),
 		bio: z.string().nullable(),
-		avatar_url: z.string().url().nullable(),
-		banner_url: z.string().url().nullable(),
+		avatar_url: z.url().nullable(),
+		banner_url: z.url().nullable(),
 		country: z.string().nullable(),
 		timezone: z.string().nullable(),
 		languages: z.array(z.string()).default([]),

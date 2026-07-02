@@ -3,7 +3,7 @@ import { PricingModel } from '../session/enums.ts';
 import { IdentifiableSchema, TimestampedSchema } from '../../core/base-response.ts';
 
 export const ServiceBlueprintResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
+	.extend(TimestampedSchema.shape)
 	.extend({
 		freelancer_profile_id: z.string().uuid(),
 		title: z.string().min(1),

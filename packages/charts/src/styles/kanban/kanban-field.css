@@ -3,28 +3,15 @@
     flex-direction: column;
     width: 320px;
     max-height: 100%;
-    /* Locks column height to the track */
     background-color: color-mix(in srgb, var(--field-solid) 8%, var(--bg));
     border-radius: var(--border-radius__large);
     overflow: hidden;
-}
-
-.kanban-field__body {
-    flex-grow: 1;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    overflow-y: auto;
-    /* Cards scroll internally here! */
 }
 
 .kanban-field__header {
     display: flex;
     align-items: center;
     padding: 0.4rem 1rem;
-
-    /* Header keeps full opacity color */
     background-color: var(--field-solid);
     gap: 0.5rem;
 }
@@ -43,7 +30,6 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    /* Ensure text forces contrast relative to dark solid background */
     color: #ffffff;
 }
 
@@ -70,7 +56,30 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    /* Removed overflow constraints; lets column grow down naturally */
+    overflow-y: auto;
+}
+
+.kanban-field__empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    border: 2px dashed color-mix(in srgb, var(--field-solid) 15%, var(--border-color));
+    border-radius: var(--border-radius);
+    color: var(--text-disabled);
+    transition: opacity var(--fast) ease, visibility var(--fast) ease;
+}
+
+.kanban-field__empty-icon {
+    color: color-mix(in srgb, var(--field-solid) 25%, var(--text-disabled));
+}
+
+.kanban-field__empty-text {
+    font-size: 0.825rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
 }
 
 .kanban-field__add-wrapper {

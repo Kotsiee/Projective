@@ -3,6 +3,7 @@ import { Button } from '@projective/ui';
 import { KanbanCard } from './KanbanCard.tsx';
 import { KanbanCardProps, KanbanFieldProps } from '../../types/kanban.ts';
 import { dragData, useDraggable, useDropzone } from '../../hooks/useKanbanDnD.ts';
+import { IconInbox } from '@tabler/icons-preact';
 import '../../styles/kanban/kanban-field.css';
 
 const getTimestamp = (date: any): number => date ? new Date(date).getTime() : 0;
@@ -41,7 +42,6 @@ export function KanbanField({
 	const cardCount = cards.length;
 	const isOverLimit = limit !== undefined && cardCount > limit;
 
-	// Locks/Hooks Setup
 	const isLocked = permissions?.canReorder !== true;
 	const draggableProps = useDraggable(
 		'field',
@@ -50,6 +50,11 @@ export function KanbanField({
 		isLocked,
 	);
 	const dropzoneProps = useDropzone('field', id);
+
+	// Contextual logic evaluating active hover/drag interaction
+	const isAnyCardHoveringThisField = dragData.value.isDragging &&
+		dragData.value.type === 'card' &&
+		dragData.value.targetFieldId === id;
 
 	return (
 		<div
@@ -65,6 +70,13 @@ export function KanbanField({
 			</div>
 
 			<div class='kanban-field__body'>
+				{cardCount === 0 && !isAnyCardHoveringThisField && (
+					<div class='kanban-field__empty-state'>
+						<IconInbox size={24} class='kanban-field__empty-icon' />
+						<span class='kanban-field__empty-text'>Empty</span>
+					</div>
+				)}
+
 				{sortedCards.map((card) => {
 					const isDraggingThisCard = dragData.value.type === 'card' &&
 						dragData.value.id === card.id;

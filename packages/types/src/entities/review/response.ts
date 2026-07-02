@@ -11,7 +11,7 @@ export const ReviewTargetTypeSchema = z.enum([
 export type ReviewTargetType = z.infer<typeof ReviewTargetTypeSchema>;
 
 export const ReviewResponseSchema = IdentifiableSchema
-	.merge(TimestampedSchema)
+	.extend(TimestampedSchema.shape)
 	.extend({
 		target_entity_id: z.string().uuid(),
 		target_entity_type: ReviewTargetTypeSchema,

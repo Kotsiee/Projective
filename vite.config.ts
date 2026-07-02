@@ -61,7 +61,6 @@ export default defineConfig({
 				'**/coverage/**',
 				'**/dist/**',
 				'**/.git/**',
-				'!**/packages/**',
 			],
 		},
 	},
