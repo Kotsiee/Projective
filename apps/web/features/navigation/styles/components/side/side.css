@@ -1,199 +1,205 @@
 .navigation__side {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    width: var(--side-nav-width);
-    min-width: var(--side-nav-width);
-    height: calc(100vh - var(--header-height));
-    background-color: var(--header);
-    z-index: 60;
-    transition: all var(--medium);
+	position: fixed;
+	top: var(--header-height);
+	left: 0;
+	width: var(--side-nav-width);
+	min-width: var(--side-nav-width);
+	height: calc(100vh - var(--header-height));
+	background-color: var(--header);
+	z-index: 60;
+	transition: all var(--medium);
 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 2rem;
-    overflow-y: auto;
-    /* Allow scrolling if menus get too long */
-    overflow-x: hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	padding-top: 2rem;
+	overflow-y: auto;
+	/* Allow scrolling if menus get too long */
+	overflow-x: hidden;
 }
 
 .navigation__side__apps {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    /* Reduced gap since dividers provide spacing */
-    width: 100%;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	/* Reduced gap since dividers provide spacing */
+	width: 100%;
 }
 
 .navigation__side__items {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    margin: 0;
-    width: 100%;
-    padding: 0 0.75rem;
-    box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0;
+	width: 100%;
+	padding: 0 0.75rem;
+	box-sizing: border-box;
 }
 
 /* --- DIVIDER --- */
 .navigation__side__divider {
-    width: calc(100% - 1.5rem);
-    /* Matches the padding of the items */
-    height: 1px;
-    background-color: var(--border-color);
-    margin: 0.5rem auto;
-    border: none;
+	width: calc(100% - 1.5rem);
+	/* Matches the padding of the items */
+	height: 1px;
+	background-color: var(--border-color);
+	margin: 0.5rem auto;
+	border: none;
 }
 
 .navigation__side__items__item {
-    display: flex;
-    flex-direction: column;
-    /* Stack button and submenu vertically */
-    align-items: flex-start;
-    position: relative;
-    width: 100%;
+	display: flex;
+	flex-direction: column;
+	/* Stack button and submenu vertically */
+	align-items: flex-start;
+	position: relative;
+	width: 100%;
+}
+
+/* The portaled Tooltip wrapper must not shrink the trigger; let the button
+   own its own width transition (2.5rem collapsed -> 100% expanded). */
+.navigation__side__items__item__tooltip {
+	width: 100%;
 }
 
 .navigation__side__items__item__button {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0 !important;
-    transition: width var(--medium), background-color var(--fast), color var(--fast);
+	width: 2.5rem;
+	height: 2.5rem;
+	padding: 0 !important;
+	transition: width var(--medium), background-color var(--fast), color var(--fast);
 
-    &[data-selected="true"] {
-        background-color: var(--primary-surface);
-        color: var(--primary);
-        font-weight: 500;
-    }
+	&[data-selected='true'] {
+		background-color: var(--primary-surface);
+		color: var(--primary);
+		font-weight: 500;
+	}
 }
 
 .navigation__side__items__item__button .btn__content {
-    justify-content: flex-start;
-    padding: 0;
-    width: 100%;
+	justify-content: flex-start;
+	padding: 0;
+	width: 100%;
 }
 
 .navigation__side__items__item__content {
-    display: flex;
-    align-items: center;
-    width: 100%;
+	display: flex;
+	align-items: center;
+	width: 100%;
 }
 
 .navigation__side__items__item__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	flex-shrink: 0;
 }
 
 .navigation__side__items__item__label {
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateX(-10px);
-    transition: opacity var(--medium), transform var(--medium);
-    font-size: 0.875rem;
-    width: 0;
-    overflow: hidden;
-    flex-grow: 1;
-    /* Pushes the chevron to the right */
+	white-space: nowrap;
+	opacity: 0;
+	transform: translateX(-10px);
+	transition: opacity var(--medium), transform var(--medium);
+	font-size: 0.875rem;
+	width: 0;
+	overflow: hidden;
+	flex-grow: 1;
+	/* Pushes the chevron to the right */
 }
 
 /* --- CHEVRON (Independent Absolute Button) --- */
 .navigation__side__items__item__chevron {
-    display: none;
-    /* Hidden by default */
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    cursor: pointer;
-    z-index: 5;
-    /* Sits directly above the main link button */
-    border-radius: var(--border-radius__small);
-    transition: background-color var(--fast), color var(--fast);
+	display: none;
+	/* Hidden by default */
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 2.5rem;
+	height: 2.5rem;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-muted);
+	cursor: pointer;
+	z-index: 5;
+	/* Sits directly above the main link button */
+	border-radius: var(--border-radius__small);
+	transition: background-color var(--fast), color var(--fast);
 }
 
 /* Rotate just the SVG so the hit-area stays square */
 .navigation__side__items__item__chevron svg {
-    transition: transform var(--medium);
+	transition: transform var(--medium);
 }
 
 /* Custom hover state to make it feel like a distinct button */
 .navigation__side__items__item__chevron:hover {
-    /* background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1); */
-    color: var(--text-main);
+	/* background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1); */
+	color: var(--text-main);
 }
 
 /* Spin chevron when local item is open */
 .navigation__side__items__item.is-open .navigation__side__items__item__chevron svg {
-    transform: rotate(180deg);
+	transform: rotate(180deg);
 }
 
 /* --- SUB-MENU --- */
 .navigation__side__submenu {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding-left: 2.5rem;
-    /* Indent under the text */
-    padding-top: 0.25rem;
-    gap: 0.25rem;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding-left: 2.5rem;
+	/* Indent under the text */
+	padding-top: 0.25rem;
+	gap: 0.25rem;
 }
 
 .navigation__side__submenu__link {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    text-decoration: none;
-    padding: 0.5rem;
-    border-radius: var(--border-radius__small);
-    transition: background-color var(--fast), color var(--fast);
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	text-decoration: none;
+	padding: 0.5rem;
+	border-radius: var(--border-radius__small);
+	transition: background-color var(--fast), color var(--fast);
 
-    &:hover {
-        color: var(--text-main);
-        background-color: var(--input-bg);
-    }
+	&:hover {
+		color: var(--text-main);
+		background-color: var(--input-bg);
+	}
 
-    &[data-selected="true"] {
-        color: var(--primary);
-        font-weight: 500;
-    }
+	&[data-selected='true'] {
+		color: var(--primary);
+		font-weight: 500;
+	}
 }
 
 /* --- EXPANDED SIDEBAR STATE --- */
 [data-sidebar-open='true'] .navigation__side__items__item__button {
-    width: 100%;
+	width: 100%;
 }
 
 [data-sidebar-open='true'] .navigation__side__items__item__label {
-    opacity: 1;
-    transform: translateX(0);
-    width: auto;
+	opacity: 1;
+	transform: translateX(0);
+	width: auto;
 
-    /* Crucial: Reserve 2.5rem of space so text never overlaps the absolute chevron */
-    padding-right: 2.5rem;
+	/* Crucial: Reserve 2.5rem of space so text never overlaps the absolute chevron */
+	padding-right: 2.5rem;
 }
 
 /* Show chevron only when sidebar is open */
 [data-sidebar-open='true'] .navigation__side__items__item__chevron {
-    display: flex;
+	display: flex;
 }
 
 .navigation__side__open {
-    position: relative;
-    left: 0.5rem;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: start;
+	position: relative;
+	left: 0.5rem;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: start;
 }

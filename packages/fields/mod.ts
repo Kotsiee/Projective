@@ -31,3 +31,8 @@ export * from './src/components/datetime/Calendar.tsx';
 export * from './src/components/datetime/TimeClock.tsx';
 
 export * from './src/components/HelpTooltip.tsx';
+
+// Toolbar controls
+export * from './src/components/MenuSelect.tsx';
+export * from './src/components/FilterTags.tsx';
+export * from './src/components/ViewToggle.tsx';

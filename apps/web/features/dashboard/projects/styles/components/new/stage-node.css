@@ -1,0 +1,284 @@
+/**
+ * stage-node.css
+ * Interactive Stage Breakdown for the ticket modal (spec §3/§4).
+ * BEM blocks: `stage-breakdown`, `stage-node`, `stage-node-menu`.
+ *
+ * Status dot-matrix (`.stage-node__indicator--[status]`):
+ *   open        → grey ring     (not started / open backlog pool)
+ *   assigned    → purple filled (awaiting funding / escrow lock)
+ *   in_progress → amber ring    (in progress)
+ *   submitted   → blue filled   (submitted / in review)
+ *   approved    → green filled   (approved / completed)
+ *   paid        → green filled   (completed)
+ *   revisions   → red ring      (revisions)
+ */
+
+/* #region Breakdown container */
+.stage-breakdown {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.stage-breakdown__list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.stage-breakdown__empty {
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	font-style: italic;
+	margin: 0;
+}
+
+.stage-breakdown__hint {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+	margin: 0;
+}
+/* #endregion */
+
+/* #region Stage node row */
+.stage-node {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.625rem 0.75rem;
+	background: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	transition: border-color var(--fast), box-shadow var(--fast), opacity var(--fast);
+}
+
+.stage-node:hover {
+	border-color: var(--field-border-hover, var(--text-muted));
+}
+
+/* Active/claimed nodes are static — no drag affordance. */
+.stage-node--locked {
+	cursor: default;
+}
+
+.stage-node--locked .stage-node__handle {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
+.stage-node:not(.stage-node--locked) {
+	cursor: grab;
+}
+
+/* The dragged node doubles as the drop-index ghost placeholder. */
+.stage-node--dragging {
+	opacity: 0.55;
+	border-style: dashed;
+	border-color: var(--primary);
+	background: var(--primary-surface);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stage-node__handle {
+	display: inline-flex;
+	align-items: center;
+	color: var(--text-disabled);
+	flex-shrink: 0;
+}
+/* #endregion */
+
+/* #region Status dot-matrix indicator */
+.stage-node__indicator {
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 9999px;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	border: 2px solid var(--text-disabled);
+	background: transparent;
+}
+
+/* Rings (border only, transparent centre) */
+.stage-node__indicator--open {
+	border-color: var(--text-disabled);
+	background: transparent;
+}
+
+.stage-node__indicator--in_progress {
+	border-color: var(--warning);
+	background: transparent;
+}
+
+.stage-node__indicator--revisions {
+	border-color: var(--danger);
+	background: transparent;
+}
+
+/* Filled dots */
+.stage-node__indicator--assigned {
+	border-color: #7c3aed;
+	background: #7c3aed;
+}
+
+.stage-node__indicator--submitted,
+.stage-node__indicator--in_review {
+	border-color: var(--primary);
+	background: var(--primary);
+}
+
+.stage-node__indicator--approved,
+.stage-node__indicator--paid {
+	border-color: var(--success);
+	background: var(--success);
+}
+/* #endregion */
+
+/* #region Node metadata */
+.stage-node__order {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.375rem;
+	height: 1.375rem;
+	border-radius: 9999px;
+	background: var(--primary-surface);
+	color: var(--primary);
+	font-size: 0.7rem;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+
+.stage-node__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.stage-node__name {
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.stage-node__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 0.75rem;
+	font-size: 0.72rem;
+	color: var(--text-muted);
+}
+
+.stage-node__meta-item--cost {
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.stage-node__status {
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	padding: 0.15rem 0.45rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--text-main) 6%, transparent);
+	color: var(--text-secondary);
+	flex-shrink: 0;
+}
+
+.stage-node__status--in_progress {
+	background: color-mix(in srgb, var(--warning) 15%, transparent);
+	color: var(--warning);
+}
+
+.stage-node__status--revisions {
+	background: color-mix(in srgb, var(--danger) 15%, transparent);
+	color: var(--danger);
+}
+
+.stage-node__status--submitted,
+.stage-node__status--in_review {
+	background: var(--primary-surface);
+	color: var(--primary);
+}
+
+.stage-node__status--approved,
+.stage-node__status--paid {
+	background: color-mix(in srgb, var(--success) 15%, transparent);
+	color: var(--success);
+}
+
+.stage-node__status--assigned {
+	background: color-mix(in srgb, #7c3aed 15%, transparent);
+	color: #7c3aed;
+}
+/* #endregion */
+
+/* #region Dot-menu */
+.stage-node__menu-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border: none;
+	border-radius: 9999px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: background var(--fast), color var(--fast);
+}
+
+.stage-node__menu-btn:hover {
+	background: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+	color: var(--text-main);
+}
+
+.stage-node-menu {
+	display: flex;
+	flex-direction: column;
+	min-width: 200px;
+	padding: 0.25rem;
+}
+
+.stage-node-menu__item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	padding: 0.5rem 0.625rem;
+	border: none;
+	border-radius: var(--border-radius__small, 6px);
+	background: transparent;
+	color: var(--text-main);
+	font-size: 0.85rem;
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--fast);
+}
+
+.stage-node-menu__item:hover {
+	background: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+}
+
+.stage-node-menu__item--danger {
+	color: var(--danger);
+}
+
+.stage-node-menu__item--danger:hover {
+	background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.stage-node-menu__empty {
+	display: block;
+	padding: 0.5rem 0.625rem;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	font-style: italic;
+}
+/* #endregion */

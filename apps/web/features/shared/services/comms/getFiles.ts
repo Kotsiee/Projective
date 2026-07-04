@@ -20,6 +20,24 @@ export interface GetFilesOptions {
 }
 /* #endregion */
 
+/* #region Helpers */
+/**
+ * Derives 1–2 letter initials for a sender, preferring real first/last names and
+ * falling back to the resolved display name (username or "Unknown User").
+ */
+function deriveInitials(profile: any, displayName: string): string {
+	const first = (profile?.first_name || '').trim();
+	const last = (profile?.last_name || '').trim();
+	if (first || last) {
+		return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || first.slice(0, 2).toUpperCase();
+	}
+	const parts = displayName.trim().split(/\s+/).filter(Boolean);
+	if (parts.length === 0) return '?';
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+/* #endregion */
+
 /* #region Service Logic */
 /**
  * @function getFiles
@@ -128,6 +146,10 @@ export async function getFiles(
 				? `${profile.first_name} ${profile.last_name || ''}`.trim()
 				: 'Unknown User';
 
+			// Derive stable initials so the UI can render an avatar chip without
+			// re-parsing the display name in every renderer.
+			const initials = deriveInitials(profile, displayName);
+
 			fileItems.push({
 				id: file.file_id, // Primary key for the file item
 				attachment: {
@@ -145,6 +167,7 @@ export async function getFiles(
 					sender: {
 						id: msg.sender_user_id,
 						name: displayName,
+						initials,
 						avatarUrl: profile.avatar_url,
 					},
 				},

@@ -59,7 +59,7 @@ export const handler = define.handlers({
 		const { projectid, stageid } = ctx.params;
 
 		try {
-			await StagesServiceBackend.deleteStage(projectid, stageid);
+			await StagesServiceBackend.deleteStage(projectid, stageid, ctx.req);
 			return new Response(null, { status: 204 });
 		} catch (err: any) {
 			console.error('[API] DELETE Stage Error:', err);

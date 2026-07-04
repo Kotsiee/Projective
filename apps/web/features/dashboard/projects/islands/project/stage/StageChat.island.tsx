@@ -1,7 +1,8 @@
 import '../../../styles/components/project/stage/chat/messages.css';
 import ChatMessage from '../../../components/project/stage/chat/StageChatMessage.tsx';
 import { ChatMessageData, ChatNetworkSource } from './ChatNetworkSource.ts';
-import { ChatList } from '@projective/data';
+import { ChatList, getBurstPosition } from '@projective/data';
+import { MediaViewerProvider } from '../../../contexts/MediaViewerContext.tsx';
 import { useStageContext } from '../../../contexts/StageContext.tsx';
 import { getCsrfToken } from '@projective/utils';
 import { useEffect, useMemo, useRef } from 'preact/hooks';
@@ -17,6 +18,7 @@ export default function ProjectChatIsland() {
 
 	const optimisticMsgs = useSignal<ChatMessageData[]>([]);
 	const attachments = useSignal<FileWithMeta[]>([]);
+	const replyingTo = useSignal<ChatMessageData | null>(null);
 	const pendingUploads = useRef(new Map<string, { message: string; files: FileWithMeta[] }>());
 
 	const handleSend = async (message: string, files: FileWithMeta[], retryId?: string) => {
@@ -25,6 +27,7 @@ export default function ProjectChatIsland() {
 
 		// Optimistic UI
 		if (!retryId) {
+			const activeReply = replyingTo.value;
 			const optimisticData: ChatMessageData = {
 				id: tempId,
 				tempId: tempId,
@@ -40,15 +43,32 @@ export default function ProjectChatIsland() {
 					size: f.file.size,
 					url: '',
 				})),
+				replyTo: activeReply
+					? {
+						id: activeReply.id,
+						senderName: activeReply.sender.name,
+						snippet: (activeReply.text?.trim() ||
+							activeReply.attachments?.[0]?.name || 'Attachment').slice(0, 80),
+					}
+					: undefined,
 			};
 			optimisticMsgs.value = [...optimisticMsgs.value, optimisticData];
 			pendingUploads.current.set(tempId, { message, files });
+			replyingTo.value = null;
 		}
 
 		try {
+			const isNewChannel = targetChannel === 'new';
+
 			const formData = new FormData();
 			formData.append('message', message);
 			formData.append('tempId', tempId);
+
+			// First message in a stage: the channel is created lazily server-side
+			// (sendMessage → get_or_create_project_channel), which needs the stage id.
+			if (isNewChannel) {
+				formData.append('targetStageId', stage?.value?.stage_id || '');
+			}
 
 			files.forEach((f) => {
 				formData.append('files', f.file);
@@ -60,9 +80,9 @@ export default function ProjectChatIsland() {
 
 			const csrfToken = await getCsrfToken();
 
-			const endpoint = targetChannel === 'new'
-				? `/api/v1/dashboard/projects/${stage?.value?.project_id}/stages/${stage?.value?.stage_id}/chat/init`
-				: `/api/v1/dashboard/comms/channels/${targetChannel}/messages?type=channel`;
+			// Both the "new" and existing cases post to the channel messages route; the
+			// channelid segment is literally `new` when no channel exists yet.
+			const endpoint = `/api/v1/dashboard/comms/channels/${targetChannel}/messages?type=channel`;
 
 			const res = await fetch(endpoint, {
 				method: 'POST',
@@ -81,7 +101,9 @@ export default function ProjectChatIsland() {
 			);
 			pendingUploads.current.delete(tempId);
 
-			if (targetChannel === 'new') refresh();
+			// Reload the stage so it picks up the freshly-created channel_id and the
+			// realtime data source re-subscribes to it.
+			if (isNewChannel) refresh();
 		} catch (err) {
 			console.error('Failed to send message:', err);
 			optimisticMsgs.value = optimisticMsgs.value.map((m) =>
@@ -100,17 +122,29 @@ export default function ProjectChatIsland() {
 		if (data) handleSend(data.message, data.files, tempId);
 	};
 
+	/** Drops an optimistic message from the local buffer (client-side delete). */
+	const handleDeleteMessage = (msg: ChatMessageData) => {
+		optimisticMsgs.value = optimisticMsgs.value.filter(
+			(o) => o.id !== msg.id && o.tempId !== msg.tempId,
+		);
+		pendingUploads.current.delete(msg.tempId ?? msg.id);
+	};
+
 	useEffect(() => {
 		const dispose = effect(() => {
 			const hasAttachments = attachments.value.length > 0;
+			const isReplying = replyingTo.value !== null;
+			const baseHeight = hasAttachments ? 150 : 86;
 
 			untracked(() => {
 				setMiddleNav({
-					footerHeight: hasAttachments ? '150px' : '86px',
+					footerHeight: `${baseHeight + (isReplying ? 44 : 0)}px`,
 					footerContent: (
 						<ChatMessageInput
 							onSend={(text, files) => onSendRef.current(text, files)}
 							files={attachments}
+							replyingTo={replyingTo}
+							onCancelReply={() => (replyingTo.value = null)}
 						/>
 					),
 				});
@@ -132,36 +166,50 @@ export default function ProjectChatIsland() {
 	}, [stage?.value?.channel_id]);
 
 	return (
-		<div class='project-chat-island messages-container'>
-			<div class='project-chat-island__messages'>
-				{dataSource
-					? (
-						<ChatList
-							dataSource={dataSource}
-							optimisticItems={optimisticMsgs.value}
-							renderItem={(item) => <ChatMessage message={item} onRetry={onRetry} />}
-							estimateHeight={120}
-							pageSize={20}
-							scrollMode='window'
-						/>
-					)
-					: (
-						<div
-							style={{
-								display: 'flex',
-								flexDirection: 'column',
-								alignItems: 'center',
-								justifyContent: 'center',
-								height: '100%',
-								color: 'var(--text-muted)',
-								gap: '1rem',
-							}}
-						>
-							<IconMessages size={48} opacity={0.5} />
-							<p>Send a message to start the conversation.</p>
-						</div>
-					)}
+		<MediaViewerProvider>
+			<div class='project-chat-island messages-container'>
+				<div class='project-chat-island__messages'>
+					{dataSource
+						? (
+							<ChatList
+								dataSource={dataSource}
+								optimisticItems={optimisticMsgs.value}
+								renderItem={(item, index, items) => {
+									const { isFirstInBurst, isLastInBurst } = getBurstPosition(items, index);
+									return (
+										<ChatMessage
+											message={item}
+											isFirstInBurst={isFirstInBurst}
+											isLastInBurst={isLastInBurst}
+											onRetry={onRetry}
+											onReply={(m) => (replyingTo.value = m)}
+											onDelete={handleDeleteMessage}
+										/>
+									);
+								}}
+								estimateHeight={120}
+								pageSize={20}
+								scrollMode='window'
+							/>
+						)
+						: (
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'center',
+									justifyContent: 'center',
+									height: '100%',
+									color: 'var(--text-muted)',
+									gap: '1rem',
+								}}
+							>
+								<IconMessages size={48} opacity={0.5} />
+								<p>Send a message to start the conversation.</p>
+							</div>
+						)}
+				</div>
 			</div>
-		</div>
+		</MediaViewerProvider>
 	);
 }

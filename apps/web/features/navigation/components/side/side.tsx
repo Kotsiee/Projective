@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@projective/ui';
+import { Button, IconButton, Tooltip } from '@projective/ui';
 import { apps, INavApp } from '../../contracts/navigation.ts';
 import '../../styles/components/side/side.css';
 import { useEffect, useState } from 'preact/hooks';
@@ -30,27 +30,37 @@ function SidebarItem(
 		<li
 			class={`navigation__side__items__item ${isOpen ? 'is-open' : ''}`}
 			data-selected={selected === app.link}
-			data-tooltip={!isSidebarOpen && !hasChildren ? app.name : undefined}
-			data-tooltip-position='right'
 		>
-			{/* 1. Main Button: This is ALWAYS a functional link now */}
-			<Button
-				aria-label={app.name}
-				ghost
-				variant='secondary'
-				className='navigation__side__items__item__button'
-				href={app.link}
+			{
+				/* 1. Main Button: This is ALWAYS a functional link now.
+			    The Tooltip is portaled to <body> so the collapsed-rail label can
+			    never be clipped by the sidebar's overflow; it self-disables once
+			    the sidebar is expanded (labels visible) or the item has a submenu. */
+			}
+			<Tooltip
+				label={app.name}
+				position='right'
+				disabled={isSidebarOpen || hasChildren}
+				className='navigation__side__items__item__tooltip'
 			>
-				<div class='navigation__side__items__item__content'>
-					<div class='navigation__side__items__item__icon'>
-						<app.icon size={20} stroke={1.5} />
-					</div>
+				<Button
+					aria-label={app.name}
+					ghost
+					variant='secondary'
+					className='navigation__side__items__item__button'
+					href={app.link}
+				>
+					<div class='navigation__side__items__item__content'>
+						<div class='navigation__side__items__item__icon'>
+							<app.icon size={20} stroke={1.5} />
+						</div>
 
-					<div class='navigation__side__items__item__label'>
-						{app.name}
+						<div class='navigation__side__items__item__label'>
+							{app.name}
+						</div>
 					</div>
-				</div>
-			</Button>
+				</Button>
+			</Tooltip>
 
 			{/* 2. Independent Toggle Button: Sits on the right edge */}
 			{hasChildren && (

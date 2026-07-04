@@ -4,6 +4,12 @@ import { computed, Signal, useSignal } from '@preact/signals';
 import { ComponentChildren } from 'preact';
 import { getCsrfToken } from '@projective/utils';
 
+/** A switchable business or team context surfaced in the header dropdown. */
+export interface UserOrgRef {
+	id: string;
+	name: string;
+}
+
 export interface UserProfile {
 	id: string;
 	displayName: string | null;
@@ -12,6 +18,14 @@ export interface UserProfile {
 	activeProfileType: 'freelancer' | 'business' | null;
 	activeProfileId: string | null;
 	activeTeamId: string | null;
+	/** Whether the user has a freelancer persona available to switch into. */
+	hasFreelancer: boolean;
+	/** Identifier used when switching to the freelancer persona (its `user_id`). */
+	freelancerProfileId: string | null;
+	/** Business profiles the user owns or actively belongs to. */
+	businesses: UserOrgRef[];
+	/** Teams the user owns or actively belongs to. */
+	teams: UserOrgRef[];
 }
 
 export interface UserState {
@@ -60,6 +74,11 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 					activeProfileType: rawUser.activeProfileType || null,
 					activeProfileId: rawUser.activeProfileId || null,
 					activeTeamId: rawUser.activeTeamId || null,
+					hasFreelancer: rawUser.hasFreelancer ?? rawUser.is_freelancer ?? false,
+					freelancerProfileId: rawUser.freelancerProfileId ??
+						rawUser.id ?? rawUser.user_id ?? null,
+					businesses: Array.isArray(rawUser.businesses) ? rawUser.businesses : [],
+					teams: Array.isArray(rawUser.teams) ? rawUser.teams : [],
 				};
 			}
 

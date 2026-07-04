@@ -5,228 +5,229 @@
  */
 
 .overlay-backdrop {
-    /* Positioning & Layering */
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    /* Maximize z-index to ensure it sits above all UI */
-    display: flex;
+	/* Positioning & Layering */
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-overlay, 9999);
+	/* Sits above all base UI, but below toasts (--z-toast) so critical
+	   notifications remain visible over modals/drawers/mobile sheets. */
+	display: flex;
 
-    /* Theming & Visuals */
-    /* Uses the text hue but fully darkens it to create a universal shadow */
-    background-color: hsla(var(--text-hue), var(--text-saturation), 10%, 0.5);
-    backdrop-filter: blur(4px);
+	/* Theming & Visuals */
+	/* Uses the text hue but fully darkens it to create a universal shadow */
+	background-color: hsla(var(--text-hue), var(--text-saturation), 10%, 0.5);
+	backdrop-filter: blur(4px);
 
-    /* Animation Defaults */
-    opacity: 0;
-    animation: overlay-fade-in var(--fast) ease-out forwards;
+	/* Animation Defaults */
+	opacity: 0;
+	animation: overlay-fade-in var(--fast) ease-out forwards;
 }
 
 /* Base keyframe for smooth overlay entry */
 @keyframes overlay-fade-in {
-    from {
-        opacity: 0;
-    }
+	from {
+		opacity: 0;
+	}
 
-    to {
-        opacity: 1;
-    }
+	to {
+		opacity: 1;
+	}
 }
 
 /* Focus trap helper boundary */
 .overlay-content-wrapper {
-    outline: none;
+	outline: none;
 }
 
 /* #endregion */
 
 /* #region 2. MODAL VARIANT */
 .overlay-modal {
-    background-color: var(--card);
-    border-radius: var(--border-radius__large, 12px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    /* Elevation High */
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    margin: auto;
-    /* Centers perfectly inside the flex backdrop */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+	background-color: var(--card);
+	border-radius: var(--border-radius__large, 12px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	/* Elevation High */
+	width: 100%;
+	max-width: 500px;
+	max-height: 90vh;
+	margin: auto;
+	/* Centers perfectly inside the flex backdrop */
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 
-    /* Animation */
-    opacity: 0;
-    transform: scale(0.95);
-    animation: modal-enter var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	/* Animation */
+	opacity: 0;
+	transform: scale(0.95);
+	animation: modal-enter var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes modal-enter {
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 .overlay-modal__header,
 .overlay-side__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1.25rem 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+	flex-shrink: 0;
 }
 
 .overlay-modal__title,
 .overlay-side__title {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-main);
-    line-height: 1;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--text-main);
+	line-height: 1;
 }
 
 .overlay-modal__body,
 .overlay-side__body {
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex: 1;
+	padding: 1.5rem;
+	overflow-y: auto;
+	flex: 1;
 }
 
 /* #endregion */
 
 /* #region 3. SIDE PANEL VARIANT */
 .overlay-side {
-    background-color: var(--card);
-    width: 100%;
-    max-width: 400px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+	background-color: var(--card);
+	width: 100%;
+	max-width: 400px;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	overflow: hidden;
 }
 
 .overlay-side--right {
-    right: 0;
-    transform: translateX(100%);
-    animation: slide-in-right var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	right: 0;
+	transform: translateX(100%);
+	animation: slide-in-right var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .overlay-side--left {
-    left: 0;
-    transform: translateX(-100%);
-    animation: slide-in-left var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	left: 0;
+	transform: translateX(-100%);
+	animation: slide-in-left var(--medium) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slide-in-right {
-    to {
-        transform: translateX(0);
-    }
+	to {
+		transform: translateX(0);
+	}
 }
 
 @keyframes slide-in-left {
-    to {
-        transform: translateX(0);
-    }
+	to {
+		transform: translateX(0);
+	}
 }
 
 /* #endregion */
 
 /* #region 4. MOBILE DRAWER VARIANT */
 .overlay-mobile {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--card);
-    border-top-left-radius: var(--border-radius__xlarge, 16px);
-    border-top-right-radius: var(--border-radius__xlarge, 16px);
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* Will-change hints the browser to push this to the GPU for smoother dragging */
-    will-change: height;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background-color: var(--card);
+	border-top-left-radius: var(--border-radius__xlarge, 16px);
+	border-top-right-radius: var(--border-radius__xlarge, 16px);
+	box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	/* Will-change hints the browser to push this to the GPU for smoother dragging */
+	will-change: height;
 }
 
 /* * Apply spring physics ONLY when animating (snapping or opening).
  * Removed during active drag to ensure 1:1 finger tracking.
  */
 .overlay-mobile--animating {
-    transition: height 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	transition: height 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .overlay-mobile__handle-area {
-    width: 100%;
-    padding: 1rem 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
-    touch-action: none;
-    /* Crucial: Prevents default browser scroll on mobile while dragging */
-    flex-shrink: 0;
-    z-index: 10;
+	width: 100%;
+	padding: 1rem 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: grab;
+	touch-action: none;
+	/* Crucial: Prevents default browser scroll on mobile while dragging */
+	flex-shrink: 0;
+	z-index: 10;
 }
 
 .overlay-mobile__handle-area:active {
-    cursor: grabbing;
+	cursor: grabbing;
 }
 
 .overlay-mobile__handle {
-    width: 48px;
-    height: 6px;
-    background-color: var(--border-color);
-    border-radius: 9999px;
-    transition: background-color var(--fast) ease;
+	width: 48px;
+	height: 6px;
+	background-color: var(--border-color);
+	border-radius: 9999px;
+	transition: background-color var(--fast) ease;
 }
 
 .overlay-mobile__handle-area:hover .overlay-mobile__handle {
-    background-color: var(--text-muted);
+	background-color: var(--text-muted);
 }
 
 .overlay-mobile__header {
-    padding: 0 1.5rem 1rem 1.5rem;
-    text-align: center;
-    flex-shrink: 0;
+	padding: 0 1.5rem 1rem 1.5rem;
+	text-align: center;
+	flex-shrink: 0;
 }
 
 .overlay-mobile__title {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-main);
-    line-height: 1.2;
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: var(--text-main);
+	line-height: 1.2;
 }
 
 .overlay-mobile__body {
-    padding: 0 1.5rem 1.5rem 1.5rem;
-    overflow-y: auto;
-    flex: 1;
+	padding: 0 1.5rem 1.5rem 1.5rem;
+	overflow-y: auto;
+	flex: 1;
 }
 
 /* #endregion */
 
 /* Append to overlay.css */
 .overlay-modal__footer {
-    /* display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--input-bg);
-    flex-shrink: 0; */
+	/* display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem;
+	border-top: 1px solid var(--border-color);
+	background-color: var(--input-bg);
+	flex-shrink: 0; */
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1.25rem 1.5rem;
+	border-top: 1px solid var(--border-color);
+	flex-shrink: 0;
 }

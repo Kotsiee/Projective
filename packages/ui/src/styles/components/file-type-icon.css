@@ -1,0 +1,13 @@
+/* #region File type icon */
+.file-type-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.file-type-icon--filled {
+	color: #fff;
+	border-radius: var(--border-radius__small, 6px);
+}
+/* #endregion */

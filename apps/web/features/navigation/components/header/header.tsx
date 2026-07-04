@@ -1,9 +1,18 @@
 import '../../styles/components/header/header.css';
-import { Icon, IconButton, Logo } from '@projective/ui';
-import { IconBell } from '@tabler/icons-preact';
+import { Icon, Logo } from '@projective/ui';
 import NavigationHeaderSearch from './search/search.tsx';
-import NavigationHeaderUser from './user/user.tsx';
+import NavigationHeaderUser from '../../islands/navigation-header-user.island.tsx';
+import NavigationNotifications from '../../islands/navigation-notifications.island.tsx';
+import NavigationBasket from '../../islands/navigation-basket.island.tsx';
 
+/**
+ * @component NavigationHeader
+ * @description Desktop header shell. Hosts the logo, global search, and the live
+ * header action islands: notifications hub, basket/cart action, and the user
+ * account dropdown.
+ *
+ * @returns {preact.JSX.Element} The fixed desktop navigation header.
+ */
 export default function NavigationHeader() {
 	return (
 		<header class='navigation__header'>
@@ -15,14 +24,8 @@ export default function NavigationHeader() {
 			<div class='navigation__content'>
 				<NavigationHeaderSearch />
 				<div class='navigation__actions'>
-					<IconButton
-						aria-label='notifications'
-						className='navigation__notification'
-						rounded
-						variant='secondary'
-					>
-						<IconBell />
-					</IconButton>
+					<NavigationNotifications />
+					<NavigationBasket />
 					<NavigationHeaderUser />
 				</div>
 			</div>

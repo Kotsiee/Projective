@@ -3,9 +3,10 @@ import { Button } from '@projective/ui';
 import { KanbanCard } from './KanbanCard.tsx';
 import { KanbanCardProps, KanbanFieldProps } from '../../types/kanban.ts';
 import { dragData, useDraggable, useDropzone } from '../../hooks/useKanbanDnD.ts';
-import { IconInbox } from '@tabler/icons-preact';
+import { IconArrowsSort, IconClockHour4, IconInbox } from '@tabler/icons-preact';
 import '../../styles/kanban/kanban-field.css';
 
+// deno-lint-ignore no-explicit-any
 const getTimestamp = (date: any): number => date ? new Date(date).getTime() : 0;
 
 const sortCards = (cards: KanbanCardProps[]): KanbanCardProps[] => {
@@ -26,6 +27,24 @@ interface ExtendedFieldProps extends KanbanFieldProps {
 	onAddCard?: () => void;
 }
 
+/** Right-aligned header hint describing how the column is ordered (spec §1). */
+function SortHint({ mode }: { mode: 'manual' | 'recency' }) {
+	if (mode === 'manual') {
+		return (
+			<span class='kanban-field__hint'>
+				<IconArrowsSort size={13} stroke={1.8} />
+				drag to reorder
+			</span>
+		);
+	}
+	return (
+		<span class='kanban-field__hint'>
+			<IconClockHour4 size={13} stroke={1.8} />
+			by update
+		</span>
+	);
+}
+
 export function KanbanField({
 	id,
 	title,
@@ -33,6 +52,7 @@ export function KanbanField({
 	cards,
 	limit,
 	order,
+	sortMode,
 	permissions,
 	addCardLabel = 'Add Ticket',
 	onCardClick,
@@ -45,7 +65,7 @@ export function KanbanField({
 	const isLocked = permissions?.canReorder !== true;
 	const draggableProps = useDraggable(
 		'field',
-		{ id, title, color, cards, limit, order, permissions },
+		{ id, title, color, cards, limit, order, sortMode, permissions },
 		id,
 		isLocked,
 	);
@@ -56,23 +76,30 @@ export function KanbanField({
 		dragData.value.type === 'card' &&
 		dragData.value.targetFieldId === id;
 
+	// CSS custom property in an inline style object — Preact's JSX.CSSProperties doesn't model
+	// arbitrary `--vars`, hence the cast (mirrors the pattern used elsewhere in the package).
+	// deno-lint-ignore no-explicit-any
+	const fieldStyle = { '--field-solid': resolveColor(color) } as any;
+
 	return (
-		<div
-			class='kanban-field'
-			style={{ '--field-solid': resolveColor(color) } as any}
-			{...dropzoneProps}
-		>
+		<div class='kanban-field' style={fieldStyle} {...dropzoneProps}>
 			<div class='kanban-field__header' {...draggableProps}>
-				<h3 class='kanban-field__title'>{title}</h3>
-				<div class={`kanban-field__metrics ${isOverLimit ? 'kanban-field__metrics--danger' : ''}`}>
-					<span class='kanban-field__count'>{cardCount}</span>
+				<div class='kanban-field__heading'>
+					<span class='kanban-field__dot' aria-hidden='true' />
+					<h3 class='kanban-field__title'>{title}</h3>
+					<span
+						class={`kanban-field__count ${isOverLimit ? 'kanban-field__count--danger' : ''}`}
+					>
+						{cardCount}
+					</span>
 				</div>
+				{sortMode && <SortHint mode={sortMode} />}
 			</div>
 
 			<div class='kanban-field__body'>
 				{cardCount === 0 && !isAnyCardHoveringThisField && (
 					<div class='kanban-field__empty-state'>
-						<IconInbox size={24} class='kanban-field__empty-icon' />
+						<IconInbox size={22} class='kanban-field__empty-icon' />
 						<span class='kanban-field__empty-text'>Empty</span>
 					</div>
 				)}

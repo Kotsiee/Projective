@@ -1,9 +1,17 @@
 import '../../styles/components/overlay/upload-file.css';
 import { useComputed, useSignal } from '@preact/signals';
 import { FileCategory, FileWithMeta, getFileCategory } from '@projective/types';
-import { DataDisplay } from '@projective/data';
+import { DataDisplay, formatFileSize } from '@projective/data';
 import { SelectField, TextField } from '@projective/fields';
-import { Button, ButtonGroup, IconButton, Overlay, toast } from '@projective/ui';
+import {
+	Button,
+	ButtonGroup,
+	FileTypeIcon,
+	IconButton,
+	Overlay,
+	resolveFileVisual,
+	toast,
+} from '@projective/ui';
 import {
 	IconCheck,
 	IconCloudUpload,
@@ -11,7 +19,6 @@ import {
 	IconList,
 	IconSearch,
 	IconSortAscending,
-	IconUpload,
 } from '@tabler/icons-preact';
 import { JSX } from 'preact';
 import { useRef } from 'preact/hooks';
@@ -237,13 +244,20 @@ export function UploadFileIsland({
 	const renderFileItem = (item: FileWithMeta) => {
 		const isGrid = viewMode.value === 'grid';
 		const isSelected = selectedFiles.value.has(item.id as string);
-		const objectUrl = item.type === 'Image' ? URL.createObjectURL(item.file) : undefined;
+		const isImage = item.type === 'Image';
+		const objectUrl = isImage ? URL.createObjectURL(item.file) : undefined;
+		const visual = resolveFileVisual({
+			name: item.file.name,
+			mimeType: item.file.type,
+			category: item.type,
+		});
+		const meta = `${formatFileSize(item.file.size)} · ${item.type ?? 'File'}`;
 
 		return (
 			<div
-				className={`upload-file__item ${
-					isGrid ? 'upload-file__item--grid' : 'upload-file__item--list'
-				} ${isSelected ? 'upload-file__item--selected' : ''}`}
+				className={`upload-file-card ${
+					isGrid ? 'upload-file-card--grid' : 'upload-file-card--list'
+				} ${isSelected ? 'upload-file-card--selected' : ''}`}
 				onClick={() => handleItemClick(item)}
 				draggable
 				onDragStart={(e) => {
@@ -253,31 +267,37 @@ export function UploadFileIsland({
 					}
 				}}
 			>
-				{item.type === 'Image' && objectUrl
-					? (
-						<img
-							src={objectUrl}
-							alt={item.file.name}
-							className='upload-file__preview-image'
-						/>
-					)
-					: (
-						<div className='upload-file__fallback-icon'>
-							<IconUpload size={24} color={isSelected ? 'var(--primary)' : 'var(--text-muted)'} />
-						</div>
-					)}
-				<div className='upload-file__info'>
-					<div className='upload-file__name'>
-						{item.file.name}
-					</div>
-					<div className='upload-file__meta'>
-						{(item.file.size / 1024 / 1024).toFixed(2)} MB • {item.type}
+				<div className='upload-file-card__preview'>
+					{isImage && objectUrl
+						? <img src={objectUrl} alt={item.file.name} className='upload-file-card__image' />
+						: (
+							<FileTypeIcon
+								name={item.file.name}
+								mimeType={item.file.type}
+								category={item.type}
+								variant='plain'
+								size={isGrid ? 38 : 22}
+							/>
+						)}
+				</div>
+
+				<div className='upload-file-card__footer'>
+					<span className='upload-file-card__name' title={item.file.name}>{item.file.name}</span>
+					<div className='upload-file-card__sub'>
+						<span
+							className='upload-file-card__badge'
+							style={{ backgroundColor: visual.color }}
+						>
+							{visual.letter}
+						</span>
+						<span className='upload-file-card__meta'>{meta}</span>
 					</div>
 				</div>
+
 				{isSelected && (
-					<div style={{ position: 'absolute', top: 8, right: 8, color: 'var(--primary)' }}>
-						<IconCheck size={20} />
-					</div>
+					<span className='upload-file-card__check'>
+						<IconCheck size={14} />
+					</span>
 				)}
 			</div>
 		);

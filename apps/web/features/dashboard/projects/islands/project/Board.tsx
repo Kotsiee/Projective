@@ -7,12 +7,17 @@
 import '../../styles/pages/board.css';
 import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
+import { IS_BROWSER } from 'fresh/runtime';
 import { Button, toast, ToggleButton, ToggleButtonGroup } from '@projective/ui';
 import { IconBasket, IconLayoutKanban, IconList } from '@tabler/icons-preact';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
 import { NewTicketModal } from '@features/dashboard/projects/components/modals/NewTicketModal.tsx';
 import NewStageModal from '@features/dashboard/projects/components/modals/NewStageModal.tsx';
+import {
+	TicketModal,
+	type TicketModalTab,
+} from '@features/dashboard/projects/components/modals/TicketModal.tsx';
 import {
 	BoardDataView,
 	BoardTicket,
@@ -25,9 +30,15 @@ import { StagesService } from '@features/dashboard/projects/services/StagesServi
 
 export interface ProjectBoardIslandProps {
 	isOwnerOrAdmin?: boolean;
+	/** Set when the board is entered directly at /board/[ticketid]/[tab] — opens the modal on load. */
+	initialTicketId?: string | null;
+	initialTab?: TicketModalTab;
 }
 
-export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoardIslandProps) {
+export default function ProjectBoardIsland(
+	{ isOwnerOrAdmin = true, initialTicketId = null, initialTab = 'details' }:
+		ProjectBoardIslandProps,
+) {
 	const { setMiddleNav } = useNavigationContext();
 	const { project, tickets, loadTickets, refresh, moveTicket, isLoading } = useProjectContext();
 
@@ -44,6 +55,67 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 	const selectedStageForNewTicket = useSignal<string | null>(null);
 
 	const isNewStageOpen = useSignal(false);
+
+	// Ticket modal (shallow-routed). Initialized from props for direct navigation entry.
+	const openTicketId = useSignal<string | null>(initialTicketId);
+	const ticketTab = useSignal<TicketModalTab>(initialTab);
+	// #endregion
+
+	// #region Ticket Modal (shallow routing)
+	/** The full ticket record currently shown in the modal, resolved from loaded board state. */
+	const activeTicket = useComputed(() =>
+		tickets.value.find((t) => t.id === openTicketId.value) ?? null
+	);
+
+	/** Builds the canonical modal URL for a ticket + tab. */
+	const ticketUrl = (ticketId: string, tab: TicketModalTab) =>
+		`/projects/${activeProjectId}/board/${ticketId}/${tab}`;
+
+	/** Opens the modal and shallow-routes to the ticket URL without a full Fresh navigation. */
+	const openTicket = (ticketId: string) => {
+		openTicketId.value = ticketId;
+		ticketTab.value = 'details';
+		if (IS_BROWSER && activeProjectId) {
+			history.pushState({ ticketId, tab: 'details' }, '', ticketUrl(ticketId, 'details'));
+		}
+	};
+
+	/** Switches the active tab and reflects it in the URL. */
+	const changeTicketTab = (tab: TicketModalTab) => {
+		ticketTab.value = tab;
+		if (IS_BROWSER && openTicketId.value && activeProjectId) {
+			history.pushState(
+				{ ticketId: openTicketId.value, tab },
+				'',
+				ticketUrl(openTicketId.value, tab),
+			);
+		}
+	};
+
+	/** Closes the modal and shallow-routes back to the base board. */
+	const closeTicket = () => {
+		openTicketId.value = null;
+		if (IS_BROWSER && activeProjectId) {
+			history.pushState({}, '', `/projects/${activeProjectId}/board`);
+		}
+	};
+
+	// Sync modal state with browser back/forward (popstate) by re-deriving from the URL.
+	useEffect(() => {
+		if (!IS_BROWSER) return;
+		const onPop = () => {
+			const segments = globalThis.location.pathname.split('/').filter(Boolean);
+			const boardIdx = segments.indexOf('board');
+			const ticketId = boardIdx >= 0 ? segments[boardIdx + 1] ?? null : null;
+			const tab = (boardIdx >= 0 ? segments[boardIdx + 2] : null) as TicketModalTab | null;
+			openTicketId.value = ticketId;
+			ticketTab.value = tab && ['details', 'attachments', 'timeline'].includes(tab)
+				? tab
+				: 'details';
+		};
+		globalThis.addEventListener('popstate', onPop);
+		return () => globalThis.removeEventListener('popstate', onPop);
+	}, []);
 	// #endregion
 
 	// #region Computed Data
@@ -65,6 +137,7 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 			return {
 				id: t.id,
 				title: t.title,
+				description: t.text_description || undefined,
 				stageId: t.current_stage_id || 'new',
 				stageName: stage ? stage.name : 'Backlog',
 				status: t.status as TicketStatus,
@@ -73,7 +146,11 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 				workloadIntensity: t.workload_intensity,
 				revisionsRequested: 0,
 				attachmentsScanned: t.attachment_count > 0,
+				attachmentCount: t.attachment_count,
 				createdAt: t.created_at,
+				updatedAt: t.updated_at ?? t.created_at,
+				sortOrder: t.sort_order,
+				hiddenUntil: t.hidden_until,
 			};
 		});
 	});
@@ -190,27 +267,53 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 		isNewStageOpen.value = true;
 	};
 
-	const handleCardMove = async (cardId: string, sourceFieldId: string, targetFieldId: string) => {
-		let newStatus: TicketStatus;
-		let newStageId: string | null = targetFieldId;
+	/**
+	 * Relocates a ticket when its card is dropped on a column. Stage and lifecycle status are
+	 * independent properties, so each view patches only what it owns:
+	 *   • Pipeline (stages) view — dropping onto a stage assigns ONLY the `current_stage_id` and
+	 *     leaves the status alone; a ticket stays "New"/backlog until the payment→claim lifecycle
+	 *     advances it, and must never be forced into `in_progress` by a board move (doing so tripped
+	 *     the description-required DB trigger and produced the "Persistence step failed" crash). The
+	 *     "New" and "Done" columns are the backlog pool and the terminal completion action.
+	 *   • Status view — columns ARE statuses, so a drop sets the status and leaves the stage intact.
+	 *
+	 * @param cardId - Ticket id being moved.
+	 * @param _sourceFieldId - Origin column id (unused; drop target drives the mutation).
+	 * @param targetFieldId - Destination column id (a stage id, a status, or 'New'/'Done').
+	 */
+	const handleCardMove = async (cardId: string, _sourceFieldId: string, targetFieldId: string) => {
+		try {
+			if (viewType.value === 'stages') {
+				// Block re-entering a previously completed (earlier) stage (spec §1): a real stage
+				// target whose pipeline position is behind the ticket's current stage is rejected.
+				const isRealStage = targetFieldId !== 'New' && targetFieldId !== 'Done';
+				if (isRealStage) {
+					const ticket = tickets.value.find((t) => t.id === cardId);
+					const order = availableStages.value.map((s) => s.value);
+					const currentIdx = ticket?.current_stage_id ? order.indexOf(ticket.current_stage_id) : -1;
+					const targetIdx = order.indexOf(targetFieldId);
+					if (currentIdx >= 0 && targetIdx >= 0 && targetIdx < currentIdx) {
+						toast.error('This ticket has already passed that stage — it cannot move backward.');
+						return;
+					}
+				}
 
-		if (viewType.value === 'stages') {
-			if (targetFieldId === 'New') {
-				newStatus = TicketStatus.Backlog;
-				newStageId = null;
-			} else if (targetFieldId === 'Done') {
-				newStatus = TicketStatus.Completed;
-				newStageId = null;
+				if (targetFieldId === 'New') {
+					// Unstage back into the backlog pool.
+					await moveTicket(cardId, null, TicketStatus.Backlog);
+				} else if (targetFieldId === 'Done') {
+					// Terminal completion — releases held escrow to the payee, if any.
+					await moveTicket(cardId, undefined, TicketStatus.Completed);
+				} else {
+					// Assign the stage only; status is orthogonal and left untouched.
+					await moveTicket(cardId, targetFieldId);
+				}
 			} else {
-				newStatus = TicketStatus.InProgress;
+				await moveTicket(cardId, undefined, targetFieldId as TicketStatus);
 			}
-		} else {
-			newStatus = targetFieldId as TicketStatus;
-			const existingTicket = tickets.value.find((t) => t.id === cardId);
-			newStageId = existingTicket?.current_stage_id || null;
+		} catch (err: any) {
+			toast.error(err.message || 'Could not move the ticket.');
 		}
-
-		await moveTicket(cardId, newStageId, newStatus);
 	};
 
 	const handleFieldMove = async (sourceId: string, targetId: string, insertBefore: boolean) => {
@@ -266,7 +369,7 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 					viewType={viewType.value}
 					displayMode={displayMode.value}
 					isOwnerOrAdmin={isOwnerOrAdmin}
-					onCardClick={(id) => console.log('Ticket clicked:', id)}
+					onCardClick={(id) => openTicket(id)}
 					onCardMove={handleCardMove}
 					onFieldMove={handleFieldMove}
 					onAddStage={handleAddStageTrigger}
@@ -287,6 +390,23 @@ export default function ProjectBoardIsland({ isOwnerOrAdmin = true }: ProjectBoa
 				onClose={() => isNewStageOpen.value = false}
 				projectId={activeProjectId || ''}
 				projectFormat={project.value?.format as 'pipeline' | 'one_off' | undefined}
+			/>
+
+			<TicketModal
+				isOpen={openTicketId.value !== null}
+				ticket={activeTicket.value}
+				project={project.value}
+				isOwner={isOwnerOrAdmin}
+				activeTab={ticketTab.value}
+				onTabChange={changeTicketTab}
+				onClose={closeTicket}
+				onSaved={() => {
+					if (activeProjectId) return loadTickets(activeProjectId);
+				}}
+				onDeleted={() => {
+					closeTicket();
+					if (activeProjectId) return loadTickets(activeProjectId);
+				}}
 			/>
 		</div>
 	);

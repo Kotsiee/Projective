@@ -9,6 +9,27 @@ import { SupabaseClient } from 'supabaseClient';
 export interface Deps {
 	getClient?: () => Promise<SupabaseClient>;
 }
+
+/** A switchable business/team context (id + display name). */
+interface OrgRef {
+	id: string;
+	name: string;
+}
+// #endregion
+
+// #region Helpers
+/**
+ * Merge owned + membership org rows into a unique, id-keyed list.
+ * @param {Array<OrgRef | null | undefined>} refs - Raw rows (may contain nulls).
+ * @returns {OrgRef[]} De-duplicated references preserving first-seen order.
+ */
+function dedupeOrgRefs(refs: Array<OrgRef | null | undefined>): OrgRef[] {
+	const seen = new Map<string, OrgRef>();
+	for (const r of refs) {
+		if (r?.id && !seen.has(r.id)) seen.set(r.id, { id: r.id, name: r.name });
+	}
+	return [...seen.values()];
+}
 // #endregion
 
 export class AuthBackendService {
@@ -49,7 +70,34 @@ export class AuthBackendService {
 			.eq('user_id', userRes.user.id)
 			.single();
 
-		// 4. Construct Payload
+		// 4. Fetch switchable contexts (best-effort — any failure resolves to []).
+		const userId = userRes.user.id;
+		const [freelancerRes, ownedBizRes, memberBizRes, ownedTeamRes, memberTeamRes] = await Promise
+			.all([
+				sb.schema('org').from('freelancer_profiles').select('user_id').eq('user_id', userId)
+					.maybeSingle(),
+				sb.schema('org').from('business_profiles').select('id, name').eq('owner_user_id', userId),
+				sb.schema('org').from('business_members').select('business:business_profiles(id, name)')
+					.eq('user_id', userId).eq('status', 'active'),
+				sb.schema('org').from('teams').select('id, name').eq('owner_user_id', userId),
+				sb.schema('org').from('team_members').select('team:teams(id, name)').eq('user_id', userId)
+					.eq('status', 'active'),
+			]);
+
+		const memberBiz = (memberBizRes.data ?? []) as unknown as Array<{ business: OrgRef | null }>;
+		const memberTeams = (memberTeamRes.data ?? []) as unknown as Array<{ team: OrgRef | null }>;
+
+		const businesses = dedupeOrgRefs([
+			...((ownedBizRes.data ?? []) as OrgRef[]),
+			...memberBiz.map((r) => r.business),
+		]);
+		const teams = dedupeOrgRefs([
+			...((ownedTeamRes.data ?? []) as OrgRef[]),
+			...memberTeams.map((r) => r.team),
+		]);
+		const hasFreelancer = !!freelancerRes.data;
+
+		// 5. Construct Payload
 		const payload = {
 			id: userRes.user.id,
 			displayName: publicProfile
@@ -65,6 +113,11 @@ export class AuthBackendService {
 				| null) ?? null,
 			activeProfileId: (sessionContext?.active_profile_id as string | null) ?? null,
 			activeTeamId: (sessionContext?.active_team_id as string | null) ?? null,
+
+			hasFreelancer,
+			freelancerProfileId: hasFreelancer ? userId : null,
+			businesses,
+			teams,
 		};
 
 		return { ok: true, data: payload };

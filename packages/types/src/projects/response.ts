@@ -81,6 +81,8 @@ export const FullProjectResponseSchema = IdentifiableSchema
 		target_project_start_date: z.iso.datetime({}),
 		owner: BaseOwnerSchema,
 		nda_required: z.boolean().default(false),
+		/** When true the engagement has agreed to deadline-bonus terms; gates the ticket Due Date. */
+		allow_deadline_bonuses: z.boolean().default(false),
 		ip_ownership_mode: z.enum(Object.values(IPOptionMode) as [string, ...string[]]),
 		languages: z.array(z.string()).default([]),
 		locations: z.array(z.string()).default([]),

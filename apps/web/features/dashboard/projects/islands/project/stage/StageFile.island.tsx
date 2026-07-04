@@ -1,7 +1,227 @@
-export default function ProjectFileIsland() {
+/* #region Imports */
+import '../../../styles/components/project/stage/files/stage-files.css';
+import { useEffect } from 'preact/hooks';
+import { useSignal } from '@preact/signals';
+import { IconArrowsSort, IconFolderOpen, IconLoader2, IconSearch } from '@tabler/icons-preact';
+import { FilterTags, MenuSelect, type ViewMode, ViewToggle } from '@projective/fields';
+import {
+	filterStageFiles,
+	parseStageFiles,
+	sortStageFiles,
+	type StageFileCategory,
+	type StageFileEntry,
+	type StageFileSort,
+} from '@projective/data';
+import type { LightboxMedia } from '@projective/ui';
+import { MediaViewerProvider, useMediaViewer } from '../../../contexts/MediaViewerContext.tsx';
+import { useStageContext } from '../../../contexts/StageContext.tsx';
+import { StageFilesItem } from '../../../components/project/stage/files/StageFilesItem.tsx';
+import { StageFilesList } from '../../../components/project/stage/files/StageFilesList.tsx';
+/* #endregion */
+
+/* #region Constants */
+const SORT_OPTIONS: { label: string; value: StageFileSort }[] = [
+	{ label: 'Recent', value: 'recent' },
+	{ label: 'Oldest', value: 'oldest' },
+	{ label: 'Name', value: 'name' },
+	{ label: 'Largest', value: 'size' },
+];
+
+const FILTER_OPTIONS: { label: string; value: 'all' | StageFileCategory }[] = [
+	{ label: 'All', value: 'all' },
+	{ label: 'Images', value: 'image' },
+	{ label: 'Docs', value: 'doc' },
+	{ label: 'Other', value: 'other' },
+];
+
+/** Upper bound on files pulled in a single sweep — plenty for a stage channel. */
+const FETCH_LIMIT = 200;
+/* #endregion */
+
+/* #region Mapping */
+/** Projects a canonical entry into the shared lightbox media descriptor. */
+function toLightboxMedia(entry: StageFileEntry): LightboxMedia {
+	return {
+		url: entry.url,
+		name: entry.name,
+		type: entry.mimeType,
+		size: entry.size,
+		uploadedAt: entry.timestamp,
+		senderName: entry.senderName,
+		senderInitials: entry.senderInitials,
+		messageId: entry.messageId,
+	};
+}
+/* #endregion */
+
+/* #region View */
+/**
+ * The interactive Files surface. Fetches the channel's aggregated attachments
+ * once (via the internal API route — islands never touch Supabase directly),
+ * then filters/sorts/searches client-side to feed either the Grid or List
+ * renderer. Selecting a file opens the shared media lightbox.
+ */
+function StageFilesView() {
+	const { stage } = useStageContext();
+	const { open } = useMediaViewer();
+
+	const entries = useSignal<StageFileEntry[]>([]);
+	const isLoading = useSignal(true);
+	const error = useSignal<string | null>(null);
+
+	const search = useSignal('');
+	const sort = useSignal<StageFileSort>('recent');
+	const category = useSignal<'all' | StageFileCategory>('all');
+	const view = useSignal<ViewMode>('grid');
+
+	const channelId = stage?.value?.channel_id ?? null;
+
+	useEffect(() => {
+		if (!channelId) {
+			entries.value = [];
+			isLoading.value = false;
+			return;
+		}
+
+		let cancelled = false;
+		isLoading.value = true;
+		error.value = null;
+
+		(async () => {
+			try {
+				const params = new URLSearchParams({
+					type: 'channel',
+					start: '0',
+					limit: String(FETCH_LIMIT),
+				});
+				const res = await fetch(
+					`/api/v1/dashboard/comms/channels/${channelId}/files?${params.toString()}`,
+				);
+				if (!res.ok) throw new Error(`Error ${res.status}`);
+				const data = await res.json();
+				if (cancelled) return;
+				entries.value = parseStageFiles(data.items);
+			} catch (err) {
+				if (!cancelled) error.value = (err as Error).message;
+			} finally {
+				if (!cancelled) isLoading.value = false;
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [channelId]);
+
+	const handleOpen = (entry: StageFileEntry) => {
+		open(toLightboxMedia(entry), {
+			onJump: entry.messageId
+				? () => {
+					const projectId = stage?.value?.project_id;
+					const stageId = stage?.value?.stage_id;
+					if (!projectId || !stageId) return;
+					globalThis.location.assign(
+						`/projects/${projectId}/${stageId}/chat?message=${entry.messageId}#msg-${entry.messageId}`,
+					);
+				}
+				: undefined,
+		});
+	};
+
+	const visible = sortStageFiles(
+		filterStageFiles(entries.value, { category: category.value, search: search.value }),
+		sort.value,
+	);
+
+	const renderBody = () => {
+		if (isLoading.value) {
+			return (
+				<div class='stage-files__state'>
+					<IconLoader2 size={32} class='stage-files__spin' />
+					<p>Loading files…</p>
+				</div>
+			);
+		}
+		if (error.value) {
+			return (
+				<div class='stage-files__state'>
+					<p>Couldn't load files. {error.value}</p>
+				</div>
+			);
+		}
+		if (visible.length === 0) {
+			const empty = entries.value.length === 0;
+			return (
+				<div class='stage-files__state'>
+					<IconFolderOpen size={40} opacity={0.5} />
+					<p>
+						{empty
+							? 'No files have been shared in this stage yet.'
+							: 'No files match your filters.'}
+					</p>
+				</div>
+			);
+		}
+		return view.value === 'grid'
+			? (
+				<div class='stage-files__grid'>
+					{visible.map((entry) => (
+						<StageFilesItem key={entry.id} entry={entry} onOpen={handleOpen} />
+					))}
+				</div>
+			)
+			: <StageFilesList entries={visible} onOpen={handleOpen} />;
+	};
+
 	return (
-		<div>
-			<div></div>
+		<div class='stage-files'>
+			<div class='stage-files__toolbar'>
+				<div class='stage-files__search'>
+					<span class='stage-files__search-icon'>
+						<IconSearch size={16} />
+					</span>
+					<input
+						class='stage-files__search-input'
+						type='search'
+						placeholder='Search files in this stage...'
+						value={search.value}
+						onInput={(e) => (search.value = e.currentTarget.value)}
+					/>
+				</div>
+
+				<MenuSelect
+					prefix='Sort by'
+					icon={<IconArrowsSort size={16} />}
+					value={sort.value}
+					options={SORT_OPTIONS}
+					onChange={(v) => (sort.value = v)}
+					aria-label='Sort files'
+				/>
+
+				<FilterTags
+					value={category.value}
+					options={FILTER_OPTIONS}
+					onChange={(v) => (category.value = v)}
+					aria-label='Filter files by type'
+				/>
+
+				<div class='stage-files__toolbar-spacer' />
+
+				<ViewToggle value={view.value} onChange={(v) => (view.value = v)} />
+			</div>
+
+			{renderBody()}
 		</div>
 	);
 }
+/* #endregion */
+
+/* #region Island */
+export default function ProjectFileIsland() {
+	return (
+		<MediaViewerProvider>
+			<StageFilesView />
+		</MediaViewerProvider>
+	);
+}
+/* #endregion */

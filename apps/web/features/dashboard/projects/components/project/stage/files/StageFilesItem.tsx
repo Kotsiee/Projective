@@ -1,100 +1,66 @@
 /* #region Imports */
 import { JSX } from 'preact';
-import { IconFile, IconFileText, IconFileZip, IconMusic, IconVideo } from '@tabler/icons-preact';
-import '../../../../styles/components/project/stage/files/message-files-item.css';
-import {
-	ChatMessageAttachment,
-	ChatMessageData,
-} from '../../../../islands/project/stage/ChatNetworkSource.ts';
+import { formatFileSize, type StageFileEntry } from '@projective/data';
+import { getFileVisual, renderFileIcon } from './StageFileVisuals.tsx';
 /* #endregion */
 
 /* #region Interfaces */
 /**
- * Props for the StageFilesItem component.
+ * Props for the StageFilesItem component (a single Grid-view asset card).
  */
 export interface StageFilesItemProps {
-	/** The attachment data to render. */
-	attachment: ChatMessageAttachment;
-	/** The parent chat message containing context like timestamp. */
-	message: ChatMessageData;
-	/** Indicates if the current file is actively selected. */
-	isSelected?: boolean;
-	/** The destination URL for opening the file */
-	openUrl?: string;
-	/** Callback fired when the item is clicked or activated. */
-	onAction: (e: Event) => void;
+	/** The canonical file entry to render. */
+	entry: StageFileEntry;
+	/** Fired when the card is activated (opens the lightbox). */
+	onOpen: (entry: StageFileEntry) => void;
 }
 /* #endregion */
 
 /* #region Component */
 /**
  * @function StageFilesItem
- * @description Renders a selectable grid item for a file shared in a stage chat.
- * @param {StageFilesItemProps} props - Component properties.
- * @returns {JSX.Element}
+ * @description A rounded asset card for the Files Grid view: a rich inline image
+ * preview (or a centred, colour-coded vector icon for system files) above a
+ * footer row mapping filename, size and uploader.
  */
-export function StageFilesItem(
-	{ attachment, message, isSelected, openUrl, onAction }: StageFilesItemProps,
-): JSX.Element {
-	const dateObj = new Date(message.timestamp);
-	const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-	const mimeType = attachment.type?.toLowerCase() || '';
-	const isImage = mimeType.startsWith('image/');
-	const ext = attachment.name?.split('.').pop()?.toUpperCase() || 'FILE';
-
-	const renderFallbackIcon = () => {
-		if (mimeType.startsWith('video/')) return <IconVideo size={42} stroke={1.5} />;
-		if (mimeType.startsWith('audio/')) return <IconMusic size={42} stroke={1.5} />;
-		if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar')) {
-			return <IconFileZip size={42} stroke={1.5} />;
-		}
-		if (mimeType.startsWith('text/') || mimeType.includes('pdf') || mimeType.includes('document')) {
-			return <IconFileText size={42} stroke={1.5} />;
-		}
-		return <IconFile size={42} stroke={1.5} />;
-	};
+export function StageFilesItem({ entry, onOpen }: StageFilesItemProps): JSX.Element {
+	const visual = getFileVisual(entry);
+	const isImage = entry.category === 'image' && !!entry.url;
 
 	return (
-		<a
-			class={`stage-files-item ${isSelected ? 'stage-files-item--selected' : ''}`}
-			href={openUrl}
-			f-partial={openUrl}
-			onClick={onAction}
-			role='button'
-			tabIndex={0}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter' || e.key === ' ') {
-					onAction(e);
-				}
-			}}
+		<button
+			type='button'
+			class='stage-file-card'
+			onClick={() => onOpen(entry)}
+			title={entry.name}
 		>
-			<div class='stage-files-item__preview-container'>
+			<div class='stage-file-card__preview'>
 				{isImage
 					? (
 						<img
-							src={attachment.url}
-							class='stage-files-item__preview'
-							alt={attachment.name || 'File preview'}
+							src={entry.url}
+							class='stage-file-card__image'
+							alt={entry.name}
 							loading='lazy'
 						/>
 					)
 					: (
-						<div class='stage-files-item__fallback'>
-							{renderFallbackIcon()}
-							<span class='stage-files-item__fallback-ext'>{ext}</span>
+						<div class={`stage-file-card__icon stage-file-card__icon--${visual.tone}`}>
+							{renderFileIcon(visual.tone, 40)}
 						</div>
 					)}
 			</div>
-			<div class='stage-files-item__details'>
-				<span class='stage-files-item__name' title={attachment.name}>
-					{attachment.name || 'Unnamed File'}
-				</span>
-				<span class='stage-files-item__date'>
-					{dateStr}
-				</span>
+
+			<div class='stage-file-card__footer'>
+				<span class='stage-file-card__name'>{entry.name}</span>
+				<div class='stage-file-card__sub'>
+					<span class={`stage-file-badge stage-file-badge--${visual.tone}`}>{visual.letter}</span>
+					<span class='stage-file-card__meta'>
+						{formatFileSize(entry.size)} · {entry.senderName}
+					</span>
+				</div>
 			</div>
-		</a>
+		</button>
 	);
 }
 /* #endregion */

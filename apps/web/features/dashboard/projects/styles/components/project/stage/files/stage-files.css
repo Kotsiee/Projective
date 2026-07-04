@@ -1,0 +1,310 @@
+/* #region Stage Files View */
+/*
+ * Unified "Files" view: aggregates every attachment sent in a stage's chat into
+ * a toolbar + Grid/List renderer. Tone colours (`--sf-tone`) are shared by the
+ * grid-card icon, the compact letter badge, and the list-row icon so a file
+ * reads the same colour everywhere it appears.
+ */
+
+.stage-files {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	height: 100%;
+	min-height: 0;
+	padding: 1.25rem;
+	box-sizing: border-box;
+	overflow-y: auto;
+}
+
+/* #region Toolbar */
+.stage-files__toolbar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.stage-files__search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex: 1 1 240px;
+	max-width: 340px;
+}
+
+.stage-files__search-icon {
+	position: absolute;
+	left: 0.75rem;
+	display: flex;
+	color: var(--text-muted);
+	pointer-events: none;
+}
+
+.stage-files__search-input {
+	width: 100%;
+	padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+	font-size: 0.875rem;
+	color: var(--text-main);
+	background-color: var(--field-bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	outline: none;
+	transition: border-color var(--fast) ease, background-color var(--fast) ease;
+}
+
+.stage-files__search-input::placeholder {
+	color: var(--text-muted);
+}
+
+.stage-files__search-input:hover {
+	border-color: var(--field-border-hover);
+}
+
+.stage-files__search-input:focus {
+	border-color: var(--primary);
+	background-color: var(--field-bg-hover);
+}
+
+.stage-files__toolbar-spacer {
+	flex: 1 1 auto;
+}
+/* #endregion */
+
+/* #region Tones (shared colour identities) */
+.stage-file-card__icon--image,
+.stage-file-badge--image,
+.stage-file-icon--image {
+	--sf-tone: hsl(160, 60%, 42%);
+}
+.stage-file-card__icon--pdf,
+.stage-file-badge--pdf,
+.stage-file-icon--pdf {
+	--sf-tone: hsl(4, 74%, 57%);
+}
+.stage-file-card__icon--design,
+.stage-file-badge--design,
+.stage-file-icon--design,
+.stage-file-card__icon--audio,
+.stage-file-badge--audio,
+.stage-file-icon--audio,
+.stage-file-card__icon--video,
+.stage-file-badge--video,
+.stage-file-icon--video {
+	--sf-tone: hsl(258, 70%, 62%);
+}
+.stage-file-card__icon--archive,
+.stage-file-badge--archive,
+.stage-file-icon--archive,
+.stage-file-card__icon--file,
+.stage-file-badge--file,
+.stage-file-icon--file {
+	--sf-tone: hsl(220, 9%, 55%);
+}
+/* #endregion */
+
+/* #region Grid view */
+.stage-files__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 1rem;
+	align-content: start;
+}
+
+.stage-file-card {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	text-align: left;
+	background-color: var(--field-bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__large);
+	overflow: hidden;
+	cursor: pointer;
+	transition: border-color var(--fast) ease, transform var(--fast) ease;
+}
+
+.stage-file-card:hover,
+.stage-file-card:focus-visible {
+	border-color: var(--field-border-hover);
+	transform: translateY(-2px);
+	outline: none;
+}
+
+.stage-file-card__preview {
+	position: relative;
+	aspect-ratio: 16 / 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bg);
+	overflow: hidden;
+}
+
+.stage-file-card__image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
+
+.stage-file-card__icon {
+	color: var(--sf-tone);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.stage-file-card__footer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	padding: 0.75rem;
+}
+
+.stage-file-card__name {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.stage-file-card__sub {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+}
+
+.stage-file-card__meta {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Compact colour-coded letter badge (grid footer). */
+.stage-file-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.125rem;
+	height: 1.125rem;
+	flex-shrink: 0;
+	font-size: 0.625rem;
+	font-weight: 700;
+	color: #fff;
+	background-color: var(--sf-tone);
+	border-radius: var(--border-radius__xsmall);
+}
+/* #endregion */
+
+/* #region List view */
+.stage-files-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.stage-files-row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) minmax(0, 0.6fr) 80px 60px;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+	padding: 0.75rem 0.5rem;
+	text-align: left;
+	background-color: transparent;
+	border: none;
+	border-bottom: 1px solid var(--border-color);
+	cursor: pointer;
+	transition: background-color var(--fast) ease;
+}
+
+.stage-files-row:hover,
+.stage-files-row:focus-visible {
+	background-color: var(--field-bg-hover);
+	outline: none;
+}
+
+.stage-file-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	flex-shrink: 0;
+	color: #fff;
+	background-color: var(--sf-tone);
+	border-radius: var(--border-radius__small);
+}
+
+.stage-files-row__name {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.stage-files-row__uploader {
+	font-size: 0.8125rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.stage-files-row__size,
+.stage-files-row__date {
+	font-size: 0.8125rem;
+	color: var(--text-muted);
+	text-align: right;
+	white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+	.stage-files-row {
+		grid-template-columns: auto minmax(0, 1fr) auto;
+	}
+	.stage-files-row__uploader {
+		display: none;
+	}
+	.stage-files-row__size {
+		display: none;
+	}
+}
+/* #endregion */
+
+/* #region States */
+.stage-files__state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	flex: 1;
+	min-height: 240px;
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.stage-files__state p {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.stage-files__spin {
+	animation: stage-files-spin 0.8s linear infinite;
+}
+
+@keyframes stage-files-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+/* #endregion */
+/* #endregion */

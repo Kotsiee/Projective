@@ -1,0 +1,807 @@
+/**
+ * ticket-modal.css
+ * Redesigned, shallow-routed ticket dialog (spec §2–§5). Block: `tkt`.
+ * Rendered inside a centered `.overlay-modal` (packages/ui) sized via the `.tkt-modal` className.
+ * Also styles the inline read↔edit fields (`ticket-inline__*`), the Installment Monitor sidebar
+ * (`tkt-finance__*`) and the `…` actions menu (`tkt-menu__*`).
+ */
+
+/* Dialog shell sizing — a tall centered dialog rather than a full-screen takeover. */
+.tkt-modal {
+	height: min(88vh, 760px);
+	max-height: 92vh;
+}
+
+.tkt-modal .overlay-modal__body {
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+.tkt {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	background: var(--bg);
+	color: var(--text-main);
+}
+
+/* #region Header */
+.tkt__header {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: start;
+	gap: 0.85rem;
+	padding: 1.25rem 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.tkt__id {
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--text-disabled);
+	padding-top: 0.15rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.tkt__headmain {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.tkt__title {
+	margin: 0;
+	font-size: 1.2rem;
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+.tkt__crumbs {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.tkt__crumb {
+	text-transform: capitalize;
+}
+
+.tkt__crumb-sep {
+	color: var(--text-disabled);
+}
+
+.tkt__headactions {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.tkt__icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border: none;
+	border-radius: 9999px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background var(--fast), color var(--fast);
+}
+
+.tkt__icon-btn:hover {
+	background: var(--card);
+	color: var(--text-main);
+}
+
+/* Status pill */
+.tkt__status {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.1rem 0.55rem;
+	border-radius: 9999px;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	background: var(--card);
+	color: var(--text-secondary);
+}
+
+.tkt__status--in_progress,
+.tkt__status--claimed {
+	background: var(--primary-surface);
+	color: var(--primary);
+}
+
+.tkt__status--completed {
+	background: color-mix(in srgb, var(--success) 15%, transparent);
+	color: var(--success);
+}
+
+.tkt__status--reported_hidden,
+.tkt__status--cancelled {
+	background: color-mix(in srgb, var(--danger) 14%, transparent);
+	color: var(--danger);
+}
+/* #endregion */
+
+/* #region Body grid: main column + finance sidebar */
+.tkt__grid {
+	flex: 1;
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	min-height: 0;
+}
+
+.tkt__main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+}
+
+.tkt__tabs {
+	display: flex;
+	gap: 0.25rem;
+	padding: 0 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.tkt__tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.75rem 0.85rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: color var(--fast);
+}
+
+.tkt__tab:hover {
+	color: var(--text-main);
+}
+
+.tkt__tab--active {
+	color: var(--primary);
+}
+
+.tkt__tab--active::after {
+	content: '';
+	position: absolute;
+	left: 0.5rem;
+	right: 0.5rem;
+	bottom: -1px;
+	height: 2px;
+	background: var(--primary);
+	border-radius: 2px 2px 0 0;
+}
+
+.tkt__tab-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.1rem;
+	height: 1.1rem;
+	padding: 0 0.3rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--primary) 16%, transparent);
+	color: var(--primary);
+	font-size: 0.68rem;
+	font-weight: 700;
+}
+
+.tkt__panel {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1.5rem;
+}
+/* #endregion */
+
+/* #region Details tab */
+.tkt__details {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.tkt__section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.tkt__section-title {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+.tkt__description {
+	font-size: 0.9375rem;
+	line-height: 1.6;
+	color: var(--text-secondary);
+	margin: 0;
+}
+
+.tkt__empty {
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	font-style: italic;
+	margin: 0;
+}
+
+.tkt__muted {
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+/* 2×2 meta matrix */
+.tkt__meta-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+}
+
+.tkt__meta-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	padding: 0.75rem 0.85rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+}
+
+.tkt__meta-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted);
+}
+
+.tkt__meta-value {
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: var(--text-main);
+}
+
+/* Locked banner (claimed) */
+.tkt__locked {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.75rem 0.9rem;
+	border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+	border-radius: var(--border-radius);
+	background: color-mix(in srgb, var(--warning) 10%, transparent);
+	font-size: 0.825rem;
+	line-height: 1.4;
+	color: color-mix(in srgb, var(--warning) 80%, var(--text-main));
+}
+
+.tkt__locked strong {
+	color: var(--warning);
+}
+
+.tkt__rte {
+	display: flex;
+	flex-direction: column;
+}
+/* #endregion */
+
+/* #region Timeline tab */
+.tkt__timeline {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.tkt__event {
+	display: flex;
+	gap: 0.75rem;
+	padding: 0.5rem 0;
+}
+
+.tkt__event-dot {
+	width: 9px;
+	height: 9px;
+	margin-top: 0.35rem;
+	border-radius: 50%;
+	background: var(--primary);
+	flex-shrink: 0;
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.tkt__event-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+}
+
+.tkt__event-action {
+	font-size: 0.875rem;
+	color: var(--text-main);
+	text-transform: capitalize;
+}
+
+.tkt__event-meta {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+}
+/* #endregion */
+
+/* #region Footer */
+.tkt__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.85rem 1.5rem;
+	border-top: 1px solid var(--border-color);
+	background: var(--card);
+}
+
+.tkt__footer-note {
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+}
+
+.tkt__footer-actions {
+	display: flex;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+/* #endregion */
+
+/* #region Installment Monitor sidebar */
+.tkt-finance {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	padding: 1.5rem 1.35rem;
+	border-left: 1px solid var(--border-color);
+	background: color-mix(in srgb, var(--card) 60%, var(--bg));
+	overflow-y: auto;
+}
+
+.tkt-finance__title {
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+.tkt-finance__muted {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+.tkt-finance__rows {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+	background: var(--bg);
+}
+
+.tkt-finance__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.7rem 0.85rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.tkt-finance__row:last-child {
+	border-bottom: none;
+}
+
+.tkt-finance__row-label {
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+}
+
+.tkt-finance__row-value {
+	font-size: 0.95rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--text-main);
+}
+
+.tkt-finance__row-value--paid {
+	color: var(--primary);
+}
+
+.tkt-finance__row-value--escrow {
+	color: var(--warning);
+}
+
+/* Segmented gauge */
+.tkt-finance__gauge {
+	display: flex;
+	width: 100%;
+	height: 8px;
+	border-radius: 9999px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.tkt-finance__seg {
+	height: 100%;
+}
+
+.tkt-finance__seg--paid {
+	background: var(--primary);
+}
+
+.tkt-finance__seg--escrow {
+	background: var(--warning);
+}
+
+.tkt-finance__seg--remaining {
+	background: transparent;
+}
+
+.tkt-finance__legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.tkt-finance__legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.72rem;
+	color: var(--text-muted);
+}
+
+.tkt-finance__legend-item::before {
+	content: '';
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.tkt-finance__legend-item--paid {
+	color: var(--primary);
+}
+
+.tkt-finance__legend-item--escrow {
+	color: var(--warning);
+}
+
+.tkt-finance__legend-item--remaining {
+	color: var(--text-disabled);
+}
+
+.tkt-finance__subtitle {
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--text-muted);
+	margin: 0.35rem 0 0;
+}
+
+.tkt-finance__narrative {
+	font-size: 0.83rem;
+	line-height: 1.55;
+	color: var(--text-secondary);
+	margin: 0;
+}
+
+.tkt-finance__accent {
+	color: var(--warning);
+}
+/* #endregion */
+
+/* #region `…` actions menu (Popover content) */
+.tkt-menu {
+	display: flex;
+	flex-direction: column;
+	min-width: 240px;
+	padding: 0.35rem;
+}
+
+.tkt-menu__item {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	width: 100%;
+	padding: 0.55rem 0.6rem;
+	border: none;
+	border-radius: var(--border-radius__small);
+	background: transparent;
+	color: var(--text-main);
+	font-size: 0.875rem;
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--fast);
+}
+
+.tkt-menu__item:hover:not(:disabled) {
+	background: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+}
+
+.tkt-menu__item:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.tkt-menu__item--danger {
+	color: var(--danger);
+}
+
+.tkt-menu__divider {
+	height: 1px;
+	margin: 0.3rem 0.2rem;
+	background: var(--border-color);
+}
+
+.tkt-menu__reassign {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	padding: 0.4rem 0.6rem 0.6rem;
+}
+
+.tkt-menu__reassign-input {
+	width: 100%;
+	padding: 0.4rem 0.55rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	background: var(--bg);
+	color: var(--text-main);
+	font-size: 0.825rem;
+}
+
+.tkt-menu__reassign-actions {
+	display: flex;
+	gap: 0.4rem;
+}
+
+.tkt-menu__reassign-btn {
+	flex: 1;
+	padding: 0.35rem 0.5rem;
+	border: none;
+	border-radius: var(--border-radius__small);
+	background: var(--primary);
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.tkt-menu__reassign-btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.tkt-menu__reassign-btn--ghost {
+	background: transparent;
+	color: var(--text-secondary);
+	border: 1px solid var(--border-color);
+}
+
+/* #region Reassign roster picker (spec §3b) */
+.tkt-menu__roster {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	padding: 0.4rem 0.5rem 0.5rem;
+}
+
+.tkt-menu__roster-status {
+	margin: 0;
+	padding: 0.4rem 0.15rem;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.tkt-menu__roster-status--error {
+	color: var(--danger);
+}
+
+.tkt-menu__roster-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	max-height: 220px;
+	overflow-y: auto;
+}
+
+.tkt-menu__roster-item {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	width: 100%;
+	padding: 0.4rem 0.45rem;
+	border: none;
+	border-radius: var(--border-radius__small);
+	background: transparent;
+	color: var(--text-main);
+	font-size: 0.85rem;
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--fast);
+}
+
+.tkt-menu__roster-item:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--text-main) 7%, transparent);
+}
+
+.tkt-menu__roster-item:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.tkt-menu__roster-item--unassign {
+	margin-top: 0.15rem;
+	border-top: 1px solid var(--border-color);
+	border-radius: 0 0 var(--border-radius__small) var(--border-radius__small);
+	color: var(--text-secondary);
+	padding-top: 0.5rem;
+}
+
+.tkt-menu__roster-name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tkt-menu__roster-role {
+	flex-shrink: 0;
+	font-size: 0.68rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--text-disabled);
+}
+
+.tkt-menu__avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background-image: linear-gradient(
+		135deg,
+		var(--primary),
+		color-mix(in srgb, var(--primary) 40%, var(--danger))
+	);
+	color: #fff;
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+
+.tkt-menu__avatar--empty {
+	background-image: none;
+	background-color: transparent;
+	border: 1.5px dashed var(--border-color);
+	color: var(--text-muted);
+}
+/* #endregion */
+/* #endregion */
+
+/* #region Inline editable fields (shared by TicketInlineField) */
+.ticket-inline {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.ticket-inline__label {
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted);
+}
+
+/* Meta cells provide their own label, so suppress the inline field's empty label slot. */
+.ticket-inline__label:empty {
+	display: none;
+}
+
+.ticket-inline__read {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.5rem;
+	width: 100%;
+	padding: 0.4rem 0.5rem;
+	border: 1px solid transparent;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: default;
+	transition: background var(--fast), border-color var(--fast);
+}
+
+.ticket-inline__read--editable {
+	cursor: text;
+}
+
+.ticket-inline__read--editable:hover,
+.ticket-inline__read--editable:focus-visible {
+	background: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+	border-color: var(--border-color);
+	outline: none;
+}
+
+.ticket-inline__value {
+	flex: 1;
+	min-width: 0;
+}
+
+.ticket-inline__pencil {
+	flex-shrink: 0;
+	color: var(--text-muted);
+	opacity: 0;
+	transition: opacity var(--fast);
+}
+
+.ticket-inline__read--editable:hover .ticket-inline__pencil,
+.ticket-inline__read--editable:focus-visible .ticket-inline__pencil {
+	opacity: 1;
+}
+
+.ticket-inline__hint {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+}
+
+.ticket-inline__inline-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 0.5rem;
+}
+/* #endregion */
+
+@media (max-width: 820px) {
+	.tkt__grid {
+		grid-template-columns: 1fr;
+	}
+
+	.tkt-finance {
+		border-left: none;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.tkt__meta-grid {
+		grid-template-columns: 1fr;
+	}
+}

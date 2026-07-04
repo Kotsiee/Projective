@@ -1,0 +1,89 @@
+/**
+ * ticket-danger.css
+ * Force-majeure confirmation overlay for ticket cancellation/deletion (spec §5).
+ * BEM block: `ticket-danger`.
+ */
+
+.ticket-danger {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.75rem;
+	max-width: 480px;
+	padding: 0.5rem 0.25rem;
+}
+
+.ticket-danger__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--danger) 14%, transparent);
+	color: var(--danger);
+}
+
+/* Escrow-release variant leans on the warning hue to distinguish it from a clean purge. */
+.ticket-danger--escrow .ticket-danger__icon {
+	background: color-mix(in srgb, var(--warning) 16%, transparent);
+	color: var(--warning);
+}
+
+.ticket-danger__title {
+	font-size: 1.15rem;
+	font-weight: 700;
+	margin: 0;
+	color: var(--text-main);
+}
+
+.ticket-danger__lead {
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+	margin: 0;
+	line-height: 1.5;
+}
+
+.ticket-danger__effect {
+	width: 100%;
+	text-align: left;
+	margin-top: 0.5rem;
+	padding: 0.875rem 1rem;
+	border-radius: var(--border-radius);
+	border: 1px solid var(--border-color);
+	background: color-mix(in srgb, var(--text-main) 4%, transparent);
+}
+
+.ticket-danger__effect--warn {
+	border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+	background: color-mix(in srgb, var(--warning) 8%, transparent);
+}
+
+.ticket-danger__effect-title {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	margin-bottom: 0.5rem;
+	color: var(--text-main);
+}
+
+.ticket-danger--escrow .ticket-danger__effect-title {
+	color: var(--warning);
+}
+
+.ticket-danger__list {
+	margin: 0;
+	padding-left: 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.ticket-danger__list li {
+	font-size: 0.85rem;
+	line-height: 1.45;
+	color: var(--text-secondary);
+}

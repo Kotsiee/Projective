@@ -1,222 +1,96 @@
-// #region IMPORTS
-import { useSignal } from '@preact/signals';
-import { Kanban, KanbanFieldProps } from '@projective/charts';
-// #endregion
-
-// #region MOCK DATA
-const MOCK_FIELDS: KanbanFieldProps[] = [
-	{
-		id: 'field-backlog',
-		title: 'Backlog',
-		color: 'var(--text-muted)',
-		order: 0,
-		addCardLabel: 'Add Backlog Item', // Customised add button label
-		permissions: {
-			canAddCard: true, // Hides unless true
-			canReorder: true, // Disabled unless true
-		},
-		cards: [
-			{
-				id: 'card-1',
-				title: 'Database Schema',
-				description: 'Create ERD.',
-				created: new Date().toISOString(),
-				order: 0,
-				permissions: { canReorder: true }, // Explicit opt-in
-			},
-			{
-				id: 'card-2',
-				title: 'Stripe Integration',
-				description: 'Integrate Connect.',
-				created: new Date().toISOString(),
-				order: 1,
-				permissions: { canReorder: true },
-			},
-		],
-	},
-	{
-		id: 'field-in-progress',
-		title: 'In Progress',
-		color: 'var(--warning)',
-		order: 1,
-		limit: 5,
-		addCardLabel: 'Add Sprint Task', // Customised add button label
-		permissions: {
-			canAddCard: true,
-			canReorder: true,
-		},
-		cards: [
-			{
-				id: 'card-3',
-				title: 'Kanban Component',
-				description: 'Locked Ticket',
-				created: new Date().toISOString(),
-				order: 0,
-				takenBy: 'Alice',
-				permissions: { canReorder: false }, // Fixed card context
-			},
-		],
-	},
-	{
-		id: 'field-done',
-		title: 'Done',
-		color: 'var(--success)',
-		order: -1,
-		permissions: {
-			canAddCard: false, // Disables the add button completely
-			canReorder: false, // Fixed layout structure
-		},
-		cards: [],
-	},
-];
-// #endregion
-
-// #region COMPONENT
 /**
- * Renders the primary Project Tasks Island containing the updated custom pointer-event
- * driven Kanban system, passing tailored labels, configuration settings, and structural permissions.
- * * @returns {JSX.Element} The rendered project tasks framework island.
+ * @file StageTasks.island.tsx
+ * @description Stage-level Tasks board. Reuses the shared {@link BoardDataView} in `level='stage'`
+ * mode (spec §1): all drag movement is disabled except — for the project Client — cards in the New
+ * column. Tickets are the project-wide set (from ProjectContext) filtered to the current stage.
  */
-export default function ProjectTasksIsland() {
-	const fields = useSignal<KanbanFieldProps[]>(MOCK_FIELDS);
 
+// #region Imports
+import { useComputed } from '@preact/signals';
+import { toast } from '@projective/ui';
+import { IS_BROWSER } from 'fresh/runtime';
+import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
+import { useStageContext } from '@features/dashboard/projects/contexts/StageContext.tsx';
+import {
+	BoardDataView,
+	BoardTicket,
+} from '@features/dashboard/projects/components/project/board/BoardDataView.tsx';
+import { TicketStatus } from '@projective/types';
+// #endregion
+
+export interface StageTasksIslandProps {
 	/**
-	 * Re-indexes array items sequentially to prevent internal collision artifacts.
-	 * * @param {T[]} items - Array of sortable entities.
-	 * @returns {T[]} Clean mapped sequence array.
+	 * Whether the viewer is the project Client — the only role allowed to move stage-level tasks, and
+	 * only within the New column (spec §1). Resolved server-side in a full deployment; defaults to the
+	 * same permissive MVP stance as the project board's `isOwnerOrAdmin`.
 	 */
-	const reindexOrders = <T extends { order: number }>(items: T[]): T[] => {
-		let counter = 0;
-		return items.map((item) => item.order >= 0 ? { ...item, order: counter++ } : item);
-	};
+	isClient?: boolean;
+}
 
-	/**
-	 * Updates local signals when cards are repositioned dynamically across board vectors.
-	 */
-	const handleCardMove = (
-		cardId: string,
-		sourceFieldId: string,
-		targetFieldId: string,
-		insertBeforeCardId: string | null,
-	) => {
-		const currentFields = [...fields.value];
+// #region Component
+export default function ProjectTasksIsland({ isClient = true }: StageTasksIslandProps) {
+	const { project, tickets, moveTicket } = useProjectContext();
+	const { stage_id } = useStageContext();
 
-		const sIdx = currentFields.findIndex((f) => f.id === sourceFieldId);
-		const tIdx = currentFields.findIndex((f) => f.id === targetFieldId);
-		if (sIdx === -1 || tIdx === -1) return;
+	const activeProjectId = project.value?.id;
 
-		const sourceCards = [...currentFields[sIdx].cards].sort((a, b) => a.order - b.order);
-		const targetCards = sIdx === tIdx
-			? sourceCards
-			: [...currentFields[tIdx].cards].sort((a, b) => a.order - b.order);
+	/** Project tickets scoped to this stage, mapped to the board's ticket shape. */
+	const stageTickets = useComputed<BoardTicket[]>(() => {
+		const sid = stage_id.value;
+		const stage = project.value?.stages.find((s) => s.id === sid);
+		return (tickets.value ?? [])
+			.filter((t) => t.current_stage_id === sid)
+			.map((t) => ({
+				id: t.id,
+				title: t.title,
+				description: t.text_description || undefined,
+				stageId: t.current_stage_id || 'new',
+				stageName: stage ? stage.name : 'Stage',
+				status: t.status as TicketStatus,
+				assigneeId: t.current_assignee_id,
+				assigneeName: t.current_assignee_id ? 'Assigned' : null,
+				workloadIntensity: t.workload_intensity,
+				revisionsRequested: 0,
+				attachmentsScanned: t.attachment_count > 0,
+				attachmentCount: t.attachment_count,
+				createdAt: t.created_at,
+				updatedAt: t.updated_at ?? t.created_at,
+				sortOrder: t.sort_order,
+				hiddenUntil: t.hidden_until,
+			}));
+	});
 
-		const cardIndex = sourceCards.findIndex((c) => c.id === cardId);
-		if (cardIndex === -1) return;
-		const [movedCard] = sourceCards.splice(cardIndex, 1);
-
-		let insertIndex = targetCards.length;
-		if (insertBeforeCardId) {
-			const isAfter = insertBeforeCardId.endsWith('_after');
-			const targetIdClean = isAfter ? insertBeforeCardId.replace('_after', '') : insertBeforeCardId;
-			const targetIndex = targetCards.findIndex((c) => c.id === targetIdClean);
-			if (targetIndex !== -1) insertIndex = isAfter ? targetIndex + 1 : targetIndex;
-		}
-
-		targetCards.splice(insertIndex, 0, movedCard);
-
-		currentFields[sIdx] = { ...currentFields[sIdx], cards: reindexOrders(sourceCards) };
-		currentFields[tIdx] = { ...currentFields[tIdx], cards: reindexOrders(targetCards) };
-
-		fields.value = currentFields;
-	};
-
-	/**
-	 * Updates local signals when fields are reordered across layout tracks.
-	 */
-	const handleFieldMove = (sourceFieldId: string, targetFieldId: string, insertBefore: boolean) => {
-		const currentFields = [...fields.value].sort((a, b) => {
-			if (a.order >= 0 && b.order >= 0) return a.order - b.order;
-			if (a.order < 0 && b.order < 0) return b.order - a.order;
-			if (a.order >= 0 && b.order < 0) return -1;
-			return 1;
-		});
-
-		const sIdx = currentFields.findIndex((f) => f.id === sourceFieldId);
-		if (sIdx === -1) return;
-		const [movedField] = currentFields.splice(sIdx, 1);
-
-		const tIdx = currentFields.findIndex((f) => f.id === targetFieldId);
-		const insertIndex = insertBefore ? Math.max(0, tIdx) : tIdx + 1;
-
-		currentFields.splice(insertIndex, 0, movedField);
-		fields.value = reindexOrders(currentFields);
-	};
-
-	/**
-	 * Creates new structured card entities using interactive browser dialog prompts.
-	 */
-	const handleAddCard = (fieldId: string) => {
-		const title = globalThis.prompt('Enter new ticket title:');
-		if (!title) return;
-
-		const currentFields = [...fields.value];
-		const fIdx = currentFields.findIndex((f) => f.id === fieldId);
-
-		if (fIdx !== -1) {
-			const cards = [...currentFields[fIdx].cards];
-			cards.push({
-				id: `card-new-${Date.now()}`,
-				title,
-				description: '',
-				created: new Date().toISOString(),
-				order: cards.length > 0 ? Math.max(...cards.map((c) => c.order)) + 1 : 0,
-				permissions: { canReorder: true }, // Enabled on initial execution
-			});
-			currentFields[fIdx] = { ...currentFields[fIdx], cards };
-			fields.value = currentFields;
+	/** Stage-level movement is status-based; the gate itself is enforced in BoardDataView. */
+	const handleCardMove = async (cardId: string, _sourceFieldId: string, targetFieldId: string) => {
+		try {
+			await moveTicket(cardId, undefined, targetFieldId as TicketStatus);
+			// deno-lint-ignore no-explicit-any
+		} catch (err: any) {
+			toast.error(err.message || 'Could not move the task.');
 		}
 	};
 
-	/**
-	 * Creates new stage vectors dynamically inside the board array layout.
-	 */
-	const handleAddField = () => {
-		const title = globalThis.prompt('Enter new stage title:');
-		if (!title) return;
-
-		const currentFields = [...fields.value];
-		const newOrder = currentFields.length > 0
-			? Math.max(...currentFields.filter((f) => f.order >= 0).map((f) => f.order)) + 1
-			: 0;
-
-		currentFields.push({
-			id: `field-new-${Date.now()}`,
-			title,
-			color: 'var(--primary)',
-			order: newOrder,
-			addCardLabel: 'Add Ticket',
-			permissions: {
-				canAddCard: true,
-				canReorder: true,
-			},
-			cards: [],
-		});
-
-		fields.value = reindexOrders(currentFields);
+	/** Opens the ticket in the project board's shallow-routed modal. */
+	const openTicket = (ticketId: string) => {
+		if (IS_BROWSER && activeProjectId) {
+			globalThis.location.href = `/projects/${activeProjectId}/board/${ticketId}/details`;
+		}
 	};
 
 	return (
 		<div class='project-tasks-island' style={{ height: 'calc(100vh - var(--header-height))' }}>
-			<Kanban
-				mode='container' // Uses standard window body container scrollbar mapping natively
-				fields={fields.value}
-				permissions={{
-					canAddField: true, // Passed down directly to structural context layout
-				}}
+			<BoardDataView
+				tickets={stageTickets.value}
+				stages={[]}
+				viewType='status'
+				displayMode='kanban'
+				isOwnerOrAdmin={isClient}
+				level='stage'
+				isClient={isClient}
+				onCardClick={openTicket}
 				onCardMove={handleCardMove}
-				onFieldMove={handleFieldMove}
-				onAddCard={handleAddCard}
-				onAddField={handleAddField}
+				onFieldMove={() => {}}
+				onAddStage={() => {}}
 			/>
 		</div>
 	);

@@ -12,7 +12,12 @@ interface RealtimeDataSource<T> extends DataSource<T> {
 
 interface ChatListProps<T> {
 	dataSource: RealtimeDataSource<T>;
-	renderItem: (item: T) => preact.VNode;
+	/**
+	 * Renders a single row. Receives the item plus its `index` and the full
+	 * ordered `items` array so renderers can inspect neighbours (e.g. to group
+	 * consecutive messages into bursts) without re-deriving the list.
+	 */
+	renderItem: (item: T, index: number, items: T[]) => preact.VNode;
 	estimateHeight?: number;
 	pageSize?: number;
 	optimisticItems?: T[];
@@ -62,14 +67,7 @@ export function ChatList<T extends { id: string; tempId?: string }>({
 						if (!currentItems.some((i: any) => i.id === msgData.id)) {
 							console.log(`[ChatList] Injecting new message ${msgData.id} into list.`);
 							items.value = [...currentItems, msgData];
-							requestAnimationFrame(() => {
-								if (parentRef.current) {
-									parentRef.current.scrollTo({
-										top: parentRef.current.scrollHeight,
-										behavior: 'smooth',
-									});
-								}
-							});
+							requestAnimationFrame(() => scrollToEnd('smooth'));
 						} else {
 							console.log(`[ChatList] Ignoring message ${msgData.id} (already exists).`);
 						}
@@ -132,6 +130,17 @@ export function ChatList<T extends { id: string; tempId?: string }>({
 		onChange: () => forceUpdate(0),
 	});
 
+	// Scrolls to the newest message. In 'window' mode the page owns the scroll,
+	// so we must scroll the document — not the (non-scrolling) pane element.
+	function scrollToEnd(behavior: ScrollBehavior) {
+		if (scrollMode === 'window') {
+			const el = document.scrollingElement ?? document.documentElement;
+			globalThis.scrollTo({ top: el.scrollHeight, behavior });
+		} else if (parentRef.current) {
+			parentRef.current.scrollTo({ top: parentRef.current.scrollHeight, behavior });
+		}
+	}
+
 	useScrollAnchoring(parentRef, true, [combinedItems, getTotalSize()]);
 
 	const virtualItems = getItems();
@@ -145,9 +154,7 @@ export function ChatList<T extends { id: string; tempId?: string }>({
 	const hasJumped = useRef(false);
 	useLayoutEffect(() => {
 		if (!hasJumped.current && items.value.length > 0) {
-			if (parentRef.current) {
-				parentRef.current.scrollTo({ top: parentRef.current.scrollHeight, behavior: 'instant' });
-			}
+			scrollToEnd('instant');
 			hasJumped.current = true;
 		}
 	}, [items.value.length]);
@@ -157,7 +164,14 @@ export function ChatList<T extends { id: string; tempId?: string }>({
 	}
 
 	return (
-		<ScrollPane ref={parentRef} mode={scrollMode} style={{ height: '100%', overflowY: 'auto' }}>
+		<ScrollPane
+			ref={parentRef}
+			mode={scrollMode}
+			// In 'window' mode the pane must not scroll itself — let the page scroll
+			// (the `.scroll-pane--window` class sets height:auto/overflow:visible).
+			// Forcing height:100%/overflow here creates a nested scroll box.
+			style={scrollMode === 'window' ? { width: '100%' } : { height: '100%', overflowY: 'auto' }}
+		>
 			<div style={{ height: `${getTotalSize()}px`, width: '100%', position: 'relative' }}>
 				{cursor > 0 && isLoading && (
 					<div
@@ -193,7 +207,7 @@ export function ChatList<T extends { id: string; tempId?: string }>({
 								transform: `translateY(${virtualRow.start}px)`,
 							}}
 						>
-							{renderItem(item)}
+							{renderItem(item, virtualRow.index, combinedItems)}
 						</div>
 					);
 				})}

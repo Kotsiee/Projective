@@ -9,11 +9,13 @@ import {
 	IconX,
 } from '@tabler/icons-preact';
 import { Signal, useSignal } from '@preact/signals';
-import { IconButton } from '@projective/ui';
+import { FileTypeIcon, IconButton } from '@projective/ui';
+import { formatFileSize } from '@projective/data';
 import { UploadFileIsland } from '@features/shared/components/overlay/UploadFile.tsx';
 import { FileWithMeta } from '@projective/types';
 import { useMemo, useRef } from 'preact/hooks';
 import AudioMessageInputVisualizer from './AudioMessageInput.tsx';
+import { ChatMessageData } from '@features/dashboard/projects/islands/project/stage/ChatNetworkSource.ts';
 import {
 	AudioRecorderResult,
 	AudioRecorderService,
@@ -24,9 +26,14 @@ type RecordingState = 'idle' | 'pressing' | 'locked';
 interface ChatMessageInputProps {
 	onSend: (text: string, files: FileWithMeta[]) => void;
 	files: Signal<FileWithMeta[]>;
+	/** The message currently being replied to, if any. */
+	replyingTo?: Signal<ChatMessageData | null>;
+	onCancelReply?: () => void;
 }
 
-export default function ChatMessageInput({ onSend, files }: ChatMessageInputProps) {
+export default function ChatMessageInput(
+	{ onSend, files, replyingTo, onCancelReply }: ChatMessageInputProps,
+) {
 	const text = useSignal('');
 	const isUploadFileOpen = useSignal(false);
 
@@ -127,19 +134,55 @@ export default function ChatMessageInput({ onSend, files }: ChatMessageInputProp
 	const hasRecordedAudio = recordedAudio.value !== null;
 	const isAudioActive = isRecording || hasRecordedAudio;
 
+	const replyTarget = replyingTo?.value ?? null;
+
 	return (
 		<div class='chat-message-input'>
+			{replyTarget && (
+				<div class='chat-message-input__reply'>
+					<div class='chat-message-input__reply-body'>
+						<span class='chat-message-input__reply-label'>
+							Replying to {replyTarget.sender.name}
+						</span>
+						<span class='chat-message-input__reply-snippet'>
+							{replyTarget.text?.trim() || replyTarget.attachments?.[0]?.name || 'Attachment'}
+						</span>
+					</div>
+					<IconButton
+						aria-label='Cancel reply'
+						variant='secondary'
+						ghost
+						rounded
+						size='small'
+						onClick={() => onCancelReply?.()}
+					>
+						<IconX size={16} />
+					</IconButton>
+				</div>
+			)}
+
 			{files.value.length > 0 && !isAudioActive && (
 				<div class='chat-message-input__attachments'>
 					{files.value.map((f) => (
-						<div key={f.id} class='chat-message-input__attachment-item'>
-							<span class='chat-message-input__attachment-name'>{f.file.name}</span>
-							<div
-								class='chat-message-input__attachment-remove'
+						<div key={f.id} class='chat-attach-chip' title={f.file.name}>
+							<FileTypeIcon
+								name={f.file.name}
+								mimeType={f.file.type}
+								category={f.type}
+								size={30}
+							/>
+							<div class='chat-attach-chip__info'>
+								<span class='chat-attach-chip__name'>{f.file.name}</span>
+								<span class='chat-attach-chip__meta'>{formatFileSize(f.file.size)}</span>
+							</div>
+							<button
+								type='button'
+								class='chat-attach-chip__remove'
+								aria-label='Remove attachment'
 								onClick={() => handleRemoveFile(f.id as string)}
 							>
 								<IconX size={14} />
-							</div>
+							</button>
 						</div>
 					))}
 				</div>

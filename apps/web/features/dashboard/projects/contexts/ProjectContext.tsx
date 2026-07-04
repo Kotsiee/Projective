@@ -13,6 +13,7 @@ import {
 	TicketStatus,
 	UpdateTicketRequest,
 } from '@projective/types';
+import { TicketsService } from '@features/dashboard/projects/services/TicketsService.ts';
 
 // #region 1. INTERFACES
 
@@ -28,10 +29,22 @@ export interface ProjectState {
 	error: Signal<string | null>;
 	refresh: () => Promise<void>;
 	loadTickets: (projectId: string) => Promise<void>;
+	/**
+	 * Relocates a ticket on the board. Stage and lifecycle status are INDEPENDENT properties, so
+	 * pass only what actually changed:
+	 *   • Omit `newStageId` to leave the stage untouched (e.g. a status-only move).
+	 *   • Omit `newStatus` to leave the status untouched (e.g. assigning a pipeline stage, which
+	 *     must NOT advance a ticket into `in_progress` — it stays "New"/backlog until the
+	 *     payment→claim lifecycle moves it).
+	 *   • Pass `null` for `newStageId` to explicitly unstage a ticket back into the backlog pool.
+	 *
+	 * Rejects (and rolls back) with the underlying server/DB error message rather than a generic
+	 * string, and rethrows so the caller can surface it.
+	 */
 	moveTicket: (
 		ticketId: string,
-		newStageId: string | null,
-		newStatus: TicketStatus,
+		newStageId?: string | null,
+		newStatus?: TicketStatus,
 	) => Promise<void>;
 }
 
@@ -80,7 +93,11 @@ export function ProjectProvider(
 			if (!res.ok) throw new Error(`Project fetch failed with status: ${res.status}`);
 
 			const data: FullProjectResponse = await res.json();
-			project.value = data;
+			// Normalize nullable aggregates: get_project_details returns NULL (not []) for
+			// stages/roles when a project has none, which would break array consumers downstream.
+			project.value = data
+				? { ...data, stages: data.stages ?? [], roles: data.roles ?? [] }
+				: null;
 		} catch (err: any) {
 			console.error('Project Context Fetch Error:', err);
 			error.value = err.message || 'An unexpected error occurred.';
@@ -106,34 +123,41 @@ export function ProjectProvider(
 	};
 
 	/**
-	 * @description Optimistically records Kanban changes across streams.
+	 * @description Optimistically relocates a ticket, then persists it with a PATCH. Stage and
+	 * status are patched independently (see {@link ProjectState.moveTicket}); an omitted argument is
+	 * left untouched both locally and in the payload. On failure the optimistic change is rolled
+	 * back, the real server/DB message is surfaced, and the error is rethrown for the caller.
 	 */
 	const moveTicket = async (
 		ticketId: string,
-		newStageId: string | null,
-		newStatus: TicketStatus,
+		newStageId?: string | null,
+		newStatus?: TicketStatus,
 	) => {
 		const previousState = [...tickets.value];
 		tickets.value = tickets.value.map((t) =>
-			t.id === ticketId ? { ...t, current_stage_id: newStageId, status: newStatus } : t
+			t.id === ticketId
+				? {
+					...t,
+					...(newStageId !== undefined ? { current_stage_id: newStageId } : {}),
+					...(newStatus !== undefined ? { status: newStatus } : {}),
+				}
+				: t
 		);
 
 		try {
-			const payload: UpdateTicketRequest = {
-				current_stage_id: newStageId,
-				status: newStatus,
-			};
+			const payload: UpdateTicketRequest = {};
+			if (newStageId !== undefined) payload.current_stage_id = newStageId;
+			if (newStatus !== undefined) payload.status = newStatus;
 
-			const res = await fetch(`/api/v1/dashboard/projects/${projectId.value}/tickets/${ticketId}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload),
-			});
-
-			if (!res.ok) throw new Error('Persistence step failed.');
+			// Delegate the HTTP write to the frontend service, which attaches the `X-CSRF` token the
+			// global middleware requires for mutations (a raw fetch here is rejected with 403) and
+			// normalizes the underlying DB/trigger error message (claim-immutability, spending cap,
+			// structure-variation caps, …) instead of a generic "persistence failed" string.
+			await TicketsService.updateTicket(projectId.value ?? '', ticketId, payload);
 		} catch (err: any) {
 			tickets.value = previousState;
 			error.value = err.message || 'Failed to sync ticket update.';
+			throw err;
 		}
 	};
 

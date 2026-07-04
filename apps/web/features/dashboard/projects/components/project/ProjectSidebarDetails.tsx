@@ -1,5 +1,6 @@
 import '../../styles/components/project/project-sidebar-details.css';
 import { useProjectContext } from '@features/dashboard/projects/contexts/ProjectContext.tsx';
+import type { ProjectDetails } from '@features/dashboard/projects/contracts/Projects.ts';
 import { useSignal } from '@preact/signals';
 import { ComponentChildren } from 'preact';
 import {
@@ -39,11 +40,17 @@ export default function ProjectSidebarDetails() {
 
 	if (!project.value) return null;
 
-	const data = project.value;
+	// get_project_details returns the ProjectDetails shape (project_id, owner{username,avatar_url},
+	// viewer_context, stages). The context signal is typed FullProjectResponse — a known
+	// context-level type mismatch tracked separately — so narrow to the real runtime shape here.
+	const data = project.value as unknown as ProjectDetails;
+
+	// Defensive: stages can be absent/null (e.g. a project with no stages yet).
+	const stages = data.stages ?? [];
 
 	// Permission evaluation - expand this based on your specific ProjectPermission enum
-	const canEdit = data.viewer_context.role === 'owner' ||
-		data.viewer_context.role === 'collaborator';
+	const canEdit = data.viewer_context?.role === 'owner' ||
+		data.viewer_context?.role === 'collaborator';
 
 	return (
 		<div class='sidebar-details'>
@@ -110,10 +117,10 @@ export default function ProjectSidebarDetails() {
 						/>
 						{isStagesOpen.value && (
 							<ul class='sidebar-details__channels__list'>
-								{data.stages.length === 0
+								{stages.length === 0
 									? <div class='sidebar-details__channels__empty'>No stages created yet.</div>
 									: (
-										data.stages.map((stage) => (
+										stages.map((stage) => (
 											<ProjectSidebarDetailsChannelsListItem
 												key={stage.id}
 												title={stage.name}

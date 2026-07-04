@@ -3,23 +3,52 @@ import type { DateTime } from '@projective/types';
 export interface KanbanTag {
 	id: string;
 	label: string;
+	// deno-lint-ignore no-explicit-any
 	icon?: any; // e.g., Preact component or string emoji
 	color?: string; // CSS color variable or hex
 	variant?: 'solid' | 'ghost' | 'text';
 }
 
+/** Priority/workload pill shown in the card footer (Low / Medium / High in the wireframes). */
+export interface KanbanPriority {
+	label: string;
+	/** Drives the pill colour ramp; `none` renders a neutral pill. */
+	level: 'low' | 'medium' | 'high' | 'none';
+}
+
 export interface KanbanCardProps {
 	id: string;
+	/** Human-facing short reference rendered in the card header (e.g. "#044"). */
+	displayId?: string;
 	title: string;
 	description?: string;
 	meta?: string; // e.g., "Created: 4 Hours ago • Due: 30th July"
 	tags?: KanbanTag[];
+	/** Priority/workload pill (Low/Medium/High) shown on the left of the footer. */
+	priority?: KanbanPriority;
+	/** Attachment count — renders a paperclip + number in the footer when > 0. */
+	attachmentCount?: number;
+	/** Short due/created label rendered with a calendar glyph in the footer (e.g. "Jul 9"). */
+	dateLabel?: string;
 	takenBy?: {
 		name: string;
 		avatarUrl?: string;
 	};
 	order: number;
 	created: DateTime;
+	/** Last-updated timestamp — used to auto-order non-backlog columns by recency. */
+	updated?: DateTime;
+	/**
+	 * When present, the card is rendered with a striped "frozen" overlay and a live countdown to
+	 * `until`. Drives the workload-dispute state (spec §4): the card sits in the New column awaiting
+	 * a client response, and both parties take penalties if the window lapses.
+	 */
+	frozen?: {
+		/** ISO timestamp the countdown ticks down to (e.g. the 48h workload-report window). */
+		until: string;
+		/** Overlay copy; defaults to the standard "Client must respond…" warning. */
+		message?: string;
+	};
 	permissions?: {
 		canEdit?: boolean;
 		canDelete?: boolean;
@@ -35,6 +64,12 @@ export interface KanbanFieldProps {
 	cards: KanbanCardProps[];
 	limit?: number;
 	order: number;
+	/**
+	 * How this column's cards are ordered, surfaced as a header hint (spec §1):
+	 *   • 'manual'  — the New/backlog column, drag-reorderable → shows "drag to reorder".
+	 *   • 'recency' — Claimed / In Progress / Review, auto-sorted → shows "by update".
+	 */
+	sortMode?: 'manual' | 'recency';
 	addCardLabel?: string;
 	permissions?: {
 		canAddCard?: boolean;

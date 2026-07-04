@@ -26,7 +26,7 @@ export const handler = define.handlers({
 				});
 			}
 
-			const result = await StagesServiceBackend.reorderStages(project_id, orderedIds);
+			const result = await StagesServiceBackend.reorderStages(project_id, orderedIds, ctx.req);
 
 			return new Response(JSON.stringify(result), {
 				status: 200,

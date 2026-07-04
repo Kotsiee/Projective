@@ -1,0 +1,67 @@
+/* #region 1. BLOCK: tooltip (inline trigger wrapper) */
+/**
+ * @file tooltip.css
+ * @description Styling for the portal-rendered Tooltip component. The bubble is
+ * teleported to <body>, so it lives outside any scroll/overflow container and
+ * layers via the shared --z-tooltip token.
+ */
+.tooltip {
+	display: inline-flex;
+	/* Wrapper must not disturb the trigger's own layout/box. */
+	max-width: 100%;
+}
+
+/* #endregion */
+
+/* #region 2. BLOCK: tooltip__bubble (portaled floating label) */
+.tooltip__bubble {
+	position: fixed;
+	z-index: var(--z-tooltip, 2000);
+	pointer-events: none;
+
+	max-width: 20rem;
+	padding: 0.4rem 0.8rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1.3;
+	white-space: nowrap;
+
+	color: var(--text-medium, var(--text-main));
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small, 6px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+	animation: tooltip-fade-in var(--fast, 150ms) ease forwards;
+}
+
+/* --- Anchor-side transforms ---
+   `top`/`left` from the component are the anchor POINT; these translate the
+   bubble so the correct edge/centre lands on that point. */
+.tooltip__bubble--top {
+	transform: translate(-50%, -100%);
+}
+
+.tooltip__bubble--bottom {
+	transform: translate(-50%, 0);
+}
+
+.tooltip__bubble--right {
+	transform: translate(0, -50%);
+}
+
+.tooltip__bubble--left {
+	transform: translate(-100%, -50%);
+}
+
+@keyframes tooltip-fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+/* #endregion */

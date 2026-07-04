@@ -1,6 +1,7 @@
 export * from './src/ThemeSwitcher.ts';
 export * from './src/components/Popover.tsx';
 export * from './src/components/toast/index.ts';
+export * from './src/components/tooltip/index.ts';
 export * from './src/components/accordion/index.ts';
 export * from './src/components/splitter/index.ts';
 export * from './src/components/stepper/index.ts';
@@ -11,6 +12,7 @@ export * from './src/components/overlay/index.ts';
 export * from './src/components/skeleton/index.ts';
 export * from './src/components/taglist/index.ts';
 export * from './src/components/icon/index.ts';
+export * from './src/components/media/index.ts';
 export * from './src/hooks/useRipple.ts';
 export * from './src/hooks/useWizard.tsx';
 export * from './src/components/Logo.tsx';

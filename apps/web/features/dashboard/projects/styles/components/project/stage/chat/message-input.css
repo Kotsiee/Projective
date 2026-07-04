@@ -1,147 +1,210 @@
 .chat-message-input {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
 }
+
+/* #region Reply banner */
+.chat-message-input__reply {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	width: 60%;
+	padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-left: 3px solid var(--primary);
+	border-radius: var(--border-radius);
+	box-sizing: border-box;
+}
+
+.chat-message-input__reply-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	min-width: 0;
+}
+
+.chat-message-input__reply-label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--primary);
+}
+
+.chat-message-input__reply-snippet {
+	font-size: 0.78rem;
+	color: var(--text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+/* #endregion */
 
 /* #region Attachments Tray */
 .chat-message-input__attachments {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: 60%;
-    overflow-x: auto;
-    padding: 0.25rem 0;
-    scrollbar-width: none;
-    /* Firefox */
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 60%;
+	overflow-x: auto;
+	padding: 0.25rem 0;
+	scrollbar-width: none;
+	/* Firefox */
 }
 
 .chat-message-input__attachments::-webkit-scrollbar {
-    display: none;
-    /* Chrome/Safari */
+	display: none;
+	/* Chrome/Safari */
 }
 
-.chat-message-input__attachment-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--card);
-    border: 1px solid var(--border-color);
-    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
-    border-radius: var(--border-radius__large);
-    font-size: 0.85rem;
-    white-space: nowrap;
-    color: var(--text-main);
-    box-shadow: var(--elevation-low);
+/* Condensed Files-tab-style attachment card. */
+.chat-attach-chip {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-shrink: 0;
+	max-width: 220px;
+	padding: 0.3rem 0.4rem 0.3rem 0.4rem;
+	background-color: var(--field-bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__large);
+	transition: border-color var(--fast) ease;
 }
 
-.chat-message-input__attachment-name {
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.chat-attach-chip:hover {
+	border-color: var(--field-border-hover, var(--text-muted));
 }
 
-.chat-message-input__attachment-remove {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text-muted);
-    border-radius: 50%;
-    padding: 2px;
-    transition: background-color var(--fast) ease, color var(--fast) ease;
+.chat-attach-chip__info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.15;
 }
 
-.chat-message-input__attachment-remove:hover {
-    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.1);
-    color: var(--danger);
+.chat-attach-chip__name {
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-main);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.chat-attach-chip__meta {
+	font-size: 0.68rem;
+	color: var(--text-muted);
+}
+
+.chat-attach-chip__remove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	padding: 3px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	color: var(--text-muted);
+	border-radius: 50%;
+	transition: background-color var(--fast) ease, color var(--fast) ease;
+}
+
+.chat-attach-chip__remove:hover {
+	background-color: hsla(
+		var(--danger-hue),
+		var(--danger-saturation),
+		var(--danger-lightness),
+		0.12
+	);
+	color: var(--danger);
 }
 
 /* #endregion */
 
 .chat-message-input__content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 60%;
-    gap: 0.75rem;
-    height: 3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 60%;
+	gap: 0.75rem;
+	height: 3rem;
 }
 
 .chat-message-input__input-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .audio-message-input-visualizer,
 .chat-message-input__input {
-    width: 100%;
-    height: 100%;
-    background-color: var(--field-bg);
-    border-radius: 4rem;
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    color: var(--text-main);
+	width: 100%;
+	height: 100%;
+	background-color: var(--field-bg);
+	border-radius: 4rem;
+	border: 1px solid var(--border-color);
+	display: flex;
+	align-items: center;
+	padding: 0 1rem;
+	color: var(--text-main);
 }
 
 .chat-message-input__input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--field-ring-color);
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 2px var(--field-ring-color);
 }
 
 .chat-message-input__right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
 }
 
 /* #region Audio Visualizer */
 .audio-message-input-visualizer {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    gap: 0.5rem;
-    padding: 0 4px;
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	gap: 0.5rem;
+	padding: 0 4px;
 }
 
 .audio-message-input-visualizer__waveform {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    /* Hide overflowing SVG bars */
+	flex: 1;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+	/* Hide overflowing SVG bars */
 }
 
 /* SVG Bar coloring based on classes */
 .audio-bar {
-    transition: fill var(--fast) ease;
+	transition: fill var(--fast) ease;
 }
 
 .audio-bar.bar-live,
 .audio-bar.bar-played {
-    fill: var(--primary);
+	fill: var(--primary);
 }
 
 .audio-bar.bar-pending {
-    fill: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.2);
+	fill: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.2);
 }
 
 .audio-bar.bar-hovered {
-    fill: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5);
+	fill: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5);
 }
 
 /* #endregion */
-

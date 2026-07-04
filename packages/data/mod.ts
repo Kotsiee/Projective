@@ -19,3 +19,30 @@ export { MasonryGrid } from './src/components/displays/MasonryGrid.tsx';
 // Prop Types
 export type { DisplayMode } from './src/types/DataDisplayProps.ts';
 export type { CarouselOptions, CarouselState } from './src/types/carousel.ts';
+
+// Utils
+export {
+	type BurstPosition,
+	DEFAULT_BURST_WINDOW_MINUTES,
+	getBurstPosition,
+	type GroupableMessage,
+	isSameBurst,
+} from './src/utils/chatGrouping.ts';
+
+export {
+	categorizeFile,
+	filterStageFiles,
+	formatFileSize,
+	formatLongDate,
+	formatShortDate,
+	getExtension,
+	getInitials,
+	matchesCategory,
+	parseStageFile,
+	parseStageFiles,
+	type RawStageFile,
+	sortStageFiles,
+	type StageFileCategory,
+	type StageFileEntry,
+	type StageFileSort,
+} from './src/utils/stageFiles.ts';

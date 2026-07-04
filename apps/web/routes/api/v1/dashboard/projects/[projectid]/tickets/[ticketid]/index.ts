@@ -35,6 +35,7 @@ export const handler = define.handlers({
 				projectid,
 				ticketid,
 				validation.data,
+				ctx.req,
 			);
 
 			return new Response(JSON.stringify(updatedTicket), {
@@ -56,7 +57,7 @@ export const handler = define.handlers({
 		const { projectid, ticketid } = ctx.params;
 
 		try {
-			await TicketsServiceBackend.deleteTicket(projectid, ticketid);
+			await TicketsServiceBackend.deleteTicket(projectid, ticketid, ctx.req);
 			return new Response(null, { status: 204 });
 		} catch (err: any) {
 			console.error('[API] DELETE Ticket Error:', err);

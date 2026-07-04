@@ -73,7 +73,11 @@ export const handler = define.handlers({
 				);
 			}
 
-			const newTicket = await TicketsServiceBackend.createTicket(project_id, validation.data);
+			const newTicket = await TicketsServiceBackend.createTicket(
+				project_id,
+				validation.data,
+				ctx.req,
+			);
 
 			return new Response(JSON.stringify(newTicket), {
 				status: 201,

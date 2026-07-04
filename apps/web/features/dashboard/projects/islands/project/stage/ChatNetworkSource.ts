@@ -14,6 +14,20 @@ export interface ChatMessageAttachment {
 	url: string;
 }
 
+/** Contextual snapshot of the message a reply is threaded onto. */
+export interface ChatMessageReply {
+	id: string;
+	senderName: string;
+	snippet: string;
+}
+
+/** An aggregated emoji reaction on a message. */
+export interface ChatMessageReaction {
+	emoji: string;
+	count: number;
+	reactedByMe?: boolean;
+}
+
 export interface ChatMessageData {
 	id: string;
 	text: string;
@@ -23,6 +37,10 @@ export interface ChatMessageData {
 	attachments?: ChatMessageAttachment[];
 	status?: 'sending' | 'error' | 'sent';
 	tempId?: string;
+	/** Present when this message is a threaded reply to another. */
+	replyTo?: ChatMessageReply;
+	/** Emoji reactions aggregated by glyph. */
+	reactions?: ChatMessageReaction[];
 }
 
 export interface ChatRealtimeEvent {

@@ -17,7 +17,7 @@ BEGIN
   IF EXISTS (
     SELECT 1 
     FROM projects.project_participants pp
-    JOIN org.freelancer_profiles fp ON pp.profile_id = fp.id
+    JOIN org.freelancer_profiles fp ON pp.profile_id = fp.user_id
     WHERE pp.project_id = _project_id
       AND pp.profile_type = 'freelancer'
       AND fp.user_id = auth.uid()
@@ -43,7 +43,7 @@ BEGIN
     SELECT 1 
     FROM projects.stage_assignments sa
     JOIN projects.project_stages ps ON sa.project_stage_id = ps.id
-    JOIN org.freelancer_profiles fp ON sa.freelancer_profile_id = fp.id
+    JOIN org.freelancer_profiles fp ON sa.freelancer_profile_id = fp.user_id
     WHERE ps.project_id = _project_id
       AND sa.assignee_type = 'freelancer'
       AND fp.user_id = auth.uid()
