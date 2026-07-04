@@ -1,0 +1,27 @@
+.local-time-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.25rem 0.5rem;
+	background: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	color: var(--text-main);
+	font-size: 0.8125rem;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.local-time-chip__icon {
+	flex-shrink: 0;
+	color: var(--text-secondary);
+}
+
+.local-time-chip__label {
+	color: var(--text-secondary);
+}
+
+.local-time-chip__time {
+	font-variant-numeric: tabular-nums;
+	font-weight: 500;
+}

@@ -1,100 +1,176 @@
 /**
  * @file NewStageModal.tsx
- * @description Modal component for creating a new stage within an existing project.
+ * @description The Stage configuration modal (spec §3). In a **pipeline** project it is a blueprint
+ * authoring form (a reusable stage template: core data, legal/compliance, timeline dependency,
+ * deliverable gate, incentive). In a **one-off** project — where tickets do not exist — the same
+ * modal is programmatically upgraded to inherit ALL ticket-level properties (workload intensity,
+ * base cost + max revision, master due date, an attachment zone and the live cost preview), since
+ * the single stage carries the whole engagement (spec §1).
+ *
+ * Minimum-viable validation: only Title is required to create (spec §1). The write contract remains
+ * byte-compatible with the existing `POST /stages` route (name, description, skills, default_tasks,
+ * file_upload_required, start/end date, ip_ownership_override, nda_required); richer controls that
+ * have no backend yet drive the preview/UX only.
  */
 
 // #region Imports
-import { useSignal } from '@preact/signals';
+import '../../styles/components/new/stage-create.css';
+import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
+import { Button, Modal, toast } from '@projective/ui';
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-	Button,
-	Modal,
-	ModalLayout,
-	toast,
-} from '@projective/ui';
-import { DateField, RichTextField, SelectField, TagInput, TextField } from '@projective/fields';
-import { DateTime, IPOptionMode } from '@projective/types';
+	DateField,
+	FileDrop,
+	RichTextField,
+	SelectField,
+	type SelectOption,
+	TagInput,
+	TextField,
+} from '@projective/fields';
+import { DateTime, type FileWithMeta, IPOptionMode } from '@projective/types';
+import { IconChartBar, IconInfoCircle, IconPlus, IconTrophy, IconX } from '@tabler/icons-preact';
 import { useProjectContext } from '../../contexts/ProjectContext.tsx';
 import { StagesService } from '../../services/StagesService.ts';
+import { ToggleSwitch } from '../common/ToggleSwitch.tsx';
+import { TicketCostPreview } from '../project/ticket/TicketCostPreview.tsx';
+import {
+	formatMoney,
+	multiplierFor,
+	WI_TIERS,
+	type WiKey,
+} from '../../contracts/new/ticketPricing.ts';
 // #endregion
 
+// #region Props
 export interface NewStageModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	projectId: string;
 	projectFormat?: 'one_off' | 'pipeline' | string;
+	/** Existing project stages, powering the "this stage follows" dependency dropdown (spec §3). */
+	existingStages?: { id: string; name: string }[];
 }
+// #endregion
 
 export default function NewStageModal(
-	{ isOpen, onClose, projectId, projectFormat }: NewStageModalProps,
+	{ isOpen, onClose, projectId, projectFormat, existingStages = [] }: NewStageModalProps,
 ) {
 	const { refresh } = useProjectContext();
+	const isOneOff = projectFormat === 'one_off';
+	const currency = 'GBP';
 
-	// #region State
+	// #region Core form state
 	const name = useSignal('');
-	// deno-lint-ignore no-explicit-any
-	const description = useSignal<any>(null);
-	const skills = useSignal<string[]>([]);
-	const defaultTasks = useSignal<string[]>([]);
-	const fileUploadRequired = useSignal('false');
+	const description = useSignal('');
+	const skills = useSignal<string[]>(['UI design', 'Prototyping']);
 
-	const startDate = useSignal<DateTime | undefined>(undefined);
-	const endDate = useSignal<DateTime | undefined>(undefined);
+	// Legal & compliance
+	const ipMode = useSignal<string>(IPOptionMode.ExclusiveTransfer);
+	const ndaRequired = useSignal(false);
+	const ndaFiles = useSignal<FileWithMeta[]>([]);
 
-	const ipModeOverride = useSignal<string>('none');
-	const ndaRequired = useSignal('false');
+	// Deliverable
+	const filesRequired = useSignal(true);
+
+	// Timeline dependency ('none' = anchor at root, else a predecessor stage id)
+	const followsStage = useSignal<string>('none');
+
+	// Incentive
+	const bonusEnabled = useSignal(false);
+	const bonusAmount = useSignal(''); // major units, £
+	const bonusBy = useSignal<DateTime | null>(null);
+
+	// One-off inherited ticket properties
+	const intensity = useSignal<WiKey>('Medium');
+	const baseCost = useSignal('360'); // major units, £
+	const maxRevision = useSignal('140'); // major units, £
+	const dueDate = useSignal<DateTime | null>(null);
+	const attachments = useSignal<FileWithMeta[]>([]);
+
 	const isSubmitting = useSignal(false);
 	// #endregion
 
+	// #region Reset on open
 	useEffect(() => {
-		if (isOpen) {
-			name.value = '';
-			description.value = null;
-			skills.value = [];
-			defaultTasks.value = [];
-			fileUploadRequired.value = 'false';
-			startDate.value = undefined;
-			endDate.value = undefined;
-			ipModeOverride.value = 'none';
-			ndaRequired.value = 'false';
-		}
+		if (!isOpen) return;
+		name.value = '';
+		description.value = '';
+		skills.value = ['UI design', 'Prototyping'];
+		ipMode.value = IPOptionMode.ExclusiveTransfer;
+		ndaRequired.value = false;
+		ndaFiles.value = [];
+		filesRequired.value = true;
+		followsStage.value = 'none';
+		bonusEnabled.value = false;
+		bonusAmount.value = '';
+		bonusBy.value = null;
+		intensity.value = 'Medium';
+		baseCost.value = '360';
+		maxRevision.value = '140';
+		dueDate.value = null;
+		attachments.value = [];
 	}, [isOpen]);
+	// #endregion
 
+	// #region Options
+	const ipOptions: SelectOption<string>[] = [
+		{ label: 'Inherit from project', value: 'none' },
+		{ label: 'Client owns all assets on release', value: IPOptionMode.ExclusiveTransfer },
+		{ label: 'Client licenses the work', value: IPOptionMode.LicensedUse },
+		{ label: 'Shared ownership', value: IPOptionMode.SharedOwnership },
+		{ label: 'Projective partner terms', value: IPOptionMode.ProjectivePartner },
+	];
+
+	const followsOptions: SelectOption<string>[] = [
+		{ label: 'None — anchor as a starting milestone', value: 'none' },
+		...existingStages.map((s) => ({ label: `After ${s.name}`, value: s.id })),
+	];
+
+	const skillSuggestions = ['Illustration', 'Motion', 'Copywriting', 'SEO', '3D'];
+	// #endregion
+
+	// #region One-off cost preview
+	const oneOffSummary = useComputed(() => {
+		const base = Math.round((parseFloat(baseCost.value) || 0) * 100);
+		const overhead = Math.round((parseFloat(maxRevision.value) || 0) * 100);
+		const standard = Math.round(base * multiplierFor(intensity.value));
+		return {
+			stageCount: 1,
+			standardCents: standard,
+			revisionOverheadCents: overhead,
+			maxCents: standard + overhead,
+			bonusCents: 0,
+		};
+	});
+	// #endregion
+
+	// #region Submit
 	const handleSubmit = async () => {
 		if (!projectId) {
 			toast.error('Unable to locate Project ID.');
 			return;
 		}
-
 		if (!name.value.trim()) {
-			toast.error('Stage Name is required.');
+			toast.error('Stage title is required.');
 			return;
 		}
 
 		isSubmitting.value = true;
-
 		try {
 			const payload = {
 				name: name.value,
 				description: description.value,
 				skills: skills.value,
-				default_tasks: defaultTasks.value,
-				file_upload_required: fileUploadRequired.value === 'true',
-				// FIX: Cast DateTime bounds to ISO Strings for Zod
-				// deno-lint-ignore no-explicit-any
-				start_date: startDate.value ? new Date(startDate.value as any).toISOString() : null,
-				// deno-lint-ignore no-explicit-any
-				end_date: endDate.value ? new Date(endDate.value as any).toISOString() : null,
-				ip_ownership_override: ipModeOverride.value !== 'none' ? ipModeOverride.value : null,
-				nda_required: ndaRequired.value === 'true',
+				default_tasks: [] as string[],
+				file_upload_required: filesRequired.value,
+				// One-off carries master timeline dates; blueprint stages inherit them from the project.
+				start_date: null,
+				end_date: isOneOff && dueDate.value ? dueDate.value.toISO() : null,
+				ip_ownership_override: ipMode.value !== 'none' ? ipMode.value : null,
+				nda_required: ndaRequired.value,
 			};
 
 			await StagesService.createStage(projectId, payload);
-
 			toast.success('Stage created successfully!');
 			refresh();
 			onClose();
@@ -105,127 +181,291 @@ export default function NewStageModal(
 			isSubmitting.value = false;
 		}
 	};
+	// #endregion
 
-	const booleanOptions = [
-		{ value: 'true', label: 'Yes' },
-		{ value: 'false', label: 'No' },
-	];
+	// #region Shared form body (identical for both modes)
+	const coreForm = (
+		<>
+			<div class='sc__field'>
+				<label class='sc__label'>
+					Stage title <span class='sc__req'>*</span>{' '}
+					<span class='sc__hint'>— only field required to create</span>
+				</label>
+				<TextField
+					value={name}
+					onChange={(v) => (name.value = v)}
+					placeholder='e.g. Motion & interaction'
+				/>
+			</div>
 
-	const ipOptions = [
-		{ value: 'none', label: 'Inherit from Project' },
-		{ value: IPOptionMode.ExclusiveTransfer, label: 'Exclusive Transfer' },
-		{ value: IPOptionMode.LicensedUse, label: 'Licensed Use' },
-	];
+			<div class='sc__field'>
+				<label class='sc__label'>Description</label>
+				<RichTextField
+					value={description}
+					onChange={(v) => (description.value = v as string)}
+					outputFormat='delta'
+					toolbar='basic'
+					variant='framed'
+					minHeight='110px'
+					placeholder='What this stage delivers, its acceptance criteria…'
+				/>
+			</div>
 
-	return (
-		<Modal isOpen={isOpen} onClose={onClose} title='Create New Stage'>
-			<ModalLayout
-				footer={
-					<div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', width: '100%' }}>
-						<Button variant='secondary' onClick={onClose} disabled={isSubmitting.value}>
-							Cancel
-						</Button>
-						<Button variant='primary' onClick={handleSubmit} loading={isSubmitting.value}>
-							Create Stage
-						</Button>
-					</div>
-				}
-			>
-				<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-					<TextField
-						label='Stage Name'
-						value={name}
-						onChange={(v) => name.value = v}
-						placeholder='e.g., Discovery, UI Design, QA Testing'
-						floating
+			<div class='sc__field'>
+				<label class='sc__label'>Preferred freelancer skills</label>
+				<TagInput
+					value={skills.value}
+					onChange={(v) => (skills.value = v)}
+					placeholder='Add skill…'
+				/>
+				<div class='sc__chips'>
+					{skillSuggestions.map((s) => (
+						<button
+							key={s}
+							type='button'
+							class='sc__chip'
+							disabled={skills.value.includes(s)}
+							onClick={() => (skills.value = [...skills.value, s])}
+						>
+							<IconPlus size={12} /> {s}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Compliance & legal */}
+			<div class='sc__section'>
+				<span class='sc__section-title'>Compliance & legal</span>
+				<div class='sc__field'>
+					<label class='sc__label'>IP ownership on release</label>
+					<SelectField<string>
+						options={ipOptions}
+						value={ipMode.value}
+						onChange={(v) => (ipMode.value = v as string)}
+						multiple={false}
+						searchable={false}
 					/>
-
-					<RichTextField
-						label='Stage Description & Requirements'
-						value={description.value}
-						onChange={(v) => description.value = v}
-						placeholder='Detail the objectives for this stage...'
+				</div>
+				<div class='sc__panel'>
+					<ToggleSwitch
+						checked={ndaRequired.value}
+						onChange={(v) => (ndaRequired.value = v)}
+						label='NDA required'
+						description='Freelancers must accept before claiming work'
 					/>
-
-					<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-						<TagInput
-							label='Required Skills'
-							value={skills.value}
-							onChange={(v) => skills.value = v}
-							placeholder='e.g., React, Figma'
-						/>
-						<SelectField
-							name='fileUploadRequired'
-							label='Require Deliverable Upload?'
-							options={booleanOptions}
-							value={fileUploadRequired.value}
-							onChange={(v) => fileUploadRequired.value = v as string}
-							multiple={false}
-							searchable={false}
-							floating
-						/>
-					</div>
-
-					<TagInput
-						label='Default Tasks (Press Enter to add)'
-						value={defaultTasks.value}
-						onChange={(v) => defaultTasks.value = v}
-						placeholder='e.g., Setup environment, Review docs'
-					/>
-
-					{projectFormat === 'one_off' && (
-						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-							<DateField
-								label='Start Date'
-								value={startDate.value}
-								onChange={(v) => startDate.value = v}
-							/>
-							<DateField
-								label='Target End Date'
-								value={endDate.value}
-								onChange={(v) => endDate.value = v}
+					{ndaRequired.value && (
+						<div class='sc__nda-upload'>
+							<FileDrop
+								id='stage-nda'
+								label='Bind NDA document'
+								value={ndaFiles}
+								onChange={(f) => (ndaFiles.value = f)}
+								variant='split'
+								multiple={false}
+								maxFiles={1}
 							/>
 						</div>
 					)}
-
-					<Accordion type='single' collapsible>
-						<AccordionItem value='advanced'>
-							<AccordionTrigger>Advanced Settings</AccordionTrigger>
-							<AccordionContent>
-								<div
-									style={{
-										display: 'grid',
-										gridTemplateColumns: '1fr 1fr',
-										gap: '1rem',
-										paddingTop: '0.5rem',
-									}}
-								>
-									<SelectField
-										name='ipOverride'
-										label='IP Mode Override'
-										options={ipOptions}
-										value={ipModeOverride.value}
-										onChange={(v) => ipModeOverride.value = v as string}
-										multiple={false}
-										searchable={false}
-										floating
-									/>
-									<SelectField
-										name='ndaRequired'
-										label='Separate NDA Required?'
-										options={booleanOptions}
-										value={ndaRequired.value}
-										onChange={(v) => ndaRequired.value = v as string}
-										multiple={false}
-										searchable={false}
-										floating
-									/>
-								</div>
-							</AccordionContent>
-						</AccordionItem>
-					</Accordion>
 				</div>
-			</ModalLayout>
+			</div>
+
+			{/* Deliverable */}
+			<div class='sc__section'>
+				<span class='sc__section-title'>Deliverable</span>
+				<label class='sc__flag'>
+					<input
+						type='checkbox'
+						checked={filesRequired.value}
+						onChange={(e) => (filesRequired.value = e.currentTarget.checked)}
+					/>
+					<span>File uploads required to clear this stage</span>
+				</label>
+			</div>
+
+			{/* Timeline engine */}
+			<div class='sc__section'>
+				<span class='sc__section-title'>Timeline engine</span>
+				<div class='sc__field'>
+					<label class='sc__label'>This stage follows</label>
+					<SelectField<string>
+						options={followsOptions}
+						value={followsStage.value}
+						onChange={(v) => (followsStage.value = v as string)}
+						multiple={false}
+						searchable={false}
+					/>
+				</div>
+				{followsStage.value !== 'none' && (
+					<div class='sc__notice'>
+						<IconInfoCircle size={16} />
+						<span>
+							Simultaneous starts will be flagged on project-level Kanban boards and individual
+							ticket views.
+						</span>
+					</div>
+				)}
+			</div>
+
+			{/* Incentive */}
+			<div class='sc__section'>
+				<span class='sc__section-title'>Incentive</span>
+				<div class='sc__panel'>
+					<ToggleSwitch
+						checked={bonusEnabled.value}
+						onChange={(v) => (bonusEnabled.value = v)}
+						label='Enable deadline bonus'
+						description='Reward early or on-time completion'
+					/>
+					{bonusEnabled.value && (
+						<div class='sc__bonus'>
+							<div class='sc__field'>
+								<label class='sc__label'>Bonus amount</label>
+								<TextField
+									type='number'
+									value={bonusAmount}
+									onChange={(v) => (bonusAmount.value = v)}
+									prefix={<span>£</span>}
+									placeholder='0'
+								/>
+							</div>
+							<div class='sc__field'>
+								<label class='sc__label'>If delivered by</label>
+								<DateField
+									value={bonusBy.value}
+									onChange={(v) => (bonusBy.value = v as DateTime | null)}
+								/>
+							</div>
+						</div>
+					)}
+				</div>
+			</div>
+		</>
+	);
+	// #endregion
+
+	// #region One-off ticket-inherited rail
+	const oneOffRail = (
+		<div class='sc__rail'>
+			<TicketCostPreview
+				summary={oneOffSummary.value}
+				currency={currency}
+				intensityLabel={intensity.value}
+				oneOff
+			/>
+
+			<div class='sc__field'>
+				<label class='sc__label'>Workload intensity</label>
+				<div class='sc__intensity'>
+					{WI_TIERS.map((tier) => (
+						<button
+							key={tier.key}
+							type='button'
+							class={`sc__intensity-opt ${
+								intensity.value === tier.key ? 'sc__intensity-opt--active' : ''
+							}`}
+							onClick={() => (intensity.value = tier.key)}
+						>
+							<IconChartBar size={18} />
+							<span>{tier.label}</span>
+						</button>
+					))}
+				</div>
+			</div>
+
+			<div class='sc__cost-grid'>
+				<div class='sc__field'>
+					<label class='sc__label'>Base cost</label>
+					<TextField
+						type='number'
+						value={baseCost}
+						onChange={(v) => (baseCost.value = v)}
+						prefix={<span>£</span>}
+						placeholder='0'
+					/>
+				</div>
+				<div class='sc__field'>
+					<label class='sc__label'>Max revision</label>
+					<TextField
+						type='number'
+						value={maxRevision}
+						onChange={(v) => (maxRevision.value = v)}
+						prefix={<span>£</span>}
+						placeholder='0'
+					/>
+				</div>
+			</div>
+
+			<div class='sc__field'>
+				<label class='sc__label'>Due date</label>
+				<DateField value={dueDate.value} onChange={(v) => (dueDate.value = v as DateTime | null)} />
+			</div>
+
+			<div class='sc__field'>
+				<label class='sc__label'>Attachments</label>
+				<FileDrop
+					id='stage-attachments'
+					value={attachments}
+					onChange={(f) => (attachments.value = f)}
+					variant='split'
+					multiple
+					maxFiles={10}
+				/>
+			</div>
+		</div>
+	);
+	// #endregion
+
+	const width = isOneOff ? 1000 : 720;
+	const footerLabel = isOneOff
+		? `${formatMoney(oneOffSummary.value.standardCents, currency)}–${
+			formatMoney(oneOffSummary.value.maxCents, currency)
+		}`
+		: null;
+
+	return (
+		<Modal isOpen={isOpen} onClose={onClose} width={width} className='sc-modal'>
+			<div class={`sc ${isOneOff ? 'sc--oneoff' : ''}`}>
+				{/* #region Header */}
+				<header class='sc__header'>
+					<div class='sc__heading'>
+						<h1 class='sc__title'>{isOneOff ? 'New stage' : 'New blueprint stage'}</h1>
+						<p class='sc__subtitle'>
+							{isOneOff
+								? 'One-off project — no tickets, so this stage inherits all ticket options'
+								: 'Adds a reusable stage template to this pipeline'}
+						</p>
+					</div>
+					<button type='button' class='sc__close' aria-label='Close' onClick={onClose}>
+						<IconX size={20} />
+					</button>
+				</header>
+				{/* #endregion */}
+
+				<div class={`sc__body ${isOneOff ? 'sc__body--split' : ''}`}>
+					<div class='sc__form'>{coreForm}</div>
+					{isOneOff && oneOffRail}
+				</div>
+
+				{/* #region Footer */}
+				<footer class='sc__footer'>
+					{footerLabel && <span class='sc__footer-summary'>1 stage · {footerLabel}</span>}
+					<div class='sc__footer-actions'>
+						<Button variant='secondary' ghost onClick={onClose} disabled={isSubmitting.value}>
+							Cancel
+						</Button>
+						<Button
+							variant='primary'
+							startIcon={isOneOff ? <IconPlus size={16} /> : <IconTrophy size={16} />}
+							onClick={handleSubmit}
+							loading={isSubmitting.value}
+							disabled={!name.value.trim()}
+						>
+							{isOneOff ? 'Create stage' : 'Create blueprint'}
+						</Button>
+					</div>
+				</footer>
+				{/* #endregion */}
+			</div>
 		</Modal>
 	);
 }

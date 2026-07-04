@@ -1,0 +1,405 @@
+/* =========================================================================
+   Profile ecosystem — root layout
+   Full-width banner → centred ~70% canvas → avatar overlap → 2-col body.
+   All colours reference the global dark-aware tokens (colour.css / ui.css).
+   ========================================================================= */
+
+.profile {
+	--profile-canvas: 72%;
+	--profile-canvas-max: 1120px;
+	--profile-banner-h: 260px;
+	--profile-avatar: 132px;
+	position: relative;
+	width: 100%;
+	padding-bottom: 4rem;
+}
+
+/* Standalone availability page — full-width padded canvas. */
+.profile-availability-page {
+	padding: 1.25rem 1.5rem 3rem;
+}
+
+/* #region Banner (full width of the content canvas) */
+.profile__banner {
+	position: relative;
+	width: 100%;
+	height: var(--profile-banner-h);
+	background-color: var(--card-dark);
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+}
+
+.profile__banner::after {
+	/* Subtle floor gradient so the avatar reads against any banner. */
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, transparent 55%, hsla(0, 0%, 0%, 0.28));
+	pointer-events: none;
+}
+
+.profile__banner-edit {
+	position: absolute;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 2;
+}
+/* #endregion */
+
+/* #region Centred canvas */
+.profile__canvas {
+	width: var(--profile-canvas);
+	max-width: var(--profile-canvas-max);
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+
+/* Sentinel used by the IntersectionObserver to morph the sticky header. */
+.profile__sentinel {
+	position: absolute;
+	top: calc(var(--profile-banner-h) + 40px);
+	height: 1px;
+	width: 1px;
+	pointer-events: none;
+}
+/* #endregion */
+
+/* #region Header block (name / handle / status / CTAs) */
+.profile__head {
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1.5rem;
+	/* Pull up so the avatar overlaps the banner. */
+	margin-top: calc(var(--profile-avatar) / -2);
+	padding-bottom: 1.25rem;
+	flex-wrap: wrap;
+}
+
+.profile__identity {
+	display: flex;
+	align-items: flex-end;
+	gap: 1.25rem;
+	min-width: 0;
+}
+
+.profile__avatar {
+	width: var(--profile-avatar);
+	height: var(--profile-avatar);
+	border-radius: 50%;
+	border: 4px solid var(--bg);
+	box-shadow: 0 8px 24px hsla(0, 0%, 0%, 0.28);
+	flex-shrink: 0;
+	background: var(--card);
+	overflow: hidden;
+}
+
+.profile__avatar .avatar {
+	width: 100% !important;
+	height: 100% !important;
+	font-size: 3rem !important;
+	border-radius: 50%;
+}
+
+.profile__namecol {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding-bottom: 0.35rem;
+	min-width: 0;
+}
+
+.profile__name-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.profile__name {
+	margin: 0;
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--text-main);
+}
+
+.profile__verified {
+	color: var(--primary);
+	display: inline-flex;
+}
+
+.profile__handle {
+	color: var(--text-muted);
+	font-size: 0.92rem;
+}
+
+.profile__subtitle {
+	color: var(--text-secondary);
+	font-size: 0.95rem;
+	margin-top: 0.15rem;
+}
+
+.profile__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	padding-bottom: 0.5rem;
+}
+/* #endregion */
+
+/* #region Inline stat row under the header */
+.profile__stats {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	flex-wrap: wrap;
+	padding: 0.25rem 0 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.profile-stat {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+	white-space: nowrap;
+}
+
+.profile-stat b {
+	color: var(--text-main);
+	font-weight: 650;
+}
+
+.profile-stat svg {
+	color: var(--text-muted);
+}
+
+.profile-stat__star {
+	color: var(--warning) !important;
+}
+
+.profile-stat__muted {
+	color: var(--text-muted);
+}
+/* #endregion */
+
+/* #region Status dot */
+.status-dot {
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: var(--text-muted);
+	flex-shrink: 0;
+}
+
+.status-dot--available {
+	background: var(--success);
+	box-shadow: 0 0 0 3px hsla(160, 65%, 45%, 0.2);
+}
+
+.status-dot--busy {
+	background: var(--danger);
+}
+
+.status-dot--away {
+	background: var(--warning);
+}
+
+.status-dot--offline {
+	background: var(--text-disabled);
+}
+/* #endregion */
+
+/* #region Two-column overview split */
+.profile__overview {
+	display: grid;
+	grid-template-columns: 1fr 340px;
+	gap: 2rem;
+	padding: 1.5rem 0;
+	align-items: start;
+}
+
+.profile__overview-main {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+}
+/* #endregion */
+
+/* #region Section shells reused by tabs */
+.profile-section__title {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0 0 0.85rem;
+	font-size: 1.05rem;
+	font-weight: 650;
+	color: var(--text-main);
+}
+
+.profile-section__title svg {
+	color: var(--primary);
+}
+
+.profile__tab-panel {
+	padding: 1.5rem 0 0;
+	min-height: 40vh;
+}
+/* #endregion */
+
+/* #region Sticky middle-nav header content (scrolled state) */
+.profile-sticky {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	height: 100%;
+	width: var(--profile-canvas);
+	max-width: var(--profile-canvas-max);
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+
+.profile-sticky__id {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	min-width: 0;
+}
+
+.profile-sticky__name {
+	font-weight: 650;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.profile-sticky__status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.profile-sticky__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+/* #endregion */
+
+/* #region Editor-mode middle-nav side rail */
+.profile-edit-side {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 1rem 0.75rem;
+	gap: 0.25rem;
+	overflow-y: auto;
+}
+
+.profile-edit-side__title {
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--text-muted);
+	padding: 0.5rem 0.75rem 0.35rem;
+}
+
+.profile-edit-side__link {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	border: none;
+	background: transparent;
+	color: var(--text-secondary);
+	border-radius: var(--border-radius);
+	font-size: 0.9rem;
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--fast), color var(--fast);
+}
+
+.profile-edit-side__link:hover {
+	background: var(--card-hover);
+	color: var(--text-main);
+}
+
+.profile-edit-side__link[data-active='true'] {
+	background: var(--primary-surface);
+	color: var(--primary);
+}
+
+.profile-edit-side__link svg {
+	flex-shrink: 0;
+}
+
+.profile-edit-side__toggle {
+	margin: 0.25rem 0.25rem 0.75rem;
+}
+/* #endregion */
+
+/* #region Editor-mode footer drawer (Save / Discard) */
+.profile-edit-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+}
+
+.profile-edit-footer__hint {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text-muted);
+	font-size: 0.85rem;
+}
+
+.profile-edit-footer__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+/* #endregion */
+
+/* #region Responsive — collapse to a single column, meta → pills */
+@media (max-width: 1024px) {
+	.profile {
+		--profile-canvas: 92%;
+		--profile-banner-h: 200px;
+		--profile-avatar: 112px;
+	}
+
+	.profile__overview {
+		grid-template-columns: 1fr;
+	}
+
+	.profile-sticky,
+	.profile__canvas {
+		width: 92%;
+	}
+}
+
+@media (max-width: 640px) {
+	.profile__head {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.profile__actions {
+		width: 100%;
+	}
+}
+/* #endregion */

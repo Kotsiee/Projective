@@ -20,6 +20,17 @@ below apply as routes/islands/features get built out.
 - **Path aliases only** — never relative-path traverse (`../../../`) across workspace boundaries.
   Use `@projective/ui`, `@projective/fields`, `@server/services`, `@features/*`, etc.
 
+## Keep CSS Variables and Documentation in Sync
+
+- **CSS variables live in `apps/web/styles/themes/variables/`** (`colour.css`, `fields.css`,
+  `font.css`, `ui.css`). Any time work adds a new variable or changes what an existing one maps to,
+  update the appropriate file there directly — don't leave a new token only referenced in a
+  component's own stylesheet without a corresponding entry in `variables/`.
+- **Business rule changes must be reflected in the documentation markdown**, not just implemented
+  in code. If a change here (a new ticket status, a new escrow trigger, a new permission check)
+  encodes or alters a business rule, update `documentation/business/brain.md` (or the relevant
+  satellite doc) in the same change — see `documentation/business/CLAUDE.md`.
+
 ## Source of Truth
 
 - `documentation/business/brain.md` — business logic, routes/sitemap, tech stack, visual identity.

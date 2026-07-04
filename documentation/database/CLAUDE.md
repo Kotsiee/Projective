@@ -23,4 +23,11 @@ currently stamped `_Not yet documented._` — see [README.md](README.md)'s cover
 intentional scaffolding, not an oversight. Replace the stub content when the corresponding schema
 exists; don't delete the file.
 
+## Business Rule Changes Ripple Here Too
+
+If a business rule change affects the schema — a new status enum value, a new tracked column (e.g.
+an amount-paid running total), a new required-stage relationship — update the relevant domain's
+`Tables.md`/`Policies.md`/`Functions.md` in the same change as the migration and the `brain.md`
+update. Don't let a rule documented in `brain.md` sit undocumented at the schema level here.
+
 See [../CLAUDE.md](../CLAUDE.md) for the full documentation-wide guardrails.

@@ -8,8 +8,12 @@ import { getFileVisual, renderFileIcon } from './StageFileVisuals.tsx';
 export interface StageFilesListProps {
 	/** Ordered, already-filtered file entries. */
 	entries: StageFileEntry[];
-	/** Fired when a row is activated (opens the lightbox). */
+	/** Fired on single-click — slides out the Details inspector. */
+	onSelect: (entry: StageFileEntry, e: MouseEvent) => void;
+	/** Fired on double-click — opens the full-view modal. */
 	onOpen: (entry: StageFileEntry) => void;
+	/** Id of the row currently shown in the inspector. */
+	activeId?: string | null;
 }
 /* #endregion */
 
@@ -20,19 +24,23 @@ export interface StageFilesListProps {
  * size and abbreviated date aligned in uniform columns. Each row activates the
  * shared lightbox.
  */
-export function StageFilesList({ entries, onOpen }: StageFilesListProps): JSX.Element {
+export function StageFilesList(
+	{ entries, onSelect, onOpen, activeId }: StageFilesListProps,
+): JSX.Element {
 	return (
 		<div class='stage-files-list' role='table' aria-label='Files'>
 			{entries.map((entry) => {
 				const visual = getFileVisual(entry);
+				const isActive = entry.id === activeId;
 				return (
 					<button
 						key={entry.id}
 						type='button'
 						role='row'
-						class='stage-files-row'
-						onClick={() => onOpen(entry)}
-						title={entry.name}
+						class={`stage-files-row${isActive ? ' stage-files-row--active' : ''}`}
+						onClick={(e) => onSelect(entry, e as unknown as MouseEvent)}
+						onDblClick={() => onOpen(entry)}
+						title={`${entry.name} — double-click to open`}
 					>
 						<span class={`stage-file-icon stage-file-icon--${visual.tone}`}>
 							{renderFileIcon(visual.tone, 18)}

@@ -1,0 +1,18 @@
+/* Profile header — subtitle, editing note. Layout lives in profile.css. */
+
+.profile__editing-note {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.4rem 0.75rem;
+	border-radius: 999px;
+	background: var(--primary-surface);
+	color: var(--primary);
+	font-size: 0.82rem;
+	font-weight: 550;
+	align-self: center;
+}
+
+.profile__editing-note svg {
+	flex-shrink: 0;
+}

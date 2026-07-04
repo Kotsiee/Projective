@@ -691,6 +691,129 @@ Clients can configure how work is distributed within a stage:
   simultaneously. Payouts are tied to their individual seat contracts rather than specific ticket
   units.
 
+#### 5. Ticket Lifecycle & Business Rules
+
+##### Creation & Purchasing Gate
+
+- **Minimum Viable Creation:** A ticket requires only a **Title** to be created. Every other field,
+  including the description, is optional at creation time.
+- **Purchasing Gate:** A ticket cannot be purchased through any channel until a **Description** has
+  been added. A title-only ticket is a draft placeholder — it is visible for planning but not yet
+  sellable.
+
+##### Payment Tracking (Installments)
+
+Ticket payment is not a single lump-sum transaction. The system tracks a running **Amount Paid**
+against the ticket's Hard Budget, since clients may fund a ticket in installments (e.g., topping up
+a Business Wallet incrementally, or partial pre-authorization on Maintenance-cycle tickets — see
+"Escrow, Wallets & Finance" §4 for the intervaled-billing equivalent at the Business level).
+
+##### Purchase Methods
+
+| Method | Use Case |
+| :--- | :--- |
+| **Buy Now** | Immediate, single-ticket purchase and escrow lock. |
+| **Basket Checkout** | Batch-purchase multiple tickets across one or more stages/projects in a single checkout flow. |
+| **Invoicing** | For verified Business accounts (KYB Level 3) — routes through Intervaled Invoicing rather than an immediate charge. |
+
+##### Escrow Lifecycle for Tickets
+
+Funds enter escrow the moment a freelancer **claims** the ticket, and are released upon completion
+(client approval) of the relevant stage. This is the same trigger already described under
+"Resource Allocation & Ticketing" §1 (Claim-and-Commit Protocol) — the ticket-specific escrow is
+committed at the **Claimed** step, not at the subsequent "In Progress" transition.
+
+> **Note on existing terminology:** The "Escrow Lifetimes by Project Type" table (under "Escrow,
+> Wallets & Finance" §2) describes the Pipeline lock trigger as "when a freelancer moves a ticket to
+> 'In Progress.'" In practice a freelancer claims and begins a ticket in the same action, so these
+> describe the same moment — but this section is the precise statement: the lock is tied to the
+> **Claim**, not the later status change. Treat this section as the authoritative wording if the two
+> ever need to be reconciled in code.
+
+##### Ticket Movement, Placement & Default Stage Selection
+
+- **Client-Initiated Movement:** Clients are permitted to move tickets between stages at will.
+- **Multi-Stage Initialization:** A ticket may be created within one or multiple stages
+  simultaneously, per the client's preference.
+- **Default Selection Rules:**
+  - If a ticket is created **from within a specific stage**, that stage is selected by default;
+    any additional stages must be selected manually.
+  - If a ticket is created as a **general ticket** (not initiated from within a specific stage), it
+    defaults to having **all available stages** selected, in sequence.
+
+##### Ticket Ordering
+
+- **"New" Stage:** Clients may manually reorder tickets.
+- **All Other Stages:** Order is determined automatically by most-recent-update timestamp — no
+  manual reordering is available once a ticket has left "New."
+
+##### Editing & Reordering Restrictions
+
+- **Editing:** Clients may only edit a ticket that has **not yet been claimed** by a freelancer.
+  Once claimed, ticket details (title, description, budget) are locked.
+- **Stage Reordering Post-Claim:** Once a ticket is claimed, clients may only reorder the stages
+  that have **not yet been started or claimed** — the claimed ticket's current and completed stages
+  are frozen in sequence.
+
+##### Deletion Protocol
+
+- **Pre-Claim Deletion:** Processed immediately — no escrow exists yet, so there is nothing to
+  release.
+- **Post-Claim Deletion:** Any escrowed funds are released to the freelancer in full, and the client
+  incurs no further charge. This mirrors the "Fair Exit" spirit described in `finance-model.md` §3,
+  but for outright ticket deletion (rather than a time-based split) the freelancer receives the full
+  escrowed amount, not a partial one.
+
+##### Freelancer Removal Mid-Ticket
+
+If a freelancer is removed from a stage or project while actively holding a claimed ticket:
+
+1. Escrowed funds for that ticket are released to the freelancer immediately.
+2. The ticket's status is reset to **"New,"** returning it to the public backlog so another
+   freelancer can claim it.
+
+##### Dispute Mechanism: Workload Intensity Reporting
+
+A freelancer may report a ticket if they believe its assigned Workload Intensity ($W_i$, see
+"Resource Allocation & Ticketing" §2) does not reflect the actual effort required.
+
+1. **Report Filed:** The ticket enters a 48-hour **"Hidden"** status — it is removed from public
+   view and all work on it is suspended.
+2. **Resolution Window:** If the client increases the ticket's Workload Intensity within the
+   48-hour window, the ticket is unhidden and work resumes at the new $W_i$.
+3. **Client Non-Response:** If the client does not adjust the $W_i$ within 48 hours, **both parties
+   incur a penalty** (see "Reputation & Discovery" §1 for how penalties feed the Reliability Index).
+4. **Unsubstantiated Report:** If the report is resolved with no $W_i$ change (i.e., a moderator or
+   the client determines the original weighting was fair), the reporting freelancer receives a
+   **ranking reduction** on the Explore page.
+
+---
+
+### Stage Management
+
+Stages are the client's primary organizational unit within a project, and clients retain full CRUD
+control over them, subject to the protections described below once tickets are actively claimed.
+
+#### 1. Client Capabilities
+
+Clients are authorized to **create, rename, edit, reorder, and delete** stages at any point in a
+project's lifecycle.
+
+#### 2. Stage Reordering
+
+Reordering the stages themselves does **not** alter the existing sequence or order of the tickets
+assigned within those stages — ticket order (per "Resource Allocation & Ticketing" §5, Ticket
+Ordering) is preserved independently of where the stage sits in the overall project sequence.
+
+#### 3. Stage Deletion
+
+- **Active Tickets:** If a stage containing active (claimed, escrowed) tickets is deleted, all
+  escrowed funds for those tickets are released to the freelancer(s) — the same outcome as a
+  post-claim ticket deletion.
+- **Dangling Requirements:** If the deleted stage was listed as a required stage on any other
+  tickets (per the Multi-Stage Initialization rule above), it is automatically removed from those
+  tickets' stage requirements rather than leaving a broken reference.
+
 ---
 
 ### Digital Marketplace & IP Governance

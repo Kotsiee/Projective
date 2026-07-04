@@ -1,0 +1,165 @@
+/* =========================================================================
+   Profile tab bar + shared tab-panel primitives (view toggles, empty states)
+   ========================================================================= */
+
+.profile-tabs {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	overflow-x: auto;
+	scrollbar-width: none;
+	border-bottom: 1px solid var(--border-color);
+	position: sticky;
+	top: var(--header-height);
+	background: var(--bg);
+	z-index: 5;
+}
+
+.profile-tabs::-webkit-scrollbar {
+	display: none;
+}
+
+.profile-tabs__tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.85rem 0.9rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 0.92rem;
+	font-weight: 550;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--fast);
+}
+
+.profile-tabs__tab:hover {
+	color: var(--text-main);
+}
+
+.profile-tabs__tab[data-active='true'] {
+	color: var(--text-main);
+}
+
+.profile-tabs__tab[data-active='true']::after {
+	content: '';
+	position: absolute;
+	left: 0.9rem;
+	right: 0.9rem;
+	bottom: -1px;
+	height: 2px;
+	border-radius: 2px 2px 0 0;
+	background: var(--primary);
+}
+
+.profile-tabs__count {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	background: var(--card-dark);
+	border-radius: 999px;
+	padding: 0.05rem 0.4rem;
+	min-width: 1.15rem;
+	text-align: center;
+}
+
+.profile-tabs__tab[data-active='true'] .profile-tabs__count {
+	color: var(--primary);
+	background: var(--primary-surface);
+}
+
+/* #region Shared tab-panel chrome */
+.tab-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.25rem;
+	flex-wrap: wrap;
+}
+
+.tab-head__title {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 650;
+	color: var(--text-main);
+}
+
+.tab-head__sub {
+	color: var(--text-muted);
+	font-size: 0.88rem;
+	margin: 0.15rem 0 0;
+}
+
+/* Grid/List view toggle */
+.view-toggle {
+	display: inline-flex;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+}
+
+.view-toggle__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.1rem;
+	height: 2.1rem;
+	border: none;
+	background: var(--card);
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background var(--fast), color var(--fast);
+}
+
+.view-toggle__btn[data-active='true'] {
+	background: var(--primary-surface);
+	color: var(--primary);
+}
+
+.view-toggle__btn:not(:last-child) {
+	border-right: 1px solid var(--border-color);
+}
+
+/* Empty state */
+.tab-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 3rem 1rem;
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.tab-empty svg {
+	color: var(--text-disabled);
+}
+
+/* Sub-section heading used inside tabs (e.g. Owned / Worked on) */
+.tab-subhead {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 1.75rem 0 0.9rem;
+	font-size: 0.78rem;
+	font-weight: 650;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--text-muted);
+}
+
+.tab-subhead:first-child {
+	margin-top: 0;
+}
+
+.tab-subhead__count {
+	color: var(--text-disabled);
+}
+/* #endregion */

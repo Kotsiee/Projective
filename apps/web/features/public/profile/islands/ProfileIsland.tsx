@@ -1,73 +1,163 @@
-// #region Imports
-import '../styles/islands/profile-island.css';
+/**
+ * @file ProfileIsland.tsx
+ * @description Root island for the profile page. Owns the scroll-driven header
+ * mutation engine (an IntersectionObserver flips `isScrolled`) and projects the
+ * chrome into the global `setMiddleNav` layout: a persistent side-nav action
+ * core, a compressed sticky header on scroll, and the Editor-Mode Save/Discard
+ * footer drawer.
+ */
+
+import '../styles/islands/profile.css';
+import '../styles/components/header.css';
+import '../styles/components/overview.css';
+import '../styles/components/tabs.css';
+
 import { useEffect, useRef } from 'preact/hooks';
-import { useSignal } from '@preact/signals';
-import { IconButton } from '@projective/ui';
-import { IconArrowLeft } from '@tabler/icons-preact';
-import { useProfileContext } from '../contexts/ProfileContext.tsx';
-import ProfileBanner from '../components/profile-banner.tsx';
-import ProfileHeader from '../components/profile-header.tsx';
-import ProfileMeta from '../components/profile-meta.tsx';
-import ProfileBody from '../components/body/body.tsx';
-import ProfileTabs from '../components/tabs/tabs.tsx';
+import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
+import { ProfileContext, ProfileProvider, useProfileContext } from '../contexts/ProfileContext.tsx';
+import type { ProfileData, ProfileTabKey } from '../contracts/Profile.ts';
+import { mockProfile } from '../data/mockProfile.ts';
+
+import ProfileBanner from '../components/header/ProfileBanner.tsx';
+import ProfileHeader from '../components/header/ProfileHeader.tsx';
+import ProfileStickyHeader from '../components/header/ProfileStickyHeader.tsx';
+import ProfileOverview from '../components/overview/ProfileOverview.tsx';
+
+import ProfileTabs from '../components/tabs/ProfileTabs.tsx';
+import ServicesTab from '../components/tabs/ServicesTab.tsx';
+import ProjectsTab from '../components/tabs/ProjectsTab.tsx';
+import PortfolioTab from '../components/tabs/PortfolioTab.tsx';
+import ExperienceTab from '../components/tabs/ExperienceTab.tsx';
+import EducationTab from '../components/tabs/EducationTab.tsx';
+import TeamsTab from '../components/tabs/TeamsTab.tsx';
+
+import ProfileSideRail from '../components/rail/ProfileSideRail.tsx';
+import ProfileEditForm from '../components/edit/ProfileEditForm.tsx';
+import ProfileEditFooter from '../components/edit/ProfileEditFooter.tsx';
+
+// #region Tab panel switch
+function ProfileTabPanel({ tab }: { tab: ProfileTabKey }) {
+	switch (tab) {
+		case 'services':
+			return <ServicesTab />;
+		case 'projects':
+			return <ProjectsTab />;
+		case 'portfolio':
+			return <PortfolioTab />;
+		case 'experience':
+			return <ExperienceTab />;
+		case 'education':
+			return <EducationTab />;
+		case 'teams':
+			return <TeamsTab />;
+		default:
+			return null;
+	}
+}
 // #endregion
 
-export default function ProfileIsland() {
-	const { isLoading } = useProfileContext();
-	const bannerRef = useRef<HTMLDivElement>(null);
-	const isBannerPast = useSignal(false);
+// #region Inner — scroll + middle-nav engine
+function ProfileInner() {
+	const state = useProfileContext();
+	const { setMiddleNav } = useNavigationContext();
+	const { isScrolled, isEditing, isOwn, activeTab } = state;
 
+	const sentinelRef = useRef<HTMLDivElement>(null);
+
+	// Scroll listener → morph the header once the banner scrolls under the top nav.
 	useEffect(() => {
-		const el = bannerRef.current;
-		if (!el) return;
+		const el = sentinelRef.current;
+		if (!el || typeof IntersectionObserver === 'undefined') return;
 
-		const observer = new IntersectionObserver(
+		const io = new IntersectionObserver(
 			([entry]) => {
-				isBannerPast.value = !entry.isIntersecting;
+				isScrolled.value = !entry.isIntersecting && entry.boundingClientRect.top < 0;
 			},
-			{ rootMargin: '-80px 0px 0px 0px', threshold: 0 },
+			{ threshold: 0, rootMargin: '-72px 0px 0px 0px' },
+		);
+		io.observe(el);
+		return () => io.disconnect();
+	}, []);
+
+	// Project the chrome into the global middle-nav layout.
+	useEffect(() => {
+		const wrap = (node: preact.ComponentChildren) => (
+			<ProfileContext.Provider value={state}>{node}</ProfileContext.Provider>
 		);
 
-		observer.observe(el);
-		return () => observer.disconnect();
-	}, [isLoading.value]);
+		const editing = isEditing.value && isOwn.value;
+		const scrolled = isScrolled.value;
 
-	const showAvatarInHeader = !isLoading.value && isBannerPast.value;
+		// The side-nav action core is always present. The Save/Discard drawer only
+		// slides out while editing; the compressed header appears on scroll.
+		const showFooter = editing;
+		const showHeader = scrolled && !editing;
+
+		setMiddleNav({
+			show: true,
+			headerHeight: showHeader ? '60px' : '0px',
+			headerContent: showHeader ? wrap(<ProfileStickyHeader />) : null,
+			sideWidth: '248px',
+			sideContent: wrap(<ProfileSideRail activePage='profile' />),
+			footerHeight: showFooter ? '72px' : '0px',
+			footerContent: showFooter ? wrap(<ProfileEditFooter />) : null,
+		});
+	}, [isScrolled.value, isEditing.value, isOwn.value, activeTab.value]);
+
+	// Tear down chrome on unmount so it doesn't leak into other routes.
+	useEffect(() => () => {
+		setMiddleNav({
+			show: false,
+			headerHeight: '0px',
+			sideWidth: '0px',
+			footerHeight: '0px',
+			headerContent: null,
+			sideContent: null,
+			footerContent: null,
+		});
+	}, []);
+
+	const editing = isEditing.value && isOwn.value;
 
 	return (
-		<div class='profile-island'>
-			<div class='profile-island__left'>
-				<IconButton
-					aria-label='Go back'
-					className='profile-island__left__back'
-					onClick={() => globalThis.history.back()}
-				>
-					<IconArrowLeft />
-				</IconButton>
+		<div class='profile'>
+			<ProfileBanner />
+			<div class='profile__canvas'>
+				<ProfileHeader />
+
+				{editing ? <ProfileEditForm /> : (
+					<>
+						<ProfileOverview />
+						<ProfileTabs />
+						<div class='profile__tab-panel'>
+							<ProfileTabPanel tab={activeTab.value} />
+						</div>
+					</>
+				)}
 			</div>
 
-			{/* Main Content Column */}
-			<div class='profile-island__content'>
-				<div class='profile-island__banner' ref={bannerRef}>
-					<ProfileBanner />
-				</div>
-
-				<div class='profile-island__header'>
-					<ProfileHeader showAvatar={showAvatarInHeader} />
-				</div>
-
-				<div class='profile-island__body'>
-					<div class='profile-island__center'>
-						<ProfileBody />
-					</div>
-					<div class='profile-island__sidebar'>
-						<ProfileMeta />
-					</div>
-				</div>
-				<div class='profile-island__tab-body'>
-					<ProfileTabs />
-				</div>
-			</div>
+			<div ref={sentinelRef} class='profile__sentinel' aria-hidden='true' />
 		</div>
 	);
 }
+// #endregion
+
+// #region Public export
+export interface ProfileIslandProps {
+	profile?: ProfileData;
+	isSelf?: boolean;
+	startInEdit?: boolean;
+}
+
+export default function ProfileIsland(
+	{ profile, isSelf = false, startInEdit = false }: ProfileIslandProps,
+) {
+	// The route may pass a resolved profile; fall back to the frontend seed.
+	const data = profile ?? mockProfile;
+	return (
+		<ProfileProvider profile={data} isSelf={isSelf} startInEdit={startInEdit}>
+			<ProfileInner />
+		</ProfileProvider>
+	);
+}
+// #endregion

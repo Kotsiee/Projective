@@ -1,0 +1,149 @@
+/**
+ * cost-preview.css — the real-time cost-range widget (spec §2A). Block: `cost-preview`.
+ * Shared by the pipeline Ticket modal and the one-off Stage modal.
+ */
+
+.cost-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	padding: 1.15rem 1.25rem;
+	border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border-color));
+	border-radius: var(--border-radius);
+	background: color-mix(in srgb, var(--primary) 8%, var(--card));
+}
+
+.cost-preview__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.cost-preview__eyebrow {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--primary);
+}
+
+.cost-preview__info {
+	display: inline-flex;
+	border: none;
+	background: transparent;
+	color: color-mix(in srgb, var(--primary) 75%, var(--text-muted));
+	cursor: pointer;
+}
+
+.cost-preview__range {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.cost-preview__low,
+.cost-preview__high {
+	font-size: 2rem;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	color: var(--text-main);
+	font-variant-numeric: tabular-nums;
+}
+
+.cost-preview__dash {
+	font-size: 1.4rem;
+	color: var(--text-muted);
+}
+
+.cost-preview__gauge {
+	display: flex;
+	width: 100%;
+	height: 8px;
+	border-radius: 9999px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--text-main) 10%, transparent);
+}
+
+.cost-preview__seg {
+	height: 100%;
+}
+
+.cost-preview__seg--standard {
+	background: var(--primary);
+}
+
+.cost-preview__seg--overhead {
+	background: var(--warning);
+}
+
+.cost-preview__rows {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+	margin: 0;
+}
+
+.cost-preview__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.cost-preview__row-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+}
+
+.cost-preview__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.cost-preview__dot--standard {
+	background: var(--primary);
+}
+
+.cost-preview__dot--overhead {
+	background: var(--warning);
+}
+
+.cost-preview__row-value {
+	font-size: 0.95rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.cost-preview__row-value--standard {
+	color: var(--primary);
+}
+
+.cost-preview__row-value--overhead {
+	color: var(--warning);
+}
+
+.cost-preview__note {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	padding: 0.6rem 0.7rem;
+	border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+	border-radius: var(--border-radius__small);
+	background: color-mix(in srgb, var(--warning) 10%, transparent);
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: color-mix(in srgb, var(--warning) 82%, var(--text-main));
+}
+
+.cost-preview__note svg {
+	flex-shrink: 0;
+	margin-top: 0.1rem;
+	color: var(--warning);
+}

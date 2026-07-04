@@ -1,0 +1,142 @@
+.ledger-card {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__large);
+	overflow: hidden;
+}
+
+.ledger-card__header {
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.ledger-card__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.ledger-card__rows {
+	display: flex;
+	flex-direction: column;
+}
+
+.ledger-row {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+	padding: 1rem 1.25rem;
+	text-align: left;
+	background: transparent;
+	border: none;
+	border-top: 1px solid var(--border-color);
+	color: inherit;
+	font: inherit;
+}
+
+.ledger-card__rows > .ledger-row:first-child {
+	border-top: none;
+}
+
+.ledger-row--dense {
+	gap: 0.5rem;
+	padding: 0.6rem 0.9rem;
+}
+
+.ledger-row--interactive {
+	cursor: pointer;
+	transition: background-color var(--fast) ease;
+}
+
+.ledger-row--interactive:hover {
+	background-color: var(--primary-half);
+}
+
+.ledger-row--interactive:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: -2px;
+}
+
+.ledger-row__head {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.ledger-row__heading {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.ledger-row__title {
+	font-size: 0.925rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.ledger-row__subtitle {
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+}
+
+.ledger-row__status {
+	flex-shrink: 0;
+	padding: 0.15rem 0.6rem;
+	font-size: 0.7rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	background-color: var(--primary-half);
+	border-radius: 50px;
+}
+
+.ledger-row__cells {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 0.75rem 1rem;
+}
+
+.ledger-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 0;
+}
+
+.ledger-cell__label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+.ledger-cell__value {
+	font-size: 0.95rem;
+	color: var(--text-main);
+}
+
+.ledger-cell--emphasis .ledger-cell__value {
+	font-weight: 700;
+	color: var(--primary);
+}
+
+.ledger-cell--primary .ledger-cell__value {
+	color: var(--primary);
+}
+
+.ledger-cell--success .ledger-cell__value {
+	color: var(--complete);
+}
+
+.ledger-cell--warning .ledger-cell__value {
+	color: var(--warning);
+}
+
+.ledger-cell--danger .ledger-cell__value {
+	color: var(--danger);
+}

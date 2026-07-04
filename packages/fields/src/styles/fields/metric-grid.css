@@ -1,0 +1,73 @@
+/* packages/fields/src/styles/fields/metric-grid.css */
+
+.metric-grid {
+	display: grid;
+	width: 100%;
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+}
+
+.metric-grid__cell {
+	--mg-tone: var(--text-main);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	padding: 14px 16px;
+}
+
+.metric-grid--sm .metric-grid__cell {
+	padding: 10px 12px;
+}
+
+/* Dividers between cells (left border on every cell except first in row) */
+.metric-grid--divided .metric-grid__cell + .metric-grid__cell {
+	border-left: 1px solid var(--border-color);
+}
+
+.metric-grid__icon {
+	display: inline-flex;
+	align-items: center;
+	color: var(--text-secondary);
+	margin-bottom: 2px;
+}
+
+.metric-grid__value {
+	font-size: 1.375rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--mg-tone);
+}
+
+.metric-grid--sm .metric-grid__value {
+	font-size: 1.0625rem;
+}
+
+.metric-grid__label {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+	line-height: 1.2;
+}
+
+.metric-grid--sm .metric-grid__label {
+	font-size: 0.6875rem;
+}
+
+/* Tones */
+.metric-grid__cell--primary {
+	--mg-tone: var(--primary);
+}
+
+.metric-grid__cell--success {
+	--mg-tone: var(--complete, var(--primary));
+}
+
+.metric-grid__cell--warning {
+	--mg-tone: var(--in-progress, var(--warning));
+}
+
+.metric-grid__cell--danger {
+	--mg-tone: var(--incomplete, var(--danger));
+}

@@ -11,8 +11,12 @@ import { getFileVisual, renderFileIcon } from './StageFileVisuals.tsx';
 export interface StageFilesItemProps {
 	/** The canonical file entry to render. */
 	entry: StageFileEntry;
-	/** Fired when the card is activated (opens the lightbox). */
+	/** Fired on single-click — slides out the Details inspector. */
+	onSelect: (entry: StageFileEntry, e: MouseEvent) => void;
+	/** Fired on double-click — opens the full-view modal. */
 	onOpen: (entry: StageFileEntry) => void;
+	/** Whether this card is the one currently shown in the inspector. */
+	active?: boolean;
 }
 /* #endregion */
 
@@ -23,16 +27,19 @@ export interface StageFilesItemProps {
  * preview (or a centred, colour-coded vector icon for system files) above a
  * footer row mapping filename, size and uploader.
  */
-export function StageFilesItem({ entry, onOpen }: StageFilesItemProps): JSX.Element {
+export function StageFilesItem(
+	{ entry, onSelect, onOpen, active }: StageFilesItemProps,
+): JSX.Element {
 	const visual = getFileVisual(entry);
 	const isImage = entry.category === 'image' && !!entry.url;
 
 	return (
 		<button
 			type='button'
-			class='stage-file-card'
-			onClick={() => onOpen(entry)}
-			title={entry.name}
+			class={`stage-file-card${active ? ' stage-file-card--active' : ''}`}
+			onClick={(e) => onSelect(entry, e as unknown as MouseEvent)}
+			onDblClick={() => onOpen(entry)}
+			title={`${entry.name} — double-click to open`}
 		>
 			<div class='stage-file-card__preview'>
 				{isImage

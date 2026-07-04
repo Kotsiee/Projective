@@ -36,3 +36,8 @@ export * from './src/components/HelpTooltip.tsx';
 export * from './src/components/MenuSelect.tsx';
 export * from './src/components/FilterTags.tsx';
 export * from './src/components/ViewToggle.tsx';
+
+// Display
+export * from './src/components/StatusBadge.tsx';
+export * from './src/components/AllocationMeter.tsx';
+export * from './src/components/MetricGrid.tsx';

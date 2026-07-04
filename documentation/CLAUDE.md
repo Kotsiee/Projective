@@ -29,6 +29,19 @@
   an Island importing the Supabase client directly, and never suggest fetching data inside an
   Island — see `business/brain2.md` §2 for the full rule.
 
+## Keep Documentation in Sync With Reality
+
+- **Business rule changes must be reflected here.** Any time a business rule, workflow, or
+  financial mechanic changes — whether the change originates in a conversation, a spec, or code —
+  the corresponding markdown in this folder (`brain.md`/`brain2.md` for durable logic, or the
+  relevant satellite doc) must be updated in the same pass. Documentation drift is exactly the
+  failure mode this folder was reorganized to eliminate; don't reintroduce it by leaving a rule
+  change undocumented.
+- **CSS variable changes belong in `apps/web/styles/themes/variables/`, not here.** If work
+  introduces or changes a CSS variable (new token, renamed variable, new semantic mapping), update
+  the appropriate file there (`colour.css`, `fields.css`, `font.css`, `ui.css`) directly — do not
+  describe the change only in prose here. See `apps/web/CLAUDE.md` for the full rule.
+
 ## Folder Map
 
 See [README.md](README.md) for the current directory structure and what lives where.

@@ -1,0 +1,125 @@
+/* packages/fields/src/styles/fields/status-badge.css */
+
+.status-badge {
+	--sb-color: var(--text-secondary);
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border-radius: var(--border-radius__large, 999px);
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+	border: 1px solid transparent;
+}
+
+/* Sizes */
+.status-badge--md {
+	padding: 4px 10px;
+	font-size: 0.8125rem;
+}
+
+.status-badge--sm {
+	padding: 2px 8px;
+	font-size: 0.6875rem;
+	gap: 4px;
+}
+
+/* Variants */
+.status-badge--subtle {
+	color: var(--sb-color);
+	background-color: color-mix(in srgb, var(--sb-color) 12%, transparent);
+}
+
+.status-badge--solid {
+	color: var(--card, #fff);
+	background-color: var(--sb-color);
+}
+
+.status-badge--outline {
+	color: var(--sb-color);
+	background-color: transparent;
+	border-color: color-mix(in srgb, var(--sb-color) 45%, transparent);
+}
+
+/* Icon + label */
+.status-badge__icon {
+	display: inline-flex;
+	align-items: center;
+	color: currentColor;
+}
+
+.status-badge__label {
+	display: inline-flex;
+	align-items: center;
+}
+
+/* Presence dot */
+.status-badge__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: var(--sb-color);
+	flex-shrink: 0;
+	position: relative;
+}
+
+.status-badge--sm .status-badge__dot {
+	width: 6px;
+	height: 6px;
+}
+
+.status-badge__dot::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background-color: var(--sb-color);
+	animation: status-badge-pulse 1.8s ease-out infinite;
+}
+
+/* Solid variant keeps the dot readable against a filled background */
+.status-badge--solid .status-badge__dot,
+.status-badge--solid .status-badge__dot::after {
+	background-color: var(--card, #fff);
+}
+
+@keyframes status-badge-pulse {
+	0% {
+		transform: scale(1);
+		opacity: 0.7;
+	}
+	70% {
+		transform: scale(2.4);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(2.4);
+		opacity: 0;
+	}
+}
+
+/* Per-status semantic colours */
+.status-badge--online,
+.status-badge--active,
+.status-badge--released,
+.status-badge--funded {
+	--sb-color: var(--complete, var(--primary));
+}
+
+.status-badge--in-escrow {
+	--sb-color: var(--primary);
+}
+
+.status-badge--away,
+.status-badge--pending,
+.status-badge--funding {
+	--sb-color: var(--in-progress, var(--warning));
+}
+
+.status-badge--disputed {
+	--sb-color: var(--incomplete, var(--danger));
+}
+
+.status-badge--offline {
+	--sb-color: var(--text-muted);
+}

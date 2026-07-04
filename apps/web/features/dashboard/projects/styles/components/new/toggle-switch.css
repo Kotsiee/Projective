@@ -1,0 +1,76 @@
+/**
+ * toggle-switch.css — the shared boolean on/off switch used across the creation modals.
+ * Block: `toggle-switch`.
+ */
+
+.toggle-switch {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	cursor: pointer;
+	user-select: none;
+}
+
+.toggle-switch--disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.toggle-switch__text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-width: 0;
+}
+
+.toggle-switch__label {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.toggle-switch__desc {
+	font-size: 0.775rem;
+	color: var(--text-muted);
+}
+
+.toggle-switch__track {
+	position: relative;
+	flex-shrink: 0;
+	width: 42px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid var(--border-color);
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--text-main) 10%, transparent);
+	cursor: pointer;
+	transition: background var(--fast), border-color var(--fast);
+}
+
+.toggle-switch__track--on {
+	background: var(--primary);
+	border-color: var(--primary);
+}
+
+.toggle-switch__track:disabled {
+	cursor: not-allowed;
+}
+
+.toggle-switch__thumb {
+	position: absolute;
+	top: 50%;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	transform: translateY(-50%);
+	transition: left var(--fast);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.toggle-switch__track--on .toggle-switch__thumb {
+	left: calc(100% - 20px);
+}

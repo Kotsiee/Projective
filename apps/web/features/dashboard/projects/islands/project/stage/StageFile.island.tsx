@@ -1,6 +1,6 @@
 /* #region Imports */
 import '../../../styles/components/project/stage/files/stage-files.css';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { IconArrowsSort, IconFolderOpen, IconLoader2, IconSearch } from '@tabler/icons-preact';
 import { FilterTags, MenuSelect, type ViewMode, ViewToggle } from '@projective/fields';
@@ -17,6 +17,7 @@ import { MediaViewerProvider, useMediaViewer } from '../../../contexts/MediaView
 import { useStageContext } from '../../../contexts/StageContext.tsx';
 import { StageFilesItem } from '../../../components/project/stage/files/StageFilesItem.tsx';
 import { StageFilesList } from '../../../components/project/stage/files/StageFilesList.tsx';
+import { StageFileDetails } from '../../../components/project/stage/files/StageFileDetails.tsx';
 /* #endregion */
 
 /* #region Constants */
@@ -74,6 +75,11 @@ function StageFilesView() {
 	const category = useSignal<'all' | StageFileCategory>('all');
 	const view = useSignal<ViewMode>('grid');
 
+	/** The file shown in the slide-out Details inspector (single-click). */
+	const activeEntry = useSignal<StageFileEntry | null>(null);
+	/** Debounce so a double-click opens the modal instead of the inspector. */
+	const clickTimer = useRef<number | null>(null);
+
 	const channelId = stage?.value?.channel_id ?? null;
 
 	useEffect(() => {
@@ -113,19 +119,34 @@ function StageFilesView() {
 		};
 	}, [channelId]);
 
+	const jumpToMessage = (entry: StageFileEntry) => {
+		const projectId = stage?.value?.project_id;
+		const stageId = stage?.value?.stage_id;
+		if (!projectId || !stageId || !entry.messageId) return;
+		globalThis.location.assign(
+			`/projects/${projectId}/${stageId}/chat?message=${entry.messageId}#msg-${entry.messageId}`,
+		);
+	};
+
+	/** Double-click / expand: opens the shared full-view media modal. */
 	const handleOpen = (entry: StageFileEntry) => {
+		if (clickTimer.current) {
+			clearTimeout(clickTimer.current);
+			clickTimer.current = null;
+		}
 		open(toLightboxMedia(entry), {
-			onJump: entry.messageId
-				? () => {
-					const projectId = stage?.value?.project_id;
-					const stageId = stage?.value?.stage_id;
-					if (!projectId || !stageId) return;
-					globalThis.location.assign(
-						`/projects/${projectId}/${stageId}/chat?message=${entry.messageId}#msg-${entry.messageId}`,
-					);
-				}
-				: undefined,
+			onJump: entry.messageId ? () => jumpToMessage(entry) : undefined,
 		});
+	};
+
+	/** Single-click: debounced so a double-click wins, then reveals the inspector. */
+	const handleSelect = (entry: StageFileEntry, e: MouseEvent) => {
+		if (e.detail > 1) return; // part of a double-click — let handleOpen run
+		if (clickTimer.current) clearTimeout(clickTimer.current);
+		clickTimer.current = setTimeout(() => {
+			activeEntry.value = entry;
+			clickTimer.current = null;
+		}, 200);
 	};
 
 	const visible = sortStageFiles(
@@ -166,11 +187,24 @@ function StageFilesView() {
 			? (
 				<div class='stage-files__grid'>
 					{visible.map((entry) => (
-						<StageFilesItem key={entry.id} entry={entry} onOpen={handleOpen} />
+						<StageFilesItem
+							key={entry.id}
+							entry={entry}
+							onSelect={handleSelect}
+							onOpen={handleOpen}
+							active={activeEntry.value?.id === entry.id}
+						/>
 					))}
 				</div>
 			)
-			: <StageFilesList entries={visible} onOpen={handleOpen} />;
+			: (
+				<StageFilesList
+					entries={visible}
+					onSelect={handleSelect}
+					onOpen={handleOpen}
+					activeId={activeEntry.value?.id ?? null}
+				/>
+			);
 	};
 
 	return (
@@ -210,7 +244,22 @@ function StageFilesView() {
 				<ViewToggle value={view.value} onChange={(v) => (view.value = v)} />
 			</div>
 
-			{renderBody()}
+			<div class='stage-files__body'>
+				<div class='stage-files__canvas'>
+					{renderBody()}
+				</div>
+
+				{activeEntry.value && (
+					<aside class='stage-files__inspector'>
+						<StageFileDetails
+							entry={activeEntry.value}
+							onOpenFull={handleOpen}
+							onJump={jumpToMessage}
+							onClose={() => (activeEntry.value = null)}
+						/>
+					</aside>
+				)}
+			</div>
 		</div>
 	);
 }

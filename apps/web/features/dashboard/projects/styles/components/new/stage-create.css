@@ -1,0 +1,310 @@
+/**
+ * stage-create.css — the Stage configuration modal (spec §3). Block: `sc`.
+ * Single-column blueprint form for pipeline projects; a two-column layout (form + ticket-inherited
+ * cost rail) for one-off projects (`.sc--oneoff` / `.sc__body--split`).
+ */
+
+/* #region Dialog shell */
+.sc-modal {
+	max-height: 94vh;
+}
+
+.sc-modal .overlay-modal__body {
+	padding: 0;
+	overflow: hidden;
+}
+
+.sc {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-height: min(90vh, 820px);
+	background: var(--bg);
+	color: var(--text-main);
+}
+/* #endregion */
+
+/* #region Header */
+.sc__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1.15rem 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.sc__title {
+	margin: 0;
+	font-size: 1.2rem;
+	font-weight: 700;
+}
+
+.sc__subtitle {
+	margin: 0.2rem 0 0;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.sc__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border: none;
+	border-radius: 9999px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background var(--fast), color var(--fast);
+}
+
+.sc__close:hover {
+	background: var(--card);
+	color: var(--text-main);
+}
+/* #endregion */
+
+/* #region Body */
+.sc__body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.sc__body--split {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+	overflow: hidden;
+}
+
+.sc__form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.15rem;
+	padding: 1.5rem;
+}
+
+.sc__body--split .sc__form {
+	overflow-y: auto;
+	border-right: 1px solid var(--border-color);
+}
+
+.sc__rail {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+	padding: 1.5rem;
+	overflow-y: auto;
+	background: color-mix(in srgb, var(--card) 45%, var(--bg));
+}
+/* #endregion */
+
+/* #region Form primitives */
+.sc__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.sc__label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.sc__req {
+	color: var(--danger);
+}
+
+.sc__hint {
+	font-weight: 400;
+	color: var(--text-muted);
+}
+
+.sc__section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--border-color);
+}
+
+.sc__section-title {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.sc__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	padding: 0.85rem 0.95rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+}
+/* #endregion */
+
+/* #region Skill quick-add chips */
+.sc__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.sc__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.3rem 0.6rem;
+	border: 1px solid var(--border-color);
+	border-radius: 9999px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.78rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: border-color var(--fast), color var(--fast);
+}
+
+.sc__chip:hover:not(:disabled) {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.sc__chip:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+/* #endregion */
+
+/* #region NDA + deliverable + notice */
+.sc__nda-upload {
+	padding-top: 0.25rem;
+	border-top: 1px dashed var(--border-color);
+}
+
+.sc__flag {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.85rem;
+	color: var(--text-main);
+	cursor: pointer;
+}
+
+.sc__flag input {
+	width: 17px;
+	height: 17px;
+	accent-color: var(--primary);
+}
+
+.sc__notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	padding: 0.65rem 0.8rem;
+	border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border-color));
+	border-radius: var(--border-radius__small);
+	background: color-mix(in srgb, var(--primary) 8%, transparent);
+	font-size: 0.8rem;
+	line-height: 1.45;
+	color: var(--text-secondary);
+}
+
+.sc__notice svg {
+	flex-shrink: 0;
+	margin-top: 0.05rem;
+	color: var(--primary);
+}
+/* #endregion */
+
+/* #region Incentive bonus */
+.sc__bonus {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	padding-top: 0.25rem;
+	border-top: 1px dashed var(--border-color);
+}
+/* #endregion */
+
+/* #region Workload intensity (one-off) */
+.sc__intensity {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.5rem;
+}
+
+.sc__intensity-opt {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.7rem 0.5rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+	color: var(--text-secondary);
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color var(--fast), background var(--fast), color var(--fast);
+}
+
+.sc__intensity-opt:hover {
+	border-color: color-mix(in srgb, var(--primary) 45%, var(--border-color));
+}
+
+.sc__intensity-opt--active {
+	border-color: var(--primary);
+	background: var(--primary-surface, color-mix(in srgb, var(--primary) 15%, transparent));
+	color: var(--primary);
+}
+
+.sc__cost-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+}
+/* #endregion */
+
+/* #region Footer */
+.sc__footer {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.85rem 1.5rem;
+	border-top: 1px solid var(--border-color);
+	background: var(--card);
+}
+
+.sc__footer-summary {
+	font-size: 0.82rem;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.sc__footer-actions {
+	display: flex;
+	gap: 0.6rem;
+	margin-left: auto;
+}
+/* #endregion */
+
+@media (max-width: 860px) {
+	.sc__body--split {
+		grid-template-columns: 1fr;
+		overflow-y: auto;
+	}
+
+	.sc__body--split .sc__form {
+		border-right: none;
+		border-bottom: 1px solid var(--border-color);
+	}
+}

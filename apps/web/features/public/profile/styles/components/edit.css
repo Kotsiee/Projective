@@ -1,0 +1,283 @@
+/* =========================================================================
+   Profile Editor Mode — form cards & inputs (.pedit) + small extensions to
+   the base .profile-edit-side / .profile-edit-footer rails (defined in
+   styles/islands/profile.css). Colours reference the global dark-aware tokens.
+   ========================================================================= */
+
+/* #region Form shell */
+.pedit {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.pedit__card {
+	background: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__large);
+	padding: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.pedit__card-title {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0;
+	font-size: 0.72rem;
+	font-weight: 650;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--text-muted);
+}
+
+.pedit__card-title svg {
+	color: var(--primary);
+}
+/* #endregion */
+
+/* #region Fields */
+.pedit__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.pedit__label {
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.pedit__hint {
+	font-size: 0.76rem;
+	color: var(--text-muted);
+}
+
+.pedit__field :global(.text-field),
+.pedit__field :global(.select-field),
+.pedit__field :global(.tag-input) {
+	width: 100%;
+}
+
+.pedit__textarea {
+	width: 100%;
+	min-height: 140px;
+	resize: vertical;
+	padding: 0.7rem 0.8rem;
+	background: var(--bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	color: var(--text-main);
+	font: inherit;
+	font-size: 0.92rem;
+	line-height: 1.55;
+	transition: border-color var(--fast);
+}
+
+.pedit__textarea:focus {
+	outline: none;
+	border-color: var(--primary);
+}
+
+.pedit__textarea::placeholder {
+	color: var(--text-disabled);
+}
+/* #endregion */
+
+/* #region Grid rows */
+.pedit__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+}
+
+@media (max-width: 640px) {
+	.pedit__grid {
+		grid-template-columns: 1fr;
+	}
+}
+/* #endregion */
+
+/* #region Skills editor */
+.pedit__skill-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.pedit__skill {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.5rem 0.6rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--bg);
+}
+
+.pedit__skill-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.pedit__skill-comp {
+	width: 9.5rem;
+	flex-shrink: 0;
+}
+
+.pedit__skill-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.8rem;
+	height: 1.8rem;
+	flex-shrink: 0;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--border-radius__small);
+	cursor: pointer;
+	transition: background var(--fast), color var(--fast);
+}
+
+.pedit__skill-remove:hover {
+	background: var(--card-hover);
+	color: var(--danger);
+}
+
+.pedit__add-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.pedit__add-row .pedit__field {
+	flex: 1;
+	min-width: 0;
+}
+/* #endregion */
+
+/* #region Languages editor */
+.pedit__lang-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.pedit__lang {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.pedit__lang-name {
+	flex: 1;
+	min-width: 0;
+}
+
+.pedit__lang-fluency {
+	width: 11rem;
+	flex-shrink: 0;
+}
+
+.pedit__add-btn {
+	align-self: flex-start;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.45rem 0.75rem;
+	border: 1px dashed var(--border-color);
+	background: transparent;
+	color: var(--text-secondary);
+	border-radius: var(--border-radius);
+	font-size: 0.85rem;
+	cursor: pointer;
+	transition: background var(--fast), border-color var(--fast), color var(--fast);
+}
+
+.pedit__add-btn:hover {
+	background: var(--card-hover);
+	border-color: var(--primary);
+	color: var(--primary);
+}
+/* #endregion */
+
+/* #region Booking toggle */
+.pedit__toggle {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 0.85rem 0.9rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--bg);
+	cursor: pointer;
+}
+
+.pedit__toggle input {
+	margin-top: 0.15rem;
+	width: 1.05rem;
+	height: 1.05rem;
+	accent-color: var(--primary);
+	cursor: pointer;
+}
+
+.pedit__toggle-text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+
+.pedit__toggle-title {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.pedit__toggle-desc {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+/* #endregion */
+
+/* #region Sidebar identity header (extends .profile-edit-side*) */
+.profile-edit-side__id {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	padding: 0.25rem 0.5rem 0.75rem;
+	min-width: 0;
+}
+
+.profile-edit-side__id-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.profile-edit-side__id-name {
+	font-weight: 650;
+	font-size: 0.92rem;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.profile-edit-side__id-handle {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+/* #endregion */

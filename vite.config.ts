@@ -84,6 +84,8 @@ export default defineConfig({
 			'@projective/fields': path.resolve(ROOT, 'packages/fields/mod.ts'),
 			'@projective/data': path.resolve(ROOT, 'packages/data/mod.ts'),
 			'@projective/charts': path.resolve(ROOT, 'packages/charts/mod.ts'),
+			'@projective/files': path.resolve(ROOT, 'packages/files/mod.ts'),
+			'@projective/time': path.resolve(ROOT, 'packages/time/mod.ts'),
 		},
 	},
 
@@ -95,6 +97,8 @@ export default defineConfig({
 			'@projective/types',
 			'@projective/data',
 			'@projective/charts',
+			'@projective/files',
+			'@projective/time',
 		],
 	},
 

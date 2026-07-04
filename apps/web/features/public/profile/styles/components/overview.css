@@ -1,0 +1,287 @@
+/* =========================================================================
+   Profile overview — About, Skills pills, right-hand details pane
+   ========================================================================= */
+
+/* #region About */
+.profile-about {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+/* Plain-text headline — a calm lead line, never a quote block. */
+.profile-about__headline {
+	margin: 0;
+	font-size: 1.1rem;
+	font-weight: 550;
+	line-height: 1.5;
+	color: var(--text-secondary);
+}
+
+/* Standard section heading shared by About / Skills. */
+.profile-about__heading {
+	margin: 0.35rem 0 0.15rem;
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.profile-about__para {
+	margin: 0;
+	color: var(--text-secondary);
+	line-height: 1.65;
+	font-size: 0.95rem;
+}
+
+.profile-about__how {
+	margin-top: 0.5rem;
+}
+
+.profile-about__how-title {
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+	font-weight: 650;
+	color: var(--text-main);
+}
+
+.profile-about__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.profile-about__list li {
+	position: relative;
+	padding-left: 1.35rem;
+	color: var(--text-secondary);
+	line-height: 1.55;
+	font-size: 0.92rem;
+}
+
+.profile-about__list li::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0.55rem;
+	width: 0.45rem;
+	height: 0.45rem;
+	border-radius: 50%;
+	background: var(--primary);
+}
+/* #endregion */
+
+/* #region Skills — soft rounded-full pills */
+.profile-skills__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.35rem;
+}
+
+.skill-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.8rem;
+	border-radius: 999px;
+	border: 1px solid var(--border-color);
+	background: var(--card);
+	color: var(--text-main);
+	font-size: 0.85rem;
+	font-weight: 550;
+	line-height: 1.2;
+	transition: border-color var(--fast), background var(--fast);
+}
+
+.skill-pill:hover {
+	border-color: var(--primary);
+}
+
+.skill-pill__icon {
+	display: inline-flex;
+	color: var(--primary);
+}
+
+.skill-pill__comp {
+	font-size: 0.72rem;
+	font-weight: 500;
+	color: var(--text-muted);
+	padding-left: 0.4rem;
+	margin-left: 0.1rem;
+	border-left: 1px solid var(--border-color);
+}
+
+.skill-pill[data-competency='Expert'] .skill-pill__comp {
+	color: var(--primary);
+}
+
+.skill-pill--more {
+	cursor: pointer;
+	background: transparent;
+	color: var(--primary);
+	border-color: var(--primary-half);
+	font-weight: 600;
+}
+
+.skill-pill--more:hover {
+	background: var(--primary-surface);
+}
+/* #endregion */
+
+/* #region Right-hand details pane (no structural heading) */
+.pmeta {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	padding: 1.1rem 1.2rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__xlarge);
+	background: var(--card);
+	position: sticky;
+	top: calc(var(--header-height) + 1rem);
+}
+
+/* Top-prioritised presence + local time */
+.pmeta-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.pmeta-top__status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.pmeta-top__status-label {
+	font-weight: 650;
+	font-size: 0.95rem;
+	color: var(--text-main);
+}
+
+.pmeta-top__time {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	line-height: 1.25;
+}
+
+.pmeta-top__clock {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-weight: 650;
+	font-size: 0.95rem;
+	color: var(--text-main);
+}
+
+.pmeta-top__clock svg {
+	color: var(--text-muted);
+}
+
+.pmeta-top__tz {
+	font-size: 0.76rem;
+	color: var(--text-muted);
+}
+
+.pmeta-divider {
+	height: 1px;
+	background: var(--border-color);
+	margin: 0.15rem 0;
+}
+
+.pmeta-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+.pmeta-row {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	font-size: 0.88rem;
+}
+
+.pmeta-row__icon {
+	display: inline-flex;
+	color: var(--text-muted);
+}
+
+.pmeta-row__label {
+	color: var(--text-muted);
+}
+
+.pmeta-row__value {
+	margin-left: auto;
+	color: var(--text-main);
+	font-weight: 600;
+	text-align: right;
+}
+
+/* Ratings */
+.pmeta-rating {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	font-size: 0.88rem;
+}
+
+.pmeta-rating__icon {
+	display: inline-flex;
+	color: var(--warning);
+}
+
+.pmeta-rating__label {
+	color: var(--text-muted);
+}
+
+.pmeta-rating__value {
+	margin-left: auto;
+	color: var(--text-main);
+	font-weight: 650;
+}
+
+.pmeta-muted {
+	color: var(--text-muted);
+	font-weight: 400;
+}
+
+/* Languages — plain text + fluency */
+.pmeta-langs {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.pmeta-lang {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.75rem;
+	font-size: 0.88rem;
+}
+
+.pmeta-lang__name {
+	color: var(--text-main);
+	font-weight: 600;
+}
+
+.pmeta-lang__fluency {
+	color: var(--text-muted);
+	font-size: 0.82rem;
+}
+/* #endregion */
+
+/* #region Compact — details pane sits inline above the tabs */
+@media (max-width: 1024px) {
+	.pmeta {
+		position: static;
+	}
+}
+/* #endregion */

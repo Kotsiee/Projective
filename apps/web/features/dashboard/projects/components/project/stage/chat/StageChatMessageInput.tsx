@@ -9,9 +9,9 @@ import {
 	IconX,
 } from '@tabler/icons-preact';
 import { Signal, useSignal } from '@preact/signals';
-import { FileTypeIcon, IconButton } from '@projective/ui';
+import { IconButton } from '@projective/ui';
 import { formatFileSize } from '@projective/data';
-import { UploadFileIsland } from '@features/shared/components/overlay/UploadFile.tsx';
+import { UploadFileIsland } from '@projective/files';
 import { FileWithMeta } from '@projective/types';
 import { useMemo, useRef } from 'preact/hooks';
 import AudioMessageInputVisualizer from './AudioMessageInput.tsx';

@@ -13,6 +13,7 @@ export * from './src/components/skeleton/index.ts';
 export * from './src/components/taglist/index.ts';
 export * from './src/components/icon/index.ts';
 export * from './src/components/media/index.ts';
+export * from './src/components/ledger/index.ts';
 export * from './src/hooks/useRipple.ts';
 export * from './src/hooks/useWizard.tsx';
 export * from './src/components/Logo.tsx';

@@ -381,6 +381,7 @@ export default function ProjectBoardIsland(
 				isOpen={isNewTicketOpen.value}
 				onClose={() => isNewTicketOpen.value = false}
 				availableStages={availableStages.value}
+				project={project.value}
 				preselectedStageId={selectedStageForNewTicket.value}
 				onSubmit={handleAddTicket}
 			/>
@@ -390,6 +391,7 @@ export default function ProjectBoardIsland(
 				onClose={() => isNewStageOpen.value = false}
 				projectId={activeProjectId || ''}
 				projectFormat={project.value?.format as 'pipeline' | 'one_off' | undefined}
+				existingStages={(project.value?.stages ?? []).map((s) => ({ id: s.id, name: s.name }))}
 			/>
 
 			<TicketModal
