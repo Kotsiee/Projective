@@ -10,6 +10,7 @@
  */
 
 import '../../styles/components/edit.css';
+import { Button, IconButton } from '@projective/ui';
 import { SelectField, type SelectOption, TagInput, TextField } from '@projective/fields';
 import { IconMoodSmile, IconPlus, IconSettings, IconUser, IconX } from '@tabler/icons-preact';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
@@ -173,14 +174,14 @@ export default function ProfileEditForm() {
 									searchable={false}
 								/>
 							</div>
-							<button
-								type='button'
-								class='pedit__skill-remove'
+							<IconButton
 								aria-label={`Remove ${s.label}`}
+								variant='secondary'
+								size='small'
 								onClick={() => removeSkill(s.id)}
 							>
 								<IconX size={16} />
-							</button>
+							</IconButton>
 						</div>
 					))}
 				</div>
@@ -278,20 +279,26 @@ export default function ProfileEditForm() {
 										searchable={false}
 									/>
 								</div>
-								<button
-									type='button'
-									class='pedit__skill-remove'
+								<IconButton
 									aria-label={`Remove ${l.name || 'language'}`}
+									variant='secondary'
+									size='small'
 									onClick={() => removeLang(l.id)}
 								>
 									<IconX size={16} />
-								</button>
+								</IconButton>
 							</div>
 						))}
 					</div>
-					<button type='button' class='pedit__add-btn' onClick={addLang}>
-						<IconPlus size={16} /> Add language
-					</button>
+					<Button
+						variant='secondary'
+						ghost
+						size='small'
+						startIcon={<IconPlus size={16} />}
+						onClick={addLang}
+					>
+						Add language
+					</Button>
 				</div>
 			</section>
 			{/* #endregion */}

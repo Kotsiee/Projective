@@ -16,7 +16,7 @@
 import '../../styles/components/availability.css';
 import { useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { Button, Modal, toast } from '@projective/ui';
+import { Button, IconButton, Modal, toast } from '@projective/ui';
 import { TextField } from '@projective/fields';
 import { IconClock, IconX } from '@tabler/icons-preact';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
@@ -81,9 +81,9 @@ export default function BookSessionModal() {
 							approves the request.
 						</p>
 					</div>
-					<button type='button' class='avail-book__close' aria-label='Close' onClick={closeBooking}>
+					<IconButton aria-label='Close' variant='secondary' onClick={closeBooking}>
 						<IconX size={20} />
-					</button>
+					</IconButton>
 				</header>
 				{/* #endregion */}
 
@@ -95,25 +95,28 @@ export default function BookSessionModal() {
 							? <p class='avail-book__rail-empty'>No bookable sessions.</p>
 							: (
 								<ul class='avail-book__services'>
-									{services.map((svc) => (
-										<li key={svc.id}>
-											<button
-												type='button'
-												class='avail-book__service'
-												data-selected={svc.id === state.serviceId}
-												onClick={() => selectService(svc)}
-											>
-												<span class='avail-book__service-top'>
-													<span class='avail-book__service-title'>{svc.title}</span>
-													<span class='avail-book__service-price'>{svc.priceLabel}</span>
-												</span>
-												<span class='avail-book__service-meta'>
-													<IconClock size={12} />
-													{svc.sessionMinutes ?? 30} min
-												</span>
-											</button>
-										</li>
-									))}
+									{services.map((svc) => {
+										const isSel = svc.id === state.serviceId;
+										return (
+											<li key={svc.id}>
+												<Button
+													variant={isSel ? 'secondary' : 'link'}
+													fullWidth
+													className={`avail-book__service${isSel ? ' is-selected' : ''}`}
+													onClick={() => selectService(svc)}
+												>
+													<span class='avail-book__service-top'>
+														<span class='avail-book__service-title'>{svc.title}</span>
+														<span class='avail-book__service-price'>{svc.priceLabel}</span>
+													</span>
+													<span class='avail-book__service-meta'>
+														<IconClock size={12} />
+														{svc.sessionMinutes ?? 30} min
+													</span>
+												</Button>
+											</li>
+										);
+									})}
 								</ul>
 							)}
 					</aside>
@@ -156,16 +159,15 @@ export default function BookSessionModal() {
 							<label class='avail-book__label'>Digital location</label>
 							<div class='avail-book__platforms'>
 								{PLATFORMS.map((p) => (
-									<button
+									<Button
 										key={p}
-										type='button'
-										class='avail-book__platform'
-										data-active={p === platform.value}
+										variant={p === platform.value ? 'secondary' : 'link'}
+										size='small'
+										startIcon={<PlatformIcon platform={p} size={16} />}
 										onClick={() => (platform.value = p)}
 									>
-										<PlatformIcon platform={p} size={16} />
-										<span>{platformLabel(p)}</span>
-									</button>
+										{platformLabel(p)}
+									</Button>
 								))}
 							</div>
 						</div>

@@ -1,5 +1,7 @@
 /* =========================================================================
    Profile side-nav action core (middle-nav side content)
+   All controls are the design-system Button; this file only arranges them into
+   a minimalist rail and drives the collapsed (icon-only) state.
    ========================================================================= */
 
 .profile-rail {
@@ -7,26 +9,20 @@
 	flex-direction: column;
 	height: 100%;
 	padding: 1rem 0.85rem;
-	gap: 0.35rem;
+	gap: 0.2rem;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 
-.profile-rail__back {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.55rem 0.6rem;
-	border-radius: var(--border-radius);
-	color: var(--text-secondary);
-	font-size: 0.88rem;
-	font-weight: 550;
-	text-decoration: none;
-	transition: background var(--fast), color var(--fast);
+/* DS buttons read as left-aligned, full-width nav rows inside the rail. */
+.profile-rail__navbtn {
+	width: 100%;
+	justify-content: flex-start;
 }
 
-.profile-rail__back:hover {
-	background: var(--card-hover);
-	color: var(--text-main);
+.profile-rail__navbtn .btn__content {
+	justify-content: flex-start;
+	width: 100%;
 }
 
 /* Identity chip */
@@ -34,7 +30,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
-	padding: 0.6rem;
+	padding: 0.55rem;
 	margin: 0.35rem 0 0.5rem;
 	border-radius: var(--border-radius__large);
 	background: var(--card);
@@ -61,11 +57,11 @@
 	color: var(--text-muted);
 }
 
-/* Groups */
+/* Groups (no headings) */
 .profile-rail__group {
 	display: flex;
 	flex-direction: column;
-	gap: 0.2rem;
+	gap: 0.15rem;
 	padding: 0.4rem 0;
 	border-top: 1px solid var(--border-color);
 }
@@ -74,82 +70,35 @@
 	border-top: none;
 }
 
-.profile-rail__group-title {
-	font-size: 0.68rem;
-	text-transform: uppercase;
-	letter-spacing: 0.07em;
-	color: var(--text-muted);
-	padding: 0.3rem 0.6rem 0.2rem;
+/* Collapse toggle — pinned to the very bottom with a divider above it. */
+.profile-rail__collapse {
+	margin-top: auto;
+	border-top: 1px solid var(--border-color);
+	border-radius: 0;
+	padding-top: 0.7rem;
 }
 
-/* Links / action buttons */
-.profile-rail__link {
-	display: flex;
-	align-items: center;
-	gap: 0.65rem;
-	width: 100%;
-	padding: 0.6rem 0.6rem;
-	border: none;
-	background: transparent;
-	color: var(--text-secondary);
-	border-radius: var(--border-radius__large);
-	font-size: 0.9rem;
-	font-weight: 550;
-	text-align: left;
-	text-decoration: none;
-	cursor: pointer;
-	transition: background var(--fast), color var(--fast);
+/* =========================================================================
+   Collapsed (icon-only) state
+   ========================================================================= */
+.profile-rail[data-collapsed='true'] {
+	padding: 1rem 0.5rem;
 }
 
-.profile-rail__link:hover {
-	background: var(--card-hover);
-	color: var(--text-main);
+.profile-rail[data-collapsed='true'] .btn__label,
+.profile-rail[data-collapsed='true'] .profile-rail__id-text {
+	display: none;
 }
 
-.profile-rail__link[data-active='true'] {
-	background: var(--primary-surface);
-	color: var(--primary);
-}
-
-.profile-rail__icon {
-	display: inline-flex;
-	flex-shrink: 0;
-}
-
-.profile-rail__link--primary {
-	background: var(--primary-surface);
-	color: var(--primary);
-	font-weight: 600;
-}
-
-.profile-rail__link--primary:hover {
-	background: var(--primary-half);
-	color: var(--primary);
-}
-
-/* Edit toggle */
-.profile-rail__edit {
-	display: inline-flex;
-	align-items: center;
+.profile-rail[data-collapsed='true'] .profile-rail__navbtn,
+.profile-rail[data-collapsed='true'] .profile-rail__navbtn .btn__content {
 	justify-content: center;
-	gap: 0.5rem;
-	width: 100%;
-	padding: 0.6rem 0.75rem;
-	border-radius: var(--border-radius__large);
-	border: 1px solid var(--primary);
-	background: var(--primary);
-	color: #fff;
-	font-size: 0.9rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: background var(--fast);
+	width: auto;
 }
 
-.profile-rail__edit:hover {
-	background: var(--primary-hover);
-}
-
-.profile-rail__edit[data-active='true'] {
-	background: transparent;
-	color: var(--primary);
+.profile-rail[data-collapsed='true'] .profile-rail__id {
+	justify-content: center;
+	gap: 0;
+	padding-left: 0;
+	padding-right: 0;
 }

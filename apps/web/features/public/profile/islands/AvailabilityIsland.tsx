@@ -17,13 +17,12 @@ import { mockProfile } from '../data/mockProfile.ts';
 
 import ProfileSideRail from '../components/rail/ProfileSideRail.tsx';
 import ProfileEditFooter from '../components/edit/ProfileEditFooter.tsx';
-import AvailabilityTab from '../components/availability/AvailabilityTab.tsx';
-import BookSessionModal from '../components/availability/BookSessionModal.tsx';
+import AvailabilityCalendar from '../components/availability/AvailabilityCalendar.tsx';
 
 function AvailabilityInner() {
 	const state = useProfileContext();
 	const { setMiddleNav } = useNavigationContext();
-	const { isEditing, isOwn } = state;
+	const { isEditing, isOwn, railCollapsed } = state;
 
 	useEffect(() => {
 		const wrap = (node: preact.ComponentChildren) => (
@@ -35,12 +34,12 @@ function AvailabilityInner() {
 			show: true,
 			headerHeight: '0px',
 			headerContent: null,
-			sideWidth: '248px',
+			sideWidth: railCollapsed.value ? '68px' : '248px',
 			sideContent: wrap(<ProfileSideRail activePage='availability' />),
 			footerHeight: editing ? '72px' : '0px',
 			footerContent: editing ? wrap(<ProfileEditFooter />) : null,
 		});
-	}, [isEditing.value, isOwn.value]);
+	}, [isEditing.value, isOwn.value, railCollapsed.value]);
 
 	useEffect(() => () => {
 		setMiddleNav({
@@ -56,8 +55,7 @@ function AvailabilityInner() {
 
 	return (
 		<div class='profile-availability-page'>
-			<AvailabilityTab />
-			<BookSessionModal />
+			<AvailabilityCalendar />
 		</div>
 	);
 }

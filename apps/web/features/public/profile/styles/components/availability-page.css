@@ -1,0 +1,144 @@
+/* Layout-only chrome for the availability calendar page. The calendar's own
+   visuals live in @projective/time (calendar.css); this file just arranges the
+   sidebar beside the main calendar and styles the compact weekly-rules list. */
+
+.avail-page {
+	display: grid;
+	grid-template-columns: 17rem minmax(0, 1fr);
+	gap: 1.5rem;
+	align-items: stretch;
+	flex: 1;
+	height: 100%;
+	min-height: 0;
+}
+
+.avail-page__side {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.25rem;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	background: color-mix(in srgb, var(--text-main) 2%, var(--card));
+	border: 1px solid color-mix(in srgb, var(--text-main) 10%, transparent);
+	border-radius: var(--border-radius__xlarge);
+}
+
+.avail-page__main {
+	min-width: 0;
+	min-height: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+/* #region Weekly rules list ------------------------------------------------ */
+.avail-page__rules {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	border-top: 1px solid color-mix(in srgb, var(--text-main) 8%, transparent);
+	padding-top: 1.15rem;
+}
+
+.avail-page__rules-title {
+	margin: 0;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.avail-page__rules-empty {
+	margin: 0;
+	font-size: 0.8125rem;
+	color: var(--text-muted);
+}
+
+.avail-page__rules-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+.avail-page__rule {
+	display: flex;
+	gap: 0.55rem;
+}
+
+.avail-page__rule-swatch {
+	flex: 0 0 3px;
+	border-radius: 999px;
+	align-self: stretch;
+}
+
+.avail-page__rule-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.avail-page__rule-top {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+}
+
+.avail-page__rule-label {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.avail-page__rule-days {
+	font-size: 0.6875rem;
+	color: var(--text-muted);
+}
+
+.avail-page__rule-slots {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+
+.avail-page__rule-slot {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	font-variant-numeric: tabular-nums;
+}
+
+.avail-page__rule-slot-name {
+	color: var(--text-muted);
+	font-variant-numeric: normal;
+}
+/* #endregion */
+
+/* #region Responsive ------------------------------------------------------- */
+@media (max-width: 60rem) {
+	.avail-page {
+		grid-template-columns: 1fr;
+	}
+
+	.avail-page__side {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.avail-page__side > * {
+		flex: 1 1 14rem;
+	}
+}
+/* #endregion */

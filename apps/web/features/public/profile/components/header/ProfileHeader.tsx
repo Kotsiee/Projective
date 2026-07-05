@@ -1,20 +1,13 @@
 /**
  * @file ProfileHeader.tsx
- * @description Lightweight profile canvas header: the overlapping avatar,
- * name / handle / role subtitle, a single primary CTA (public viewers only),
- * and a clean inline stat row (ratings, services, products). Secondary
- * engagement actions live in the side-nav action core; duplicated meta
- * (location, time, rate) lives only in the right-hand details pane.
+ * @description Minimal profile canvas header: the avatar overlaps the banner
+ * while the name/handle/subtitle sit cleanly below it. The subtitle is the
+ * headline. A single primary CTA shows for public viewers, and a clean counter
+ * string (Services · Products · Active projects) replaces the old rating chips.
  */
 
 import { Avatar } from '@projective/ui';
-import {
-	IconBox,
-	IconBriefcase,
-	IconRosetteDiscountCheckFilled,
-	IconStarFilled,
-	IconUserStar,
-} from '@tabler/icons-preact';
+import { IconRosetteDiscountCheckFilled } from '@tabler/icons-preact';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import { ProfilePrimaryCTA } from './ProfileCTAs.tsx';
 
@@ -24,13 +17,16 @@ export default function ProfileHeader() {
 	const own = isOwn.value;
 	const editing = isEditing.value && own;
 
+	const activeProjects = p.projects.filter((pr) => pr.status === 'active').length;
+
 	return (
 		<>
 			<div class='profile__head'>
-				<div class='profile__identity'>
-					<div class='profile__avatar'>
-						<Avatar name={p.displayName} src={p.avatarUrl} size={132} />
-					</div>
+				<div class='profile__avatar'>
+					<Avatar name={p.displayName} src={p.avatarUrl} size={132} />
+				</div>
+
+				<div class='profile__headrow'>
 					<div class='profile__namecol'>
 						<div class='profile__name-row'>
 							<h1 class='profile__name'>{p.displayName}</h1>
@@ -43,34 +39,27 @@ export default function ProfileHeader() {
 						<span class='profile__handle'>@{p.handle}</span>
 						<span class='profile__subtitle'>{p.subtitle}</span>
 					</div>
-				</div>
 
-				{!editing && !own && (
-					<div class='profile__actions'>
-						<ProfilePrimaryCTA />
-					</div>
-				)}
+					{!editing && !own && (
+						<div class='profile__actions'>
+							<ProfilePrimaryCTA />
+						</div>
+					)}
+				</div>
 			</div>
 
 			{!editing && (
 				<div class='profile__stats'>
 					<span class='profile-stat'>
-						<IconStarFilled size={15} class='profile-stat__star' />
-						<b>{p.meta.ratings.asFreelancer.score.toFixed(1)}</b>
-						<span class='profile-stat__muted'>({p.meta.ratings.asFreelancer.count})</span>
-					</span>
-					<span class='profile-stat'>
-						<IconUserStar size={15} />
-						<b>{p.meta.ratings.asClient.score.toFixed(1)}</b>
-						<span class='profile-stat__muted'>({p.meta.ratings.asClient.count})</span>
-					</span>
-					<span class='profile-stat'>
-						<IconBriefcase size={15} />
 						<b>{p.services.length}</b> Services
 					</span>
+					<span class='profile-stat__sep'>·</span>
 					<span class='profile-stat'>
-						<IconBox size={15} />
 						<b>{p.productCount}</b> Products
+					</span>
+					<span class='profile-stat__sep'>·</span>
+					<span class='profile-stat'>
+						<b>{activeProjects}</b> Active {activeProjects === 1 ? 'project' : 'projects'}
 					</span>
 				</div>
 			)}

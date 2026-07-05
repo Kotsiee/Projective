@@ -14,9 +14,15 @@
 	padding-bottom: 4rem;
 }
 
-/* Standalone availability page — full-width padded canvas. */
+/* Standalone availability page — height-locked to the viewport so the browser
+   window never scrolls; the calendar's own inner canvas is the sole scroller. */
 .profile-availability-page {
-	padding: 1.25rem 1.5rem 3rem;
+	height: calc(100dvh - var(--header-height));
+	padding: 1.25rem 1.5rem;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 /* #region Banner (full width of the content canvas) */
@@ -55,34 +61,24 @@
 	padding: 0 1rem;
 }
 
-/* Sentinel used by the IntersectionObserver to morph the sticky header. */
+/* Sentinel sits in normal flow at the banner's bottom edge; the observer
+   flips the sticky header the instant it crosses the app header line. */
 .profile__sentinel {
-	position: absolute;
-	top: calc(var(--profile-banner-h) + 40px);
 	height: 1px;
-	width: 1px;
+	width: 100%;
 	pointer-events: none;
 }
 /* #endregion */
 
-/* #region Header block (name / handle / status / CTAs) */
+/* #region Header block (name / handle / subtitle / CTA) */
+/* Only the avatar overlaps the banner; the name text always sits cleanly
+   below the banner edge so it can never clip the backdrop. */
 .profile__head {
 	position: relative;
 	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
-	gap: 1.5rem;
-	/* Pull up so the avatar overlaps the banner. */
-	margin-top: calc(var(--profile-avatar) / -2);
+	flex-direction: column;
+	gap: 0.85rem;
 	padding-bottom: 1.25rem;
-	flex-wrap: wrap;
-}
-
-.profile__identity {
-	display: flex;
-	align-items: flex-end;
-	gap: 1.25rem;
-	min-width: 0;
 }
 
 .profile__avatar {
@@ -94,20 +90,29 @@
 	flex-shrink: 0;
 	background: var(--card);
 	overflow: hidden;
+	/* Pull ONLY the avatar up into the banner. */
+	margin-top: calc(var(--profile-avatar) / -2);
 }
 
 .profile__avatar .avatar {
 	width: 100% !important;
 	height: 100% !important;
-	font-size: 3rem !important;
+	font-size: 2.75rem !important;
 	border-radius: 50%;
+}
+
+.profile__headrow {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
 }
 
 .profile__namecol {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
-	padding-bottom: 0.35rem;
+	gap: 0.15rem;
 	min-width: 0;
 }
 
@@ -150,40 +155,30 @@
 }
 /* #endregion */
 
-/* #region Inline stat row under the header */
+/* #region Minimal counter string under the header */
 .profile__stats {
 	display: flex;
 	align-items: center;
-	gap: 1.5rem;
+	gap: 0.6rem;
 	flex-wrap: wrap;
-	padding: 0.25rem 0 1.5rem;
+	padding: 0.1rem 0 1.5rem;
 	border-bottom: 1px solid var(--border-color);
+	font-size: 0.9rem;
+	color: var(--text-muted);
 }
 
 .profile-stat {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.4rem;
-	font-size: 0.9rem;
-	color: var(--text-secondary);
 	white-space: nowrap;
 }
 
 .profile-stat b {
 	color: var(--text-main);
 	font-weight: 650;
+	margin-right: 0.15rem;
 }
 
-.profile-stat svg {
-	color: var(--text-muted);
-}
-
-.profile-stat__star {
-	color: var(--warning) !important;
-}
-
-.profile-stat__muted {
-	color: var(--text-muted);
+.profile-stat__sep {
+	color: var(--text-disabled);
 }
 /* #endregion */
 

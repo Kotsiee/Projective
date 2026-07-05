@@ -1,9 +1,9 @@
-import './styles/availability-scheduler.css';
+import '../styles/availability-scheduler.css';
 import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 import { IconPlus, IconTrash, IconX } from '@tabler/icons-preact';
 import { LocalTimeChip } from './LocalTimeChip.tsx';
-import type { AvailabilitySlot, AvailabilityValue, AwayDate, Weekday } from './types.ts';
+import type { AvailabilitySlot, AvailabilityValue, AwayDate, Weekday } from '../types/scheduler.ts';
 
 export interface AvailabilitySchedulerProps {
 	open: boolean;

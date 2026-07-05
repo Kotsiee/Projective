@@ -60,20 +60,24 @@ function ProfileTabPanel({ tab }: { tab: ProfileTabKey }) {
 function ProfileInner() {
 	const state = useProfileContext();
 	const { setMiddleNav } = useNavigationContext();
-	const { isScrolled, isEditing, isOwn, activeTab } = state;
+	const { isScrolled, isEditing, isOwn, activeTab, railCollapsed } = state;
 
 	const sentinelRef = useRef<HTMLDivElement>(null);
 
-	// Scroll listener → morph the header once the banner scrolls under the top nav.
+	// Header mutation: a 1px sentinel sits at the bottom edge of the banner.
+	// Once it crosses above the app header line the main header morphs into the
+	// sticky middle-nav header; it reverts cleanly the moment it comes back.
+	// A single `isIntersecting` read (no rect maths) keeps the transition stable
+	// in both directions with no flicker at the boundary.
 	useEffect(() => {
 		const el = sentinelRef.current;
 		if (!el || typeof IntersectionObserver === 'undefined') return;
 
 		const io = new IntersectionObserver(
 			([entry]) => {
-				isScrolled.value = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+				isScrolled.value = !entry.isIntersecting;
 			},
-			{ threshold: 0, rootMargin: '-72px 0px 0px 0px' },
+			{ threshold: 0, rootMargin: '-64px 0px 0px 0px' },
 		);
 		io.observe(el);
 		return () => io.disconnect();
@@ -97,12 +101,12 @@ function ProfileInner() {
 			show: true,
 			headerHeight: showHeader ? '60px' : '0px',
 			headerContent: showHeader ? wrap(<ProfileStickyHeader />) : null,
-			sideWidth: '248px',
+			sideWidth: railCollapsed.value ? '68px' : '248px',
 			sideContent: wrap(<ProfileSideRail activePage='profile' />),
 			footerHeight: showFooter ? '72px' : '0px',
 			footerContent: showFooter ? wrap(<ProfileEditFooter />) : null,
 		});
-	}, [isScrolled.value, isEditing.value, isOwn.value, activeTab.value]);
+	}, [isScrolled.value, isEditing.value, isOwn.value, activeTab.value, railCollapsed.value]);
 
 	// Tear down chrome on unmount so it doesn't leak into other routes.
 	useEffect(() => () => {
@@ -122,6 +126,8 @@ function ProfileInner() {
 	return (
 		<div class='profile'>
 			<ProfileBanner />
+			{/* Sits at the banner's bottom edge — drives the header mutation. */}
+			<div ref={sentinelRef} class='profile__sentinel' aria-hidden='true' />
 			<div class='profile__canvas'>
 				<ProfileHeader />
 
@@ -135,8 +141,6 @@ function ProfileInner() {
 					</>
 				)}
 			</div>
-
-			<div ref={sentinelRef} class='profile__sentinel' aria-hidden='true' />
 		</div>
 	);
 }

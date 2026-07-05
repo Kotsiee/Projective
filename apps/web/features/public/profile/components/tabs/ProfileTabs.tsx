@@ -5,6 +5,7 @@
  * surfaced as small chips beside the label.
  */
 
+import { Button } from '@projective/ui';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { ProfileTabKey } from '../../contracts/Profile.ts';
 
@@ -27,18 +28,15 @@ export default function ProfileTabs() {
 				const active = activeTab.value === t.key;
 				const count = counts[t.key];
 				return (
-					<button
+					<Button
 						key={t.key}
-						type='button'
-						role='tab'
-						aria-selected={active}
-						class='profile-tabs__tab'
-						data-active={active}
+						variant={active ? 'secondary' : 'link'}
+						size='small'
+						badge={typeof count === 'number' ? count : undefined}
 						onClick={() => setTab(t.key)}
 					>
 						{t.label}
-						{typeof count === 'number' && <span class='profile-tabs__count'>{count}</span>}
-					</button>
+					</Button>
 				);
 			})}
 		</nav>

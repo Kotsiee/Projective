@@ -1,4 +1,4 @@
-import './styles/local-time-chip.css';
+import '../styles/local-time-chip.css';
 import { useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 import { IconClock } from '@tabler/icons-preact';

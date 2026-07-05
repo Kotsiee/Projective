@@ -6,6 +6,7 @@
  */
 
 import { useSignal } from '@preact/signals';
+import { Button } from '@projective/ui';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import { SkillIcon } from './skillIcons.tsx';
 
@@ -34,22 +35,14 @@ export default function ProfileSkills() {
 				))}
 
 				{hidden > 0 && (
-					<button
-						type='button'
-						class='skill-pill skill-pill--more'
-						onClick={() => (expanded.value = true)}
-					>
+					<Button variant='link' size='small' onClick={() => (expanded.value = true)}>
 						+{hidden} more
-					</button>
+					</Button>
 				)}
 				{expanded.value && skills.length > COLLAPSED_COUNT && (
-					<button
-						type='button'
-						class='skill-pill skill-pill--more'
-						onClick={() => (expanded.value = false)}
-					>
+					<Button variant='link' size='small' onClick={() => (expanded.value = false)}>
 						Show less
-					</button>
+					</Button>
 				)}
 			</div>
 		</section>

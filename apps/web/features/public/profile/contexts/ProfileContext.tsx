@@ -47,6 +47,9 @@ export interface ProfileState {
 	/** ISO date (YYYY-MM-DD) the calendar is centred on. */
 	calendarCursor: Signal<string>;
 
+	/** Whether the side-nav action rail is collapsed to icons (persisted). */
+	railCollapsed: Signal<boolean>;
+
 	draft: Signal<ProfileDraft>;
 	bookingModal: Signal<BookingModalState>;
 
@@ -61,6 +64,7 @@ export interface ProfileState {
 	toggleSaved: () => void;
 	toggleConnect: () => void;
 	toggleMember: () => void;
+	toggleRail: () => void;
 
 	openBooking: (date: string, start: number, end?: number, serviceId?: string | null) => void;
 	updateBooking: (patch: Partial<BookingModalState>) => void;
@@ -123,6 +127,9 @@ export function ProfileProvider(
 	const projectsView = useSignal<ListGridView>('grid');
 	const calendarView = useSignal<CalendarView>('week');
 	const calendarCursor = useSignal<string>(firstBookableDate(profile));
+
+	// Rail collapse — collapsed by default, restored from localStorage.
+	const railCollapsed = useSignal<boolean>(readRailCollapsed());
 
 	const draft = useSignal<ProfileDraft>(draftFromProfile(profile));
 
@@ -188,6 +195,14 @@ export function ProfileProvider(
 	const toggleConnect = () => flip('isConnected');
 	const toggleMember = () => flip('isMember');
 
+	const toggleRail = () => {
+		const next = !railCollapsed.value;
+		railCollapsed.value = next;
+		if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
+			globalThis.localStorage.setItem('profile_rail_collapsed', String(next));
+		}
+	};
+
 	const openBooking = (
 		date: string,
 		start: number,
@@ -224,6 +239,7 @@ export function ProfileProvider(
 				projectsView,
 				calendarView,
 				calendarCursor,
+				railCollapsed,
 				draft,
 				bookingModal,
 				setTab,
@@ -235,6 +251,7 @@ export function ProfileProvider(
 				toggleSaved,
 				toggleConnect,
 				toggleMember,
+				toggleRail,
 				openBooking,
 				updateBooking,
 				closeBooking,
@@ -257,6 +274,15 @@ export function useProfileContext(): ProfileState {
 export { ProfileContext };
 
 // #region Local helpers
+/** Reads the persisted rail-collapse preference; defaults to collapsed. */
+function readRailCollapsed(): boolean {
+	if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
+		const stored = globalThis.localStorage.getItem('profile_rail_collapsed');
+		if (stored !== null) return stored === 'true';
+	}
+	return true; // collapsed by default
+}
+
 /** Picks a sensible starting date for the calendar cursor from seed bookings. */
 function firstBookableDate(p: ProfileData): string {
 	const dated = [...p.availability.bookings].sort((a, b) => a.date.localeCompare(b.date));

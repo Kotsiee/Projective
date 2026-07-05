@@ -789,6 +789,26 @@
 	gap: 0.4rem;
 }
 
+/* The service list item is a DS Button; flatten its content wrappers so the
+   two inner rows lay out directly, and scope the card look above .btn variants. */
+.avail-book__service .btn__content,
+.avail-book__service .btn__label {
+	display: contents;
+}
+
+.avail-book__service.btn {
+	padding: 0.6rem 0.7rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+	text-align: left;
+}
+
+.avail-book__service.btn:hover {
+	border-color: var(--primary);
+	background: var(--card);
+}
+
 .avail-book__service {
 	display: flex;
 	flex-direction: column;
@@ -807,7 +827,7 @@
 	border-color: var(--primary);
 }
 
-.avail-book__service[data-selected='true'] {
+.avail-book__service.is-selected {
 	border-color: var(--primary);
 	background: var(--primary-surface);
 }

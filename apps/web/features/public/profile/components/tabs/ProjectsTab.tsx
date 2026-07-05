@@ -8,7 +8,7 @@
 import '../../styles/components/projects.css';
 
 import { useSignal } from '@preact/signals';
-import { Tag } from '@projective/ui';
+import { Button, IconButton, Tag } from '@projective/ui';
 import {
 	IconChevronRight,
 	IconGitFork,
@@ -95,16 +95,16 @@ function ProjectSection(
 
 	return (
 		<section class='repo-branch' data-open={open.value}>
-			<button
-				type='button'
-				class='repo-branch__toggle'
-				aria-expanded={open.value}
+			<Button
+				variant='link'
+				size='small'
+				fullWidth
+				startIcon={<IconChevronRight size={16} class='repo-branch__chevron' />}
+				badge={items.length}
 				onClick={() => (open.value = !open.value)}
 			>
-				<IconChevronRight size={16} class='repo-branch__chevron' />
-				<span class='repo-branch__label'>{label}</span>
-				<span class='repo-branch__count'>{items.length}</span>
-			</button>
+				{label}
+			</Button>
 			{open.value && (
 				<div class='repo-grid'>
 					{items.map((p) => <ProjectCard key={p.id} p={p} />)}
@@ -130,24 +130,24 @@ export default function ProjectsTab() {
 					<p class='tab-head__sub'>{projects.length} projects owned & contributed to</p>
 				</div>
 				<div class='view-toggle' role='group' aria-label='View mode'>
-					<button
-						type='button'
-						class='view-toggle__btn'
-						data-active={view === 'grid'}
+					<IconButton
 						aria-label='Grid view'
+						variant={view === 'grid' ? 'primary' : 'secondary'}
+						ghost={view !== 'grid'}
+						size='small'
 						onClick={() => (projectsView.value = 'grid')}
 					>
 						<IconLayoutGrid size={17} />
-					</button>
-					<button
-						type='button'
-						class='view-toggle__btn'
-						data-active={view === 'list'}
+					</IconButton>
+					<IconButton
 						aria-label='List view'
+						variant={view === 'list' ? 'primary' : 'secondary'}
+						ghost={view !== 'list'}
+						size='small'
 						onClick={() => (projectsView.value = 'list')}
 					>
 						<IconList size={17} />
-					</button>
+					</IconButton>
 				</div>
 			</header>
 

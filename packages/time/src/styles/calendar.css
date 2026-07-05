@@ -1,0 +1,668 @@
+/* Minimalist calendar — an SVG-driven continuous vertical timeline plus a static
+   month grid and a compact mini month. Hairline rules, generous whitespace, soft
+   washed events. Inspired by Fantastical / Morgen / Apple Calendar and the repo's
+   own Kanban surfaces. All colour comes from the global Projective tokens; event
+   and window accents arrive per-item via inline SVG fills. */
+
+.cal {
+	/* Local design tokens — one place for the calendar's line + surface language. */
+	--cal-hairline: color-mix(in srgb, var(--text-main) 6%, transparent);
+	--cal-hairline-strong: color-mix(in srgb, var(--text-main) 10%, transparent);
+	--cal-surface: color-mix(in srgb, var(--text-main) 2%, var(--card));
+	--cal-radius: var(--border-radius__xlarge);
+	--cal-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	color: var(--text-main);
+}
+
+/* #region Toolbar ---------------------------------------------------------- */
+.cal-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	padding: 0 0.25rem 1rem;
+}
+
+.cal-toolbar__nav {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.cal-toolbar__label {
+	font-size: 1.0625rem;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+	white-space: nowrap;
+}
+
+.cal-toolbar__stepper {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.cal-toolbar__chev {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.85rem;
+	height: 1.85rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--border-radius__small);
+	cursor: pointer;
+	transition: background var(--fast) ease, color var(--fast) ease;
+}
+
+.cal-toolbar__chev:hover {
+	background: color-mix(in srgb, var(--text-main) 7%, transparent);
+	color: var(--text-main);
+}
+
+.cal-toolbar__today {
+	height: 1.85rem;
+	padding: 0 0.8rem;
+	border: 1px solid var(--cal-hairline-strong);
+	background: transparent;
+	color: var(--text-secondary);
+	border-radius: 999px;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background var(--fast) ease, color var(--fast) ease, border-color var(--fast) ease;
+}
+
+.cal-toolbar__today:hover {
+	background: color-mix(in srgb, var(--text-main) 6%, transparent);
+	border-color: color-mix(in srgb, var(--text-main) 20%, transparent);
+	color: var(--text-main);
+}
+
+.cal-toolbar__views {
+	display: inline-flex;
+	padding: 3px;
+	background: color-mix(in srgb, var(--text-main) 4%, transparent);
+	border-radius: 999px;
+	gap: 2px;
+}
+
+.cal-toolbar__view {
+	padding: 0.35rem 0.9rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: 999px;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background var(--medium) var(--cal-ease), color var(--medium) var(--cal-ease);
+}
+
+.cal-toolbar__view:hover {
+	color: var(--text-main);
+}
+
+.cal-toolbar__view[data-active='true'] {
+	background: var(--card);
+	color: var(--text-main);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+/* #endregion */
+
+.cal__body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+/* #region SVG timeline (day / week) --------------------------------------- */
+.cal-grid {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	border: 1px solid var(--cal-hairline-strong);
+	border-radius: var(--cal-radius);
+	background: var(--cal-surface);
+	overflow: hidden;
+}
+
+/* Fixed header band above the scroll canvas — reflects the centred day/week and
+   updates live as the timeline scrolls. */
+.cal-grid__headband {
+	display: flex;
+	border-bottom: 1px solid var(--cal-hairline);
+	background: var(--cal-surface);
+}
+
+.cal-grid__head-gutter {
+	flex: 0 0 56px;
+}
+
+.cal-grid__day-head {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.7rem 0;
+	border-left: 1px solid var(--cal-hairline);
+}
+
+.cal-grid__dow {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.cal-grid__date {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.85rem;
+	height: 1.85rem;
+	padding: 0 0.4rem;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--text-main);
+	border-radius: 999px;
+	transition: background var(--medium) var(--cal-ease), color var(--medium) var(--cal-ease);
+}
+
+.cal-grid__date[data-today='true'] {
+	background: var(--primary);
+	color: #fff;
+	box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+/* Infinite viewport — overflow hidden, NO native scroll. A virtual `offset`
+   drives the render; the custom floating scrollbar is the only scroll affordance. */
+.cal-viewport {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	scrollbar-width: none;
+	touch-action: none;
+}
+
+.cal-viewport::-webkit-scrollbar {
+	display: none;
+}
+
+/* Absolute paint surface filling the viewport; the SVG repaints the visible slice
+   from the virtual offset. Nothing mounts/unmounts on scroll. */
+.cal-viewport__paint {
+	position: absolute;
+	inset: 0;
+	user-select: none;
+}
+
+/* #region Floating custom scrollbar — Gantt-parity relative thumb ---------- */
+.cal-scrollbar {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 14px;
+	/* Track is transparent on idle; only the thumb is interactive. */
+	pointer-events: none;
+	z-index: 6;
+}
+
+.cal-scrollbar__thumb {
+	position: absolute;
+	right: 4px;
+	width: 6px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--text-main) 24%, transparent);
+	pointer-events: auto;
+	cursor: default;
+	touch-action: none;
+	transition:
+		top 200ms var(--cal-ease),
+		height 200ms var(--cal-ease),
+		width 120ms ease,
+		background 120ms ease;
+}
+
+.cal-scrollbar__thumb[data-active='true'] {
+	width: 8px;
+	background: color-mix(in srgb, var(--text-main) 50%, transparent);
+}
+
+/* No positional easing while actively dragging — the thumb must track the finger. */
+.cal-scrollbar__thumb[data-dragging='true'] {
+	transition: width 120ms ease, background 120ms ease;
+}
+/* #endregion */
+
+.cal-svg {
+	display: block;
+	width: 100%;
+	/* Grid/labels are inert; only event groups opt back in to receive clicks. */
+	pointer-events: none;
+}
+
+.cal-svg__axis {
+	stroke: var(--cal-hairline-strong);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.cal-svg__col {
+	stroke: var(--cal-hairline);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.cal-svg__hour {
+	stroke: var(--cal-hairline);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.cal-svg__hour--day {
+	stroke: var(--cal-hairline-strong);
+}
+
+.cal-svg__label {
+	fill: var(--text-disabled);
+	font-size: 11px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
+.cal-svg__datelabel {
+	fill: var(--text-muted);
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.cal-svg__today {
+	fill: color-mix(in srgb, var(--primary) 4%, transparent);
+}
+
+.cal-svg__hatch-bg {
+	fill: color-mix(in srgb, var(--text-main) 3%, transparent);
+}
+
+.cal-svg__hatch-line {
+	stroke: color-mix(in srgb, var(--text-main) 8%, transparent);
+	stroke-width: 6;
+}
+
+/* Event blocks — soft wash + vibrant left accent, drawn as vectors. */
+.cal-svg__event {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.cal-svg__event-bg {
+	transition: filter var(--medium) var(--cal-ease);
+}
+
+.cal-svg__event:hover .cal-svg__event-bg {
+	filter: brightness(1.12);
+}
+
+.cal-svg__event-title {
+	fill: var(--text-main);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	pointer-events: none;
+}
+
+.cal-svg__event-time {
+	fill: var(--text-muted);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+}
+
+.cal-svg__hover {
+	fill: var(--primary-surface);
+	stroke: color-mix(in srgb, var(--primary) 32%, transparent);
+	stroke-width: 1;
+}
+
+.cal-svg__sel {
+	fill: color-mix(in srgb, var(--primary) 18%, transparent);
+	stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+	stroke-width: 1;
+}
+
+.cal-svg__now {
+	stroke: var(--danger);
+	stroke-width: 1.5;
+}
+
+.cal-svg__now-dot {
+	fill: var(--danger);
+}
+/* #endregion */
+
+/* #region Month view ------------------------------------------------------- */
+.cal-month {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	border: 1px solid var(--cal-hairline-strong);
+	border-radius: var(--cal-radius);
+	background: var(--cal-surface);
+	overflow: hidden;
+}
+
+/* Continuous month stream — each month is an absolutely-positioned block driven
+   by the virtual offset (transform), stacked seamlessly with no pagination. */
+.cal-monthblock {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	flex-direction: column;
+	will-change: transform;
+}
+
+.cal-monthblock__label {
+	display: flex;
+	align-items: center;
+	height: 40px;
+	padding: 0 0.9rem;
+	font-size: 0.9rem;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+	border-bottom: 1px solid var(--cal-hairline);
+	background: var(--cal-surface);
+}
+
+.cal-monthblock__grid {
+	flex: 1;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+}
+
+.cal-month__dow {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	border-bottom: 1px solid var(--cal-hairline);
+	background: color-mix(in srgb, var(--text-main) 1.5%, transparent);
+}
+
+.cal-month__dow-cell {
+	padding: 0.65rem 0;
+	text-align: center;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.cal-month__grid {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	grid-auto-rows: 1fr;
+}
+
+.cal-month__cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-height: 5.5rem;
+	padding: 0.5rem;
+	border: none;
+	border-top: 1px solid var(--cal-hairline);
+	border-left: 1px solid var(--cal-hairline);
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--medium) var(--cal-ease);
+}
+
+.cal-month__cell:nth-child(7n+1) {
+	border-left: none;
+}
+
+.cal-month__cell:hover {
+	background: color-mix(in srgb, var(--text-main) 3%, transparent);
+}
+
+.cal-month__cell[data-outside='true'] .cal-month__num {
+	color: var(--text-disabled);
+}
+
+.cal-month__cell[data-off='true'] {
+	background: repeating-linear-gradient(
+		45deg,
+		color-mix(in srgb, var(--text-main) 3%, transparent),
+		color-mix(in srgb, var(--text-main) 3%, transparent) 7px,
+		transparent 7px,
+		transparent 14px
+	);
+}
+
+.cal-month__num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.65rem;
+	height: 1.65rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	border-radius: 999px;
+	align-self: flex-start;
+	transition: background var(--medium) var(--cal-ease), color var(--medium) var(--cal-ease);
+}
+
+.cal-month__num[data-today='true'] {
+	background: var(--primary);
+	color: #fff;
+	box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.cal-month__events {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+
+.cal-month__chip {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.1rem 0.35rem;
+	border-radius: var(--border-radius__small);
+	min-width: 0;
+	cursor: pointer;
+	transition: background var(--fast) ease;
+}
+
+.cal-month__chip:hover {
+	background: color-mix(in srgb, var(--cal-event-accent, var(--primary)) 14%, transparent);
+}
+
+.cal-month__chip-dot {
+	flex: 0 0 6px;
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--cal-event-accent, var(--primary));
+}
+
+.cal-month__chip-time {
+	font-size: 0.6875rem;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.cal-month__chip-title {
+	font-size: 0.6875rem;
+	font-weight: 500;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cal-month__more {
+	font-size: 0.6875rem;
+	font-weight: 500;
+	color: var(--text-muted);
+	padding-left: 0.35rem;
+}
+
+.cal-month__off {
+	font-size: 0.6875rem;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+/* #endregion */
+
+/* #region Mini calendar ---------------------------------------------------- */
+.cal-mini {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.cal-mini__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.cal-mini__month {
+	font-size: 0.8125rem;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+}
+
+.cal-mini__nav {
+	display: flex;
+	gap: 0.15rem;
+}
+
+.cal-mini__navbtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.6rem;
+	height: 1.6rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: 999px;
+	cursor: pointer;
+	transition: background var(--fast) ease, color var(--fast) ease;
+}
+
+.cal-mini__navbtn:hover {
+	background: color-mix(in srgb, var(--text-main) 7%, transparent);
+	color: var(--text-main);
+}
+
+.cal-mini__dow {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	margin-bottom: 0.15rem;
+}
+
+.cal-mini__dow-cell {
+	text-align: center;
+	font-size: 0.625rem;
+	font-weight: 600;
+	color: var(--text-disabled);
+}
+
+.cal-mini__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+.cal-mini__day {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1;
+	border: none;
+	background: transparent;
+	border-radius: 999px;
+	cursor: pointer;
+	transition: background var(--fast) ease;
+}
+
+.cal-mini__day:hover {
+	background: color-mix(in srgb, var(--text-main) 7%, transparent);
+}
+
+.cal-mini__daynum {
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	font-variant-numeric: tabular-nums;
+}
+
+.cal-mini__day[data-outside='true'] .cal-mini__daynum {
+	color: var(--text-disabled);
+}
+
+.cal-mini__day[data-today='true'] .cal-mini__daynum {
+	color: var(--primary);
+	font-weight: 700;
+}
+
+.cal-mini__day[data-selected='true'] {
+	background: var(--primary);
+}
+
+.cal-mini__day[data-selected='true']:hover {
+	background: var(--primary);
+}
+
+.cal-mini__day[data-selected='true'] .cal-mini__daynum {
+	color: #fff;
+	font-weight: 600;
+}
+
+.cal-mini__day[data-off='true'] .cal-mini__daynum {
+	text-decoration: line-through;
+	color: var(--text-disabled);
+}
+
+.cal-mini__dot {
+	position: absolute;
+	bottom: 3px;
+	width: 3px;
+	height: 3px;
+	border-radius: 999px;
+	background: var(--primary);
+}
+
+.cal-mini__day[data-selected='true'] .cal-mini__dot {
+	background: #fff;
+}
+/* #endregion */

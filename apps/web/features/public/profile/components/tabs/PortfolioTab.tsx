@@ -8,6 +8,7 @@
 import '../../styles/components/portfolio.css';
 
 import { useSignal } from '@preact/signals';
+import { Button } from '@projective/ui';
 import {
 	type Icon,
 	IconFileText,
@@ -93,16 +94,15 @@ export default function PortfolioTab() {
 
 			<div class='pfolio-filters' role='tablist' aria-label='Filter portfolio'>
 				{filters.map((f) => (
-					<button
+					<Button
 						key={f}
-						type='button'
-						class='pfolio-filter'
-						data-active={active.value === f}
-						aria-selected={active.value === f}
+						variant={active.value === f ? 'secondary' : 'link'}
+						size='small'
+						rounded
 						onClick={() => (active.value = f)}
 					>
 						{f}
-					</button>
+					</Button>
 				))}
 			</div>
 

@@ -7,7 +7,7 @@
 
 import '../../styles/components/services.css';
 
-import { Button, Tag } from '@projective/ui';
+import { Button, IconButton, Tag } from '@projective/ui';
 import {
 	IconCalendarEvent,
 	IconClock,
@@ -81,24 +81,24 @@ export default function ServicesTab() {
 					<p class='tab-head__sub'>{services.length} offerings you can hire or book</p>
 				</div>
 				<div class='view-toggle' role='group' aria-label='View mode'>
-					<button
-						type='button'
-						class='view-toggle__btn'
-						data-active={view === 'grid'}
+					<IconButton
 						aria-label='Grid view'
+						variant={view === 'grid' ? 'primary' : 'secondary'}
+						ghost={view !== 'grid'}
+						size='small'
 						onClick={() => (servicesView.value = 'grid')}
 					>
 						<IconLayoutGrid size={17} />
-					</button>
-					<button
-						type='button'
-						class='view-toggle__btn'
-						data-active={view === 'list'}
+					</IconButton>
+					<IconButton
 						aria-label='List view'
+						variant={view === 'list' ? 'primary' : 'secondary'}
+						ghost={view !== 'list'}
+						size='small'
 						onClick={() => (servicesView.value = 'list')}
 					>
 						<IconList size={17} />
-					</button>
+					</IconButton>
 				</div>
 			</header>
 
