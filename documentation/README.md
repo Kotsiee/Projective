@@ -12,7 +12,7 @@ entire "micro-agencies" to deliver structured, stage-based projects with escrow-
    technical reference for UI component APIs, styling variables, and Deno/Fresh system directives.
 3. Everything else in `documentation/` is either (a) detail that fills a gap the brain files
    deliberately leave abstract, or (b) content the brain files don't cover at all (investor
-   narrative, market data, per-route API tables, user stories). None of it should *restate* what's
+   narrative, market data, per-route API tables). None of it should *restate* what's
    already in the brain files — if you find a file doing that, it's a redundancy bug; consolidate
    or delete it.
 
@@ -51,11 +51,12 @@ dumped in `codebase_context.md`. If you need Fields API detail, go to `codebase_
 Implementation-level workflow detail (state diagrams, stage archetypes) complementing `brain.md`'s
 business-level "Projects & Services" description.
 
-### [user-stories/](user-stories/README.md)
+### User stories & delivery status → `../project_management/`
 
-Concrete acceptance-criteria-format user stories (as a [persona], I want X, so that Y) with
-technical implementation notes, organized by domain (identity-access, organisational-structures,
-project-engine, finance-escrow).
+User stories and the live implementation-status boards (epics, features, per-story acceptance
+criteria) now live in the repo-root [`project_management/`](../project_management/README.md)
+directory, not here. That directory tracks *current build state* as text Kanbans; this folder
+remains the durable *spec*. See the root `CLAUDE.md` for the rule that keeps the two in sync.
 
 ## Technical Overview
 
