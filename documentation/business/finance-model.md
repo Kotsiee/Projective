@@ -10,6 +10,11 @@
 > service fee — this file (and the wallet ledger example below) consistently say **5%**, while
 > `investor-summary.md` states **10%**. Neither figure appears in `brain.md`. Resolve which is
 > current before using either number externally.
+>
+> **Implemented value:** the escrow engine now operationalizes **5%** — `security.platform_params`
+> `platform_fee_bp = 500` (set in migration `0305`), applied on escrow release by
+> `finance.fn_release_ticket_escrow`. The `investor-summary.md` 10% figure remains **unreconciled**
+> for external/investor use; this note preserves the conflict rather than erasing it.
 
 ---
 
@@ -61,6 +66,14 @@
 | **Session-Based** | Educate, Advise | Scheduled session duration completed and logged |
 | **Maintenance** | Run, Test | Completion of the `MaintenanceCycleInterval` (Weekly/Monthly) with no open dispute |
 
+> **Stage-level entry points (implementation):** the client drives this loop from the stage Finance
+> tab against **pre-loaded wallet balances** (Stripe fiat top-up deferred). `projects.fund_stage`
+> holds escrow for an **assigned** stage's tickets (spending-limit checked, isolated to the stage)
+> and moves it `assigned → in_progress`, emitting a "stage funded" notification via `comms.fn_notify`.
+> `projects.approve_stage` is the "Approve" trigger above — it releases the stage's held escrow with
+> the 5% fee and team smart-splits, marking the stage `paid`. Both are `SECURITY DEFINER` wrappers
+> over the `finance.*` engine (migrations `0009`, `0305`).
+
 ## 3. The "Fair Exit" Logic — 25/50/75 Splits
 
 Time-based split for early termination of **File-Based** stages, comparing `stage.started_at` /
@@ -73,6 +86,14 @@ current time against `stage.deadline`:
 - **> 75% of stage duration (or final submission):** Full payout to freelancer.
 
 **Worked example:** a £1,000 stage cancelled at 40% duration triggers an automatic £500/£500 split.
+
+> **Implementation (current):** the split is exposed as a **client-selected settlement tier** rather
+> than auto-derived from elapsed duration. `projects.cancel_stage_fair_exit(project_id, stage_id,
+> tier)` (migration `0305`, tier ∈ `{25, 50, 75}`) pays the freelancer that percentage of each held
+> escrow's principal — net of the 5% fee, team-split-aware — and refunds the remainder to the client
+> business wallet, marking the stage `cancelled`. The automatic duration-thresholding above
+> (`<25%` → full refund, `25–75%` → 50/50, `>75%` → full payout) is **not yet wired**; the tier is
+> currently supplied explicitly by the cancelling client.
 
 ## 4. Session & Maintenance-Specific Exit Rules
 

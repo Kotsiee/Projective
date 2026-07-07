@@ -86,7 +86,8 @@ export interface StageDetails {
 		| 'submitted'
 		| 'approved'
 		| 'revisions'
-		| 'paid';
+		| 'paid'
+		| 'cancelled';
 	ip_mode:
 		| 'exclusive_transfer'
 		| 'licensed_use'

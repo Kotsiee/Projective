@@ -111,4 +111,17 @@
 	color: var(--text-muted);
 }
 
+.inbox__item[data-unread='true'] .inbox__item-indicator {
+	background-color: var(--primary);
+}
+
+.inbox__empty {
+	padding: 2rem 1.25rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+	border: 1px dashed var(--border-color);
+	border-radius: var(--border-radius__large, 12px);
+}
+
 /* #endregion */

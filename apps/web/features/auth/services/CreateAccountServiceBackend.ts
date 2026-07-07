@@ -51,8 +51,12 @@ export class CreateAccountBackendService {
 			const getClient = deps.getClient ?? supabaseClient;
 			const supabase = await getClient();
 
-			// Database Sync: Supabase Trigger will automatically populate users_public and freelancer_profiles
-			// using this metadata as soon as the Auth insert finalises in Gotrue.
+			// Database Sync: the on_auth_user_created trigger (handle_new_user) consumes this
+			// metadata as soon as the Auth insert finalises in Gotrue. In one transaction it
+			// populates users_public + freelancer_profiles, initialises security.session_context
+			// with the active profile (US-001 AC4), and writes the 'user.onboarded' entry to
+			// security.audit_logs (US-001 AC6). audit_logs is definer-only, so those writes must
+			// stay in the trigger — not here.
 			const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
 				email: email,
 				password: password,

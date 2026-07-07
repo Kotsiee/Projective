@@ -9,7 +9,9 @@ bridges the gap between Supabase Auth and the application's domain-specific RLS 
 
 The heart of the application's context-switching logic. It tracks which persona (freelancer,
 business, or team) the user is currently acting as. This state is synchronized with the user's JWT
-to drive Row-Level Security across all other schemas.
+to drive Row-Level Security across all other schemas. The row is initialised during onboarding by
+`public.handle_new_user()` — freelancers get their profile as the active context, while client/buyer
+accounts start with no active profile until they create a Business or Team.
 
 | Column                | Type         | Notes                          |
 | :-------------------- | :----------- | :----------------------------- |
@@ -68,7 +70,7 @@ dispute resolution and security auditing.
 | Column             | Type  | Notes                                            |
 | :----------------- | :---- | :----------------------------------------------- |
 | `user_id`          | uuid  | The human user performing the action.            |
-| `action`           | text  | e.g., `stage.approved`, `dispute.opened`.        |
+| `action`           | text  | e.g., `user.onboarded`, `stage.approved`, `dispute.opened`. |
 | `actor_profile_id` | uuid  | The profile ID active at the time of the action. |
 | `ip`               | inet  | Client IP address.                               |
 | `metadata`         | jsonb | Structured data regarding the change.            |

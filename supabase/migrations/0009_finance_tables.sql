@@ -292,6 +292,9 @@ DECLARE
     v record;
     v_amount bigint;
     v_escrow_id uuid;
+    v_team_id uuid;
+    v_payee_type assignment_type;
+    v_payee_id uuid;
 BEGIN
     SELECT
         t.current_stage_id AS stage_id,
@@ -307,7 +310,26 @@ BEGIN
 
     v_amount := v.amount;
 
-    IF v.payer IS NULL OR v.stage_id IS NULL OR v.payee_id IS NULL
+    -- Prefer an accepted team assignment on the ticket's current stage so the payout splits
+    -- across the team at release (fn_split_team_payout keys off escrow.payee_type = 'team').
+    -- Otherwise the payee is the individual freelancer assigned to the ticket.
+    SELECT sa.team_id INTO v_team_id
+    FROM projects.stage_assignments sa
+    WHERE sa.project_stage_id = v.stage_id
+        AND sa.assignee_type = 'team'
+        AND sa.status = 'accepted'
+        AND sa.team_id IS NOT NULL
+    LIMIT 1;
+
+    IF v_team_id IS NOT NULL THEN
+        v_payee_type := 'team'::assignment_type;
+        v_payee_id := v_team_id;
+    ELSE
+        v_payee_type := 'freelancer'::assignment_type;
+        v_payee_id := v.payee_id;
+    END IF;
+
+    IF v.payer IS NULL OR v.stage_id IS NULL OR v_payee_id IS NULL
         OR v_amount IS NULL OR v_amount <= 0 THEN
         RETURN NULL;
     END IF;
@@ -324,7 +346,7 @@ BEGIN
     END IF;
 
     INSERT INTO finance.escrows (project_stage_id, ticket_id, payer_business_id, payee_type, payee_id, amount_cents, currency, status)
-    VALUES (v.stage_id, p_ticket_id, v.payer, 'freelancer', v.payee_id, v_amount, COALESCE(v.currency, 'USD'), 'held')
+    VALUES (v.stage_id, p_ticket_id, v.payer, v_payee_type, v_payee_id, v_amount, COALESCE(v.currency, 'USD'), 'held')
     RETURNING id INTO v_escrow_id;
 
     PERFORM finance.fn_wallet_debit(v.payer, 'business', COALESCE(v.currency, 'USD'), v_amount, 'escrow_hold', 'escrows', v_escrow_id);

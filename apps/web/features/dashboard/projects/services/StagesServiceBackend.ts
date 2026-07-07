@@ -122,4 +122,69 @@ export class StagesServiceBackend {
 		return { success: true };
 	}
 	// #endregion
+
+	// #region Finance — fund / approve / fair-exit / read (US-005, US-007)
+	/**
+	 * Reads the stage escrow/settlement summary via `projects.get_stage_finance` (0305):
+	 * escrowed/released totals, platform fee, per-ticket rows, team payout splits and a `fundable`
+	 * flag. Powers the stage Finance tab. All money runs against pre-loaded wallet balances.
+	 */
+	static async getStageFinance(projectId: string, stageId: string, req?: Request) {
+		const supabase = await supabaseClient(req);
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('get_stage_finance', { p_project_id: projectId, p_stage_id: stageId });
+		if (error) throw error;
+		return data;
+	}
+
+	/**
+	 * Funds an assigned stage's escrow via `projects.fund_stage` (US-005): holds escrow for each
+	 * assigned ticket (spending-limit checked, isolated to the stage, ledgered), moves the stage
+	 * `assigned → in_progress`, and notifies assignees.
+	 */
+	static async fundStage(projectId: string, stageId: string, req?: Request) {
+		const supabase = await supabaseClient(req);
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('fund_stage', { p_project_id: projectId, p_stage_id: stageId });
+		if (error) throw error;
+		return data;
+	}
+
+	/**
+	 * Final approval via `projects.approve_stage` (US-007 AC1-AC3): releases the stage's held
+	 * escrow with the 5% platform fee and team smart-splits, then marks the stage `paid`.
+	 */
+	static async approveStage(projectId: string, stageId: string, req?: Request) {
+		const supabase = await supabaseClient(req);
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('approve_stage', { p_project_id: projectId, p_stage_id: stageId });
+		if (error) throw error;
+		return data;
+	}
+
+	/**
+	 * Fair-exit cancellation via `projects.cancel_stage_fair_exit` (US-007 AC4): pays the payee the
+	 * 25/50/75% tier of the principal (net of fee) and refunds the remainder to the client wallet.
+	 */
+	static async cancelStageFairExit(
+		projectId: string,
+		stageId: string,
+		tier: number,
+		req?: Request,
+	) {
+		const supabase = await supabaseClient(req);
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('cancel_stage_fair_exit', {
+				p_project_id: projectId,
+				p_stage_id: stageId,
+				p_tier: tier,
+			});
+		if (error) throw error;
+		return data;
+	}
+	// #endregion
 }

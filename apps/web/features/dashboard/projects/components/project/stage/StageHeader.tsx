@@ -55,7 +55,11 @@ export default function StageHeader() {
 					<h3 class='stage-header__title'>
 						{stage.value?.title || 'Loading Stage...'}
 					</h3>
-					<span class='stage-header__status'>Active</span>
+					<span
+						class={`stage-header__status stage-header__status--${stage.value?.status ?? 'open'}`}
+					>
+						{(stage.value?.status ?? 'open').replaceAll('_', ' ')}
+					</span>
 				</div>
 			</div>
 

@@ -42,4 +42,52 @@ export class StagesService {
 		});
 		if (!res.ok) throw new Error(`Failed to delete stage: ${res.statusText}`);
 	}
+
+	// #region Finance — fund / approve / fair-exit (US-005, US-007)
+	static async getStageFinance(projectId: string, stageId: string): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/finance`);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to load stage finance');
+		}
+		return await res.json();
+	}
+
+	static async fundStage(projectId: string, stageId: string): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/fund`, {
+			method: 'POST',
+			headers: { 'X-CSRF': getCsrfToken() || '' },
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to fund stage');
+		}
+		return await res.json();
+	}
+
+	static async approveStage(projectId: string, stageId: string): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/approve`, {
+			method: 'POST',
+			headers: { 'X-CSRF': getCsrfToken() || '' },
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to approve stage');
+		}
+		return await res.json();
+	}
+
+	static async cancelStageFairExit(projectId: string, stageId: string, tier: number): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/cancel`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+			body: JSON.stringify({ tier }),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to cancel stage');
+		}
+		return await res.json();
+	}
+	// #endregion
 }

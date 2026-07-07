@@ -10,12 +10,14 @@ Status is edited **in place** — move a feature between lanes, don't append not
 | ⬜ Todo | 🟡 In Progress | ✅ Done |
 | :--- | :--- | :--- |
 | Departmental isolation (dept-scoped visibility) | Session context / active-profile propagation | Row-level security & permission grants |
-| | Notifications pipeline (API ↔ inbox UI) | Realtime infrastructure |
-| | Main `/dashboard` overview (renders a Test island) | Storage buckets & file security |
+| | Main `/dashboard` overview (renders a Test island) | Realtime infrastructure |
+| | | Storage buckets & file security |
+| | | Notifications pipeline (writer + API + SSE inbox) |
 | | | Shared package suite (ui, fields, data, charts, time, files, utils, types) |
 
-*Evidence:* `supabase/migrations/0200`–`0207`; `api/v1/notifications`, `features/dashboard/inbox`;
-`routes/(dashboard)/dashboard/index.tsx` (stub → `Test.tsx`); `packages/*`.
+*Evidence:* `supabase/migrations/0200`–`0207`; notifications — `comms.fn_notify` (`0305`),
+`api/v1/notifications` (list) + `.../notifications/stream` (SSE), `features/dashboard/inbox`
+(`NotificationsInbox.island`); `routes/(dashboard)/dashboard/index.tsx` (stub → `Test.tsx`); `packages/*`.
 
 ---
 
@@ -23,14 +25,17 @@ Status is edited **in place** — move a feature between lanes, don't append not
 
 | ⬜ Todo | 🟡 In Progress | ✅ Done |
 | :--- | :--- | :--- |
-| Onboarding audit logging | Multi-persona onboarding (`/join`) | Email/password registration & login |
-| Onboarding session-context init | Profile / team context switching | OAuth PKCE (Google, GitHub-gated) |
+| | Multi-persona onboarding (`/join`) | Email/password registration & login |
+| | Profile / team context switching | OAuth PKCE (Google, GitHub-gated) |
 | | | Email verification (`token_hash` + `verifyOtp`) |
 | | | Password recovery / reset |
 | | | Logout, token refresh, `me` / `user` |
+| | | Onboarding session-context init |
+| | | Onboarding audit logging |
 
 *Evidence:* `routes/(auth)/*`, `api/v1/auth/*` (incl. `switch-profile`, `switch-team`);
-`features/auth/services/*Backend.ts`; `packages/backend/src/auth/pkce.ts`.
+`features/auth/services/*Backend.ts`; `packages/backend/src/auth/pkce.ts`;
+`handle_new_user()` in `supabase/migrations/0304_onboarding_session_and_audit.sql`.
 
 ---
 
@@ -101,14 +106,18 @@ report, finance, timeline); `migrations/0007,0115,0117,0121`; pricing:
 | ⬜ Todo | 🟡 In Progress | ✅ Done |
 | :--- | :--- | :--- |
 | Stripe payment intents / Connect | Wallet Hub UI (frontend seed) | Escrow hold / release engine |
-| Stripe billing / customer portal | Project & ticket finance views | Team smart-split payouts |
-| Intervaled invoicing (monthly consolidation) | | 5% platform-fee ledger lines |
+| Stripe billing / customer portal | Project-level finance rollup view | Team smart-split payouts |
+| Intervaled invoicing (monthly consolidation) | | 5% platform-fee ledger lines *(`platform_fee_bp`=500)* |
 | Withdrawal / payout-to-bank flow | | Fair-exit cancellation splits |
 | | | Spending-limit & wallet credit/debit fns |
 | | | Consolidated-invoice generation fn |
+| | | Stage funding / approval / fair-exit UI |
+| | | Ticket finance view (installment monitor) |
 
-*Evidence:* `migrations/0009_finance_tables.sql` + `projects.*` wrappers (`0115,0117`);
-`api/v1/dashboard/projects/[pid]/finance`, `.../tickets/[id]/finance`; Wallet Hub —
+*Evidence:* `migrations/0009_finance_tables.sql` + `projects.*` wrappers (`0115,0117,0305`);
+stage funding/approval/fair-exit — `projects.fund_stage`/`approve_stage`/`cancel_stage_fair_exit`
+(`0305`), `api/v1/dashboard/projects/[pid]/stages/[sid]/{fund,approve,cancel,finance}`,
+`StageFinance.island`; ticket finance — `.../tickets/[id]/finance`. Wallet Hub —
 `features/dashboard/wallet` (seed). Stripe: `infra/stripe/README.md` only.
 
 ---

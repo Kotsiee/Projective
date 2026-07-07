@@ -8,26 +8,26 @@ AC off by moving it between lanes; keep no history.
 
 | ⬜ Todo | 🟡 In Progress | ✅ Done |
 | :--- | :--- | :--- |
-| US-004 · Stage Staffing & Assignment *(2/6)* | US-001 · Multi-Persona Onboarding *(4/6)* | — |
-| US-008 · Business Administration *(1/5)* | US-002 · Org-Unit Formation *(3/6)* | |
-| | US-003 · Modular Project Creation *(3/6)* | |
-| | US-005 · Stage Escrow Funding *(4/6)* | |
+| US-004 · Stage Staffing & Assignment *(2/6)* | US-002 · Org-Unit Formation *(3/6)* | US-001 · Multi-Persona Onboarding *(6/6)* |
+| US-008 · Business Administration *(1/5)* | US-003 · Modular Project Creation *(3/6)* | US-005 · Stage Escrow Funding *(6/6)* |
 | | US-006 · Collaboration & Delivery *(4/6)* | |
 | | US-007 · Approval & Smart Payouts *(4/6)* | |
 
-*(n/m) = acceptance criteria met. No story is fully complete; the two weakest sit in the Todo lane.*
+*(n/m) = acceptance criteria met. US-001 and US-005 are fully complete; the two weakest sit in the Todo lane.*
 
 ---
 
-## US-001 · Multi-Persona Onboarding — 🟡 In Progress (E1)
+## US-001 · Multi-Persona Onboarding — ✅ Done (E1)
 > A new user selects a persona and sets up their profile so the platform grants the right role.
 
 | ⬜ Outstanding | ✅ Met |
 | :--- | :--- |
-| AC4 · Initialise `security.session_context` with active profile | AC1 · Persona selection (Freelancer / Business) |
-| AC6 · Write `security.audit_logs` onboarding entry | AC2 · Identity setup (unique `@username`, name) |
+| | AC1 · Persona selection (Freelancer / Business) |
+| | AC2 · Identity setup (unique `@username`, name) |
 | | AC3 · Create `org.users_public` + persona record |
+| | AC4 · Initialise `security.session_context` with active profile |
 | | AC5 · Username validation (alphanumeric, 3–20) |
+| | AC6 · Write `security.audit_logs` onboarding entry |
 
 ---
 
@@ -70,17 +70,21 @@ model is frontend-only.*
 
 ---
 
-## US-005 · Stage Escrow Funding — 🟡 In Progress (E6)
+## US-005 · Stage Escrow Funding — ✅ Done (E6)
 > A client funds a stage's escrow to signal secured capital so work can begin.
 
 | ⬜ Outstanding | ✅ Met |
 | :--- | :--- |
-| AC1 · "Fund Stage" UI action (assigned stages only) | AC2 · Wallet balance verification *(`fn_check_spending_limit`)* |
-| AC5 · Real-time "stage funded" notification | AC3 · Escrow isolation to `stage_id` *(`fn_hold_ticket_escrow`)* |
+| | AC1 · "Fund Stage" UI action (assigned stages only) *(`projects.fund_stage`)* |
+| | AC2 · Wallet balance verification *(`fn_check_spending_limit`)* |
+| | AC3 · Escrow isolation to `stage_id` *(`fn_hold_ticket_escrow`)* |
 | | AC4 · Status transition assigned → active |
+| | AC5 · Real-time "stage funded" notification *(`comms.fn_notify` + SSE)* |
 | | AC6 · Ledger entry + 5% fee calculation |
 
-*Note: the escrow engine is complete in SQL; the funding UI and Stripe fiat-pull are not built.*
+*Note: funded via `projects.fund_stage` against pre-loaded wallet balances; the Finance tab
+(`StageFinance.island`) drives fund/approve, and the inbox streams the funded notification over SSE.
+Stripe fiat top-up is intentionally deferred.*
 
 ---
 
@@ -101,10 +105,14 @@ model is frontend-only.*
 
 | ⬜ Outstanding | ✅ Met |
 | :--- | :--- |
-| AC5 · Ghosting protection (14-day auto-approve) | AC1 · Final approval → escrow release |
-| AC6 · 7-day pending safety window *(pending state exists; timer not wired)* | AC2 · 5% platform-fee routing |
+| AC5 · Ghosting protection (14-day auto-approve) | AC1 · Final approval → escrow release *(`projects.approve_stage`)* |
+| AC6 · 7-day pending safety window *(pending state exists; timer not wired)* | AC2 · 5% platform-fee routing *(`platform_fee_bp` = 500)* |
 | | AC3 · Team smart splits *(`fn_split_team_payout`)* |
-| | AC4 · Fair-exit cancellation split (25/50/75) |
+| | AC4 · Fair-exit cancellation split (25/50/75) *(`projects.cancel_stage_fair_exit`)* |
+
+*Note: final-approval and fair-exit (25/50/75) are UI-wired via the stage Finance tab to
+`projects.approve_stage` / `cancel_stage_fair_exit`; team splits and the 5% fee route through the SQL
+engine. Ghosting auto-approve and the 7-day safety-window timer remain unbuilt.*
 
 ---
 

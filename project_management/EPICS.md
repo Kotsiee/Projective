@@ -24,16 +24,17 @@ place — no history is kept here.
 The cross-cutting substrate: RLS/permissions, realtime, storage, notifications, session context, and
 the shared monorepo package suite.
 - **Done:** Row-level security & permission grants (`0200`–`0206`), storage buckets (`0207`), the
+  notifications pipeline (writer `comms.fn_notify`, list API + SSE stream, live inbox island), the
   design-system packages (`@projective/ui`, `fields`, `data`, `charts`, `time`, `files`, `utils`, `types`).
-- **Gap:** `security.session_context` / active-profile propagation and the notifications pipeline are
-  only partially wired into the app.
+- **Gap:** `security.session_context` / active-profile propagation is only partially wired into the app.
 
 ## E1 · Identity, Access & Onboarding — 🟡 In Progress
 Registration, login, OAuth, email verification, password recovery, and multi-persona onboarding.
 - **Done:** Full auth flow — email/password, OAuth PKCE, `token_hash` confirm/recovery (`(auth)/*`
-  routes, `api/v1/auth/*`, backend services).
-- **Gap:** Onboarding (`/join`) does not yet initialise session context or write audit logs; KYC/KYB
-  identity tiers are unstarted (those live in E12).
+  routes, `api/v1/auth/*`, backend services). Onboarding (`/join`) initialises
+  `security.session_context` with the active profile and writes a `user.onboarded`
+  `security.audit_logs` entry, both atomically in `handle_new_user()` (US-001 complete).
+- **Gap:** KYC/KYB identity tiers are unstarted (those live in E12).
 
 ## E2 · Organizational Structures — 🟡 In Progress
 Businesses and Freelancer Teams (the "Virtual Agency"), their membership, roles, and shared vaults.
@@ -68,7 +69,9 @@ methods.
 ## E6 · Finance, Escrow & Wallets — 🟡 In Progress
 The escrow ledger engine, multi-persona wallets, platform fees, fair-exit splits, and invoicing.
 - **Done:** The entire escrow/ledger/payout engine in Postgres — hold/release/split/spending-limit,
-  5% fee, fair-exit logic (`0009` + `projects.*` wrappers).
+  5% fee (`platform_fee_bp`=500), fair-exit split logic (`0009` + `projects.*` wrappers, `0305`). The
+  **stage funding & payout loop is UI-wired**: the Finance tab funds/approves/fair-exit-cancels a
+  stage via `projects.fund_stage`/`approve_stage`/`cancel_stage_fair_exit` against pre-loaded wallets.
 - **Gap:** The Wallet Hub UI is **frontend-seed only**; Stripe (payment intents / Connect / billing
   portal) and Intervaled Invoicing are unstarted.
 

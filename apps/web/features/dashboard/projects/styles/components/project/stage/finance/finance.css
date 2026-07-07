@@ -1,0 +1,172 @@
+/**
+ * Stage Finance tab — escrow funding & payout panel (US-005 / US-007).
+ * Uses shared palette tokens with safe fallbacks so it renders even where a token is unset.
+ */
+
+.stage-finance {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.5rem;
+	max-width: 820px;
+	margin: 0 auto;
+	width: 100%;
+	color: var(--text-primary, #1a1a1a);
+}
+
+.stage-finance--loading,
+.stage-finance--error {
+	align-items: center;
+	justify-content: center;
+	min-height: 160px;
+	color: var(--text-secondary, #6b7280);
+}
+
+.stage-finance__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.stage-finance__title {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.stage-finance__sub {
+	margin: 0.25rem 0 0;
+	font-size: 0.85rem;
+	color: var(--text-secondary, #6b7280);
+}
+
+.stage-finance__status {
+	text-transform: capitalize;
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 0.25rem 0.6rem;
+	border-radius: 999px;
+	background: var(--bg-muted, #eef2f7);
+	color: var(--text-secondary, #4b5563);
+	white-space: nowrap;
+}
+
+.stage-finance__status--in_progress { background: #e0edff; color: #1d4ed8; }
+.stage-finance__status--paid { background: #dcfce7; color: #15803d; }
+.stage-finance__status--cancelled { background: #fee2e2; color: #b91c1c; }
+.stage-finance__status--assigned { background: #fef3c7; color: #b45309; }
+
+.stage-finance__stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.75rem;
+}
+
+.stage-finance__stat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 0.9rem 1rem;
+	border: 1px solid var(--border-default, #e5e7eb);
+	border-radius: 12px;
+	background: var(--bg-surface, #fff);
+}
+
+.stage-finance__stat-label {
+	font-size: 0.75rem;
+	color: var(--text-secondary, #6b7280);
+}
+
+.stage-finance__stat-value {
+	font-size: 1.1rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.stage-finance__section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.stage-finance__section-title {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+}
+
+.stage-finance__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--border-default, #e5e7eb);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.stage-finance__row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.7rem 1rem;
+	border-bottom: 1px solid var(--border-subtle, #f1f3f5);
+}
+
+.stage-finance__row:last-child { border-bottom: none; }
+
+.stage-finance__row-title { flex: 1; font-size: 0.9rem; }
+
+.stage-finance__row-amount {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.stage-finance__badge {
+	text-transform: capitalize;
+	font-size: 0.7rem;
+	padding: 0.15rem 0.5rem;
+	border-radius: 999px;
+	background: var(--bg-muted, #eef2f7);
+	color: var(--text-secondary, #4b5563);
+}
+
+.stage-finance__badge--escrow_funded { background: #e0edff; color: #1d4ed8; }
+.stage-finance__badge--released { background: #dcfce7; color: #15803d; }
+.stage-finance__badge--partially_released { background: #fef3c7; color: #b45309; }
+
+.stage-finance__empty,
+.stage-finance__note {
+	font-size: 0.85rem;
+	color: var(--text-secondary, #6b7280);
+	margin: 0;
+}
+
+/* Action bar tunnelled into the stage nav footer via setMiddleNav. */
+.stage-finance-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	padding: 0 1.25rem;
+}
+
+.stage-finance-bar__exit,
+.stage-finance-bar__primary {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.stage-finance-bar__tier {
+	height: 38px;
+	padding: 0 0.6rem;
+	border: 1px solid var(--border-default, #e5e7eb);
+	border-radius: 8px;
+	background: var(--bg-surface, #fff);
+	color: var(--text-primary, #1a1a1a);
+	font-size: 0.85rem;
+}
