@@ -18,6 +18,8 @@ interface SendMessageOptions {
 	attachments?: string[];
 	files?: File[];
 	voiceMessageNames?: string[];
+	/** BlurHash per file, keyed by `file.name` (client-generated, best-effort). */
+	blurhashes?: Record<string, string>;
 	targetUserId?: string;
 	targetStageId?: string;
 }
@@ -40,6 +42,7 @@ export async function sendMessage(
 			attachments = [],
 			files = [],
 			voiceMessageNames = [],
+			blurhashes = {},
 			targetUserId,
 			targetStageId,
 		} = options;
@@ -136,6 +139,7 @@ export async function sendMessage(
 
 				// Check if the file's exact name is in the voice messages array
 				const isVoiceMessage = voiceMessageNames.includes(file.name);
+				const blurhash = blurhashes[file.name];
 
 				const { error: dbError } = await supabase.schema('files').from('items').insert({
 					id: fileId,
@@ -149,7 +153,10 @@ export async function sendMessage(
 					target_bucket: targetBucket,
 					target_path: targetPath,
 					status: 'pending_upload',
-					metadata: isVoiceMessage ? { is_voice_message: true } : {}, // Inject the metadata flag
+					metadata: {
+						...(isVoiceMessage ? { is_voice_message: true } : {}),
+						...(blurhash ? { blurhash } : {}),
+					},
 				});
 				if (dbError) throw dbError;
 

@@ -2,20 +2,20 @@
 
 /* --- Field Array Wrapper --- */
 .field-array {
-  display: flex;
-  flex-direction: column;
-  gap: var(--field-gap, 8px);
-  /* cite: 1 */
+	display: flex;
+	flex-direction: column;
+	gap: var(--field-gap, 8px);
+	/* cite: 1 */
 }
 
 .field-array__item {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--field-gap, 8px);
-  /* cite: 1 */
+	display: flex;
+	align-items: flex-start;
+	gap: var(--field-gap, 8px);
+	/* cite: 1 */
 }
 
 .field-array__action {
-  margin-top: 4px;
-  /* Manual alignment offset for standard field height cite: 1 */
+	margin-top: 4px;
+	/* Manual alignment offset for standard field height cite: 1 */
 }

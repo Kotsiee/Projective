@@ -1,0 +1,99 @@
+.pipeline-flow {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+}
+
+.pipeline-flow__canvas {
+	display: block;
+	width: 100%;
+}
+
+.pipeline-flow__overlay {
+	position: absolute;
+	inset: 0;
+	cursor: crosshair;
+}
+
+.pipeline-flow__axis {
+	stroke: var(--hairline-strong, rgba(128, 128, 128, 0.25));
+	stroke-width: 1;
+}
+
+.pipeline-flow__crosshair line {
+	stroke: var(--text-muted);
+	stroke-width: 1;
+	stroke-dasharray: 4 4;
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.pipeline-flow__cursor {
+	fill: none;
+	stroke: var(--text-main);
+	stroke-width: 1.5;
+	pointer-events: none;
+}
+
+.pipeline-flow__axis-label {
+	position: absolute;
+	font-size: 0.68rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	pointer-events: none;
+}
+
+.pipeline-flow__axis-label--x {
+	bottom: 6px;
+	right: 12px;
+}
+
+.pipeline-flow__axis-label--y {
+	top: 6px;
+	left: 8px;
+	transform-origin: left top;
+}
+
+.pipeline-flow__tooltip {
+	position: absolute;
+	min-width: 150px;
+	padding: 0.55rem 0.7rem;
+	background: var(--card);
+	border: 1px solid var(--hairline-strong, var(--border-color));
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 4;
+	font-size: 0.75rem;
+}
+
+.pipeline-flow__tooltip-title {
+	font-weight: 600;
+	font-size: 0.82rem;
+	color: var(--text-main);
+	margin-bottom: 0.35rem;
+}
+
+.pipeline-flow__tooltip-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.75rem;
+	color: var(--text-muted);
+	line-height: 1.5;
+}
+
+.pipeline-flow__tooltip-row strong {
+	color: var(--text-main);
+	font-variant-numeric: tabular-nums;
+}
+
+.pipeline-flow__tooltip-cat {
+	margin-top: 0.4rem;
+	padding-top: 0.35rem;
+	border-top: 1px solid var(--hairline);
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}

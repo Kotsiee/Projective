@@ -1,0 +1,70 @@
+.explore-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+	width: 100%;
+}
+
+.explore-section__head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.explore-section__titles {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+}
+
+.explore-section__eyebrow {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--primary);
+}
+
+.explore-section__title {
+	margin: 0;
+	font-size: 1.4rem;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+}
+
+.explore-section__subtitle {
+	margin: 0;
+	font-size: 0.88rem;
+	color: var(--text-muted);
+}
+
+.explore-section__view-all {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
+	flex-shrink: 0;
+	padding: 0.4rem 0.6rem;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	text-decoration: none;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease;
+}
+
+.explore-section__view-all:hover {
+	color: var(--primary);
+	border-color: var(--hairline-strong);
+	background: var(--primary-surface);
+}
+
+.explore-section__view-all svg { transition: transform var(--fast) ease; }
+.explore-section__view-all:hover svg { transform: translateX(2px); }
+
+.explore-section__body {
+	width: 100%;
+}

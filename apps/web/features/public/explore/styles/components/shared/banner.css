@@ -1,0 +1,133 @@
+.explore-banner {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	overflow: hidden;
+	border-radius: var(--border-radius__xlarge);
+	border: 1px solid var(--hairline-strong);
+	padding: 2rem 2.25rem;
+	color: #fff;
+	isolation: isolate;
+}
+
+.explore-banner--full {
+	min-height: 168px;
+}
+
+.explore-banner--split {
+	min-height: 200px;
+	padding: 1.75rem;
+}
+
+/* Subtle noise/vignette so the flat gradient reads as a premium surface. */
+.explore-banner__grain {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background:
+		radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.14), transparent 55%),
+		radial-gradient(90% 120% at 0% 100%, rgba(0, 0, 0, 0.35), transparent 60%);
+	pointer-events: none;
+}
+
+.explore-banner__content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	max-width: 34rem;
+	z-index: 1;
+}
+
+.explore-banner--split .explore-banner__content { max-width: 20rem; }
+
+.explore-banner__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	width: fit-content;
+	padding: 0.2rem 0.6rem;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.16);
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: 999px;
+	backdrop-filter: blur(6px);
+}
+
+.explore-banner__title {
+	margin: 0;
+	font-size: 1.55rem;
+	font-weight: 800;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
+}
+
+.explore-banner--split .explore-banner__title { font-size: 1.3rem; }
+
+.explore-banner__text {
+	margin: 0;
+	font-size: 0.92rem;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.explore-banner--split .explore-banner__text { font-size: 0.85rem; }
+
+.explore-banner__cta { margin-top: 0.4rem; }
+
+/* Bright white pill CTA regardless of the ui secondary theming. */
+.explore-banner__cta .btn {
+	background: #fff;
+	color: #10141a;
+	border: none;
+	font-weight: 700;
+}
+
+.explore-banner__cta .btn:hover { background: rgba(255, 255, 255, 0.88); }
+
+.explore-banner__asset {
+	position: relative;
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	width: 168px;
+	height: 168px;
+	z-index: 1;
+}
+
+.explore-banner--split .explore-banner__asset { width: 120px; height: 120px; }
+
+.explore-banner__glyph {
+	font-size: 5.5rem;
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.9);
+	filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.35));
+	transform: rotate(-8deg);
+}
+
+.explore-banner__asset::before {
+	content: '';
+	position: absolute;
+	inset: 8%;
+	border-radius: 50%;
+	border: 1px dashed rgba(255, 255, 255, 0.35);
+}
+
+.explore-banner__asset::after {
+	content: '';
+	position: absolute;
+	inset: 22%;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 720px) {
+	.explore-banner { flex-direction: column; align-items: flex-start; text-align: left; }
+	.explore-banner__asset { display: none; }
+}

@@ -46,7 +46,9 @@ export function TableRow<T>({
 		<Row
 			virtualItem={virtualRow}
 			virtualizer={virtualizer}
-			className={`data-table__row ${onRowClick ? 'data-table__row--interactive' : ''} ${
+			className={`data-table__row ${
+				virtualRow.index % 2 === 1 ? 'data-table__row--stripe' : ''
+			} ${onRowClick ? 'data-table__row--interactive' : ''} ${
 				item.selected ? 'data-table__row--selected' : ''
 			}`}
 		>

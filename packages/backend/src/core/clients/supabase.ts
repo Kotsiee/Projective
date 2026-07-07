@@ -51,3 +51,21 @@ export async function supabaseClient(
 	}
 	return anonClient;
 }
+
+/**
+ * Returns a fresh (never cached) anonymous client.
+ *
+ * Use this for flows that mutate the client's in-memory session — e.g.
+ * `verifyOtp`, which authenticates the client on success. A dedicated instance
+ * keeps that session off the shared cached {@link supabaseClient} anon client.
+ */
+export function freshAnonClient(): SupabaseClient {
+	const { SUPABASE_URL, ANON_KEY } = getEnv();
+	return createClient(SUPABASE_URL, ANON_KEY, {
+		auth: {
+			persistSession: false,
+			detectSessionInUrl: false,
+			autoRefreshToken: false,
+		},
+	});
+}

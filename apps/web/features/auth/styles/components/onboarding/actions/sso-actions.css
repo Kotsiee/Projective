@@ -1,50 +1,60 @@
-/* Block */
 .ssoactions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
-/* Elements */
 .ssoactions__divider {
-    display: flex;
-    align-items: center;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	color: var(--text-muted);
+	font-size: 12px;
 }
-
-.ssoactions__line {
-    flex: 1;
-    height: 1px;
-    background-color: var(--border-color);
-}
-
-.ssoactions__text {
-    padding: 0 1rem;
+.ssoactions__divider::before,
+.ssoactions__divider::after {
+	content: '';
+	height: 1px;
+	flex: 1;
+	background: var(--border-color);
 }
 
 .ssoactions__button {
-    --btn-bg: #f0f0f0;
-    padding: 1.5rem;
-    color: black;
-    font-size: 1rem;
-
-    img {
-        width: 1.85rem;
-        height: 1.85rem;
-    }
-
-    &:hover {
-        background-color: #d6d6d6 !important;
-    }
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	height: 48px;
+	border-radius: 14px;
+	border: 1.5px solid var(--border-color);
+	background: var(--card);
+	color: var(--text-main);
+	font: inherit;
+	font-size: 14.5px;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		border-color var(--fast) ease,
+		background var(--fast) ease,
+		transform var(--fast) ease;
+}
+.ssoactions__button:hover,
+.ssoactions__button:focus-visible {
+	border-color: var(--primary);
+	background: var(--input-bg);
+	transform: translateY(-1px);
 }
 
-.ssoactions__button .btn__label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.25rem;
+.ssoactions__icon {
+	width: 18px;
+	height: 18px;
+	flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ssoactions__button:hover,
+	.ssoactions__button:focus-visible {
+		transform: none;
+	}
 }

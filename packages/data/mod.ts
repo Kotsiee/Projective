@@ -3,6 +3,8 @@ export * from './src/core/index.ts';
 
 // Components
 export * from './src/components/DataDisplay.tsx';
+export { LedgerTable } from './src/components/table/LedgerTable.tsx';
+export type { LedgerColumn, LedgerTableProps } from './src/components/table/LedgerTable.tsx';
 
 // Hooks (exposed for advanced custom renderers)
 export { useVirtual } from './src/hooks/useVirtual.ts';

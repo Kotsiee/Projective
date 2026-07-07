@@ -1,25 +1,20 @@
 /**
  * @file ProjectsTab.tsx
- * @description The "Projects" panel. Clean, repo/data-style cards (no imagery)
- * split into "Projects owned" and "Projects worked on" sections. A grid/list
- * toggle is bound to the `projectsView` signal.
+ * @description The "Projects" panel. Clean, banner-free cards (via the unified `ProjectCard`)
+ * split into "Projects owned" and "Projects worked on" sections. A grid/list toggle is bound to
+ * the `projectsView` signal.
  */
 
 import '../../styles/components/projects.css';
 
 import { useSignal } from '@preact/signals';
-import { Button, IconButton, Tag } from '@projective/ui';
-import {
-	IconChevronRight,
-	IconGitFork,
-	IconLayoutGrid,
-	IconList,
-	IconStarFilled,
-} from '@tabler/icons-preact';
+import { Button, IconButton, ProjectCard } from '@projective/ui';
+import { IconChevronRight, IconLayoutGrid, IconList } from '@tabler/icons-preact';
+import type { EntityCardModel, EntityCardStatusTone } from '@projective/types';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { ProjectItem } from '../../contracts/Profile.ts';
 
-const STATUS_COLOR: Record<ProjectItem['status'], 'success' | 'neutral' | 'warning'> = {
+const STATUS_TONE: Record<ProjectItem['status'], EntityCardStatusTone> = {
 	active: 'success',
 	completed: 'neutral',
 	archived: 'warning',
@@ -44,42 +39,38 @@ function fmtDate(iso: string): string {
 	return `${months[Number(m) - 1]} ${y}`;
 }
 
-function ProjectCard({ p }: { p: ProjectItem }) {
-	return (
-		<article class='repo-card'>
-			<div class='repo-card__head'>
-				<h3 class='repo-card__name'>{p.name}</h3>
-				<span class='repo-card__affiliation'>{p.affiliation}</span>
-			</div>
+/** Adapts a profile `ProjectItem` into the unified card model (project = metadata only). */
+function projectToCardModel(p: ProjectItem): EntityCardModel {
+	const stats: EntityCardModel['stats'] = [{ key: 'stars', value: p.stars }];
+	if (typeof p.contributions === 'number') {
+		stats.push({ key: 'contributions', value: p.contributions });
+	}
 
-			{p.role && <span class='repo-card__role'>{p.role}</span>}
-
-			<p class='repo-card__desc'>{p.description}</p>
-
-			{p.stack.length > 0 && (
-				<div class='repo-card__stack'>
-					{p.stack.map((s) => (
-						<Tag key={s} size='small' color='neutral' variant='outline'>{s}</Tag>
-					))}
-				</div>
-			)}
-
-			<div class='repo-card__stats'>
-				<span class='repo-card__stat'>
-					<IconStarFilled size={14} /> {p.stars}
-				</span>
-				{typeof p.contributions === 'number' && (
-					<span class='repo-card__stat'>
-						<IconGitFork size={14} /> {p.contributions}
-					</span>
-				)}
-				<Tag size='small' color={STATUS_COLOR[p.status]} variant='subtle' rounded>
-					{p.status}
-				</Tag>
-				<span class='repo-card__updated'>Updated {fmtDate(p.updatedAt)}</span>
-			</div>
-		</article>
-	);
+	return {
+		id: p.id,
+		entity_type: 'project',
+		display_title: p.name,
+		display_description: p.description,
+		tags: p.stack,
+		rating_average: 0,
+		rating_count: 0,
+		owner_name: '',
+		owner_handle: '',
+		owner_avatar: null,
+		banner: null,
+		accent: 'primary',
+		price_cents: null,
+		price_unit: null,
+		availability: null,
+		location: null,
+		scope: null,
+		taxonomy: null,
+		is_sponsored: false,
+		subtitle: p.role ? `${p.affiliation} · ${p.role}` : p.affiliation,
+		stats,
+		status: { label: p.status, tone: STATUS_TONE[p.status] },
+		timeline_note: `Updated ${fmtDate(p.updatedAt)}`,
+	};
 }
 
 /** A collapsible accordion branch grouping projects by relationship. */
@@ -107,7 +98,7 @@ function ProjectSection(
 			</Button>
 			{open.value && (
 				<div class='repo-grid'>
-					{items.map((p) => <ProjectCard key={p.id} p={p} />)}
+					{items.map((p) => <ProjectCard key={p.id} entity={projectToCardModel(p)} />)}
 				</div>
 			)}
 		</section>

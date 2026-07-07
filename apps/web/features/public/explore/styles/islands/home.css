@@ -1,0 +1,21 @@
+.explore-home {
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+	width: 100%;
+	padding-bottom: 4rem;
+}
+
+.explore-home__body {
+	display: flex;
+	flex-direction: column;
+	gap: 3.25rem;
+	max-width: 1440px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 0 2rem;
+}
+
+@media (max-width: 640px) {
+	.explore-home__body { padding: 0 1rem; gap: 2.5rem; }
+}

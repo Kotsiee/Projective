@@ -5,6 +5,7 @@ import { ChatList, getBurstPosition } from '@projective/data';
 import { MediaViewerProvider } from '../../../contexts/MediaViewerContext.tsx';
 import { useStageContext } from '../../../contexts/StageContext.tsx';
 import { getCsrfToken } from '@projective/utils';
+import { generateBlurhash } from '@/utils/processors/blurhash.ts';
 import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { effect, untracked, useSignal } from '@preact/signals';
 import { IconMessages } from '@tabler/icons-preact';
@@ -70,6 +71,15 @@ export default function ProjectChatIsland() {
 				formData.append('targetStageId', stage?.value?.stage_id || '');
 			}
 
+			// BlurHash placeholders: reuse the hash the processor pipeline already
+			// produced (image resizer), else generate one here. Best-effort — a null
+			// hash just means that attachment renders without a placeholder.
+			const blurhashes: Record<string, string> = {};
+			await Promise.all(files.map(async (f) => {
+				const hash = f.processingMeta?.blurhash ?? await generateBlurhash(f.file);
+				if (hash) blurhashes[f.file.name] = hash;
+			}));
+
 			files.forEach((f) => {
 				formData.append('files', f.file);
 				// Flag this specific file as an audio message based on the meta injected in the input component
@@ -77,6 +87,11 @@ export default function ProjectChatIsland() {
 					formData.append('voiceMessages', f.file.name);
 				}
 			});
+
+			// One JSON field: { [file.name]: blurhash }, read back in the messages route.
+			if (Object.keys(blurhashes).length > 0) {
+				formData.append('blurhashes', JSON.stringify(blurhashes));
+			}
 
 			const csrfToken = await getCsrfToken();
 

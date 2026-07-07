@@ -50,7 +50,8 @@ export const handler = define.handlers({
 		});
 
 		// 3. Route User Based on Profile State
-		const redirectTo = res.data.isOnboarded ? '/dashboard' : '/onboarding?step=2';
+		// Note: onboarding lives at /join (there is no /onboarding route).
+		const redirectTo = res.data.isOnboarded ? '/dashboard' : '/join';
 
 		return new Response(JSON.stringify({ redirectTo }), {
 			status: 200,

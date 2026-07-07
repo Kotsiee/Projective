@@ -1,0 +1,40 @@
+.home-sections {
+	display: flex;
+	flex-direction: column;
+	gap: 3.25rem;
+	width: 100%;
+}
+
+/* Carousel slots — give card items an even height + breathing room. */
+.home-carousel .data-carousel__item {
+	display: flex;
+	padding: 0.25rem 0.4rem 0.5rem;
+	align-items: stretch;
+}
+
+.home-carousel .data-carousel__item > * { width: 100%; min-height: 356px; }
+
+.home-carousel .data-carousel__nav-button {
+	background: var(--card);
+	border: 1px solid var(--hairline-strong);
+	color: var(--text-main);
+	box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.6);
+}
+
+.home-carousel .data-carousel__nav-button:hover { color: var(--primary); }
+
+/* Side-by-side half-width banner pair. */
+.home-banner-pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.25rem;
+	width: 100%;
+}
+
+@media (max-width: 860px) {
+	.home-banner-pair { grid-template-columns: 1fr; }
+}
+
+/* Keep the data-display grids from clipping card shadows. */
+.home-sections .data-grid__card,
+.home-sections .data-masonry__item { overflow: visible; }

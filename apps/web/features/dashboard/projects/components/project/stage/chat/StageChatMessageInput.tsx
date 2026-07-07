@@ -9,7 +9,7 @@ import {
 	IconX,
 } from '@tabler/icons-preact';
 import { Signal, useSignal } from '@preact/signals';
-import { IconButton } from '@projective/ui';
+import { FileTypeIcon, IconButton } from '@projective/ui';
 import { formatFileSize } from '@projective/data';
 import { UploadFileIsland } from '@projective/files';
 import { FileWithMeta } from '@projective/types';

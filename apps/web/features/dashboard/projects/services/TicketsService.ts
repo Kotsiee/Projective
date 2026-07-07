@@ -37,6 +37,32 @@ export class TicketsService {
 		return await res.json();
 	}
 
+	/**
+	 * Moves a ticket to a new board column (spec §3 Kanban). Routes through the guarded `move_ticket`
+	 * RPC: moving to "Review" auto-creates a submission; moving to "Done" requires client/owner review
+	 * authority and confirms milestone delivery.
+	 */
+	static async moveTicket(
+		projectId: string,
+		ticketId: string,
+		status: string,
+		stageId: string | null = null,
+	): Promise<any> {
+		const res = await fetch(
+			`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}/move`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+				body: JSON.stringify({ status, stageId }),
+			},
+		);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || `Failed to move ticket`);
+		}
+		return await res.json();
+	}
+
 	static async updateTicket(projectId: string, ticketId: string, data: any): Promise<any> {
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}`, {
 			method: 'PATCH',

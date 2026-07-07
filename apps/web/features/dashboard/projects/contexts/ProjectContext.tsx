@@ -95,9 +95,7 @@ export function ProjectProvider(
 			const data: FullProjectResponse = await res.json();
 			// Normalize nullable aggregates: get_project_details returns NULL (not []) for
 			// stages/roles when a project has none, which would break array consumers downstream.
-			project.value = data
-				? { ...data, stages: data.stages ?? [], roles: data.roles ?? [] }
-				: null;
+			project.value = data ? { ...data, stages: data.stages ?? [], roles: data.roles ?? [] } : null;
 		} catch (err: any) {
 			console.error('Project Context Fetch Error:', err);
 			error.value = err.message || 'An unexpected error occurred.';
@@ -145,15 +143,23 @@ export function ProjectProvider(
 		);
 
 		try {
-			const payload: UpdateTicketRequest = {};
-			if (newStageId !== undefined) payload.current_stage_id = newStageId;
-			if (newStatus !== undefined) payload.status = newStatus;
-
-			// Delegate the HTTP write to the frontend service, which attaches the `X-CSRF` token the
-			// global middleware requires for mutations (a raw fetch here is rejected with 403) and
-			// normalizes the underlying DB/trigger error message (claim-immutability, spending cap,
-			// structure-variation caps, …) instead of a generic "persistence failed" string.
-			await TicketsService.updateTicket(projectId.value ?? '', ticketId, payload);
+			if (newStatus !== undefined) {
+				// Column transition → route through the guarded `move_ticket` RPC so the Kanban rules
+				// apply: Review auto-generates a submission, and Done requires client/owner review
+				// authority + confirms milestone delivery (spec §3). The stage moves atomically with it.
+				await TicketsService.moveTicket(
+					projectId.value ?? '',
+					ticketId,
+					newStatus,
+					newStageId ?? null,
+				);
+			} else {
+				// Pure re-stage within the same column → lightweight PATCH. The service attaches the
+				// `X-CSRF` token the global middleware requires and normalizes DB/trigger errors.
+				const payload: UpdateTicketRequest = {};
+				if (newStageId !== undefined) payload.current_stage_id = newStageId;
+				await TicketsService.updateTicket(projectId.value ?? '', ticketId, payload);
+			}
 		} catch (err: any) {
 			tickets.value = previousState;
 			error.value = err.message || 'Failed to sync ticket update.';

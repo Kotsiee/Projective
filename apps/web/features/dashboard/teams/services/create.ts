@@ -15,6 +15,9 @@ import { CreateTeamInput } from '../contracts/new/_validation.ts';
 interface FileOptions {
 	avatar?: File;
 	banner?: File;
+	/** Client-generated BlurHash placeholders (best-effort). */
+	avatarBlurhash?: string;
+	bannerBlurhash?: string;
 }
 
 export async function createTeam(
@@ -50,6 +53,7 @@ export async function createTeam(
 		const processFile = async (
 			file: File,
 			type: 'team_avatar' | 'team_banner',
+			blurhash?: string,
 		): Promise<string> => {
 			const fileId = crypto.randomUUID();
 			const quarantinePath = `${crypto.randomUUID()}/${file.name}`;
@@ -71,6 +75,7 @@ export async function createTeam(
 				target_bucket: targetBucket,
 				target_path: targetPath,
 				status: 'pending_upload',
+				metadata: blurhash ? { blurhash } : {},
 			});
 			if (dbError) throw dbError;
 
@@ -102,7 +107,7 @@ export async function createTeam(
 
 		if (files.avatar) {
 			try {
-				avatarUrl = await processFile(files.avatar, 'team_avatar');
+				avatarUrl = await processFile(files.avatar, 'team_avatar', files.avatarBlurhash);
 			} catch (e) {
 				console.error('Avatar upload failed:', e);
 
@@ -112,7 +117,7 @@ export async function createTeam(
 
 		if (files.banner) {
 			try {
-				bannerUrl = await processFile(files.banner, 'team_banner');
+				bannerUrl = await processFile(files.banner, 'team_banner', files.bannerBlurhash);
 			} catch (e) {
 				console.error('Banner upload failed:', e);
 				return fail('server_error', 'Failed to upload banner', 500);

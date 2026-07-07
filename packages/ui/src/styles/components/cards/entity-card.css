@@ -1,0 +1,748 @@
+/* =============================================================================
+   EntityCard — the unified entity/discovery card (Service · Profile · Project ·
+   Product · Compact). Premium slate/zinc surface, hairline micro-borders, vivid
+   per-accent glows. The Explore surface is the design source of truth; every other
+   entity surface (profile tabs, workspace switchers) now inherits from here.
+
+   Tokens (`--hairline`, `--sponsored-frame`, accent vars, `--fast/--medium`,
+   `--focus-ring`, `--z-dropdown`) are provided app-side by
+   apps/web/styles/themes/variables/*.css and cascade from :root.
+   ========================================================================== */
+
+.entity-card {
+	--accent: var(--primary);
+	--accent-surface: var(--primary-surface);
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius__large);
+	overflow: hidden;
+	cursor: default;
+	transition:
+		transform var(--fast) ease,
+		border-color var(--fast) ease,
+		box-shadow var(--medium) ease;
+	height: 100%;
+}
+
+.entity-card--interactive {
+	cursor: pointer;
+}
+
+.entity-card:hover {
+	transform: translateY(-3px);
+	border-color: var(--hairline-strong);
+	box-shadow: 0 14px 40px -18px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--accent-surface);
+}
+
+.entity-card:focus-visible {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: var(--focus-ring);
+}
+
+.entity-card.is-active {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 1px var(--accent), 0 14px 40px -18px rgba(0, 0, 0, 0.6);
+}
+
+/* Accent palette --------------------------------------------------------- */
+.entity-card.accent-mint {
+	--accent: var(--mint);
+	--accent-surface: var(--mint-surface);
+}
+.entity-card.accent-violet {
+	--accent: var(--violet);
+	--accent-surface: var(--violet-surface);
+}
+.entity-card.accent-amber {
+	--accent: var(--amber);
+	--accent-surface: var(--amber-surface);
+}
+.entity-card.accent-primary {
+	--accent: var(--primary);
+	--accent-surface: var(--primary-surface);
+}
+.entity-card.accent-ocean {
+	--accent: hsl(199, 89%, 60%);
+	--accent-surface: hsla(199, 89%, 60%, 0.15);
+}
+.entity-card.accent-ember {
+	--accent: hsl(334, 86%, 66%);
+	--accent-surface: hsla(334, 86%, 66%, 0.15);
+}
+.entity-card.accent-forest {
+	--accent: hsl(142, 71%, 55%);
+	--accent-surface: hsla(142, 71%, 55%, 0.15);
+}
+.entity-card.accent-neutral {
+	--accent: hsl(220, 9%, 68%);
+	--accent-surface: hsla(220, 9%, 68%, 0.14);
+}
+
+/* Sponsored native styling — soft accent frame -------------------------- */
+.entity-card--sponsored {
+	border-color: var(--sponsored-frame);
+}
+
+.entity-card__sponsored {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.15rem 0.45rem;
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--amber);
+	background: var(--amber-surface);
+	border: 1px solid var(--sponsored-frame);
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
+/* Banner ----------------------------------------------------------------- */
+.entity-card__banner {
+	position: relative;
+	height: 116px;
+	background-size: cover;
+	background-position: center;
+}
+
+.entity-card--profile .entity-card__banner {
+	height: 92px;
+}
+
+/* Accent-tinted fallback when a profile/service has no banner image. */
+.entity-card__banner--empty {
+	background:
+		linear-gradient(135deg, var(--accent-surface), transparent 70%),
+		var(--mid) !important;
+}
+
+.entity-card__banner-top,
+.entity-card__poster-top {
+	position: absolute;
+	inset: 0.6rem 0.6rem auto 0.6rem;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.entity-card__flags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+/* Taxonomy flag (micro-bordered) ----------------------------------------- */
+.entity-card__flag {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.15rem 0.5rem;
+	font-size: 0.66rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.42);
+	border: 1px solid rgba(255, 255, 255, 0.32);
+	border-radius: 999px;
+	backdrop-filter: blur(4px);
+}
+
+/* Profile avatar overlap -------------------------------------------------- */
+.entity-card__avatar-mount {
+	position: absolute;
+	left: 1rem;
+	bottom: -27px;
+	padding: 3px;
+	background: var(--card);
+	border-radius: 999px;
+}
+
+/* Face action bar (Save · Share · kebab) --------------------------------- */
+.entity-card__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+	opacity: 0;
+	transform: translateY(-2px);
+	transition: opacity var(--fast) ease, transform var(--fast) ease;
+}
+
+.entity-card:hover .entity-card__actions,
+.entity-card:focus-within .entity-card__actions,
+.entity-card.is-active .entity-card__actions {
+	opacity: 1;
+	transform: none;
+}
+
+.entity-card__action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.42);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 999px;
+	cursor: pointer;
+	backdrop-filter: blur(6px);
+	transition: background var(--fast) ease, color var(--fast) ease, transform var(--fast) ease;
+}
+
+.entity-card__action:hover {
+	background: rgba(0, 0, 0, 0.62);
+	transform: scale(1.08);
+}
+
+.entity-card__action.is-active {
+	color: var(--danger);
+	background: rgba(0, 0, 0, 0.6);
+}
+
+/* Kebab menu ------------------------------------------------------------- */
+.entity-card__menu {
+	position: relative;
+}
+
+.entity-card__menu-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-dropdown);
+}
+
+.entity-card__menu-pop {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: calc(var(--z-dropdown) + 1);
+	min-width: 172px;
+	padding: 0.35rem;
+	background: var(--mid);
+	border: 1px solid var(--hairline-strong);
+	border-radius: var(--border-radius);
+	box-shadow: 0 18px 44px -16px rgba(0, 0, 0, 0.7);
+}
+
+.entity-card__menu-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	padding: 0.5rem 0.6rem;
+	font-size: 0.82rem;
+	color: var(--text-main);
+	background: none;
+	border: none;
+	border-radius: var(--border-radius__small);
+	cursor: pointer;
+	text-align: left;
+}
+
+.entity-card__menu-item:hover {
+	background: var(--button-hover, rgba(255, 255, 255, 0.08));
+}
+
+.entity-card__menu-item--danger {
+	color: var(--danger);
+}
+
+/* Content ---------------------------------------------------------------- */
+.entity-card__content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.9rem 1rem 1rem;
+	flex: 1;
+}
+
+.entity-card--profile .entity-card__content {
+	padding-top: 2rem;
+}
+
+.entity-card__typeline {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.entity-card__type {
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+.entity-card__rating {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
+	font-size: 0.76rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.entity-card__rating svg {
+	color: var(--amber);
+}
+.entity-card__rating i {
+	color: var(--text-muted);
+	font-style: normal;
+	font-weight: 500;
+}
+
+.entity-card__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--text-main);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.entity-card__desc {
+	margin: 0;
+	font-size: 0.82rem;
+	line-height: 1.45;
+	color: var(--text-muted);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* Tags ------------------------------------------------------------------- */
+.entity-card__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.entity-card__tag {
+	padding: 0.2rem 0.55rem;
+	font-size: 0.72rem;
+	font-weight: 500;
+	color: var(--text-secondary);
+	background: var(--mid);
+	border: 1px solid var(--hairline);
+	border-radius: 999px;
+	cursor: pointer;
+	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease;
+}
+
+.entity-card__tag:hover {
+	color: var(--accent);
+	border-color: var(--accent);
+	background: var(--accent-surface);
+}
+
+/* Footer ----------------------------------------------------------------- */
+.entity-card__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-top: auto;
+	padding-top: 0.3rem;
+}
+
+.entity-card__owner {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+	text-decoration: none;
+	color: var(--text-secondary);
+}
+
+.entity-card__owner:hover .entity-card__owner-name {
+	color: var(--accent);
+}
+
+.entity-card__owner-name {
+	font-size: 0.78rem;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 120px;
+}
+
+.entity-card__meta-left {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.entity-card__members,
+.entity-card__role {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.74rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.entity-card__role {
+	padding: 0.1rem 0.5rem;
+	color: var(--accent);
+	background: var(--accent-surface);
+	border-radius: 999px;
+}
+
+.entity-card__avail {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.74rem;
+	font-weight: 600;
+	text-transform: capitalize;
+	color: var(--text-secondary);
+}
+
+.entity-card__dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: var(--text-muted);
+}
+
+.entity-card__avail--available .entity-card__dot {
+	background: var(--mint);
+	box-shadow: 0 0 0 3px var(--mint-surface);
+}
+.entity-card__avail--busy .entity-card__dot {
+	background: var(--amber);
+	box-shadow: 0 0 0 3px var(--amber-surface);
+}
+.entity-card__avail--unavailable .entity-card__dot {
+	background: var(--danger);
+}
+
+.entity-card__loc {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-size: 0.74rem;
+	color: var(--text-muted);
+}
+
+.entity-card__price {
+	font-size: 0.9rem;
+	font-weight: 800;
+	color: var(--text-main);
+	white-space: nowrap;
+}
+
+/* =========================================================================
+   PRODUCT variant — image-forward masonry poster
+   ====================================================================== */
+.entity-card--product {
+	background: transparent;
+	border: none;
+}
+.entity-card--product:hover {
+	transform: translateY(-3px);
+	box-shadow: none;
+}
+
+.entity-card__poster {
+	position: relative;
+	width: 100%;
+	border-radius: var(--border-radius__large);
+	border: 1px solid var(--hairline);
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+	transition: border-color var(--fast) ease, box-shadow var(--medium) ease;
+}
+
+.entity-card--product:hover .entity-card__poster {
+	border-color: var(--hairline-strong);
+	box-shadow: 0 16px 44px -18px rgba(0, 0, 0, 0.7);
+}
+
+.entity-card--sponsored .entity-card__poster {
+	border-color: var(--sponsored-frame);
+}
+
+.entity-card__poster-glow {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+	pointer-events: none;
+}
+
+.entity-card__poster-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	padding: 0.65rem 0.4rem 0.2rem;
+}
+
+.entity-card__poster-text {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.entity-card__poster-text .entity-card__title {
+	font-size: 0.9rem;
+	-webkit-line-clamp: 1;
+}
+
+/* =========================================================================
+   PROJECT variant — banner-free, high-density metadata only
+   ====================================================================== */
+.entity-card__project-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+	padding: 1rem 1.1rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.entity-card__topline {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.entity-card__topline .entity-card__typeline {
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	min-width: 0;
+}
+
+.entity-card__subtitle {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Project has no banner, so its action buttons sit on the card surface. */
+.entity-card--project .entity-card__actions {
+	opacity: 1;
+	transform: none;
+}
+.entity-card--project .entity-card__action,
+.entity-card--compact .entity-card__action {
+	color: var(--text-secondary);
+	background: var(--mid);
+	border-color: var(--hairline);
+	backdrop-filter: none;
+}
+.entity-card--project .entity-card__action:hover,
+.entity-card--compact .entity-card__action:hover {
+	color: var(--text-main);
+	background: var(--card);
+}
+.entity-card--project .entity-card__action.is-active,
+.entity-card--compact .entity-card__action.is-active {
+	color: var(--danger);
+}
+
+.entity-card__scope {
+	display: grid;
+	grid-template-columns: repeat(4, auto);
+	justify-content: start;
+	gap: 0.4rem 1.1rem;
+	padding: 0.6rem 0;
+	border-top: 1px solid var(--hairline);
+	border-bottom: 1px solid var(--hairline);
+}
+
+.entity-card__scope-cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.entity-card__scope-cell svg {
+	color: var(--accent);
+}
+.entity-card__scope-cell--budget {
+	color: var(--text-main);
+	font-weight: 800;
+}
+
+/* Generic stat strip (repo-style counts when there is no structured scope). */
+.entity-card__statstrip {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem 1rem;
+	padding: 0.55rem 0;
+	border-top: 1px solid var(--hairline);
+	border-bottom: 1px solid var(--hairline);
+}
+
+.entity-card__stat {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.entity-card__stat svg {
+	color: var(--accent);
+}
+
+.entity-card__metarow {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.entity-card__status {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.12rem 0.55rem;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: capitalize;
+	border-radius: 999px;
+	border: 1px solid transparent;
+}
+
+.entity-card__status--success {
+	color: var(--mint);
+	background: var(--mint-surface);
+}
+.entity-card__status--warning {
+	color: var(--amber);
+	background: var(--amber-surface);
+}
+.entity-card__status--danger {
+	color: var(--danger);
+	background: rgba(0, 0, 0, 0.04);
+}
+.entity-card__status--neutral {
+	color: var(--text-secondary);
+	background: var(--mid);
+	border-color: var(--hairline);
+}
+
+.entity-card__timeline {
+	font-size: 0.74rem;
+	color: var(--text-muted);
+}
+
+.entity-card__timeline--icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.entity-card__timeline--icon svg {
+	color: var(--text-muted);
+}
+
+/* =========================================================================
+   COMPACT variant — horizontal list / switcher row
+   ====================================================================== */
+.entity-card--compact {
+	flex-direction: row;
+	align-items: center;
+	gap: 0.7rem;
+	height: auto;
+	padding: 0.55rem 0.7rem;
+}
+
+.entity-card--compact:hover {
+	transform: none;
+	box-shadow: none;
+	border-color: var(--hairline-strong);
+}
+
+.entity-card--compact.is-active {
+	border-color: var(--accent);
+	background: var(--accent-surface);
+	box-shadow: none;
+}
+
+.entity-card__compact-avatar {
+	flex: 0 0 auto;
+}
+
+.entity-card__compact-id {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1;
+}
+
+.entity-card__compact-name {
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.entity-card__compact-handle {
+	font-size: 0.72rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.entity-card__compact-role {
+	flex: 0 0 auto;
+	padding: 0.1rem 0.5rem;
+	font-size: 0.68rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--accent);
+	background: var(--accent-surface);
+	border-radius: 999px;
+}
+
+.entity-card__compact-indicator {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	color: var(--text-muted);
+}
+
+.entity-card--compact.is-active .entity-card__compact-indicator {
+	color: var(--accent);
+}
+
+/* Responsive ------------------------------------------------------------- */
+@media (max-width: 620px) {
+	.entity-card__scope {
+		grid-template-columns: repeat(2, auto);
+	}
+}

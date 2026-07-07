@@ -4,7 +4,7 @@
  */
 
 // #region Imports
-import { Deps, fail, normaliseUnknownError, ok, Result, supabaseClient } from '@projective/backend';
+import { exchangeOAuthCode, fail, normaliseUnknownError, ok, Result } from '@projective/backend';
 // #endregion
 
 // #region Interfaces
@@ -30,19 +30,17 @@ export class OAuthBackendService {
 	 * Exchanges an OAuth code for a Supabase session and determines if the user requires onboarding.
 	 *
 	 * @param {string} code The OAuth code returned by the provider.
-	 * @param {Deps} [deps] Dependency injection object for the Supabase client.
+	 * @param {string} verifier The PKCE code verifier persisted during initiation.
 	 * @returns {Promise<Result<OAuthCallbackResult>>} The session and parsed metadata.
 	 */
 	static async handleCallback(
 		code: string,
-		deps: Deps = {},
+		verifier: string,
 	): Promise<Result<OAuthCallbackResult>> {
 		try {
-			const getClient = deps.getClient ?? supabaseClient;
-			const supabase = await getClient();
-
-			// 1. Exchange Code for Session
-			const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+			// 1. Exchange Code for Session (PKCE) — reuse the authenticated client
+			//    for the follow-up onboarding lookup.
+			const { client: supabase, data, error } = await exchangeOAuthCode(code, verifier);
 			if (error || !data.session) {
 				return fail('unauthorized', 'Failed to exchange OAuth code for session', 401);
 			}

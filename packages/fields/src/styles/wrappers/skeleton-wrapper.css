@@ -1,25 +1,25 @@
 /* packages/fields/src/styles/wrappers/skeleton-wrapper.css */
 
 .field-skeleton {
-  background-color: var(--field-bg-disabled, #f3f4f6);
-  border-radius: var(--field-radius, 8px);
-  overflow: hidden;
-  position: relative;
+	background-color: var(--field-bg-disabled, #f3f4f6);
+	border-radius: var(--field-radius, 8px);
+	overflow: hidden;
+	position: relative;
 }
 
 .field-skeleton--rect {
-  height: var(--field-height, 2.5rem);
-  width: 100%;
+	height: var(--field-height, 2.5rem);
+	width: 100%;
 }
 
 .field-skeleton--circle {
-  width: var(--field-height, 2.5rem);
-  height: var(--field-height, 2.5rem);
-  border-radius: 50%;
+	width: var(--field-height, 2.5rem);
+	height: var(--field-height, 2.5rem);
+	border-radius: 50%;
 }
 
 .field-skeleton--pill {
-  height: 24px;
-  width: 60px;
-  border-radius: var(--border-radius__xlarge, 16px);
+	height: 24px;
+	width: 60px;
+	border-radius: var(--border-radius__xlarge, 16px);
 }

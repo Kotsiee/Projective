@@ -1,0 +1,101 @@
+.explore-filters {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.explore-filters__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.explore-filters__head h3 {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 800;
+	color: var(--text-main);
+}
+
+.explore-filters__reset {
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+.explore-filters__reset:hover { color: var(--primary); }
+
+/* Accordion tweaks */
+.explore-filters .accordion { border: none; }
+.explore-filters .accordion__item { border-bottom: 1px solid var(--hairline); padding: 0.35rem 0; }
+.explore-filters .accordion__item:last-of-type { border-bottom: none; }
+.explore-filters .accordion__trigger { padding: 0.5rem 0; font-weight: 600; }
+
+/* Budget */
+.explore-filters__budget { display: flex; flex-direction: column; gap: 0.75rem; padding: 0.35rem 0.15rem 0.75rem; }
+
+.explore-filters__budget-readout {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+/* Segmented availability control */
+.explore-filters__segment {
+	display: flex;
+	gap: 0.35rem;
+	padding: 0.35rem 0 0.5rem;
+}
+
+.explore-filters__seg {
+	flex: 1;
+	padding: 0.4rem 0.5rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	background: var(--mid);
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease;
+}
+
+.explore-filters__seg:hover { color: var(--text-main); }
+
+.explore-filters__seg.is-active {
+	color: var(--primary);
+	background: var(--primary-surface);
+	border-color: var(--primary);
+}
+
+/* Rating stars */
+.explore-filters__stars {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.35rem 0 0.5rem;
+}
+
+.explore-filters__star {
+	display: inline-flex;
+	padding: 0.1rem;
+	color: var(--text-disabled);
+	background: none;
+	border: none;
+	cursor: pointer;
+	transition: transform var(--fast) ease, color var(--fast) ease;
+}
+
+.explore-filters__star:hover { transform: scale(1.12); }
+.explore-filters__star .is-on { color: var(--amber); }
+
+.explore-filters__stars-label {
+	margin-left: 0.5rem;
+	font-size: 0.78rem;
+	color: var(--text-muted);
+}

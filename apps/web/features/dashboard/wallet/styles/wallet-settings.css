@@ -1,0 +1,75 @@
+.wallet-settings {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.5rem clamp(1rem, 3vw, 2rem);
+	max-width: 1080px;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.wallet-settings__title {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.wallet-settings__subtitle {
+	margin: 0.2rem 0 0;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+
+.wallet-settings__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 1rem;
+	align-items: start;
+}
+
+.wallet-settings__prefs {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius__large, 12px);
+	background: var(--card);
+	padding: 1rem 1.1rem;
+}
+
+.wallet-settings__prefs-title {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 650;
+	color: var(--text-main);
+}
+
+.wallet-settings__toggle {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.6rem;
+	cursor: pointer;
+}
+
+.wallet-settings__toggle input {
+	margin-top: 0.2rem;
+}
+
+.wallet-settings__toggle span {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+}
+
+.wallet-settings__toggle strong {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.wallet-settings__toggle em {
+	font-style: normal;
+	font-size: 0.76rem;
+	color: var(--text-muted);
+}

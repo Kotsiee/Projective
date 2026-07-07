@@ -38,7 +38,7 @@ export const handler = define.handlers({
 				});
 			}
 
-			return new Response(JSON.stringify({ ok: true, value: res.value }), {
+			return new Response(JSON.stringify({ ok: true, value: res.data }), {
 				status: 200,
 				headers: responseHeaders,
 			});

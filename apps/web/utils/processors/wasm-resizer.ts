@@ -1,5 +1,6 @@
 import init, { resize_image } from '../../static/wasm/wasm.js';
 import { FileProcessor } from 'packages/types/src/files/processing.ts';
+import { generateBlurhash } from './blurhash.ts';
 
 // Config interface
 interface ResizerConfig {
@@ -49,6 +50,12 @@ export const WasmImageResizer = (config: ResizerConfig): FileProcessor => ({
 				{ type: 'image/jpeg', lastModified: Date.now() },
 			);
 
+			// 5. BlurHash placeholder — encode the smaller resized output (fast to
+			// decode). Best-effort: a null hash just means no placeholder.
+			const blurhash = await generateBlurhash(newFile);
+
+			onProgress?.(95);
+
 			// Calculate savings for fun
 			const saved = ((file.size - newFile.size) / file.size * 100).toFixed(1);
 
@@ -56,6 +63,7 @@ export const WasmImageResizer = (config: ResizerConfig): FileProcessor => ({
 				file: newFile,
 				metadata: {
 					optimization: `Resized to ${config.maxWidth}px (${saved}% saved)`,
+					...(blurhash ? { blurhash } : {}),
 				},
 			};
 		} catch (e) {

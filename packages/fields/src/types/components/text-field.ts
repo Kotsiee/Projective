@@ -10,6 +10,12 @@ export interface TextFieldProps
 		Omit<LabelWrapperProps, 'id' | 'label' | 'error' | 'disabled' | 'className'>,
 		Omit<MessageWrapperProps, 'error' | 'hint'> {
 	type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url' | 'search';
+	/**
+	 * Visual variant. `glass` applies the frosted aurora-glass styling used by the
+	 * auth flow (taller control, softer fill, focus glow) and is self-contained —
+	 * no ancestor scope required. Defaults to `default`.
+	 */
+	variant?: 'default' | 'glass';
 	multiline?: boolean;
 	rows?: number;
 	maxRows?: number;

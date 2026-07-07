@@ -21,6 +21,7 @@ export function TextField(props: TextFieldProps) {
 		disabled,
 		placeholder,
 		className,
+		variant = 'default',
 		style,
 		position,
 		floatingRule,
@@ -107,11 +108,11 @@ export function TextField(props: TextFieldProps) {
 			value: val,
 			onInput: handleInput,
 			onKeyDown: handleKeyDown,
-			onFocus: (e: any) => {
+			onFocus: (e: FocusEvent) => {
 				interaction.handleFocus(e);
 				onFocus?.(e);
 			},
-			onBlur: (e: any) => {
+			onBlur: (e: FocusEvent) => {
 				interaction.handleBlur(e);
 				fieldState.validate();
 				onBlur?.(e);
@@ -123,6 +124,8 @@ export function TextField(props: TextFieldProps) {
 			minLength,
 			min,
 			max,
+			'aria-invalid': errorMessage ? true : undefined,
+			'aria-required': required ? true : undefined,
 		};
 
 		if (multiline) {
@@ -145,7 +148,14 @@ export function TextField(props: TextFieldProps) {
 	};
 
 	return (
-		<div className={`field-text ${className || ''}`} style={style}>
+		<div
+			className={[
+				'field-text',
+				variant === 'glass' && 'field-text--glass',
+				className,
+			].filter(Boolean).join(' ')}
+			style={style}
+		>
 			<div
 				className={[
 					'field-text__container',

@@ -7,3 +7,9 @@ export * from './src/components/kanban/index.ts';
 
 export * from './src/components/rating/index.ts';
 export * from './src/types/rating.ts';
+
+// Wallet-hub finance visualizations (D3)
+export * from './src/types/finance.ts';
+export * from './src/components/pipeline/index.ts';
+export * from './src/components/forecast/index.ts';
+export * from './src/components/finance/index.ts';

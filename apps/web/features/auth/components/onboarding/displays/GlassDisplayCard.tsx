@@ -1,87 +1,81 @@
-import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
+/**
+ * @file GlassDisplayCard.tsx
+ * @description The live "Projective ID" — a frosted glass identity card that fills
+ * in as the user types their name / username / path in the onboarding wizard.
+ * Reads the shared OnboardingContext so it updates reactively, and tilts subtly
+ * toward the pointer (reduced-motion respected).
+ */
+
 import '../../../styles/components/onboarding/displays/glass-display-card.css';
-import { Logo, useWizardContext } from '@projective/ui';
+import { useEffect, useRef } from 'preact/hooks';
+import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
 
 export function GlassDisplayCard() {
-	const { currentStep } = useWizardContext();
+	const { firstName, lastName, username, objective } = useOnboardingContext();
 
-	const rotation = (currentStep.value - 1) * 180;
-	const frontContent = currentStep.value >= 3 ? <CardObjective /> : <CardAccount />;
+	const wrapRef = useRef<HTMLDivElement>(null);
+	const cardRef = useRef<HTMLDivElement>(null);
 
-	const logos = Array.from({ length: 15 });
+	useEffect(() => {
+		const wrap = wrapRef.current;
+		const card = cardRef.current;
+		if (!wrap || !card) return;
+		if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 
-	return (
-		<div class='glass-display-card'>
-			<div
-				class='glass-display-card__3d-wrapper'
-				style={{ transform: `rotateY(${rotation}deg)` }}
-			>
-				<div class='glass-display-card__background'>
-					{logos.map((_, index) => <Logo key={index} color='var(--primary)' size={80} />)}
-				</div>
+		const onMove = (e: MouseEvent) => {
+			const r = wrap.getBoundingClientRect();
+			const px = (e.clientX - r.left) / r.width - 0.5;
+			const py = (e.clientY - r.top) / r.height - 0.5;
+			card.style.setProperty('--ry', `${(px * 14).toFixed(2)}deg`);
+			card.style.setProperty('--rx', `${(-py * 12).toFixed(2)}deg`);
+		};
+		const onLeave = () => {
+			card.style.setProperty('--ry', '0deg');
+			card.style.setProperty('--rx', '0deg');
+		};
 
-				<div class='glass-display-card__card face-front'>
-					{frontContent}
-				</div>
+		wrap.addEventListener('mousemove', onMove);
+		wrap.addEventListener('mouseleave', onLeave);
+		return () => {
+			wrap.removeEventListener('mousemove', onMove);
+			wrap.removeEventListener('mouseleave', onLeave);
+		};
+	}, []);
 
-				<div class='glass-display-card__card face-back'>
-					<CardIdentity />
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function CardAccount() {
-	return (
-		<div class='card-account__layout'>
-			<div class='card-account__quote'>
-				<p>Everything you can imagine is real</p>
-				<div class='card-account__divider'>
-					<hr />
-					<span>Pablo Picasso</span>
-				</div>
-			</div>
-			<div class='card-account__slogan'>
-				<h2>
-					Build Together.<br />Deliver Better.
-				</h2>
-			</div>
-		</div>
-	);
-}
-
-function CardIdentity() {
-	const { firstName, lastName, username } = useOnboardingContext();
+	const fullName = `${firstName.value ?? ''} ${lastName.value ?? ''}`.trim();
+	const initial = (firstName.value?.[0] ?? 'P').toUpperCase();
+	const handle = (username.value ?? '').replace(/^@+/, '');
+	const roleLabel = objective.value === 'seller'
+		? 'Freelancer · For hire'
+		: objective.value === 'client'
+		? 'Client · Hiring'
+		: 'Choose your path';
 
 	return (
-		<div class='card-identity__layout'>
-			<div class='card-identity__top-banner'>
-				<Logo size={48} color='rgba(255,255,255,0.5)' />
-			</div>
+		<div class='idwrap' ref={wrapRef}>
+			<div class='idcard' ref={cardRef} role='img' aria-label='Live preview of your Projective ID'>
+				<div class='idcard__top'>
+					<div class='idcard__avatar'>{initial}</div>
+					<div>
+						<div class={`idcard__name ${fullName ? '' : 'placeholder'}`}>
+							{fullName || 'Your name'}
+						</div>
+						<div class='idcard__user'>{handle ? `@${handle}` : '@username'}</div>
+					</div>
+				</div>
 
-			<div class='card-identity__avatar'>
-				<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'>
-					<path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'></path>
-					<circle cx='12' cy='7' r='4'></circle>
-				</svg>
-			</div>
+				<div class='idcard__meta'>
+					<span class='idbadge'>
+						<span class='dot'></span> {roleLabel}
+					</span>
+					<span class='idbadge'>Member · 2026</span>
+				</div>
 
-			<div class='card-identity__details'>
-				<h3>
-					{firstName.value || 'Firstname'} {lastName.value || 'Surname'}
-				</h3>
-				<p>@{username.value || 'username'}</p>
+				<div class='idcard__foot'>
+					<span>Projective ID</span>
+					<span class='idcard__chip'></span>
+				</div>
 			</div>
-		</div>
-	);
-}
-
-function CardObjective() {
-	return (
-		<div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-			{/* Placeholder for Step 3 */}
-			<p style={{ color: 'white', opacity: 0.5 }}>Objective Design Pending</p>
 		</div>
 	);
 }

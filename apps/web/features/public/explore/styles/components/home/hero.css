@@ -1,29 +1,166 @@
-.explore-home-hero {
-	display: flex;
-	justify-content: space-between;
+.explore-hero {
+	position: relative;
+	overflow: hidden;
 	width: 100%;
+	padding: 3.5rem 2rem 3rem;
+	border-bottom: 1px solid var(--hairline);
+	isolation: isolate;
 }
 
-.explore-home-hero__header {
+/* Ambient aurora — layered radial accents drifting behind the hero. */
+.explore-hero__aurora {
+	position: absolute;
+	inset: -30% -10% auto -10%;
+	height: 150%;
+	z-index: -1;
+	background:
+		radial-gradient(38% 55% at 18% 20%, hsla(160, 84%, 45%, 0.22), transparent 70%),
+		radial-gradient(40% 60% at 82% 10%, hsla(258, 90%, 66%, 0.22), transparent 70%),
+		radial-gradient(45% 65% at 60% 90%, hsla(37, 100%, 55%, 0.12), transparent 70%);
+	filter: blur(8px);
+	animation: hero-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes hero-drift {
+	from { transform: translate3d(-2%, -1%, 0) scale(1); }
+	to { transform: translate3d(2%, 2%, 0) scale(1.06); }
+}
+
+.explore-hero__inner {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	align-items: center;
+	gap: 1.25rem;
+	max-width: 960px;
+	margin: 0 auto;
+	text-align: center;
 }
 
-.explore-home-hero__header__context {
-	width: 65%;
+.explore-hero__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.8rem;
+	font-size: 0.74rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--text-secondary);
+	background: var(--card);
+	border: 1px solid var(--hairline-strong);
+	border-radius: 999px;
 }
-.explore-home-hero__header__context__title {}
-.explore-home-hero__header__context__subtitle {}
-.explore-home-hero__header__search {}
-.explore-home-hero__header__search__input {
+
+.explore-hero__badge svg { color: var(--mint); }
+
+.explore-hero__title {
+	margin: 0;
+	font-size: clamp(2.2rem, 5vw, 3.6rem);
+	font-weight: 850;
+	line-height: 1.08;
+	letter-spacing: -0.025em;
+	color: var(--text-main);
+}
+
+.explore-hero__typed {
+	display: inline;
+	background: linear-gradient(100deg, var(--mint), var(--violet) 55%, var(--amber));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
+}
+
+.explore-hero__caret {
+	display: inline-block;
+	width: 3px;
+	height: 1em;
+	margin-left: 2px;
+	vertical-align: text-bottom;
+	background: var(--violet);
+	border-radius: 2px;
+	animation: hero-caret 1s steps(1) infinite;
+	-webkit-text-fill-color: var(--violet);
+}
+
+@keyframes hero-caret {
+	50% { opacity: 0; }
+}
+
+.explore-hero__subtitle {
+	margin: 0;
+	max-width: 42rem;
+	font-size: clamp(0.95rem, 1.6vw, 1.12rem);
+	line-height: 1.55;
+	color: var(--text-muted);
+}
+
+.explore-hero__search {
+	width: 100%;
+	max-width: 720px;
+	margin-top: 0.75rem;
+}
+
+/* Contextual dynamic CTA banner ------------------------------------------ */
+.explore-hero__cta {
 	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.25rem;
+	width: 100%;
+	max-width: 720px;
+	margin-top: 0.5rem;
+	padding: 1rem 1.25rem;
+	text-align: left;
+	background: var(--card);
+	border: 1px solid var(--hairline-strong);
+	border-radius: var(--border-radius__large);
 }
-.explore-home-hero__header__search__suggested {}
 
-.explore-home-hero__promotion {
-	height: 100%;
-	min-height: calc(75vh - var(--header-height) - 2rem);
-	width: 35%;
-	border: 1px solid red;
+.explore-hero__cta-copy { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.explore-hero__cta-copy strong { font-size: 0.95rem; color: var(--text-main); }
+.explore-hero__cta-copy span { font-size: 0.82rem; color: var(--text-muted); }
+
+.explore-hero__cta-actions {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.explore-hero__role-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15rem;
+	font-size: 0.7rem;
+	color: var(--text-muted);
+}
+
+.explore-hero__role-switch > span { margin-right: 0.25rem; }
+
+.explore-hero__role {
+	padding: 0.15rem 0.5rem;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: capitalize;
+	color: var(--text-secondary);
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	cursor: pointer;
+	transition: color var(--fast) ease, background var(--fast) ease, border-color var(--fast) ease;
+}
+
+.explore-hero__role:hover { color: var(--text-main); }
+
+.explore-hero__role.is-active {
+	color: var(--primary);
+	background: var(--primary-surface);
+	border-color: var(--primary);
+}
+
+@media (max-width: 720px) {
+	.explore-hero { padding: 2.5rem 1rem 2rem; }
+	.explore-hero__cta { flex-direction: column; align-items: flex-start; }
+	.explore-hero__cta-actions { align-items: flex-start; width: 100%; }
 }

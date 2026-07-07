@@ -5,7 +5,7 @@
 
 // #region Imports
 import { useSignal } from '@preact/signals';
-import { Button, toast } from '@projective/ui';
+import { toast } from '@projective/ui';
 import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
 import { CreateAccountService } from '../../../services/CreateAccountService.ts';
 // #endregion
@@ -51,23 +51,26 @@ export function CreateAccountButton({ enabled }: { enabled: boolean }) {
 			} else {
 				globalThis.location.href = '/verify';
 			}
-		} catch (err: any) {
-			toast.error(err.message || 'An unexpected error occurred during account creation.');
+		} catch (err) {
+			toast.error(
+				err instanceof Error
+					? err.message
+					: 'An unexpected error occurred during account creation.',
+			);
 		} finally {
 			isLoading.value = false;
 		}
 	};
 
 	return (
-		<Button
-			className='objective-input__continue-button'
-			variant='primary'
+		<button
+			type='button'
+			class='auth-cta'
 			disabled={!enabled || isLoading.value}
-			loading={isLoading.value}
 			onClick={handleCreateAccount}
 		>
-			{isLoading.value ? 'Creating...' : 'Create Account'}
-		</Button>
+			{isLoading.value ? 'Creating…' : 'Create account'}
+		</button>
 	);
 }
 // #endregion

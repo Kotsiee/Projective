@@ -14,6 +14,7 @@ export * from './src/wrappers/FieldArrayWrapper.tsx';
 export * from './src/hooks/useInteraction.ts';
 export * from './src/hooks/useCurrencyMask.ts';
 export * from './src/hooks/useGlobalDrag.ts';
+export * from './src/hooks/useMinAmountValidation.ts';
 
 // Components
 export * from './src/components/TextField.tsx';

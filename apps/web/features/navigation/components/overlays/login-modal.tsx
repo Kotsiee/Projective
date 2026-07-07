@@ -60,7 +60,7 @@ export default function LoginModal() {
 					>
 						Don't have an account?
 						<a
-							href='/register'
+							href='/join'
 							style={{ color: 'var(--primary)', fontWeight: 500, textDecoration: 'none' }}
 						>
 							Sign up here
@@ -85,7 +85,7 @@ export default function LoginModal() {
 						placeholder='••••••••'
 					/>
 
-					<a href='/reset' class='auth-modal__forgot-password'>
+					<a href='/forgot-password' class='auth-modal__forgot-password'>
 						Forgot Password?
 					</a>
 

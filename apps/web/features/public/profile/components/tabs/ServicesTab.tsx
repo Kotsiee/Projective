@@ -1,71 +1,57 @@
 /**
  * @file ServicesTab.tsx
- * @description The "Services" panel. Prominent image-thumbnail cards for each
- * offering, with a grid/list view toggle bound to the `servicesView` signal.
- * Session-based services surface a small "Bookable" chip.
+ * @description The "Services" panel. Renders each offering through the unified `ServiceCard`
+ * (premium thumbnail + dense pricing/rating metadata). Per the card action guardrail, the only
+ * face buttons are Save · Share · kebab — the former "Book session" / "View service" CTA now lives
+ * inside the kebab menu.
  */
 
 import '../../styles/components/services.css';
 
-import { Button, IconButton, Tag } from '@projective/ui';
+import { IconButton, ServiceCard } from '@projective/ui';
 import {
 	IconCalendarEvent,
-	IconClock,
+	IconExternalLink,
 	IconLayoutGrid,
 	IconList,
-	IconStarFilled,
 } from '@tabler/icons-preact';
+import type { EntityCardMenuItem } from '@projective/ui';
+import type { EntityCardModel } from '@projective/types';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
-import { mediaBackground } from '../../utils.ts';
 import type { ServiceItem } from '../../contracts/Profile.ts';
 
-function ServiceCard({ s }: { s: ServiceItem }) {
-	return (
-		<article class='svc-card'>
-			<div class='svc-card__cover' style={mediaBackground(s.thumbnailUrl)}>
-				{s.sessionBased && (
-					<span class='svc-card__chip'>
-						<IconCalendarEvent size={13} /> Bookable
-					</span>
-				)}
-			</div>
+/** Adapts a profile `ServiceItem` into the unified card model. */
+function serviceToCardModel(s: ServiceItem): EntityCardModel {
+	return {
+		id: s.id,
+		entity_type: 'service',
+		display_title: s.title,
+		display_description: s.summary,
+		tags: s.tags,
+		rating_average: s.rating,
+		rating_count: s.reviews,
+		owner_name: '',
+		owner_handle: '',
+		owner_avatar: null,
+		banner: s.thumbnailUrl ? `url("${s.thumbnailUrl}") center / cover no-repeat` : null,
+		accent: 'primary',
+		price_cents: null,
+		price_unit: null,
+		price_label: s.priceLabel,
+		availability: null,
+		location: null,
+		scope: null,
+		taxonomy: null,
+		is_sponsored: false,
+		timeline_note: s.deliveryLabel,
+	};
+}
 
-			<div class='svc-card__body'>
-				<h3 class='svc-card__title'>{s.title}</h3>
-				<p class='svc-card__summary'>{s.summary}</p>
-
-				<div class='svc-card__meta'>
-					<span class='svc-card__price'>{s.priceLabel}</span>
-					<span class='svc-card__dot' aria-hidden='true'>·</span>
-					<span class='svc-card__delivery'>
-						<IconClock size={14} /> {s.deliveryLabel}
-					</span>
-					<span class='svc-card__rating'>
-						<IconStarFilled size={14} /> {s.rating.toFixed(1)}
-						<span class='svc-card__reviews'>({s.reviews})</span>
-					</span>
-				</div>
-
-				{s.tags.length > 0 && (
-					<div class='svc-card__tags'>
-						{s.tags.map((t) => (
-							<Tag key={t} size='small' color='neutral' variant='subtle' rounded>{t}</Tag>
-						))}
-					</div>
-				)}
-			</div>
-
-			<div class='svc-card__foot'>
-				<Button
-					variant={s.sessionBased ? 'primary' : 'secondary'}
-					size='small'
-					outlined={!s.sessionBased}
-				>
-					{s.sessionBased ? 'Book session' : 'View service'}
-				</Button>
-			</div>
-		</article>
-	);
+/** The kebab menu for a service — its primary action lives here, not on the card face. */
+function serviceMenu(s: ServiceItem): EntityCardMenuItem[] {
+	return s.sessionBased
+		? [{ label: 'Book session', icon: <IconCalendarEvent size={15} />, onSelect: () => {} }]
+		: [{ label: 'View service', icon: <IconExternalLink size={15} />, onSelect: () => {} }];
 }
 
 export default function ServicesTab() {
@@ -106,7 +92,9 @@ export default function ServicesTab() {
 				? <div class='tab-empty'>No services listed yet.</div>
 				: (
 					<div class='svc-grid'>
-						{services.map((s) => <ServiceCard key={s.id} s={s} />)}
+						{services.map((s) => (
+							<ServiceCard key={s.id} entity={serviceToCardModel(s)} menuItems={serviceMenu(s)} />
+						))}
 					</div>
 				)}
 		</section>

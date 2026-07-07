@@ -1,0 +1,56 @@
+/**
+ * @file data.css
+ * @description Design-token bridge for `@projective/data` (and any shared table/grid/list/skeleton
+ * surface). The data package authors its CSS against a semantic vocabulary — `--bg-surface`,
+ * `--table-header-bg`, `--text-primary`, `--border-default`, `--data-font-family`, … — that was
+ * never defined in the Projective theme, so those components rendered with unset colours, missing
+ * borders and no striping (the root cause of "tables don't align/scale"). This maps that
+ * vocabulary onto the real palette from `colour.css`. Because every mapping targets a token that
+ * already flips under `:root[data-theme="dark"]`, no separate dark block is needed.
+ *
+ * Per apps/web/CLAUDE.md, shared CSS variables must live here under styles/themes/variables/.
+ */
+:root {
+	/* #region Surfaces */
+	--bg-surface: var(--card);
+	--bg-surface-subtle: var(--mid);
+	--bg-surface-active: var(--card-active);
+	--bg-selection: var(--primary-surface);
+	--bg-brand-subtle: var(--primary-surface);
+	--grid-card-bg: var(--card);
+	/* #endregion */
+
+	/* #region Text (--text-secondary / --text-muted / --text-disabled already in colour.css) */
+	--text-primary: var(--text-main);
+	--text-brand: var(--primary);
+	/* #endregion */
+
+	/* #region Borders (micro-hairlines, the `border-zinc-700/30` equivalent) */
+	--border-default: var(--hairline);
+	--border-subtle: var(--hairline);
+	--border-active: var(--primary);
+	--border-focus: var(--primary);
+	/* #endregion */
+
+	/* #region Typography & motion */
+	--data-font-family: var(--font-sans, inherit);
+	--data-font-size: 0.875rem;
+	--data-transition: var(--fast);
+	--data-radius: var(--border-radius);
+	/* #endregion */
+
+	/* #region Table metrics */
+	--table-header-bg: var(--mid);
+	--table-header-height: 40px;
+	--table-cell-padding: 0.5rem 0.75rem;
+	/* #endregion */
+
+	/* #region Grid */
+	--grid-gap: 1rem;
+	/* #endregion */
+
+	/* #region Local stacking (scoped to the data scroll-pane, not the global z scale) */
+	--z-header: 5;
+	--z-loader: 6;
+	/* #endregion */
+}

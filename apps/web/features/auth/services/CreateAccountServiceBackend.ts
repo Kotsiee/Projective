@@ -44,7 +44,10 @@ export class CreateAccountBackendService {
 		}
 
 		try {
-			const emailRedirectTo = `${Config.BASE_URL}/api/v1/auth/callback`;
+			// Fallback redirect for the confirmation email. The email template builds
+			// the actual link from {{ .TokenHash }} → /api/v1/auth/confirm; this value
+			// only needs to be an allow-listed URL for Gotrue to accept the signup.
+			const emailRedirectTo = `${Config.BASE_URL}/api/v1/auth/confirm`;
 			const getClient = deps.getClient ?? supabaseClient;
 			const supabase = await getClient();
 

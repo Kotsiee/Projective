@@ -1,28 +1,28 @@
 /* #region 1. BLOCK: field-label */
 .field-label {
-    display: flex;
-    align-items: center;
-    font-family: inherit;
-    font-size: var(--field-font-size, 14px);
-    color: var(--field-text-label, #4b5563);
-    margin-bottom: 4px;
-    transition: all var(--field-transition, 150ms ease);
-    pointer-events: none;
-    line-height: 1.5;
+	display: flex;
+	align-items: center;
+	font-family: inherit;
+	font-size: var(--field-font-size, 14px);
+	color: var(--field-text-label, #4b5563);
+	margin-bottom: 4px;
+	transition: all var(--field-transition, 150ms ease);
+	pointer-events: none;
+	line-height: 1.5;
 }
 
 /* #endregion */
 
 /* #region 2. MODIFIER: field-label--floating */
 .field-label--floating {
-    position: absolute;
-    z-index: 10;
-    left: var(--field-padding-x, 12px);
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: transparent;
-    padding: 0 4px;
-    margin-bottom: 0;
+	position: absolute;
+	z-index: 10;
+	left: var(--field-padding-x, 12px);
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: transparent;
+	padding: 0 4px;
+	margin-bottom: 0;
 }
 
 /**
@@ -30,26 +30,26 @@
  * Added z-index to ensure it sits above the EffectWrapper.
  */
 .field-label--active {
-    top: 0 !important;
-    transform: translateY(-50%) scale(0.85) !important;
-    left: calc(var(--field-padding-x, 12px) - 2px);
-    color: var(--field-border-focus, #3b82f6);
-    background-color: var(--field-bg, #ffffff);
-    font-weight: 600;
-    z-index: 20;
+	top: 0 !important;
+	transform: translateY(-50%) scale(0.85) !important;
+	left: calc(var(--field-padding-x, 12px) - 2px);
+	color: var(--field-border-focus, #3b82f6);
+	background-color: var(--field-bg, #ffffff);
+	font-weight: 600;
+	z-index: 20;
 }
 
 .field-label--error {
-    color: var(--field-text-error, #ef4444);
+	color: var(--field-text-error, #ef4444);
 }
 
 .field-label--disabled {
-    color: var(--field-text-disabled, #9ca3af);
+	color: var(--field-text-disabled, #9ca3af);
 }
 
 .field-label__required {
-    color: var(--danger, #ef4444);
-    margin-left: 2px;
+	color: var(--danger, #ef4444);
+	margin-left: 2px;
 }
 
 /* #endregion */

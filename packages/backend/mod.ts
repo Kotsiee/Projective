@@ -11,6 +11,7 @@ export * from './src/types.ts';
 // Domain Exports
 export * from './src/auth/jwt.ts';
 export * from './src/auth/tokens.ts';
+export * from './src/auth/pkce.ts';
 export * from './src/core/index.ts';
 
 export * from './src/services/files.ts';

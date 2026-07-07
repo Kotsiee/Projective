@@ -7,7 +7,6 @@
 import { Head } from 'fresh/runtime';
 import { State } from '@utils';
 import Providers from './(_islands)/Providers.tsx';
-import HashAuthInterceptor from '@features/auth/islands/HashAuthInterceptor.island.tsx';
 // #endregion
 
 // #region App Container
@@ -32,8 +31,6 @@ export default function App(
 				/>
 			</Head>
 			<body>
-				<HashAuthInterceptor />
-
 				<main>
 					<Providers>
 						<ctx.Component />

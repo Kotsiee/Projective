@@ -1,15 +1,22 @@
-import '../../../styles/components/onboarding/displays/display-orchestrator.css';
+/**
+ * @file DisplayOrchestrator.tsx
+ * @description Content of the onboarding visual pane: the live "Projective ID"
+ * identity card, brand copy, and the step tracker. Rendered inside AuthShell's
+ * visual slot (within the onboarding island, so the card reads wizard context).
+ */
+
 import { OnboardingStepper } from './OnboardingStepper.tsx';
 import { GlassDisplayCard } from './GlassDisplayCard.tsx';
 
 export function DisplayOrchestrator() {
 	return (
-		<div class='onboarding__display-orchestrator'>
-			<h1 class='onboarding__display-orchestrator__title'>Join Projective</h1>
-			<div class='onboarding__display-orchestrator__card'>
-				<GlassDisplayCard />
+		<>
+			<GlassDisplayCard />
+			<div class='auth-visual__body'>
+				<span class='auth-eyebrow'>Your pass, live</span>
+				<p class='auth-lede'>Watch your profile come together as you type.</p>
+				<OnboardingStepper />
 			</div>
-			<OnboardingStepper />
-		</div>
+		</>
 	);
 }

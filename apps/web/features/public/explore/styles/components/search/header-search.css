@@ -1,28 +1,131 @@
-.explore-search-header-search {
+.explore-search-header {
+	--hdr-accent: var(--primary);
+	--hdr-accent-2: var(--primary);
+	position: relative;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 2rem;
+	gap: 1rem;
 	width: 100%;
+	overflow: hidden;
+	isolation: isolate;
 }
 
-.explore-search-header-search__header {
+/* Dynamic entity themes ---------------------------------------------------- */
+.explore-search-header.accent-mint   { --hdr-accent: var(--mint);   --hdr-accent-2: hsl(150, 84%, 50%); }
+.explore-search-header.accent-violet { --hdr-accent: var(--violet); --hdr-accent-2: hsl(280, 90%, 70%); }
+.explore-search-header.accent-amber  { --hdr-accent: var(--amber);  --hdr-accent-2: hsl(20, 95%, 60%); }
+.explore-search-header.accent-ocean  { --hdr-accent: hsl(199, 89%, 60%); --hdr-accent-2: hsl(220, 90%, 66%); }
+.explore-search-header.accent-multi  { --hdr-accent: var(--mint);   --hdr-accent-2: var(--violet); }
+
+/* Themed graphic asset: a soft accent aurora bleeding from the top-right. */
+.explore-search-header__glow {
+	position: absolute;
+	inset: -60% -20% auto 30%;
+	height: 220px;
+	z-index: -1;
+	background:
+		radial-gradient(50% 80% at 80% 0%, color-mix(in srgb, var(--hdr-accent) 45%, transparent), transparent 70%),
+		radial-gradient(45% 70% at 55% 10%, color-mix(in srgb, var(--hdr-accent-2) 38%, transparent), transparent 72%);
+	filter: blur(14px);
+	opacity: 0.65;
+	transition: background var(--slow) ease;
+	pointer-events: none;
+}
+
+.accent-multi .explore-search-header__glow {
+	background:
+		radial-gradient(40% 70% at 85% 0%, hsla(160, 84%, 50%, 0.4), transparent 70%),
+		radial-gradient(40% 70% at 60% 5%, hsla(258, 90%, 70%, 0.4), transparent 70%),
+		radial-gradient(40% 70% at 40% 10%, hsla(37, 100%, 60%, 0.3), transparent 72%);
+}
+
+.explore-search-header__topline {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.explore-search-header__headline {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	gap: 0.35rem;
 }
 
-.explore-search-header-search__title {
-	font-size: 3rem;
-	padding: 0;
+.explore-search-header__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--hdr-accent);
+}
+
+.explore-search-header__glyph {
+	display: inline-grid;
+	place-items: center;
+	width: 1.7rem;
+	height: 1.7rem;
+	font-size: 0.95rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--hdr-accent) 16%, transparent);
+	border: 1px solid color-mix(in srgb, var(--hdr-accent) 40%, transparent);
+	-webkit-text-fill-color: initial;
+}
+
+.explore-search-header__title {
 	margin: 0;
+	font-size: clamp(2rem, 4vw, 3rem);
+	font-weight: 850;
+	letter-spacing: -0.03em;
+	line-height: 1.05;
+	background: linear-gradient(100deg, var(--text-main), color-mix(in srgb, var(--hdr-accent) 70%, var(--text-main)));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
 }
 
-.explore-search-header-search__related {
-	font-size: 0.8rem;
-}
-
-.explore-search-header-search__input {
-	width: 100%;
+/* Dribbble-style related search tags ------------------------------------- */
+.explore-search-header__related {
 	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.explore-search-header__related-label {
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.explore-search-header__related-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+}
+
+.explore-search-header__related-tag {
+	padding: 0.3rem 0.7rem;
+	font-size: 0.78rem;
+	font-weight: 500;
+	color: var(--text-secondary);
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: 999px;
+	cursor: pointer;
+	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease;
+}
+
+.explore-search-header__related-tag:hover {
+	color: var(--hdr-accent);
+	border-color: var(--hdr-accent);
+	background: color-mix(in srgb, var(--hdr-accent) 12%, transparent);
+}
+
+.explore-search-header__input {
+	width: 100%;
 }

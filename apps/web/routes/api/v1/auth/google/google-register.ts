@@ -1,19 +1,24 @@
 import { define } from '@utils';
-import { getProviderRedirectUrl } from '@features/auth/services/oauth.ts';
+import { getProviderRedirect } from '@features/auth/services/oauth.ts';
+import { setPkceCookie } from '@projective/backend';
 
 export const handler = define.handlers({
 	async GET(ctx) {
 		try {
 			const url = new URL(ctx.req.url);
-
 			const next = url.searchParams.get('next') || '/';
 
-			const redirect = await getProviderRedirectUrl('google', 'register', url, next);
+			const { url: redirect, verifier } = await getProviderRedirect(
+				'google',
+				'register',
+				url,
+				next,
+			);
 
-			return new Response(null, {
-				status: 303,
-				headers: { Location: redirect },
-			});
+			const headers = new Headers({ Location: redirect });
+			setPkceCookie(headers, verifier, url);
+
+			return new Response(null, { status: 303, headers });
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'OAuth init failed';
 

@@ -1,16 +1,16 @@
 /**
  * @file Explore.ts
- * @description Contracts and state definitions for the Explore discovery engine.
+ * @description Contracts and reactive state definitions for the Unified Explore & Discovery Engine.
  */
 
 import { Signal } from '@preact/signals';
-import { PartialEntityResponse } from '@projective/types';
+import { EntityType, ExploreEntity, ExploreFilters, ExploreSort } from '@projective/types';
 
-// Update to expect the normalized DTO instead of full domain entities
-export type ExploreResponses = PartialEntityResponse;
-
+// #region 1. LEGACY ALIASES
+// Retained so the (currently unused) REST search services + API route handlers keep type-checking.
+// The live discovery surfaces below are driven entirely by the frontend seed.
 export type ViewMode = 'grid' | 'list' | 'masonry';
-export type SortType = 'recommended' | 'price' | 'rating' | 'recent';
+export type SortType = ExploreSort;
 export type SearchType =
 	| 'projects'
 	| 'marketplace'
@@ -19,23 +19,47 @@ export type SearchType =
 	| 'people'
 	| 'posts'
 	| 'all';
+// #endregion
+
+// #region 2. DISCOVERY MODEL
+
+/** Session role state that drives the contextual hero CTA banner. */
+export type UserRole = 'guest' | 'client' | 'freelancer';
+
+/** The active entity-type facet. `'all'` is the federated (multi-entity) view. */
+export type EntityFilter = EntityType | 'all';
 
 /**
  * @interface ExploreState
- * @description The central state contract for the Explore & Search discovery engine.
+ * @description Central reactive state contract for the Explore & Search discovery engine.
  */
 export interface ExploreState {
-	/** The current search term entered by the user */
+	/** Current search term. */
 	exploreQuery: Signal<string | null>;
-	/** The layout mode for the search results (e.g., grid vs list) */
-	viewMode: Signal<ViewMode>;
-	/** The active federated search tab */
-	searchType: Signal<SearchType>;
-	/** The active sorting parameter */
-	sortType: Signal<SortType>;
-	/** Store the full data object of the selected item instead of just the ID */
-	// deno-lint-ignore no-explicit-any
-	selectedItem: Signal<any | null>;
-	/** Controls the visibility of the sticky filter sidebar */
+	/** Active entity-type facet — `'all'` unlocks the federated view; a concrete type isolates it. */
+	entityType: Signal<EntityFilter>;
+	/** Active sort parameter (only meaningful in single-entity view). */
+	sort: Signal<ExploreSort>;
+	/** Advanced filter parameters (only applied in single-entity view). */
+	filters: Signal<ExploreFilters>;
+	/** The entity currently open in the split-pane inspector (single-entity view only). */
+	selectedItem: Signal<ExploreEntity | null>;
+	/** Whether the collapsible filter sidebar is open. */
 	isFiltersOpen: Signal<boolean>;
+	/** Session role — drives the contextual hero CTA. */
+	userRole: Signal<UserRole>;
 }
+
+/** Convenience: default filter parameter set. */
+export const DEFAULT_FILTERS: ExploreFilters = {
+	entity_type: null,
+	budget_min_cents: 0,
+	budget_max_cents: 1_000_000,
+	availability: null,
+	min_rating: 0,
+	skills: [],
+	locations: [],
+	languages: [],
+};
+
+// #endregion

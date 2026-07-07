@@ -27,7 +27,7 @@ export class ResendBackendService {
 		if (!email) return fail('bad_request', 'Email is required.', 400);
 
 		try {
-			const emailRedirectTo = `${Config.BASE_URL}/verify`;
+			const emailRedirectTo = `${Config.BASE_URL}/api/v1/auth/confirm`;
 			const supabase = await supabaseClient();
 
 			const { error } = await supabase.auth.resend({

@@ -14,7 +14,7 @@ function resolveCookieNames(isSecureOrigin: boolean, isLocalhost: boolean) {
 	return { ACCESS_NAME: 'pjv-at', REFRESH_NAME: 'pjv-rt' };
 }
 
-function isLocalhostHost(hostname: string) {
+export function isLocalhostHost(hostname: string) {
 	return (
 		hostname === 'localhost' ||
 		hostname === '127.0.0.1' ||

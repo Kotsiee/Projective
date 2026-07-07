@@ -14,3 +14,9 @@ wasm-bindgen = "0.2.105"
 version = "0.24"
 default-features = false
 features = ["jpeg", "png", "webp"]
+
+# BlurHash encoder. default-features disabled so we don't pull a second copy of
+# `image`/gdk-pixbuf — we feed it flat RGBA that the browser <canvas> produces.
+[dependencies.blurhash]
+version = "0.2"
+default-features = false

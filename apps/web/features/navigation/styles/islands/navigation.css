@@ -125,7 +125,6 @@
     margin-top: var(--header-height);
     border-radius: 0;
     box-shadow: none;
-    padding: 40px;
 }
 
 /* 3. Mobile View (Triggers at 768px) */

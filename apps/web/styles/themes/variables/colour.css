@@ -1,124 +1,248 @@
 /* #region 1. LOGIC SETTINGS */
 :root {
-        --hover-delta: -8%;
-        --active-delta: -12%;
+	--hover-delta: -8%;
+	--active-delta: -12%;
 
-        --darker-delta: -20%;
-        --lighter-delta: 20%;
+	--darker-delta: -20%;
+	--lighter-delta: 20%;
 
-        /* #region 2. BASE PALETTE (H/S/L) */
-        --header-hue: 0;
-        --header-saturation: 0%;
-        --header-lightness: 100%;
-        /* Lightest layer */
+	/* #region 2. BASE PALETTE (H/S/L) */
+	--header-hue: 0;
+	--header-saturation: 0%;
+	--header-lightness: 100%;
+	/* Lightest layer */
 
-        --mid-hue: 0;
-        --mid-saturation: 0%;
-        --mid-lightness: 99%;
-        /* Exact middle between Header and BG */
+	--mid-hue: 0;
+	--mid-saturation: 0%;
+	--mid-lightness: 99%;
+	/* Exact middle between Header and BG */
 
-        --bg-hue: 0;
-        --bg-saturation: 0%;
-        --bg-lightness: 98%;
-        /* Base layer */
+	--bg-hue: 0;
+	--bg-saturation: 0%;
+	--bg-lightness: 98%;
+	/* Base layer */
 
-        --card-hue: 0;
-        --card-saturation: 0%;
-        --card-lightness: 100%;
+	--card-hue: 0;
+	--card-saturation: 0%;
+	--card-lightness: 100%;
 
-        --text-hue: 0;
-        --text-saturation: 0%;
-        --text-lightness: 10%;
+	--text-hue: 0;
+	--text-saturation: 0%;
+	--text-lightness: 10%;
 
-        --primary-hue: 186;
-        --primary-saturation: 57%;
-        --primary-lightness: 36%;
+	--primary-hue: 186;
+	--primary-saturation: 57%;
+	--primary-lightness: 36%;
 
-        --danger-hue: 0;
-        --danger-saturation: 70%;
-        --danger-lightness: 55%;
+	--danger-hue: 0;
+	--danger-saturation: 70%;
+	--danger-lightness: 55%;
 
-        --warning-hue: 37;
-        --warning-saturation: 90%;
-        --warning-lightness: 45%;
+	--warning-hue: 37;
+	--warning-saturation: 90%;
+	--warning-lightness: 45%;
 
-        --success-hue: 160;
-        --success-saturation: 65%;
-        --success-lightness: 40%;
-        /* #endregion */
+	--success-hue: 160;
+	--success-saturation: 65%;
+	--success-lightness: 40%;
+	/* #endregion */
 
-        /* #region 3. GENERATED COLORS */
-        --header: hsl(var(--header-hue), var(--header-saturation), var(--header-lightness));
-        --mid: hsl(var(--mid-hue), var(--mid-saturation), var(--mid-lightness));
-        --bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
+	/* #region 3. GENERATED COLORS */
+	--header: hsl(var(--header-hue), var(--header-saturation), var(--header-lightness));
+	--mid: hsl(var(--mid-hue), var(--mid-saturation), var(--mid-lightness));
+	--bg: hsl(var(--bg-hue), var(--bg-saturation), var(--bg-lightness));
 
-        --card: hsl(var(--card-hue), var(--card-saturation), var(--card-lightness));
-        --card-hover: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--hover-delta)));
-        --card-active: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--active-delta)));
-        --card-dark: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--darker-delta)));
-        --card-light: hsl(var(--card-hue), var(--card-saturation), calc(var(--card-lightness) + var(--lighter-delta)));
+	--card: hsl(var(--card-hue), var(--card-saturation), var(--card-lightness));
+	--card-hover: hsl(
+		var(--card-hue),
+		var(--card-saturation),
+		calc(var(--card-lightness) + var(--hover-delta))
+	);
+	--card-active: hsl(
+		var(--card-hue),
+		var(--card-saturation),
+		calc(var(--card-lightness) + var(--active-delta))
+	);
+	--card-dark: hsl(
+		var(--card-hue),
+		var(--card-saturation),
+		calc(var(--card-lightness) + var(--darker-delta))
+	);
+	--card-light: hsl(
+		var(--card-hue),
+		var(--card-saturation),
+		calc(var(--card-lightness) + var(--lighter-delta))
+	);
 
-        --primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
-        --primary-half: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.25);
-        --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--hover-delta)));
-        --primary-active: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) + var(--active-delta)));
-        --primary-surface: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.12);
+	--primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+	--primary-half: hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.25
+	);
+	--primary-hover: hsl(
+		var(--primary-hue),
+		var(--primary-saturation),
+		calc(var(--primary-lightness) + var(--hover-delta))
+	);
+	--primary-active: hsl(
+		var(--primary-hue),
+		var(--primary-saturation),
+		calc(var(--primary-lightness) + var(--active-delta))
+	);
+	--primary-surface: hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.12
+	);
 
-        --danger: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
-        --warning: hsl(var(--warning-hue), var(--warning-saturation), var(--warning-lightness));
-        --success: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
-        /* #endregion */
+	--danger: hsl(var(--danger-hue), var(--danger-saturation), var(--danger-lightness));
+	--warning: hsl(var(--warning-hue), var(--warning-saturation), var(--warning-lightness));
+	--success: hsl(var(--success-hue), var(--success-saturation), var(--success-lightness));
 
-        /* #region 4. GLOBAL SEMANTICS */
-        --text-main: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
-        --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 30%);
-        --text-secondary: hsl(var(--text-hue), var(--text-saturation), calc(var(--text-lightness) + var(--lighter-delta)));
-        --text-muted: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.6);
-        --text-disabled: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
-        --text-tertiary: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
-        --border-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15);
+	/* Translucent surfaces for soft banner/alert fills (mirror --primary-surface). */
+	--danger-surface: hsla(
+		var(--danger-hue),
+		var(--danger-saturation),
+		var(--danger-lightness),
+		0.12
+	);
+	--success-surface: hsla(
+		var(--success-hue),
+		var(--success-saturation),
+		var(--success-lightness),
+		0.12
+	);
+	/* #endregion */
 
-        --focus-ring: 0 0 0 3px hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.4);
+	/* #region 4c. AUTH / AURORA-GLASS
+	   Brand gradient + the aurora-glass surfaces used by the auth flow. The visual
+	   pane stays dark in both themes; only the page backdrop + form panel re-theme. */
+	--aqua: hsl(168, 78%, 66%);
+	--grad: linear-gradient(135deg, var(--primary), var(--mint));
+	--grad-text: linear-gradient(100deg, var(--primary), var(--mint) 60%, var(--aqua));
 
-        --incomplete: var(--danger);
-        --in-progress: var(--warning);
-        --complete: var(--primary);
-        /* #endregion */
+	--auth-ink: hsl(186, 40%, 8%);
+	--glass-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
+	--glass-border: rgba(255, 255, 255, 0.22);
 
-        --scrollbar-bg: var(--bg);
-        --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 88%);
-        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 82%);
+	--auth-page-1: hsl(174, 34%, 94%);
+	--auth-page-2: var(--bg);
+	--auth-page-3: hsl(168, 34%, 93%);
+	--auth-orb-a: hsla(170, 60%, 46%, 0.3);
+	--auth-orb-b: hsla(186, 57%, 36%, 0.22);
+	--auth-orb-c: hsla(258, 70%, 63%, 0.14);
+	--auth-ghost: hsla(186, 57%, 36%, 0.16);
+	/* #endregion */
 
-        --navigation-drop-shadow: rgba(0, 0, 0, 0.1)
+	/* #region 4b. DISCOVERY ACCENTS
+	   Lively pops of color for the Explore & Discovery engine. Mint is the existing
+	   primary (teal, hue 186); amber reuses the warning hue; violet is net-new. Each
+	   accent ships a solid tone + a translucent surface for soft badge/pill fills. */
+	--violet-hue: 258;
+	--violet-saturation: 85%;
+	--violet-lightness: 66%;
+
+	--mint: hsl(160, 70%, 42%);
+	--mint-surface: hsla(160, 70%, 42%, 0.14);
+	--violet: hsl(var(--violet-hue), var(--violet-saturation), var(--violet-lightness));
+	--violet-surface: hsla(
+		var(--violet-hue),
+		var(--violet-saturation),
+		var(--violet-lightness),
+		0.14
+	);
+	--amber: hsl(37, 95%, 55%);
+	--amber-surface: hsla(37, 95%, 55%, 0.14);
+
+	/* Micro-border hairline (the `border-zinc-700/50` equivalent) + sponsored frame. */
+	--hairline: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
+	--hairline-strong: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.18);
+	--sponsored-frame: hsla(var(--amber-hue, 37), 95%, 55%, 0.35);
+	/* #endregion */
+
+	/* #region 4. GLOBAL SEMANTICS */
+	--text-main: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
+	--text-blue: hsl(var(--primary-hue), var(--primary-saturation), 30%);
+	--text-secondary: hsl(
+		var(--text-hue),
+		var(--text-saturation),
+		calc(var(--text-lightness) + var(--lighter-delta))
+	);
+	--text-muted: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.6);
+	--text-disabled: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
+	--text-tertiary: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.35);
+	--border-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15);
+
+	--focus-ring: 0 0 0 3px hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.4
+	);
+
+	--incomplete: var(--danger);
+	--in-progress: var(--warning);
+	--complete: var(--primary);
+	/* #endregion */
+
+	--scrollbar-bg: var(--bg);
+	--scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 88%);
+	--scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 82%);
+
+	--navigation-drop-shadow: rgba(0, 0, 0, 0.1);
 }
 
-:root[data-theme="dark"] {
-        --hover-delta: 6%;
-        --active-delta: 10%;
+:root[data-theme='dark'] {
+	--hover-delta: 6%;
+	--active-delta: 10%;
 
-        --darker-delta: 20%;
-        --lighter-delta: -20%;
+	--darker-delta: 20%;
+	--lighter-delta: -20%;
 
-        /* The dark mode HSL scale */
-        --header-lightness: 6%;
-        /* Darkest */
-        --mid-lightness: 9%;
-        /* Middle step */
-        --bg-lightness: 12%;
-        /* Base layer */
+	/* The dark mode HSL scale */
+	--header-lightness: 6%;
+	/* Darkest */
+	--mid-lightness: 9%;
+	/* Middle step */
+	--bg-lightness: 12%;
+	/* Base layer */
 
-        --card-lightness: 13%;
-        --text-lightness: 100%;
+	--card-lightness: 13%;
+	--text-lightness: 100%;
 
-        --danger-lightness: 55%;
-        --warning-lightness: 50%;
-        --success-lightness: 45%;
+	--danger-lightness: 55%;
+	--warning-lightness: 50%;
+	--success-lightness: 45%;
 
-        --scrollbar-bg: hsl(var(--bg-hue), var(--bg-saturation), 10%);
-        --scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
-        --scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 12%);
-        --text-blue: hsl(var(--primary-hue), var(--primary-saturation), 90%);
-        --navigation-drop-shadow: rgba(0, 0, 0, 0.5)
+	--scrollbar-bg: hsl(var(--bg-hue), var(--bg-saturation), 10%);
+	--scrollbar-thumb: hsl(var(--bg-hue), var(--bg-saturation), 18%);
+	--scrollbar-thumb-hover: hsl(var(--bg-hue), var(--bg-saturation), 12%);
+	--text-blue: hsl(var(--primary-hue), var(--primary-saturation), 90%);
+	--navigation-drop-shadow: rgba(0, 0, 0, 0.5);
+
+	/* Vivid discovery accents pop harder against the near-black canvas. */
+	--mint: hsl(160, 84%, 52%);
+	--mint-surface: hsla(160, 84%, 52%, 0.16);
+	--violet: hsl(258, 90%, 72%);
+	--violet-surface: hsla(258, 90%, 72%, 0.18);
+	--amber: hsl(37, 100%, 60%);
+	--amber-surface: hsla(37, 100%, 60%, 0.16);
+
+	--hairline: hsla(0, 0%, 100%, 0.08);
+	--hairline-strong: hsla(0, 0%, 100%, 0.16);
+	--sponsored-frame: hsla(37, 100%, 60%, 0.38);
+
+	/* Auth backdrop deepens on the near-black canvas; glows intensify. */
+	--aqua: hsl(168, 84%, 68%);
+	--auth-page-1: hsl(186, 30%, 9%);
+	--auth-page-3: hsl(198, 32%, 8%);
+	--auth-orb-a: hsla(170, 70%, 52%, 0.2);
+	--auth-orb-b: hsla(186, 60%, 42%, 0.28);
+	--auth-orb-c: hsla(258, 80%, 68%, 0.18);
+	--auth-ghost: hsla(168, 84%, 68%, 0.14);
 }
 
 /* #endregion */

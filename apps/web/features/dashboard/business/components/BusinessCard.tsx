@@ -1,12 +1,38 @@
-import { IconCurrencyDollar } from '@tabler/icons-preact';
 import { DashboardBusiness } from '../contracts/Business.ts';
-import { VNode } from 'preact';
 import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 import { useSignal } from '@preact/signals';
-import { Card, metaPosition } from 'packages/ui/src/components/card/Card.tsx';
+import { ProfileCard } from '@projective/ui';
+import type { EntityCardMenuItem } from '@projective/ui';
+import type { EntityCardModel } from '@projective/types';
 
 interface BusinessCardProps {
 	business: DashboardBusiness;
+}
+
+/** Adapts a dashboard business into the unified card model. */
+function businessToCardModel(business: DashboardBusiness): EntityCardModel {
+	return {
+		id: business.id,
+		entity_type: 'business',
+		display_title: business.name,
+		display_description: null,
+		tags: [],
+		rating_average: 0,
+		rating_count: 0,
+		owner_name: business.name,
+		owner_handle: business.slug,
+		owner_avatar: business.logo_url ?? null,
+		banner: null,
+		accent: 'amber',
+		price_cents: null,
+		price_unit: null,
+		availability: null,
+		location: null,
+		scope: null,
+		taxonomy: 'business',
+		is_sponsored: false,
+		role_label: business.default_currency || 'USD',
+	};
 }
 
 export function BusinessCard({ business }: BusinessCardProps) {
@@ -17,7 +43,6 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
 	const handleSwitch = async () => {
 		if (isActive || isLoading.value) return;
-
 		isLoading.value = true;
 		try {
 			await switchProfile(business.id, 'business');
@@ -26,31 +51,16 @@ export function BusinessCard({ business }: BusinessCardProps) {
 		}
 	};
 
-	const meta: Partial<Record<metaPosition, VNode>> = {
-		'bottom-left': (
-			<div class='business-card__stat'>
-				<IconCurrencyDollar size={14} />
-				<span>{business.default_currency || 'USD'}</span>
-			</div>
-		),
-	};
+	const menuItems: EntityCardMenuItem[] = [
+		{ label: isActive ? 'Currently active' : 'Set as active', onSelect: handleSwitch },
+	];
 
 	return (
-		<div className={`business-card-wrapper ${isActive ? 'is-active' : ''}`}>
-			<Card
-				owner={{
-					name: business.name,
-					handle: business.slug,
-					profilePictureUrl: business.logo_url ?? undefined,
-				}}
-				type={isActive ? 'active' : 'default'}
-				onClick={handleSwitch}
-				title={business.name}
-				// description={business.headline || 'No headline provided.'}
-				tags={[{ label: 'Owner' }]}
-				bannerUrl='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&auto=format&fit=crop&q=60'
-				meta={meta}
-			/>
-		</div>
+		<ProfileCard
+			entity={businessToCardModel(business)}
+			active={isActive}
+			onSelect={handleSwitch}
+			menuItems={menuItems}
+		/>
 	);
 }

@@ -1,26 +1,20 @@
 import { ExploreProvider } from '@features/public/explore/contexts/ExploreContext.tsx';
 import ExploreSearchIsland from '@features/public/explore/islands/ExploreSearchIsland.tsx';
 
-/**
- * @interface ExploreSearchWrapperProps
- */
 interface ExploreSearchWrapperProps {
 	query: string;
+	authenticated?: boolean;
 }
 
 /**
  * @function ExploreSearchWrapper
- * @description Client-side Island entry point for the Search flow.
- * Hosts the ExploreProvider so all nested client components share the same state tree.
+ * @description Client-side Island entry for the discovery matrix. Hosts the ExploreProvider so all
+ * nested components share one reactive state tree (query, entity facet, sort, filters, inspector).
  */
 export default function ExploreSearchWrapper(props: ExploreSearchWrapperProps) {
-	const { query } = props;
-
 	return (
-		<ExploreProvider query={query}>
-			<div className='explore-search-layout'>
-				<ExploreSearchIsland />
-			</div>
+		<ExploreProvider query={props.query}>
+			<ExploreSearchIsland authenticated={props.authenticated} />
 		</ExploreProvider>
 	);
 }

@@ -1,0 +1,93 @@
+.forecast-runway {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+}
+
+.forecast-runway__svg {
+	display: block;
+	width: 100%;
+	cursor: crosshair;
+}
+
+.forecast-runway__grid line {
+	stroke: var(--hairline);
+	stroke-width: 1;
+}
+
+.forecast-runway__ytick {
+	fill: var(--text-muted);
+	font-size: 0.66rem;
+	text-anchor: end;
+	dominant-baseline: middle;
+	font-variant-numeric: tabular-nums;
+}
+
+.forecast-runway__xtick {
+	fill: var(--text-muted);
+	font-size: 0.66rem;
+	text-anchor: middle;
+}
+
+.forecast-runway__band {
+	opacity: 0.16;
+	transition: d var(--medium, 240ms) ease, opacity var(--medium, 240ms) ease;
+}
+
+.forecast-runway__fill {
+	transition: d var(--medium, 240ms) ease;
+}
+
+.forecast-runway__line {
+	fill: none;
+	stroke-width: 2.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: d var(--medium, 240ms) ease;
+}
+
+.forecast-runway__marker line {
+	stroke: var(--text-muted);
+	stroke-width: 1;
+	stroke-dasharray: 4 4;
+	pointer-events: none;
+}
+
+.forecast-runway__marker circle {
+	stroke: var(--card);
+	stroke-width: 2;
+	pointer-events: none;
+}
+
+.forecast-runway__tooltip {
+	position: absolute;
+	min-width: 128px;
+	padding: 0.5rem 0.65rem;
+	background: var(--card);
+	border: 1px solid var(--hairline-strong, var(--border-color));
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 4;
+}
+
+.forecast-runway__tooltip-date {
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+.forecast-runway__tooltip-value {
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--text-main);
+	font-variant-numeric: tabular-nums;
+	margin: 0.15rem 0;
+}
+
+.forecast-runway__tooltip-band {
+	font-size: 0.68rem;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}

@@ -1,67 +1,54 @@
-import { Carousel } from '@projective/data';
 import '../../styles/components/home/categories.css';
+import {
+	IconBrain,
+	IconCode,
+	IconMovie,
+	IconMusic,
+	IconPalette,
+	IconPencil,
+	IconSchool,
+	IconSpeakerphone,
+} from '@tabler/icons-preact';
+import { HOME_CATEGORIES } from '../../data/exploreSeed.ts';
 
-// #region Interfaces
-
-/**
- * Represents a simplified category link for the home page exploration.
- */
-export interface CategoryData {
-	name: string;
-	href: string;
-}
-
-interface ExploreHomeCategoryProps {
-	category: CategoryData;
-}
-
-// #endregion
-
-// #region Static Data
-
-const MOCK_CATEGORIES: CategoryData[] = [
-	{ name: 'Technology', href: '/explore/technology' },
-	{ name: 'Design', href: '/explore/design' },
-	{ name: 'Business', href: '/explore/business' },
-	{ name: 'Marketing', href: '/explore/marketing' },
-	{ name: 'Engineering', href: '/explore/engineering' },
-	{ name: 'Science', href: '/explore/science' },
-	{ name: 'Art', href: '/explore/art' },
-	{ name: 'Music', href: '/explore/music' },
-];
-
-// #endregion
-
-// #region Components
+const ICONS: Record<string, typeof IconCode> = {
+	'c-dev': IconCode,
+	'c-design': IconPalette,
+	'c-marketing': IconSpeakerphone,
+	'c-courses': IconSchool,
+	'c-video': IconMovie,
+	'c-data': IconBrain,
+	'c-writing': IconPencil,
+	'c-audio': IconMusic,
+};
 
 /**
- * Individual category card rendered within the carousel.
- */
-function ExploreHomeCategory({ category }: ExploreHomeCategoryProps) {
-	return (
-		<a href={category.href} class='explore-home-category' draggable={false}>
-			{category.name}
-		</a>
-	);
-}
-
-/**
- * Island component displaying a horizontal, fluid carousel of categories.
- * Encapsulates the interactive Carousel within a hydrated client boundary.
+ * @function ExploreHomeCategories
+ * @description Interactive row of accent-tinted category pills sitting directly beneath the hero.
  */
 export default function ExploreHomeCategories() {
 	return (
-		<div class='explore-home-categories' style={{ display: 'flex' }}>
-			<Carousel<CategoryData>
-				dataSource={MOCK_CATEGORIES}
-				renderItem={(item) => <ExploreHomeCategory category={item} />}
-				itemMinWidth={200}
-				numVisible={4}
-				arrowPosition='outside'
-				indicatorPosition='bottom'
-			/>
-		</div>
+		<nav class='explore-categories' aria-label='Browse categories'>
+			<div class='explore-categories__row'>
+				{HOME_CATEGORIES.map((cat) => {
+					const Icon = ICONS[cat.id];
+					return (
+						<a
+							key={cat.id}
+							href={`/explore?q=${encodeURIComponent(cat.name)}`}
+							class={`explore-categories__pill accent-${cat.accent}`}
+							draggable={false}
+						>
+							{Icon && (
+								<span class='explore-categories__icon'>
+									<Icon size={16} />
+								</span>
+							)}
+							{cat.name}
+						</a>
+					);
+				})}
+			</div>
+		</nav>
 	);
 }
-
-// #endregion

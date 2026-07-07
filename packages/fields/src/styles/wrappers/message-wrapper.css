@@ -1,22 +1,22 @@
 /* packages/fields/src/styles/wrappers/message-wrapper.css */
 
 .field-message {
-  font-family: inherit;
-  font-size: 0.75rem;
-  line-height: 1.2;
-  margin-top: 4px;
-  transition: all var(--field-transition, 150ms ease);
-  opacity: 1;
+	font-family: inherit;
+	font-size: 0.75rem;
+	line-height: 1.2;
+	margin-top: 4px;
+	transition: all var(--field-transition, 150ms ease);
+	opacity: 1;
 }
 
 .field-message--error {
-  color: var(--field-text-error, #ef4444);
+	color: var(--field-text-error, #ef4444);
 }
 
 .field-message--warning {
-  color: var(--warning, #f59e0b);
+	color: var(--warning, #f59e0b);
 }
 
 .field-message--info {
-  color: var(--field-text-placeholder, #9ca3af);
+	color: var(--field-text-placeholder, #9ca3af);
 }

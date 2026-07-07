@@ -247,6 +247,65 @@ export class TicketsServiceBackend {
 	}
 	// #endregion
 
+	// #region Kanban board movement (spec §3 "Automated Kanban State Synchronization")
+	/**
+	 * Moves a ticket between board columns via `projects.move_ticket` (0121). The RPC guards the
+	 * transition (has_project_access for any move; client/owner review authority for a move to
+	 * "Done"), cascades escrow release + submission-ledger creation through the existing ticket
+	 * triggers, and records the move to the ticket history timeline.
+	 *
+	 * Column → status: Backlog=backlog, To Do=todo, In Progress=in_progress, Review=in_review,
+	 * Done=completed.
+	 *
+	 * @param projectId - Owning project id (route scoping).
+	 * @param ticketId - Ticket being moved.
+	 * @param toStatus - Target column/status.
+	 * @param toStageId - Optional stage to move the ticket into as part of the transition.
+	 * @param req - Caller request, for user-scoped RLS.
+	 * @returns The updated ticket row.
+	 */
+	static async moveTicket(
+		projectId: string,
+		ticketId: string,
+		toStatus: string,
+		toStageId: string | null,
+		req?: Request,
+	) {
+		const startedAt = Date.now();
+		const supabase = await supabaseClient(req);
+
+		console.log(
+			`[KANBAN_SVC] moveTicket begin ts=${
+				new Date().toISOString()
+			} project=${projectId} ticket=${ticketId} to=${toStatus} stage=${toStageId ?? '-'}`,
+		);
+
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('move_ticket', {
+				p_ticket_id: ticketId,
+				p_to_status: toStatus,
+				p_to_stage_id: toStageId,
+			});
+
+		if (error) {
+			console.error(
+				`[KANBAN_SVC] moveTicket FAILED project=${projectId} ticket=${ticketId} to=${toStatus} code=${
+					error.code ?? '-'
+				} msg=${error.message} duration_ms=${Date.now() - startedAt}`,
+			);
+			throw error;
+		}
+
+		console.log(
+			`[KANBAN_SVC] moveTicket ok project=${projectId} ticket=${ticketId} to=${toStatus} duration_ms=${
+				Date.now() - startedAt
+			}`,
+		);
+		return data;
+	}
+	// #endregion
+
 	// #region Read models — finance breakdown & timeline (spec §2 modal)
 	/**
 	 * Returns the per-ticket escrow breakdown powering the modal's Installment Monitor, via

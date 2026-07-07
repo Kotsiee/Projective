@@ -1,106 +1,110 @@
 import { ComponentChildren, createContext } from 'preact';
 import { useContext, useEffect } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
-import { ExploreState, SearchType, SortType, ViewMode } from '../contracts/Explore.ts';
+import { EntityType, ExploreEntity } from '@projective/types';
+import { DEFAULT_FILTERS, EntityFilter, ExploreState, UserRole } from '../contracts/Explore.ts';
+import { byId } from '../data/exploreSeed.ts';
 
 // #region 1. CONTEXT INITIALIZATION
-const ExploreContext = createContext<ExploreState | null>(null);
+// Exported so content projected into the global middle-nav via `setMiddleNav` (which renders
+// OUTSIDE this island's provider tree) can re-wrap itself with the same context value.
+export const ExploreContext = createContext<ExploreState | null>(null);
 // #endregion
 
 // #region 2. PROVIDER PROPS
 export interface ExploreProviderProps {
 	query?: string | null;
-	initialViewMode?: ViewMode;
-	initialTab?: SearchType;
-	initialSort?: SortType;
-	initialSelectedId?: string | null;
+	initialEntityType?: EntityFilter;
+	initialSort?: ExploreState['sort']['value'];
 	initialFiltersOpen?: boolean;
+	/** Session role. Real auth wiring is a TODO — driven by `?role=` for now. */
+	initialRole?: UserRole;
 	children: ComponentChildren;
 }
 // #endregion
 
+const ENTITY_VALUES: EntityFilter[] = [
+	'all',
+	'service',
+	'product',
+	'person',
+	'team',
+	'business',
+	'project',
+];
+
 /**
  * @function ExploreProvider
- * @description Injects the reactive state tree for the Explore discovery engine.
- * Handles SSR-safe client hydration from LocalStorage and URL Parameters.
+ * @description Injects the reactive state tree for the Explore discovery engine. Handles SSR-safe
+ * client hydration from URL parameters. State also flows back to the URL (via `replaceState`) so any
+ * discovery view is shareable.
  */
 export function ExploreProvider(props: ExploreProviderProps) {
 	// #region 3. SIGNAL INSTANTIATION
 	const exploreQuery = useSignal<string | null>(props.query || null);
-	const viewMode = useSignal<ViewMode>(props.initialViewMode || 'list');
-	const searchType = useSignal<SearchType>(props.initialTab || 'all');
-	const sortType = useSignal<SortType>(props.initialSort || 'recommended');
-	const selectedItem = useSignal<any | null>(null);
-	const isFiltersOpen = useSignal<boolean>(props.initialFiltersOpen || true);
+	const entityType = useSignal<EntityFilter>(props.initialEntityType || 'all');
+	const sort = useSignal<ExploreState['sort']['value']>(props.initialSort || 'recommended');
+	const filters = useSignal({ ...DEFAULT_FILTERS });
+	const selectedItem = useSignal<ExploreEntity | null>(null);
+	const isFiltersOpen = useSignal<boolean>(props.initialFiltersOpen ?? false);
+	const userRole = useSignal<UserRole>(props.initialRole || 'guest');
 	// #endregion
 
 	// #region 4. HYDRATION (On Mount)
 	useEffect(() => {
-		if (typeof globalThis === 'undefined') return;
+		if (typeof globalThis === 'undefined' || !globalThis.location) return;
+		const p = new URLSearchParams(globalThis.location.search);
 
-		const urlParams = new URLSearchParams(globalThis.location.search);
+		const q = p.get('q');
+		if (q) exploreQuery.value = q;
 
-		const localView = localStorage.getItem('explore_view_mode') as ViewMode | null;
-		const urlView = urlParams.get('view') as ViewMode | null;
+		const tab = p.get('type') as EntityFilter | null;
+		if (tab && ENTITY_VALUES.includes(tab)) entityType.value = tab;
 
-		if (localView) {
-			viewMode.value = localView;
-		} else if (urlView) {
-			viewMode.value = urlView;
-		}
+		const s = p.get('sort');
+		if (s) sort.value = s as ExploreState['sort']['value'];
 
-		const urlQuery = urlParams.get('q');
-		if (urlQuery) exploreQuery.value = urlQuery;
+		const role = p.get('role') as UserRole | null;
+		if (role && ['guest', 'client', 'freelancer'].includes(role)) userRole.value = role;
 
-		const urlTab = urlParams.get('tab') as SearchType | null;
-		if (urlTab) searchType.value = urlTab;
-
-		const urlSort = urlParams.get('sort') as SortType | null;
-		if (urlSort) sortType.value = urlSort;
-
-		const previewId = urlParams.get('preview_id');
-		const previewType = urlParams.get('preview_type');
+		const previewId = p.get('preview_id');
 		if (previewId) {
-			selectedItem.value = { id: previewId, type: previewType, fetchNeeded: true };
+			const found = byId(previewId);
+			if (found) selectedItem.value = found;
 		}
 	}, []);
 	// #endregion
 
+	// #region 5. URL SYNC (share-ability)
 	useEffect(() => {
-		if (typeof globalThis === 'undefined') return;
-
-		// Sync View Mode to LocalStorage
-		localStorage.setItem('explore_view_mode', viewMode.value);
-
-		// Sync core parameters to URL via replaceState (so we don't spam the back-button history)
+		if (typeof globalThis === 'undefined' || !globalThis.location) return;
 		const url = new URL(globalThis.location.href);
 
 		if (exploreQuery.value) url.searchParams.set('q', exploreQuery.value);
 		else url.searchParams.delete('q');
 
-		if (searchType.value !== 'all') url.searchParams.set('tab', searchType.value);
-		else url.searchParams.delete('tab');
+		if (entityType.value !== 'all') url.searchParams.set('type', entityType.value);
+		else url.searchParams.delete('type');
 
-		if (sortType.value !== 'recommended') url.searchParams.set('sort', sortType.value);
+		if (sort.value !== 'recommended') url.searchParams.set('sort', sort.value);
 		else url.searchParams.delete('sort');
 
-		if (viewMode.value !== 'list') url.searchParams.set('view', viewMode.value);
-		else url.searchParams.delete('view');
+		if (selectedItem.value) url.searchParams.set('preview_id', selectedItem.value.id);
+		else url.searchParams.delete('preview_id');
 
 		globalThis.history.replaceState({}, '', url.toString());
-	}, [exploreQuery.value, viewMode.value, searchType.value, sortType.value]);
+	}, [exploreQuery.value, entityType.value, sort.value, selectedItem.value]);
 	// #endregion
+
+	// Isolating on a concrete entity type resets any inspector selection cleanly.
+	useEffect(() => {
+		filters.value = { ...filters.value, entity_type: entityType.value === 'all' ? null : entityType.value as EntityType };
+		if (entityType.value === 'all') selectedItem.value = null;
+	}, [entityType.value]);
 
 	return (
 		<ExploreContext.Provider
-			value={{
-				exploreQuery,
-				viewMode,
-				searchType,
-				sortType,
-				selectedItem,
-				isFiltersOpen,
-			}}
+			value={{ exploreQuery, entityType, sort, filters, selectedItem, isFiltersOpen, userRole }}
 		>
 			{props.children}
 		</ExploreContext.Provider>

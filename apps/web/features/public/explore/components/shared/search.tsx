@@ -4,96 +4,82 @@ import { useEffect, useRef } from 'preact/hooks';
 import { IconSearch, IconX } from '@tabler/icons-preact';
 import { SelectField, SelectOption } from '@projective/fields';
 import { IconButton } from '@projective/ui';
-import { SearchType } from '../../contracts/Explore.ts';
+import { EntityFilter } from '../../contracts/Explore.ts';
 
 // #region 1. CONSTANTS & TYPES
 const SEARCH_PHRASES = [
 	'Find a full-stack team...',
-	'Search for Pitch Deck templates...',
-	'Hire a Blockchain expert...',
-	'Discover 3D models...',
-	'Find marketing micro-agencies...',
+	'Search pitch-deck templates...',
+	'Hire a blockchain expert...',
+	'Discover 3D models & motion...',
+	'Find a growth micro-agency...',
 ];
 
-const CATEGORY_OPTIONS: SelectOption<SearchType>[] = [
+/** The native entity-type dropdown. "Profiles" maps to `person` (which fans out to teams/businesses). */
+const ENTITY_OPTIONS: SelectOption<EntityFilter>[] = [
 	{ label: 'All', value: 'all' },
-	{ label: 'Projects', value: 'projects' },
-	{ label: 'Services', value: 'services' },
-	{ label: 'People', value: 'people' },
-	// { label: 'Posts', value: 'posts' },
-	// { label: 'Marketplace', value: 'marketplace' },
-	// { label: 'Local Traders', value: 'traders' },
+	{ label: 'Services', value: 'service' },
+	{ label: 'Products', value: 'product' },
+	{ label: 'Profiles', value: 'person' },
+	{ label: 'Projects', value: 'project' },
 ];
 
 export interface ExploreSearchProps {
-	/** Optional callback. If provided, intercepts the form submission to update context instead of redirecting. */
-	onSearch?: (term: string, type: SearchType) => void;
+	/** If provided, intercepts submission to update context instead of redirecting. */
+	onSearch?: (term: string, type: EntityFilter) => void;
+	initialQuery?: string;
+	initialType?: EntityFilter;
+	size?: 'md' | 'lg';
 }
 // #endregion
 
 /**
- * ExploreSearch Island
- * A high-conversion, interactive search bar for the Explore homepage.
+ * @function ExploreSearch
+ * @description The high-conversion search bar: animated placeholder, query input, native entity-type
+ * dropdown, and submit. Embedded full-width in the hero and reused in the search header.
  */
-export default function ExploreSearch({ onSearch }: ExploreSearchProps) {
-	// #region 2. STATE
-	const query = useSignal('');
-	const searchType = useSignal<SearchType>('all');
+export default function ExploreSearch({ onSearch, initialQuery, initialType, size = 'md' }: ExploreSearchProps) {
+	const query = useSignal(initialQuery ?? '');
+	const entityType = useSignal<EntityFilter>(initialType ?? 'all');
 	const activeIndex = useSignal(0);
 	const isFocused = useSignal(false);
 	const inputRef = useRef<HTMLInputElement>(null);
-	// #endregion
 
-	// #region 3. EFFECTS (Placeholder Animation)
+	// Rotating placeholder animation
 	useEffect(() => {
 		if (isFocused.value || query.value.length > 0) return;
-
 		const interval = setInterval(() => {
 			activeIndex.value = (activeIndex.value + 1) % SEARCH_PHRASES.length;
 		}, 3000);
-
 		return () => clearInterval(interval);
 	}, [isFocused.value, query.value]);
-	// #endregion
 
-	// #region 4. EVENT HANDLERS
 	const handleSubmit = (e: Event) => {
-		e.preventDefault(); // Prevents page reload!
+		e.preventDefault();
 		const term = query.value.trim();
-
 		if (onSearch) {
-			// Update the Island Context directly (e.g., inside the explore page)
-			onSearch(term, searchType.value);
+			onSearch(term, entityType.value);
 		} else {
-			// Fallback redirect (e.g., when used in the global site header)
-			const searchParams = new URLSearchParams();
-			if (term) searchParams.set('q', term);
-			searchParams.set('tab', searchType.value);
-
-			globalThis.location.href = `/explore?${searchParams.toString()}`;
+			const params = new URLSearchParams();
+			if (term) params.set('q', term);
+			if (entityType.value !== 'all') params.set('type', entityType.value);
+			globalThis.location.href = `/explore?${params.toString()}`;
 		}
 	};
 
-	const handleClear = () => {
-		query.value = '';
-		inputRef.current?.focus();
-	};
-	// #endregion
-
-	// #region 5. RENDER HELPERS
 	const getPlaceholderClass = (index: number) => {
 		if (index === activeIndex.value) return 'explore-search-input__placeholder-item--active';
-
-		const prevIndex = activeIndex.value === 0 ? SEARCH_PHRASES.length - 1 : activeIndex.value - 1;
-		if (index === prevIndex) return 'explore-search-input__placeholder-item--prev';
-
+		const prev = activeIndex.value === 0 ? SEARCH_PHRASES.length - 1 : activeIndex.value - 1;
+		if (index === prev) return 'explore-search-input__placeholder-item--prev';
 		return 'explore-search-input__placeholder-item--next';
 	};
-	// #endregion
 
 	return (
-		<form class='explore-search-input' onSubmit={handleSubmit}>
-			{/* Input Area */}
+		<form class={`explore-search-input explore-search-input--${size}`} onSubmit={handleSubmit}>
+			<div class='explore-search-input__leading'>
+				<IconSearch size={size === 'lg' ? 20 : 18} />
+			</div>
+
 			<div class='explore-search-input__input-group'>
 				<input
 					ref={inputRef}
@@ -105,22 +91,15 @@ export default function ExploreSearch({ onSearch }: ExploreSearchProps) {
 					onBlur={() => isFocused.value = false}
 					aria-label='Search Projective'
 				/>
-
-				{/* Animated Placeholder */}
 				{query.value.length === 0 && (
 					<div class='explore-search-input__placeholder' aria-hidden='true'>
 						{SEARCH_PHRASES.map((phrase, idx) => (
-							<span
-								key={idx}
-								class={`explore-search-input__placeholder-item ${getPlaceholderClass(idx)}`}
-							>
+							<span key={idx} class={`explore-search-input__placeholder-item ${getPlaceholderClass(idx)}`}>
 								{phrase}
 							</span>
 						))}
 					</div>
 				)}
-
-				{/* Clear Button (Using Projective UI) */}
 				{query.value.length > 0 && (
 					<IconButton
 						className='explore-search-input__clear'
@@ -128,7 +107,10 @@ export default function ExploreSearch({ onSearch }: ExploreSearchProps) {
 						ghost
 						rounded
 						size='small'
-						onClick={handleClear}
+						onClick={() => {
+							query.value = '';
+							inputRef.current?.focus();
+						}}
 						aria-label='Clear search'
 					>
 						<IconX size={14} />
@@ -136,28 +118,24 @@ export default function ExploreSearch({ onSearch }: ExploreSearchProps) {
 				)}
 			</div>
 
-			<div class='explore-search-input__divider'></div>
+			<div class='explore-search-input__divider' />
 
-			{/* Dropdown */}
 			<div class='explore-search-input__dropdown'>
-				<SelectField<SearchType>
-					options={CATEGORY_OPTIONS}
-					value={searchType}
-					onChange={(val) => searchType.value = val as SearchType}
+				<SelectField<EntityFilter>
+					options={ENTITY_OPTIONS}
+					value={entityType}
+					onChange={(val) => entityType.value = val as EntityFilter}
 					displayMode='chips-inside'
 				/>
 			</div>
 
-			{/* Submit Button (Using Projective UI) */}
 			<IconButton
 				className='explore-search-input__submit'
 				variant='primary'
-				ghost={false}
-				rounded={false}
 				htmlType='submit'
 				aria-label='Submit search'
 			>
-				<IconSearch size={20} />
+				<IconSearch size={size === 'lg' ? 20 : 18} />
 			</IconButton>
 		</form>
 	);

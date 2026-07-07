@@ -253,6 +253,8 @@ export default function StageSubmissionsIsland(): JSX.Element {
 			multiFreelancer={multiFreelancer}
 			currentFreelancerId={me.id}
 			author={{ id: me.id, name: me.name }}
+			projectId={(s as any).project_id}
+			stageId={(s as any).stage_id}
 		>
 			<SubmissionsSurface />
 		</SubmissionsProvider>

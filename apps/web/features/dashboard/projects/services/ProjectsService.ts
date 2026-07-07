@@ -67,23 +67,44 @@ export class ProjectsService {
 	}
 
 	/**
-	 * Updates the project status (e.g., draft -> active)
+	 * Updates the project status (e.g., draft -> active) through the guarded lifecycle RPC.
+	 * Illegal transitions surface the RPC's descriptive error verbatim.
 	 */
-	static async updateStatus(projectId: string, status: string): Promise<void> {
+	static async updateStatus(
+		projectId: string,
+		status: string,
+		reason: string | null = null,
+	): Promise<void> {
 		const csrf = getCsrfToken();
 
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/status`, {
-			method: 'PATCH',
+			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'X-CSRF': csrf || '',
 			},
-			body: JSON.stringify({ status }),
+			body: JSON.stringify({ status, reason }),
 		});
 
-		if (!res.ok) throw new Error(`Failed to update project status: ${res.statusText}`);
+		if (!res.ok) {
+			const errData = await res.json().catch(() => ({} as any));
+			throw new Error(errData.error?.message || errData.error || `Failed to update project status`);
+		}
 	}
 	// #endregion
+
+	/**
+	 * High-density inspector metadata for a project card (spec §4): Kanban column counts, next
+	 * milestone deadline, pending-submission warnings, unsettled escrow.
+	 */
+	static async getCardSummary(projectId: string): Promise<any> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/summary`);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || `Failed to load project summary`);
+		}
+		return await res.json();
+	}
 
 	/**
 	 * Creates a new stage within an existing project.

@@ -74,6 +74,7 @@ export const handler = define.handlers({
 		let attachments: string[] = [];
 		let files: File[] = [];
 		let voiceMessageNames: string[] = [];
+		let blurhashes: Record<string, string> = {};
 		let targetUserId: string | undefined;
 		let targetStageId: string | undefined;
 
@@ -95,11 +96,22 @@ export const handler = define.handlers({
 				// Extract the voice message flags
 				const formVoiceMessages = formData.getAll('voiceMessages');
 				voiceMessageNames = formVoiceMessages.map((name) => name.toString());
+
+				// BlurHash placeholders, sent as one JSON field: { [file.name]: hash }.
+				const rawBlurhashes = formData.get('blurhashes')?.toString();
+				if (rawBlurhashes) {
+					try {
+						blurhashes = JSON.parse(rawBlurhashes);
+					} catch {
+						blurhashes = {};
+					}
+				}
 			} else {
 				const body = await ctx.req.json().catch(() => ({}));
 				message = body.message || '';
 				attachments = body.attachments || [];
 				voiceMessageNames = body.voiceMessageNames || [];
+				blurhashes = body.blurhashes || {};
 				targetUserId = body.targetUserId;
 				targetStageId = body.targetStageId;
 			}
@@ -139,6 +151,7 @@ export const handler = define.handlers({
 				attachments,
 				files,
 				voiceMessageNames,
+				blurhashes,
 				targetUserId,
 				targetStageId,
 			}, {

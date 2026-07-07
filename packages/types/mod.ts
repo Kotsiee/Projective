@@ -39,6 +39,8 @@ export * from './src/session/response.ts';
 
 // Domain: marketplace
 export * from './src/marketplace/response.ts';
+export * from './src/marketplace/discovery.ts';
+export * from './src/marketplace/cards.ts';
 
 // Domain: reviews
 export * from './src/reviews/response.ts';

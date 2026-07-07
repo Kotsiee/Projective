@@ -5,7 +5,7 @@ export const handler = define.handlers({
 	async POST(ctx) {
 		try {
 			const body = await ctx.req.json();
-			const { filename, mimeType, sizeBytes, context } = body;
+			const { filename, mimeType, sizeBytes, context, blurhash } = body;
 
 			const client = await supabaseClient(ctx.req);
 			const user = (await client.auth.getUser()).data.user;
@@ -20,6 +20,7 @@ export const handler = define.handlers({
 				mimeType,
 				sizeBytes,
 				context,
+				blurhash,
 			);
 
 			return new Response(JSON.stringify(result), {

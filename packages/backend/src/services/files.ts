@@ -8,6 +8,12 @@ export class FileService {
 		mimeType: string,
 		sizeBytes: number,
 		context: any,
+		/**
+		 * Optional BlurHash placeholder for image/video uploads, generated
+		 * client-side (see apps/web/utils/processors/blurhash.ts). Persisted into
+		 * the `metadata` jsonb as `metadata->>'blurhash'` — no dedicated column.
+		 */
+		blurhash?: string | null,
 	) {
 		const supabase = await supabaseClient();
 
@@ -32,6 +38,7 @@ export class FileService {
 				target_bucket: targetBucket,
 				target_path: targetPath,
 				status: 'pending_upload',
+				metadata: blurhash ? { blurhash } : {},
 			})
 			.select()
 			.single();

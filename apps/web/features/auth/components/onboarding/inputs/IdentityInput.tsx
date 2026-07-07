@@ -1,5 +1,4 @@
-import '../../../styles/components/onboarding/inputs/identity-input.css';
-import { Button, useWizardContext } from '@projective/ui';
+import { useWizardContext } from '@projective/ui';
 import { DateField, TextField } from '@projective/fields';
 import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
 import { Signal } from '@preact/signals';
@@ -9,99 +8,88 @@ export function IdentityInput() {
 	const { next, back } = useWizardContext();
 	const { firstName, lastName, username, dob, isAdult } = useOnboardingContext();
 
-	// Calculate live verification states
 	const usernameStatus = validateUsername(username.value || '');
 	const ageStatus = evaluateAge(dob.value);
 
-	// Synchronize 'isAdult' signal so other wizards parts can access it later
+	// Keep isAdult in sync for later wizard steps.
 	isAdult.value = ageStatus.isOver18;
 
-	// Core form submission gate rule logic
+	const usernameError = username.value && !usernameStatus.isValid
+		? (!usernameStatus.hasValidLength
+			? 'Username must be 3–15 characters.'
+			: 'Only letters, numbers, and . - _ are allowed.')
+		: '';
+
 	const isFormValid = !!firstName.value?.trim() &&
 		!!lastName.value?.trim() &&
 		usernameStatus.isValid &&
 		ageStatus.isOver13;
 
 	return (
-		<div class='identity-input__container'>
-			<div class='identity-input__profile-picture'>
-				{/* Reserved for future iteration placeholder */}
-			</div>
-
-			<div class='identity-input__fields'>
-				<div class='identity-input__name-row'>
-					<TextField
-						label='First Name'
-						value={firstName as Signal<string>}
-						floatingRule='auto'
-					/>
-
-					<TextField
-						label='Last Name'
-						value={lastName as Signal<string>}
-						floatingRule='auto'
-					/>
-				</div>
-
+		<div class='auth-form'>
+			<div class='auth-namerow'>
 				<TextField
-					label='Username'
-					value={username as Signal<string>}
+					id='join-firstname'
+					variant='glass'
+					label='First name'
+					value={firstName as Signal<string>}
 					floatingRule='auto'
+					autoComplete='given-name'
+					required
 				/>
-
-				{/* Real-time username hint banner */}
-				{username.value && !usernameStatus.isValid && (
-					<div class='validation-error-bubble'>
-						{!usernameStatus.hasValidLength && (
-							<p>• Username must be between 3 and 15 characters.</p>
-						)}
-						{!usernameStatus.hasValidChars && (
-							<p>• Only letters, numbers, periods (.), dashes (-), or underscores (_) allowed.</p>
-						)}
-					</div>
-				)}
-
-				<DateField
-					label='Date of Birth'
-					value={dob.value}
-					onChange={(date) => {
-						dob.value = date;
-					}}
+				<TextField
+					id='join-lastname'
+					variant='glass'
+					label='Last name'
+					value={lastName as Signal<string>}
 					floatingRule='auto'
+					autoComplete='family-name'
+					required
 				/>
 			</div>
 
-			{/* Age Restriction Warnings */}
+			<TextField
+				id='join-username'
+				variant='glass'
+				label='Username'
+				value={username as Signal<string>}
+				floatingRule='auto'
+				autoComplete='username'
+				required
+				error={usernameError}
+			/>
+
+			<DateField
+				label='Date of birth'
+				value={dob.value}
+				onChange={(date) => {
+					dob.value = date;
+				}}
+				floatingRule='auto'
+			/>
+
 			{dob.value && !ageStatus.isOver13 && (
-				<div class='validation-error-bubble critical'>
-					<p>You must be at least 13 years old to register an account.</p>
-				</div>
+				<p class='auth-note auth-note--warn' role='alert'>
+					You must be at least 13 years old to create an account.
+				</p>
 			)}
 
 			{dob.value && ageStatus.isOver13 && !ageStatus.isOver18 && (
-				<div class='validation-info-bubble'>
-					<p>ℹNote: Certain actions on this platform require you to be 18+.</p>
-				</div>
+				<p class='auth-note auth-note--info'>
+					Heads up — some actions on Projective require you to be 18 or older.
+				</p>
 			)}
 
-			<div class='identity-input__actions'>
-				<Button
-					className='identity-input__back-button'
-					variant='secondary'
-					onClick={back}
-				>
-					Back
-				</Button>
-
-				<Button
-					className='identity-input__continue-button'
-					variant='primary'
-					fullWidth
+			<div class='auth-btnrow'>
+				<button type='button' class='auth-btn-secondary' onClick={back}>Back</button>
+				<button
+					type='button'
+					class='auth-cta'
 					onClick={next}
 					disabled={!isFormValid}
 				>
 					Continue
-				</Button>
+				</button>
 			</div>
 		</div>
 	);

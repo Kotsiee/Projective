@@ -1,142 +1,141 @@
 /* #region 1. HEADER */
 .time-clock__header {
-    background-color: var(--primary);
-    color: #ffffff;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: var(--field-radius) var(--field-radius) 0 0;
+	background-color: var(--primary);
+	color: #ffffff;
+	padding: 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-radius: var(--field-radius) var(--field-radius) 0 0;
 }
 
 .time-clock__digital {
-    display: flex;
-    align-items: baseline;
-    font-size: 2rem;
-    font-weight: 500;
+	display: flex;
+	align-items: baseline;
+	font-size: 2rem;
+	font-weight: 500;
 }
 
 .time-clock__val {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-    padding: 0 0.2rem;
-    transition: color var(--fast) ease;
+	background: transparent;
+	border: none;
+	color: rgba(255, 255, 255, 0.7);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	padding: 0 0.2rem;
+	transition: color var(--fast) ease;
 }
 
 .time-clock__val--active {
-    color: #ffffff;
+	color: #ffffff;
 }
 
 .time-clock__sep {
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0 0.1rem;
+	color: rgba(255, 255, 255, 0.7);
+	margin: 0 0.1rem;
 }
 
 .time-clock__ampm {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
 }
 
 .time-clock__meridiem {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--border-radius__xsmall);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem;
-    padding: 0.1rem 0.3rem;
-    cursor: pointer;
-    transition: all var(--fast) ease;
+	background: none;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: var(--border-radius__xsmall);
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.75rem;
+	padding: 0.1rem 0.3rem;
+	cursor: pointer;
+	transition: all var(--fast) ease;
 }
 
 .time-clock__meridiem--active {
-    background: #ffffff;
-    color: var(--primary);
-    font-weight: bold;
-    border-color: #ffffff;
+	background: #ffffff;
+	color: var(--primary);
+	font-weight: bold;
+	border-color: #ffffff;
 }
 
 /* #endregion */
 
-
 /* #region 2. CLOCK FACE */
 .time-clock__body {
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
-    background-color: var(--field-bg);
-    border: 1px solid var(--field-border);
-    border-top: none;
-    border-radius: 0 0 var(--field-radius) var(--field-radius);
+	padding: 1.5rem;
+	display: flex;
+	justify-content: center;
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-top: none;
+	border-radius: 0 0 var(--field-radius) var(--field-radius);
 }
 
 .clock__face {
-    width: 230px;
-    height: 230px;
-    background: var(--field-bg-hover);
-    /* Light gray usually */
-    border-radius: 50%;
-    position: relative;
-    touch-action: none;
+	width: 230px;
+	height: 230px;
+	background: var(--field-bg-hover);
+	/* Light gray usually */
+	border-radius: 50%;
+	position: relative;
+	touch-action: none;
 }
 
 .clock__number {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 0.875rem;
-    color: var(--field-text);
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    transition: background-color var(--fast) ease, color var(--fast) ease;
+	position: absolute;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-size: 0.875rem;
+	color: var(--field-text);
+	cursor: pointer;
+	transform: translate(-50%, -50%);
+	transition: background-color var(--fast) ease, color var(--fast) ease;
 }
 
 .clock__number--active {
-    background-color: var(--primary);
-    color: #ffffff;
+	background-color: var(--primary);
+	color: #ffffff;
 }
 
 .clock__hand {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 2px;
-    background-color: var(--primary);
-    transform-origin: bottom center;
-    pointer-events: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 2px;
+	background-color: var(--primary);
+	transform-origin: bottom center;
+	pointer-events: none;
 }
 
 .clock__hand-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    background-color: var(--primary);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 8px;
+	height: 8px;
+	background-color: var(--primary);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
 }
 
 .clock__hand-knob {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 32px;
-    height: 32px;
-    background-color: var(--primary);
-    /* Usually darker for knob, but primary works */
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.2;
-    /* Subtle Highlight around selected number */
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 32px;
+	height: 32px;
+	background-color: var(--primary);
+	/* Usually darker for knob, but primary works */
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	opacity: 0.2;
+	/* Subtle Highlight around selected number */
 }
 
 /* #endregion */

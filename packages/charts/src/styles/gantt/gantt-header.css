@@ -1,55 +1,55 @@
 .gantt-header {
-    width: 100%;
-    background-color: var(--card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-main);
+	width: 100%;
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem;
+	font-size: 0.875rem;
+	color: var(--text-main);
 
-    .gantt-header__spacer {
-        width: 30%;
-    }
+	.gantt-header__spacer {
+		width: 30%;
+	}
 
-    .field-slider__fill {
-        background: none;
-    }
+	.field-slider__fill {
+		background: none;
+	}
 
-    /* #region CUSTOM SLIDER MARKS */
-    .gantt-slider-mark--day .field-slider__mark-tick {
-        width: 1px;
-        height: 4px;
-        background-color: var(--text-muted);
-        opacity: 0.3;
-    }
+	/* #region CUSTOM SLIDER MARKS */
+	.gantt-slider-mark--day .field-slider__mark-tick {
+		width: 1px;
+		height: 4px;
+		background-color: var(--text-muted);
+		opacity: 0.3;
+	}
 
-    .gantt-slider-mark--month .field-slider__mark-tick {
-        width: 2px;
-        height: 12px;
-        background-color: var(--primary);
-        opacity: 1;
-    }
+	.gantt-slider-mark--month .field-slider__mark-tick {
+		width: 2px;
+		height: 12px;
+		background-color: var(--primary);
+		opacity: 1;
+	}
 
-    .gantt-slider-mark--min {
-        transform: translate(0, -50%);
-    }
+	.gantt-slider-mark--min {
+		transform: translate(0, -50%);
+	}
 
-    .gantt-slider-mark--min .field-slider__mark-label {
-        left: 0;
-        text-align: left;
-    }
+	.gantt-slider-mark--min .field-slider__mark-label {
+		left: 0;
+		text-align: left;
+	}
 
-    .gantt-slider-mark--max {
-        transform: translate(-100%, -50%);
-    }
+	.gantt-slider-mark--max {
+		transform: translate(-100%, -50%);
+	}
 
-    .gantt-slider-mark--max .field-slider__mark-label {
-        right: 0;
-        text-align: right;
-    }
+	.gantt-slider-mark--max .field-slider__mark-label {
+		right: 0;
+		text-align: right;
+	}
 
-    /* #endregion */
+	/* #endregion */
 }

@@ -1,20 +1,23 @@
 /**
  * @file oauth.ts
- * @description Frontend Service for initiating OAuth handshakes.
+ * @description Backend-facing service for initiating OAuth PKCE handshakes.
+ *
+ * Builds the app callback URL (carrying `next`/`intent`) and delegates the PKCE
+ * initiation to the backend, returning both the provider URL and the verifier the
+ * route must persist in an HttpOnly cookie before redirecting.
  */
 
-import { supabaseClient } from '@projective/backend';
+import { initiateOAuth, type OAuthInitResult, type OAuthProvider } from '@projective/backend';
 
-export type OAuthProvider = 'google' | 'github';
+export type { OAuthProvider };
 export type OAuthIntent = 'login' | 'register';
 
-export async function getProviderRedirectUrl(
+export function getProviderRedirect(
 	provider: OAuthProvider,
 	intent: OAuthIntent,
 	requestUrl: URL,
 	next = '/',
-): Promise<string> {
-	// Point to the new dedicated callback route
+): Promise<OAuthInitResult> {
 	const callbackUrl = new URL('/api/v1/auth/callback', requestUrl);
 
 	if (next && next !== '/') {
@@ -22,17 +25,5 @@ export async function getProviderRedirectUrl(
 	}
 	callbackUrl.searchParams.set('intent', intent);
 
-	const sb = await supabaseClient();
-	const { data, error } = await sb.auth.signInWithOAuth({
-		provider,
-		options: {
-			redirectTo: callbackUrl.toString(),
-			skipBrowserRedirect: true,
-		} as any,
-	});
-
-	if (error || !data?.url) {
-		throw new Error(error?.message || 'OAuth init failed');
-	}
-	return data.url;
+	return initiateOAuth(provider, callbackUrl.toString());
 }

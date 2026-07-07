@@ -1,154 +1,230 @@
+import '../../styles/components/search/filters.css';
 import { useSignal } from '@preact/signals';
 import { IconStar, IconStarFilled } from '@tabler/icons-preact';
-import { SelectField, SelectOption } from '@projective/fields';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@projective/ui';
+import { SelectField, SelectOption, SliderField } from '@projective/fields';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from '@projective/ui';
+import type { Availability } from '@projective/types';
+import { useExploreContext } from '../../contexts/ExploreContext.tsx';
+import { DEFAULT_FILTERS } from '../../contracts/Explore.ts';
 
-// #region 1. MOCK DATA
-const MOCK_SKILLS: SelectOption<string>[] = [
-	{ label: 'JavaScript', value: 'javascript' },
+// #region Option data
+const SKILLS: SelectOption<string>[] = [
+	{ label: 'React', value: 'react' },
 	{ label: 'TypeScript', value: 'typescript' },
 	{ label: 'Python', value: 'python' },
-	{ label: 'VSCode', value: 'vscode' },
-	{ label: 'React', value: 'react' },
 	{ label: 'Figma', value: 'figma' },
+	{ label: 'Motion', value: 'motion' },
+	{ label: 'AI / LLM', value: 'ai' },
 ];
-
-const MOCK_LOCATIONS: SelectOption<string>[] = [
+const LOCATIONS: SelectOption<string>[] = [
+	{ label: 'Remote', value: 'remote' },
 	{ label: 'United Kingdom', value: 'uk' },
-	{ label: 'Ireland', value: 'ireland' },
-	{ label: 'France', value: 'france' },
-	{ label: 'Sweden', value: 'sweden' },
-	{ label: 'Germany', value: 'germany' },
+	{ label: 'Germany', value: 'de' },
+	{ label: 'Portugal', value: 'pt' },
+	{ label: 'United States', value: 'us' },
 ];
-
-const MOCK_LANGUAGES: SelectOption<string>[] = [
+const LANGUAGES: SelectOption<string>[] = [
 	{ label: 'English', value: 'en' },
 	{ label: 'French', value: 'fr' },
 	{ label: 'Spanish', value: 'es' },
 	{ label: 'German', value: 'de' },
 ];
+const AVAILABILITY: { label: string; value: Availability | 'any' }[] = [
+	{ label: 'Any', value: 'any' },
+	{ label: 'Available', value: 'available' },
+	{ label: 'Busy', value: 'busy' },
+];
 // #endregion
 
 /**
  * @function ExploreSearchFilters
- * @description A sticky sidebar component utilizing an accordion structure to house dynamic search filters.
+ * @description Advanced parameter workspace (Budget, Availability, Rating, Skills, Location,
+ * Language). Only mounted in the single-entity view, where these parameters are unlocked. Every
+ * change mirrors into the shared `filters` signal so results re-query live.
  */
 export default function ExploreSearchFilters() {
-	// #region 2. LOCAL STATE (Mocked)
-	const priceMin = useSignal<string>('0');
-	const priceMax = useSignal<string>('2000');
-	const selectedSkills = useSignal<string[]>(['javascript', 'typescript', 'python', 'vscode']);
-	const selectedRating = useSignal<number>(4);
-	const selectedLocations = useSignal<string[]>(['uk', 'ireland', 'france', 'sweden', 'germany']);
-	const selectedLanguages = useSignal<string[]>([]);
-	// #endregion
+	const { filters } = useExploreContext();
+	const f = filters.value;
+
+	// Local mirrors bound to the field components.
+	const budget = useSignal<number[]>([f.budget_min_cents / 100, f.budget_max_cents / 100]);
+	const rating = useSignal<number>(f.min_rating);
+	const availability = useSignal<Availability | 'any'>(f.availability ?? 'any');
+	const skills = useSignal<string[]>(f.skills);
+	const locations = useSignal<string[]>(f.locations);
+	const languages = useSignal<string[]>(f.languages);
+
+	const patch = (next: Partial<typeof f>) => {
+		filters.value = { ...filters.value, ...next };
+	};
+
+	const reset = () => {
+		budget.value = [0, 10000];
+		rating.value = 0;
+		availability.value = 'any';
+		skills.value = [];
+		locations.value = [];
+		languages.value = [];
+		filters.value = { ...DEFAULT_FILTERS, entity_type: filters.value.entity_type };
+	};
 
 	return (
-		// Using Accordion component from @projective/ui.
-		// type="multiple" ensures sections don't close each other.
-		<Accordion
-			type='multiple'
-			defaultValue={['price', 'skills', 'rating', 'location', 'language']}
-			variant='ghost'
-			density='compact'
-		>
-			{/* --- PRICE --- */}
-			<AccordionItem value='price'>
-				<AccordionTrigger>Price</AccordionTrigger>
-				<AccordionContent>
-					<div class='filter-price-inputs'>
-						<input
-							type='number'
-							placeholder='Min'
-							value={priceMin.value}
-							onInput={(e) => priceMin.value = e.currentTarget.value}
-							aria-label='Minimum Price'
-						/>
-						<span style={{ color: 'var(--text-muted)' }}>-</span>
-						<input
-							type='number'
-							placeholder='Max'
-							value={priceMax.value}
-							onInput={(e) => priceMax.value = e.currentTarget.value}
-							aria-label='Maximum Price'
-						/>
-					</div>
-				</AccordionContent>
-			</AccordionItem>
+		<div class='explore-filters'>
+			<div class='explore-filters__head'>
+				<h3>Refine</h3>
+				<button type='button' class='explore-filters__reset' onClick={reset}>Reset</button>
+			</div>
 
-			{/* --- SKILLS --- */}
-			<AccordionItem value='skills'>
-				<AccordionTrigger>Skills</AccordionTrigger>
-				<AccordionContent>
-					<SelectField<string>
-						options={MOCK_SKILLS}
-						value={selectedSkills}
-						onChange={(val) => selectedSkills.value = val as string[]}
-						multiple
-						searchable
-						clearable
-						displayMode='chips-below'
-						placeholder='Select Skills'
-					/>
-				</AccordionContent>
-			</AccordionItem>
+			<Accordion
+				type='multiple'
+				defaultValue={['budget', 'availability', 'rating', 'skills', 'location', 'language']}
+				variant='ghost'
+				density='compact'
+			>
+				{/* BUDGET */}
+				<AccordionItem value='budget'>
+					<AccordionTrigger>Budget</AccordionTrigger>
+					<AccordionContent>
+						<div class='explore-filters__budget'>
+							<div class='explore-filters__budget-readout'>
+								<span>${budget.value[0].toLocaleString()}</span>
+								<span>${budget.value[1].toLocaleString()}+</span>
+							</div>
+							<SliderField
+								value={budget}
+								onChange={(val) => {
+									const v = val as number[];
+									budget.value = v;
+									patch({ budget_min_cents: v[0] * 100, budget_max_cents: v[1] * 100 });
+								}}
+								min={0}
+								max={10000}
+								step={50}
+								range
+							/>
+						</div>
+					</AccordionContent>
+				</AccordionItem>
 
-			{/* --- RATING --- */}
-			<AccordionItem value='rating'>
-				<AccordionTrigger>Rating</AccordionTrigger>
-				<AccordionContent>
-					<div class='filter-stars' role='radiogroup' aria-label='Select Rating'>
-						{[1, 2, 3, 4, 5].map((star) => (
-							<span
-								key={star}
-								onClick={() => selectedRating.value = star}
-								onKeyDown={(e) => e.key === 'Enter' && (selectedRating.value = star)}
-								tabIndex={0}
-								role='radio'
-								aria-checked={selectedRating.value === star}
-							>
-								{star <= selectedRating.value
-									? <IconStarFilled className='active' size={24} />
-									: <IconStar size={24} />}
+				{/* AVAILABILITY */}
+				<AccordionItem value='availability'>
+					<AccordionTrigger>Availability</AccordionTrigger>
+					<AccordionContent>
+						<div class='explore-filters__segment' role='radiogroup' aria-label='Availability'>
+							{AVAILABILITY.map((opt) => (
+								<button
+									type='button'
+									key={opt.value}
+									role='radio'
+									aria-checked={availability.value === opt.value}
+									class={`explore-filters__seg ${availability.value === opt.value ? 'is-active' : ''}`}
+									onClick={() => {
+										availability.value = opt.value;
+										patch({ availability: opt.value === 'any' ? null : opt.value });
+									}}
+								>
+									{opt.label}
+								</button>
+							))}
+						</div>
+					</AccordionContent>
+				</AccordionItem>
+
+				{/* RATING */}
+				<AccordionItem value='rating'>
+					<AccordionTrigger>Rating</AccordionTrigger>
+					<AccordionContent>
+						<div class='explore-filters__stars' role='radiogroup' aria-label='Minimum rating'>
+							{[1, 2, 3, 4, 5].map((star) => (
+								<button
+									type='button'
+									key={star}
+									role='radio'
+									aria-checked={rating.value === star}
+									class='explore-filters__star'
+									onClick={() => {
+										const next = rating.value === star ? 0 : star;
+										rating.value = next;
+										patch({ min_rating: next });
+									}}
+								>
+									{star <= rating.value
+										? <IconStarFilled class='is-on' size={22} />
+										: <IconStar size={22} />}
+								</button>
+							))}
+							<span class='explore-filters__stars-label'>
+								{rating.value ? `${rating.value}.0 & up` : 'Any'}
 							</span>
-						))}
-					</div>
-				</AccordionContent>
-			</AccordionItem>
+						</div>
+					</AccordionContent>
+				</AccordionItem>
 
-			{/* --- LOCATION --- */}
-			<AccordionItem value='location'>
-				<AccordionTrigger>Location</AccordionTrigger>
-				<AccordionContent>
-					<SelectField<string>
-						options={MOCK_LOCATIONS}
-						value={selectedLocations}
-						onChange={(val) => selectedLocations.value = val as string[]}
-						multiple
-						searchable
-						clearable
-						displayMode='chips-below'
-						placeholder='Select Locations'
-					/>
-				</AccordionContent>
-			</AccordionItem>
+				{/* SKILLS */}
+				<AccordionItem value='skills'>
+					<AccordionTrigger>Skills</AccordionTrigger>
+					<AccordionContent>
+						<SelectField<string>
+							options={SKILLS}
+							value={skills}
+							onChange={(val) => {
+								skills.value = val as string[];
+								patch({ skills: val as string[] });
+							}}
+							multiple
+							searchable
+							clearable
+							displayMode='chips-below'
+							placeholder='Add skills'
+						/>
+					</AccordionContent>
+				</AccordionItem>
 
-			{/* --- LANGUAGE --- */}
-			<AccordionItem value='language'>
-				<AccordionTrigger>Language</AccordionTrigger>
-				<AccordionContent>
-					<SelectField<string>
-						options={MOCK_LANGUAGES}
-						value={selectedLanguages}
-						onChange={(val) => selectedLanguages.value = val as string[]}
-						multiple
-						searchable
-						clearable
-						displayMode='chips-below'
-						placeholder='Select Languages'
-					/>
-				</AccordionContent>
-			</AccordionItem>
-		</Accordion>
+				{/* LOCATION */}
+				<AccordionItem value='location'>
+					<AccordionTrigger>Location</AccordionTrigger>
+					<AccordionContent>
+						<SelectField<string>
+							options={LOCATIONS}
+							value={locations}
+							onChange={(val) => {
+								locations.value = val as string[];
+								patch({ locations: val as string[] });
+							}}
+							multiple
+							searchable
+							clearable
+							displayMode='chips-below'
+							placeholder='Add locations'
+						/>
+					</AccordionContent>
+				</AccordionItem>
+
+				{/* LANGUAGE */}
+				<AccordionItem value='language'>
+					<AccordionTrigger>Language</AccordionTrigger>
+					<AccordionContent>
+						<SelectField<string>
+							options={LANGUAGES}
+							value={languages}
+							onChange={(val) => {
+								languages.value = val as string[];
+								patch({ languages: val as string[] });
+							}}
+							multiple
+							searchable
+							clearable
+							displayMode='chips-below'
+							placeholder='Add languages'
+						/>
+					</AccordionContent>
+				</AccordionItem>
+			</Accordion>
+
+			{/* Filters apply live via the shared signal; this is a reassuring affordance. */}
+			<Button variant='primary' fullWidth rounded>
+				Show results
+			</Button>
+		</div>
 	);
 }

@@ -1,276 +1,216 @@
 import '../../../styles/components/search/results/results-details.css';
-import { useExploreContext } from '../../../contexts/ExploreContext.tsx';
 import { useSignal } from '@preact/signals';
-import { useEffect } from 'preact/hooks';
-import { Button, Skeleton } from '@projective/ui';
-import { StringModifier } from '@projective/utils';
+import { Avatar, Button } from '@projective/ui';
 import {
+	IconArrowUpRight,
 	IconBriefcase,
 	IconClock,
-	IconCurrencyDollar,
-	IconLayoutGridAdd,
+	IconDots,
+	IconExternalLink,
+	IconFlag,
+	IconLayersSubtract,
 	IconMapPin,
+	IconMessage,
+	IconStarFilled,
+	IconUsersGroup,
 	IconX,
 } from '@tabler/icons-preact';
-import { DateTime } from 'packages/types/src/core/datetime.ts';
+import type { ExploreEntity } from '@projective/types';
+import { useExploreContext } from '../../../contexts/ExploreContext.tsx';
+import { isProfileType } from '../../../data/exploreSeed.ts';
 
-export default function ExploreSearchResultsDetails() {
+const TYPE_LABEL: Record<ExploreEntity['entity_type'], string> = {
+	service: 'Service',
+	product: 'Product',
+	person: 'Freelancer',
+	team: 'Team',
+	business: 'Business',
+	project: 'Project',
+};
+
+function money(cents: number): string {
+	const n = cents / 100;
+	return n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `$${n}`;
+}
+
+function priceLabel(e: ExploreEntity): string | null {
+	if (e.price_cents == null) return null;
+	const m = money(e.price_cents);
+	if (e.price_unit === 'per_hour') return `${m}/hr`;
+	if (e.price_unit === 'per_seat') return `${m}/seat`;
+	if (e.price_unit === 'from') return `From ${m}`;
+	return m;
+}
+
+function fullPageHref(e: ExploreEntity): string {
+	return isProfileType(e.entity_type) ? `/${e.owner_handle}` : `/view/${e.id}`;
+}
+
+/**
+ * @function ExploreSearchInspector
+ * @description The right-hand quick-inspector. A top canopy (mini banner + overlapping avatar +
+ * identity + primary CTAs) sits above a density-optimized content canvas that renders only the
+ * metadata relevant to the selected entity type. The "Report Listing" action is tucked inside a
+ * 3-dot kebab menu.
+ */
+export default function ExploreSearchInspector() {
 	const { selectedItem } = useExploreContext();
-	const isLoading = useSignal(false);
-	const parsedData = useSignal<any | null>(null);
+	const menuOpen = useSignal(false);
+	const e = selectedItem.value;
 
-	// Map raw polymorphic data into a clean, uniform object for the details pane
-	useEffect(() => {
-		if (!selectedItem.value) {
-			parsedData.value = null;
-			return;
-		}
+	if (!e) return null;
 
-		let isMounted = true;
-		isLoading.value = true;
+	const isProfile = isProfileType(e.entity_type);
+	const price = priceLabel(e);
 
-		// Helper to execute the data mapping once we have the full object
-		const processRawData = (raw: any) => {
-			const mapped: any = {
-				id: raw.id || raw.project_id || raw.entity_id || raw.service_id,
-				type: 'Item',
-				title: 'Unknown',
-				subtitle: '',
-				description: '',
-				bannerUrl: '',
-				avatarUrl: '',
-				tags: [],
-				attributes: [],
-			};
-
-			// Project Mapping
-			if (raw.project_id) {
-				mapped.type = 'Project';
-				mapped.title = raw.title;
-				mapped.subtitle = raw.owner?.name ? `Posted by ${raw.owner.name}` : '';
-				mapped.description = raw.description || '';
-				mapped.bannerUrl = raw.thumbnail_url;
-				mapped.avatarUrl = raw.owner?.avatar_url;
-				mapped.tags = raw.skills || [];
-
-				if (raw.locations?.[0]) {
-					mapped.attributes.push({ icon: <IconMapPin size={16} />, label: raw.locations[0] });
-				}
-				if (raw.target_project_start_date) {
-					mapped.attributes.push({
-						icon: <IconClock size={16} />,
-						label: new DateTime(raw.target_project_start_date).toFormat('DD MMM YYYY'),
-					});
-				}
-				if (raw.roles?.length) {
-					mapped.attributes.push({
-						icon: <IconBriefcase size={16} />,
-						label: `${raw.roles.length} Role(s) Open`,
-					});
-				}
-			} // People Mapping
-			else if (raw.entity_id) {
-				mapped.type = StringModifier.titleCase(raw.entity_type || 'Profile');
-				mapped.title = raw.display_name;
-				mapped.subtitle = raw.headline || '';
-				mapped.description = raw.metadata?.bio || '';
-				mapped.avatarUrl = raw.metadata?.avatar_url;
-				mapped.tags = raw.metadata?.skills || [];
-				if (raw.metadata?.hourly_rate) {
-					mapped.attributes.push({
-						icon: <IconCurrencyDollar size={16} />,
-						label: `$${raw.metadata.hourly_rate}/hr`,
-					});
-				}
-			} // Services Mapping
-			else if (raw.service_id) {
-				mapped.type = 'Service';
-				mapped.title = raw.title;
-			}
-
-			if (isMounted) {
-				parsedData.value = mapped;
-				isLoading.value = false;
-			}
-		};
-
-		const rawState = selectedItem.value;
-
-		// If the context hydrated from the URL, it needs to fetch the full object
-		if (rawState.fetchNeeded && rawState.id && rawState.type) {
-			fetch(`/api/v1/public/search/${rawState.type}?id=${rawState.id}`)
-				.then((res) => {
-					if (!res.ok) throw new Error('Failed to fetch details');
-					return res.json();
-				})
-				.then((data) => {
-					if (!isMounted) return;
-					if (data.items && data.items.length > 0) {
-						const fullItem = data.items[0];
-						// Update the context so we don't fetch again if the user navigates away and back
-						selectedItem.value = fullItem;
-						processRawData(fullItem);
-					} else {
-						// 404 Fallback
-						isLoading.value = false;
-					}
-				})
-				.catch((err) => {
-					console.error('[Explore Details] Hydration Fetch Error:', err);
-					if (isMounted) isLoading.value = false;
-				});
-		} else {
-			// We already have the full object (user clicked a card in the UI)
-			// Small timeout for polish to ensure skeletons flash nicely on rapid clicks
-			setTimeout(() => {
-				processRawData(rawState);
-			}, 150);
-		}
-
-		return () => {
-			isMounted = false;
-		};
-	}, [selectedItem.value]);
-
-	// STATE 1: Empty
-	if (!selectedItem.value) {
-		return (
-			<div class='explore-search-results-details explore-search-results-details--empty'>
-				<div class='explore-search-results-details__empty-state'>
-					<IconLayoutGridAdd size={48} color='var(--text-disabled)' />
-					<h3>Select an item</h3>
-					<p>Click on any result to view its full details here.</p>
-				</div>
-			</div>
-		);
-	}
-
-	// STATE 2: Loading (Using your official Skeleton UI primitives)
-	if (isLoading.value || !parsedData.value) {
-		return (
-			<div class='explore-search-results-details explore-search-results-details--loading'>
-				<Skeleton variant='image' height={140} style={{ borderRadius: 0 }} />
-
-				<div style={{ position: 'relative', marginTop: '-2.5rem', marginLeft: '2rem' }}>
-					<Skeleton
-						variant='avatar'
-						width={80}
-						height={80}
-						style={{ border: '4px solid var(--card)' }}
-					/>
-				</div>
-
-				<div
-					style={{
-						padding: '0 2rem',
-						marginTop: '1.5rem',
-						display: 'flex',
-						flexDirection: 'column',
-						gap: '1rem',
-					}}
-				>
-					<Skeleton variant='text' width='25%' height={12} />
-					<Skeleton variant='text' width='75%' height={28} />
-					<Skeleton variant='text' width='40%' height={14} />
-
-					<div style={{ marginTop: '1.5rem' }}>
-						<Skeleton variant='multiline' lines={5} />
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	// STATE 3: Populated
-	const data = parsedData.value;
-
-	const generateViewUrl = () => {
-		switch (data.type.toLowerCase()) {
-			case 'project':
-				return `/view/project?id=${data.id}`;
-			case 'service':
-				return `/view/service?id=${data.id}`;
-			default:
-				return data.username ? `/${data.username}` : `/view/profile?id=${data.id}`;
-		}
-	};
+	// Contextual primary CTAs.
+	const primaryLabel = isProfile ? 'Hire' : e.entity_type === 'project' ? 'Apply now' : 'Get started';
 
 	return (
-		<div class='explore-search-results-details'>
-			<div class='explore-search-results-details__hero'>
-				{data.bannerUrl
-					? <img class='explore-search-results-details__banner' src={data.bannerUrl} alt='Banner' />
-					: (
-						<div class='explore-search-results-details__banner explore-search-results-details__banner--fallback' />
-					)}
-
-				<div class='explore-search-results-details__identity'>
-					{data.avatarUrl
-						? (
-							<img
-								class='explore-search-results-details__avatar'
-								src={data.avatarUrl}
-								alt='Avatar'
-							/>
-						)
-						: (
-							<div class='explore-search-results-details__avatar explore-search-results-details__avatar--fallback'>
-								{data.title.charAt(0)}
+		<div class={`inspector accent-${e.accent}`}>
+			{/* Top toolbar (close + kebab) floats over the canopy */}
+			<div class='inspector__toolbar'>
+				<div class='inspector__kebab'>
+					<button
+						type='button'
+						class='inspector__icon-btn'
+						aria-label='More actions'
+						aria-haspopup='menu'
+						aria-expanded={menuOpen.value}
+						onClick={() => menuOpen.value = !menuOpen.value}
+					>
+						<IconDots size={18} />
+					</button>
+					{menuOpen.value && (
+						<>
+							<div class='inspector__menu-backdrop' onClick={() => menuOpen.value = false} />
+							<div class='inspector__menu' role='menu'>
+								<button
+									type='button'
+									class='inspector__menu-item inspector__menu-item--danger'
+									role='menuitem'
+									onClick={() => menuOpen.value = false}
+								>
+									<IconFlag size={15} />
+									Report Listing
+								</button>
 							</div>
-						)}
+						</>
+					)}
 				</div>
-			</div>
-
-			<div class='explore-search-results-details__body'>
-				<div class='explore-search-results-details__header'>
-					<span class='explore-search-results-details__type'>{data.type}</span>
-					<h2 class='explore-search-results-details__title'>{data.title}</h2>
-					{data.subtitle && <p class='explore-search-results-details__subtitle'>{data.subtitle}</p>}
-				</div>
-
-				{data.attributes && data.attributes.length > 0 && (
-					<ul class='explore-search-results-details__attributes'>
-						{data.attributes.map((attr: any, idx: number) => (
-							<li key={idx}>
-								{attr.icon}
-								<span>{attr.label}</span>
-							</li>
-						))}
-					</ul>
-				)}
-
-				{data.description && (
-					<div class='explore-search-results-details__section'>
-						<h3>Description</h3>
-						<p class='explore-search-results-details__description'>
-							{data.description}
-						</p>
-					</div>
-				)}
-
-				{data.tags && data.tags.length > 0 && (
-					<div class='explore-search-results-details__section'>
-						<h3>Skills & Tags</h3>
-						<ul class='explore-search-results-details__tags'>
-							{data.tags.map((tag: string) => (
-								<li key={tag} class='explore-search-results-details__tag'>{tag}</li>
-							))}
-						</ul>
-					</div>
-				)}
-			</div>
-
-			<div class='explore-search-results-details__footer'>
-				<Button
-					variant='primary'
-					size='large'
-					style={{ width: '100%' }}
-					onClick={() => {
-						globalThis.location.href = generateViewUrl();
-					}}
+				<button
+					type='button'
+					class='inspector__icon-btn'
+					aria-label='Close inspector'
+					onClick={() => selectedItem.value = null}
 				>
-					View Full {data.type}
+					<IconX size={18} />
+				</button>
+			</div>
+
+			{/* Canopy + identity overlay */}
+			<div class='inspector__canopy' style={{ background: e.banner ?? undefined }} />
+			<div class='inspector__identity'>
+				<div class='inspector__avatar'>
+					<Avatar name={e.owner_name} src={e.owner_avatar ?? undefined} size={72} />
+				</div>
+				<div class='inspector__id-text'>
+					<span class='inspector__type'>{TYPE_LABEL[e.entity_type]}</span>
+					<h2 class='inspector__title'>{e.display_title}</h2>
+					<a class='inspector__owner' href={`/${e.owner_handle}`}>@{e.owner_handle}</a>
+				</div>
+			</div>
+
+			{/* Primary CTAs */}
+			<div class='inspector__cta'>
+				<Button variant='primary' rounded onClick={() => {}}>{primaryLabel}</Button>
+				<Button variant='secondary' outlined rounded startIcon={<IconMessage size={16} />} onClick={() => {}}>
+					Message
 				</Button>
+			</div>
+
+			{/* Density-optimized content canvas */}
+			<div class='inspector__body'>
+				{/* Rating + price strip */}
+				<div class='inspector__stat-row'>
+					<div class='inspector__stat'>
+						<span class='inspector__stat-icon'><IconStarFilled size={16} /></span>
+						<div>
+							<strong>{e.rating_average.toFixed(1)}</strong>
+							<small>{e.rating_count} reviews</small>
+						</div>
+					</div>
+					{price && (
+						<div class='inspector__stat'>
+							<span class='inspector__stat-icon'><IconBriefcase size={16} /></span>
+							<div>
+								<strong>{price}</strong>
+								<small>starting price</small>
+							</div>
+						</div>
+					)}
+					{e.location && (
+						<div class='inspector__stat'>
+							<span class='inspector__stat-icon'><IconMapPin size={16} /></span>
+							<div>
+								<strong>{e.location}</strong>
+								<small>location</small>
+							</div>
+						</div>
+					)}
+				</div>
+
+				{e.display_description && (
+					<section class='inspector__section'>
+						<h3>Overview</h3>
+						<p>{e.display_description}</p>
+					</section>
+				)}
+
+				{/* Project-specific scope table */}
+				{e.entity_type === 'project' && e.scope && (
+					<section class='inspector__section'>
+						<h3>Scope</h3>
+						<div class='inspector__scope'>
+							<div><IconUsersGroup size={16} /><span>{e.scope.role_count} open roles</span></div>
+							<div><IconLayersSubtract size={16} /><span>{e.scope.stage_count} stages</span></div>
+							<div><IconClock size={16} /><span>{e.scope.duration_weeks} weeks</span></div>
+							<div class='inspector__scope-budget'>
+								<IconBriefcase size={16} />
+								<span>{money(e.scope.budget_min_cents)} – {money(e.scope.budget_max_cents)}</span>
+							</div>
+						</div>
+					</section>
+				)}
+
+				{/* Availability (profiles) */}
+				{isProfile && e.availability && (
+					<section class='inspector__section'>
+						<h3>Availability</h3>
+						<span class={`inspector__avail inspector__avail--${e.availability}`}>
+							<i />{e.availability}
+						</span>
+					</section>
+				)}
+
+				{/* Tech stack / skills / tags */}
+				{e.tags.length > 0 && (
+					<section class='inspector__section'>
+						<h3>{e.entity_type === 'project' ? 'Tech stack' : 'Skills & tags'}</h3>
+						<div class='inspector__tags'>
+							{e.tags.map((t) => <span key={t} class='inspector__tag'>{t}</span>)}
+						</div>
+					</section>
+				)}
+			</div>
+
+			{/* Footer link to the full page */}
+			<div class='inspector__footer'>
+				<a class='inspector__full-link' href={fullPageHref(e)}>
+					<IconExternalLink size={16} />
+					View full {isProfile ? 'profile' : `${TYPE_LABEL[e.entity_type].toLowerCase()} page`}
+					<IconArrowUpRight size={16} />
+				</a>
 			</div>
 		</div>
 	);

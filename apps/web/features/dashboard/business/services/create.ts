@@ -15,6 +15,9 @@ import { CreateBusinessInput } from '../contracts/new/_validation.ts';
 interface FileOptions {
 	logo?: File;
 	banner?: File;
+	/** Client-generated BlurHash placeholders (best-effort). */
+	logoBlurhash?: string;
+	bannerBlurhash?: string;
 }
 
 export async function createBusiness(
@@ -50,6 +53,7 @@ export async function createBusiness(
 		const processFile = async (
 			file: File,
 			type: 'business_logo' | 'business_banner',
+			blurhash?: string,
 		): Promise<string> => {
 			const fileId = crypto.randomUUID();
 			const quarantinePath = `${crypto.randomUUID()}/${file.name}`;
@@ -71,6 +75,7 @@ export async function createBusiness(
 				target_bucket: targetBucket,
 				target_path: targetPath,
 				status: 'pending_upload',
+				metadata: blurhash ? { blurhash } : {},
 			});
 			if (dbError) throw dbError;
 
@@ -102,7 +107,7 @@ export async function createBusiness(
 
 		if (files.logo) {
 			try {
-				logoUrl = await processFile(files.logo, 'business_logo');
+				logoUrl = await processFile(files.logo, 'business_logo', files.logoBlurhash);
 			} catch (e) {
 				console.error('Logo upload failed:', e);
 				return fail('server_error', 'Failed to upload logo', 500);
@@ -111,7 +116,7 @@ export async function createBusiness(
 
 		if (files.banner) {
 			try {
-				bannerUrl = await processFile(files.banner, 'business_banner');
+				bannerUrl = await processFile(files.banner, 'business_banner', files.bannerBlurhash);
 			} catch (e) {
 				console.error('Banner upload failed:', e);
 				return fail('server_error', 'Failed to upload banner', 500);

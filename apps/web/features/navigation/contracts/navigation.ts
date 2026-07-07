@@ -41,7 +41,7 @@ export const apps3: INavApp[] = [
 			{ name: 'Reports', link: '/analytics/reports' },
 		],
 	},
-	{ icon: IconWallet, name: 'Earnings', link: '/earnings' },
+	{ icon: IconWallet, name: 'Wallet', link: '/wallet' },
 	{ icon: IconSettings, name: 'Settings', link: '/settings' },
 ];
 

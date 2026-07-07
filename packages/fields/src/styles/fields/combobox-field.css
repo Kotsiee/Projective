@@ -1,62 +1,62 @@
 /* #region ComboboxField Tokens */
 .field-combobox {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	width: 100%;
 }
 
 .field-combobox__container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  background-color: var(--field-bg, #ffffff);
-  border: 1px solid var(--field-border, #d1d5db);
-  border-radius: var(--field-radius, 8px);
-  transition: all var(--field-transition, 150ms ease);
-  min-height: var(--field-height, 2.5rem);
-  cursor: text;
+	display: flex;
+	align-items: center;
+	position: relative;
+	background-color: var(--field-bg, #ffffff);
+	border: 1px solid var(--field-border, #d1d5db);
+	border-radius: var(--field-radius, 8px);
+	transition: all var(--field-transition, 150ms ease);
+	min-height: var(--field-height, 2.5rem);
+	cursor: text;
 }
 
 .field-combobox__menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background-color: var(--bg-overlay, #ffffff);
-  border: 1px solid var(--field-border, #d1d5db);
-  border-radius: var(--field-radius, 8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  max-height: 250px;
-  overflow-y: auto;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-  transition: all var(--field-transition, 150ms ease);
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	background-color: var(--bg-overlay, #ffffff);
+	border: 1px solid var(--field-border, #d1d5db);
+	border-radius: var(--field-radius, 8px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	z-index: 10;
+	max-height: 250px;
+	overflow-y: auto;
+	opacity: 0;
+	transform: translateY(-10px);
+	pointer-events: none;
+	transition: all var(--field-transition, 150ms ease);
 }
 
 .field-combobox__menu--open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
 }
 
 .field-combobox__option {
-  padding: 8px var(--field-padding-x, 0.75rem);
-  cursor: pointer;
-  color: var(--field-text, #111827);
-  transition: background-color var(--fast, 100ms);
+	padding: 8px var(--field-padding-x, 0.75rem);
+	cursor: pointer;
+	color: var(--field-text, #111827);
+	transition: background-color var(--fast, 100ms);
 }
 
 .field-combobox__option:hover {
-  background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+	background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
 }
 
 .field-combobox__option--selected {
-  background-color: var(--primary-surface, rgba(186, 57%, 36%, 0.12));
-  color: var(--text-brand, #1d4ed8);
-  font-weight: 500;
+	background-color: var(--primary-surface, rgba(186, 57%, 36%, 0.12));
+	color: var(--text-brand, #1d4ed8);
+	font-weight: 500;
 }
 
 /* #endregion */

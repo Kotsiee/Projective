@@ -1,38 +1,51 @@
-/* #region Explore Categories Island */
-
-.explore-home-categories {
+.explore-categories {
 	width: 100%;
-	padding: 2rem 0;
 }
 
-.explore-home-category {
+.explore-categories__row {
 	display: flex;
-	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.6rem;
 	justify-content: center;
-	height: 100px;
-	background-color: var(--card);
-	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius);
-	text-decoration: none;
-	color: var(--text-main);
+}
+
+.explore-categories__pill {
+	--accent: var(--primary);
+	--accent-surface: var(--primary-surface);
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.95rem;
+	font-size: 0.86rem;
 	font-weight: 600;
-	transition: border-color var(--fast), background-color var(--fast), color var(--fast);
-	box-sizing: border-box;
-	/* Prevent text selection while dragging the carousel */
-	user-select: none;
+	color: var(--text-secondary);
+	text-decoration: none;
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: 999px;
+	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease,
+		transform var(--fast) ease;
 }
 
-.explore-home-category:hover,
-.explore-home-category:focus-visible {
-	border-color: var(--primary);
-	background-color: var(--primary-surface);
-	color: var(--primary);
-	outline: none;
+.explore-categories__pill:hover {
+	color: var(--accent);
+	border-color: var(--accent);
+	background: var(--accent-surface);
+	transform: translateY(-2px);
 }
 
-.explore-home-category:active {
-	background-color: var(--primary-active);
-	color: var(--card);
+.explore-categories__icon {
+	display: inline-flex;
+	color: var(--accent);
 }
 
-/* #endregion */
+/* Shared accent palette (cards, pills, banners, cinematic) ---------------- */
+.accent-mint    { --accent: var(--mint);    --accent-surface: var(--mint-surface); }
+.accent-violet  { --accent: var(--violet);  --accent-surface: var(--violet-surface); }
+.accent-amber   { --accent: var(--amber);   --accent-surface: var(--amber-surface); }
+.accent-primary { --accent: var(--primary); --accent-surface: var(--primary-surface); }
+.accent-ocean   { --accent: hsl(199, 89%, 60%); --accent-surface: hsla(199, 89%, 60%, 0.15); }
+.accent-ember   { --accent: hsl(334, 86%, 66%); --accent-surface: hsla(334, 86%, 66%, 0.15); }
+.accent-forest  { --accent: hsl(142, 71%, 55%); --accent-surface: hsla(142, 71%, 55%, 0.15); }
+.accent-neutral { --accent: hsl(220, 9%, 68%);  --accent-surface: hsla(220, 9%, 68%, 0.14); }

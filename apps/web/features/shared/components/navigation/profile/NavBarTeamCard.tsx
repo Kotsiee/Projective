@@ -1,43 +1,53 @@
-import { IconArrowsRight, IconCheck, IconUsers } from '@tabler/icons-preact';
 import { DashboardTeam } from '@features/dashboard/teams/contracts/Teams.ts';
 import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
+import { EntityCard } from '@projective/ui';
+import type { EntityCardModel } from '@projective/types';
 
 interface NavBarTeamCardProps {
 	team: DashboardTeam;
+}
+
+/** Adapts a team into the compact card model used by the nav workspace switcher. */
+function teamToCardModel(team: DashboardTeam): EntityCardModel {
+	return {
+		id: team.team_id,
+		entity_type: 'team',
+		display_title: team.name,
+		display_description: null,
+		tags: [],
+		rating_average: 0,
+		rating_count: 0,
+		owner_name: team.name,
+		owner_handle: team.slug,
+		owner_avatar: team.avatar_url ?? null,
+		banner: null,
+		accent: 'primary',
+		price_cents: null,
+		price_unit: null,
+		availability: null,
+		location: null,
+		scope: null,
+		taxonomy: null,
+		is_sponsored: false,
+	};
 }
 
 export default function NavBarTeamCard({ team }: NavBarTeamCardProps) {
 	const { user, switchTeam } = useUserContext();
 	const isActive = user.value?.activeTeamId === team.team_id;
 
-	const handleSwitch = async (e: Event) => {
-		e.preventDefault();
-		e.stopPropagation();
+	const handleSwitch = async () => {
 		if (isActive) return;
 		await switchTeam(team.team_id);
 	};
 
 	return (
-		<button
-			class={`nav-bar-team-card ${isActive ? 'nav-bar-team-card--active' : ''}`}
-			onClick={handleSwitch}
-			disabled={isActive}
-			type='button'
-		>
-			<div class='nav-bar-team-card__avatar'>
-				{team.avatar_url ? <img src={team.avatar_url} alt={team.name} /> : <IconUsers size={16} />}
-			</div>
-
-			<div class='nav-bar-team-card__info'>
-				<span class='nav-bar-team-card__name'>{team.name}</span>
-				<span class='nav-bar-team-card__slug'>@{team.slug}</span>
-			</div>
-
-			<div class='nav-bar-team-card__action'>
-				{isActive
-					? <IconCheck size={16} class='nav-bar-team-card__icon--active' />
-					: <IconArrowsRight size={16} class='nav-bar-team-card__icon--switch' />}
-			</div>
-		</button>
+		<EntityCard
+			variant='compact'
+			entity={teamToCardModel(team)}
+			active={isActive}
+			onSelect={handleSwitch}
+			actions={false}
+		/>
 	);
 }

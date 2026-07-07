@@ -1,77 +1,97 @@
 /* packages/fields/src/styles/fields/text-field.css */
 
 .field-text {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	width: 100%;
 }
 
 .field-text__container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  background-color: var(--field-bg, #ffffff);
-  border: 1px solid var(--field-border, #d1d5db);
-  border-radius: var(--field-radius, 8px);
-  transition: all var(--field-transition, 150ms ease);
-  min-height: var(--field-height, 2.5rem);
-  cursor: text;
+	display: flex;
+	align-items: center;
+	position: relative;
+	background-color: var(--field-bg, #ffffff);
+	border: 1px solid var(--field-border, #d1d5db);
+	border-radius: var(--field-radius, 8px);
+	transition: all var(--field-transition, 150ms ease);
+	min-height: var(--field-height, 2.5rem);
+	cursor: text;
 }
 
 .field-text__container:hover {
-  background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
-  border-color: var(--field-border-hover, #6b7280);
+	background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+	border-color: var(--field-border-hover, #6b7280);
 }
 
 .field-text__container--focused {
-  border-color: var(--field-border-focus, #3b82f6);
-  background-color: var(--field-bg-active, #ffffff);
+	border-color: var(--field-border-focus, #3b82f6);
+	background-color: var(--field-bg-active, #ffffff);
 }
 
 .field-text__container--error {
-  border-color: var(--field-border-error, #ef4444);
+	border-color: var(--field-border-error, #ef4444);
 }
 
 .field-text__container--disabled {
-  background-color: var(--field-bg-disabled, #f3f4f6);
-  border-color: var(--field-border-disabled, #d1d5db);
-  cursor: not-allowed;
-  opacity: 0.8;
+	background-color: var(--field-bg-disabled, #f3f4f6);
+	border-color: var(--field-border-disabled, #d1d5db);
+	cursor: not-allowed;
+	opacity: 0.8;
 }
 
 .field-text__input {
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: transparent;
-  padding: 0 var(--field-padding-x, 0.75rem);
-  font-family: inherit;
-  font-size: var(--field-font-size, 14px);
-  color: var(--field-text, #111827);
-  outline: none;
-  min-width: 0;
+	flex: 1;
+	width: 100%;
+	height: 100%;
+	border: none;
+	background: transparent;
+	padding: 0 var(--field-padding-x, 0.75rem);
+	font-family: inherit;
+	font-size: var(--field-font-size, 14px);
+	color: var(--field-text, #111827);
+	outline: none;
+	min-width: 0;
 }
 
 .field-text__input::placeholder {
-  color: var(--field-text-placeholder, #6b7280);
+	color: var(--field-text-placeholder, #6b7280);
 }
 
 textarea.field-text__input {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  min-height: var(--field-height, 2.5rem);
-  line-height: 1.5;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	min-height: var(--field-height, 2.5rem);
+	line-height: 1.5;
 }
 
 .field-text__count {
-  align-self: flex-end;
-  font-size: 0.75rem;
-  color: var(--field-text-placeholder, #6b7280);
-  margin-top: 4px;
+	align-self: flex-end;
+	font-size: 0.75rem;
+	color: var(--field-text-placeholder, #6b7280);
+	margin-top: 4px;
 }
 
 .field-text__count--limit {
-  color: var(--field-text-error, #ef4444);
+	color: var(--field-text-error, #ef4444);
+}
+
+/* Glass variant — frosted aurora-glass field used by the auth flow. Self-contained:
+   it sets its own field tokens so it looks right anywhere, not just inside a themed
+   ancestor. Relies only on the global theme tokens. */
+.field-text--glass {
+	--field-height: 54px;
+	--field-radius: 14px;
+	--field-font-size: 15px;
+	--field-bg: var(--input-bg);
+	--field-bg-hover: var(--input-bg);
+	--field-bg-active: var(--card);
+	--field-border: var(--hairline);
+	--field-border-focus: var(--primary);
+}
+.field-text--glass .field-text__container {
+	border-width: 1.5px;
+}
+.field-text--glass .field-text__container--focused {
+	box-shadow: 0 0 0 4px var(--field-ring-color);
 }

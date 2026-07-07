@@ -1,86 +1,86 @@
 /* packages/fields/src/styles/fields/tag-input.css */
 
 .field-tag {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	width: 100%;
 }
 
 .field-tag__container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  position: relative;
-  background-color: var(--field-bg, #ffffff);
-  border: 1px solid var(--field-border, #d1d5db);
-  border-radius: var(--field-radius, 8px);
-  transition: all var(--field-transition, 150ms ease);
-  min-height: var(--field-height, 2.5rem);
-  padding: 4px var(--field-padding-x, 0.75rem);
-  cursor: text;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	position: relative;
+	background-color: var(--field-bg, #ffffff);
+	border: 1px solid var(--field-border, #d1d5db);
+	border-radius: var(--field-radius, 8px);
+	transition: all var(--field-transition, 150ms ease);
+	min-height: var(--field-height, 2.5rem);
+	padding: 4px var(--field-padding-x, 0.75rem);
+	cursor: text;
 }
 
 .field-tag__container:hover {
-  background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
-  border-color: var(--field-border-hover, #6b7280);
+	background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
+	border-color: var(--field-border-hover, #6b7280);
 }
 
 .field-tag__container--focused {
-  border-color: var(--field-border-focus, #3b82f6);
-  background-color: var(--field-bg-active, #ffffff);
+	border-color: var(--field-border-focus, #3b82f6);
+	background-color: var(--field-bg-active, #ffffff);
 }
 
 .field-tag__container--error {
-  border-color: var(--field-border-error, #ef4444);
+	border-color: var(--field-border-error, #ef4444);
 }
 
 .field-tag__container--disabled {
-  background-color: var(--field-bg-disabled, #f3f4f6);
-  border-color: var(--field-border-disabled, #d1d5db);
+	background-color: var(--field-bg-disabled, #f3f4f6);
+	border-color: var(--field-border-disabled, #d1d5db);
 }
 
 /* Tag Chips */
 .field-tag__chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  /* Balanced default state using colour.css semantics */
-  background-color: var(--primary-surface);
-  color: var(--text-blue);
-  border: 1px solid var(--primary-half);
-  border-radius: var(--border-radius__xlarge, 16px);
-  padding: 2px 8px;
-  font-size: 0.875em;
-  transition: all var(--fast, 150ms ease);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	/* Balanced default state using colour.css semantics */
+	background-color: var(--primary-surface);
+	color: var(--text-blue);
+	border: 1px solid var(--primary-half);
+	border-radius: var(--border-radius__xlarge, 16px);
+	padding: 2px 8px;
+	font-size: 0.875em;
+	transition: all var(--fast, 150ms ease);
 }
 
 .field-tag__chip-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: opacity var(--fast, 150ms ease), color var(--fast, 150ms ease);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	opacity: 0.6;
+	transition: opacity var(--fast, 150ms ease), color var(--fast, 150ms ease);
 }
 
 .field-tag__chip-remove:hover {
-  opacity: 1;
-  color: var(--danger);
+	opacity: 1;
+	color: var(--danger);
 }
 
 .field-tag__input {
-  color: var(--field-text, #111827);
-  flex: 1;
-  min-width: 60px;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-family: inherit;
-  font-size: var(--field-font-size, 14px);
+	color: var(--field-text, #111827);
+	flex: 1;
+	min-width: 60px;
+	border: none;
+	background: transparent;
+	outline: none;
+	font-family: inherit;
+	font-size: var(--field-font-size, 14px);
 }
 
 .field-tag__input::placeholder {
-  color: var(--field-text-placeholder, #6b7280);
+	color: var(--field-text-placeholder, #6b7280);
 }

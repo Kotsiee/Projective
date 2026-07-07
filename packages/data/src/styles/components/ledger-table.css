@@ -1,0 +1,138 @@
+/**
+ * Dense spreadsheet-style ledger. Uses `table-layout: fixed` so the <colgroup> widths are
+ * authoritative — cells truncate instead of pushing the layout, and the header stays pixel-aligned
+ * with the body. Micro-borders use the theme `--hairline`; striping + fee segmentation are tuned
+ * to read on the dark canvas.
+ */
+.ledger-table {
+	width: 100%;
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius, 8px);
+	overflow: hidden;
+	background: var(--card);
+}
+
+.ledger-table__scroll {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.ledger-table__table {
+	width: 100%;
+	min-width: max-content;
+	border-collapse: separate;
+	border-spacing: 0;
+	table-layout: fixed;
+	font-size: 0.8rem;
+	font-variant-numeric: tabular-nums;
+	color: var(--text-main);
+}
+
+.ledger-table__caption {
+	caption-side: top;
+	text-align: left;
+	padding: 0.75rem 0.9rem 0.5rem;
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--text-muted);
+}
+
+/* #region Header */
+.ledger-table__head .ledger-table__th {
+	padding: 0.55rem 0.75rem;
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--text-muted);
+	background: var(--mid);
+	border-bottom: 1px solid var(--hairline-strong, var(--hairline));
+	white-space: nowrap;
+}
+
+.ledger-table__table--sticky .ledger-table__head .ledger-table__th {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+}
+/* #endregion */
+
+/* #region Cells */
+.ledger-table__td {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--hairline);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
+.ledger-table--dense .ledger-table__td {
+	padding: 0.32rem 0.7rem;
+	font-size: 0.76rem;
+}
+
+.ledger-table__cell--left {
+	text-align: left;
+}
+
+.ledger-table__cell--right {
+	text-align: right;
+}
+
+.ledger-table__cell--center {
+	text-align: center;
+}
+
+.ledger-table__cell--num {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+/* #endregion */
+
+/* #region Rows */
+.ledger-table__row {
+	transition: background-color var(--fast, 150ms);
+}
+
+.ledger-table__row--stripe {
+	background-color: var(--mid);
+}
+
+.ledger-table__row--interactive {
+	cursor: pointer;
+}
+
+.ledger-table__row--interactive:hover {
+	background-color: var(--primary-surface);
+}
+
+.ledger-table__row:last-child .ledger-table__td {
+	border-bottom: none;
+}
+/* #endregion */
+
+/* #region Fee-line segmentation
+   Platform-fee rows (the isolated 5% service charge) get a visually distinct, quieter treatment
+   so they read as deductions rather than raw project payouts: monospace + italic + muted, with a
+   warning-toned left rule marking the deduction. */
+.ledger-table__row--fee .ledger-table__td {
+	font-family: var(--font-mono, ui-monospace, 'SF Mono', 'Cascadia Code', monospace);
+	font-style: italic;
+	font-size: 0.72rem;
+	color: var(--text-muted);
+	background-color: color-mix(in srgb, var(--amber) 7%, transparent);
+}
+
+.ledger-table__row--fee .ledger-table__td:first-child {
+	box-shadow: inset 3px 0 0 var(--amber);
+}
+/* #endregion */
+
+.ledger-table__empty {
+	padding: 2.5rem 1rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.85rem;
+}

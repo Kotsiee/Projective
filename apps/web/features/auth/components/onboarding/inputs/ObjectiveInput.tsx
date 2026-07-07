@@ -1,7 +1,8 @@
 // #region Imports
 import '../../../styles/components/onboarding/inputs/objective-input.css';
+import type { ComponentChildren } from 'preact';
 import { Signal, useSignal } from '@preact/signals';
-import { Button, useWizardContext } from '@projective/ui';
+import { useWizardContext } from '@projective/ui';
 import { TextField } from '@projective/fields';
 import { IconBriefcase, IconPlus, IconUser } from '@tabler/icons-preact';
 import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
@@ -96,6 +97,7 @@ function TagSelector({ title, subtitle, suggestions, signal, max = 10 }: TagSele
 						<button
 							key={tag}
 							type='button'
+							aria-pressed={isSelected}
 							class={`objective-tag ${
 								isSelected ? 'objective-tag--selected' : 'objective-tag--suggested'
 							}`}
@@ -109,7 +111,7 @@ function TagSelector({ title, subtitle, suggestions, signal, max = 10 }: TagSele
 
 			<TextField
 				value={customInput}
-				placeholder='Add custom...'
+				placeholder='Add custom…'
 				onKeyDown={handleKeyDown}
 				floatingRule='never'
 				disabled={currentTags.length >= max}
@@ -117,6 +119,7 @@ function TagSelector({ title, subtitle, suggestions, signal, max = 10 }: TagSele
 					<button
 						type='button'
 						class='objective-tag-selector__add-btn'
+						aria-label='Add custom tag'
 						onClick={addCustomTag}
 						disabled={!customInput.value.trim() || currentTags.length >= max}
 					>
@@ -124,6 +127,40 @@ function TagSelector({ title, subtitle, suggestions, signal, max = 10 }: TagSele
 					</button>
 				}
 			/>
+		</div>
+	);
+}
+
+interface RoleCardProps {
+	value: 'client' | 'seller';
+	selected: boolean;
+	title: string;
+	desc: string;
+	onSelect: () => void;
+	children: ComponentChildren;
+}
+
+function RoleCard({ selected, title, desc, onSelect, children }: RoleCardProps) {
+	return (
+		<div
+			role='radio'
+			tabIndex={0}
+			aria-checked={selected}
+			aria-label={title}
+			class={`objective-card ${selected ? 'objective-card--selected' : ''}`}
+			onClick={onSelect}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					onSelect();
+				}
+			}}
+		>
+			{children}
+			<div>
+				<h4 class='objective-card__title'>{title}</h4>
+				<p class='objective-card__desc'>{desc}</p>
+			</div>
 		</div>
 	);
 }
@@ -140,7 +177,6 @@ export function ObjectiveInput() {
 
 	return (
 		<div class='objective-input'>
-			{/* Base Objective Selection */}
 			<div class='objective-input__selection'>
 				<div class='objective-input__section'>
 					<div class='objective-input__header'>
@@ -148,34 +184,30 @@ export function ObjectiveInput() {
 						<p class='objective-input__subtitle'>This can always be changed later.</p>
 					</div>
 
-					<div class='objective-input__cards'>
-						<div
-							class={`objective-card ${
-								objective.value === 'client' ? 'objective-card--selected' : ''
-							}`}
-							onClick={() => objective.value = 'client'}
+					<div
+						class='objective-input__cards'
+						role='radiogroup'
+						aria-label='What do you want to achieve?'
+					>
+						<RoleCard
+							value='client'
+							selected={objective.value === 'client'}
+							title='Client'
+							desc='I want to hire freelancers for my projects'
+							onSelect={() => (objective.value = 'client')}
 						>
 							<IconUser size={48} stroke={1.5} class='objective-card__icon' />
-							<div>
-								<h4 class='objective-card__title'>Client</h4>
-								<p class='objective-card__desc'>I want to hire freelancers for my projects</p>
-							</div>
-						</div>
+						</RoleCard>
 
-						<div
-							class={`objective-card ${
-								objective.value === 'seller' ? 'objective-card--selected' : ''
-							}`}
-							onClick={() => objective.value = 'seller'}
+						<RoleCard
+							value='seller'
+							selected={objective.value === 'seller'}
+							title='Seller'
+							desc='I want to be a freelancer and sell my products or services'
+							onSelect={() => (objective.value = 'seller')}
 						>
 							<IconBriefcase size={48} stroke={1.5} class='objective-card__icon' />
-							<div>
-								<h4 class='objective-card__title'>Seller</h4>
-								<p class='objective-card__desc'>
-									I want to be a freelancer and sell my products or services
-								</p>
-							</div>
-						</div>
+						</RoleCard>
 					</div>
 				</div>
 
@@ -191,7 +223,6 @@ export function ObjectiveInput() {
 							/>
 						)}
 
-						{/* Clients see Interests. Sellers see both Skills and Interests. */}
 						{(objective.value === 'client' || objective.value === 'seller') && (
 							<TagSelector
 								title='What are your interests?'
@@ -203,15 +234,9 @@ export function ObjectiveInput() {
 					</div>
 				)}
 			</div>
-			<div class='objective-input__actions'>
-				<Button
-					className='objective-input__back-button'
-					variant='secondary'
-					onClick={back}
-				>
-					Back
-				</Button>
 
+			<div class='auth-btnrow'>
+				<button type='button' class='auth-btn-secondary' onClick={back}>Back</button>
 				<CreateAccountButton enabled={!!objective.value} />
 			</div>
 		</div>

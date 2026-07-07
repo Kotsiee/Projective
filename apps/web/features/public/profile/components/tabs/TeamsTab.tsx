@@ -1,46 +1,41 @@
 /**
  * @file TeamsTab.tsx
- * @description The "Teams" panel. Two sections — Teams and Businesses — of
- * interactive entity cards (avatar/logo, name, handle, role, member count).
+ * @description The "Teams" panel. Two sections — Teams and Businesses — rendered through the unified
+ * `ProfileCard` (avatar canopy + micro-bordered taxonomy flag, member count, and role).
  */
 
 import '../../styles/components/entities.css';
 
-import { Avatar, Tag } from '@projective/ui';
-import { IconUsers } from '@tabler/icons-preact';
+import { ProfileCard } from '@projective/ui';
+import type { EntityCardModel } from '@projective/types';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { EntityCard } from '../../contracts/Profile.ts';
 
-function EntityCardView({ entity }: { entity: EntityCard }) {
-	return (
-		<article class='entity-card'>
-			<div class='entity-card__head'>
-				<span class='entity-card__avatar'>
-					<Avatar name={entity.name} src={entity.logoUrl} size={44} />
-				</span>
-				<div class='entity-card__id'>
-					<span class='entity-card__name'>{entity.name}</span>
-					<span class='entity-card__handle'>@{entity.handle}</span>
-				</div>
-				<span class='entity-card__role'>{entity.role}</span>
-			</div>
-
-			<p class='entity-card__desc'>{entity.description}</p>
-
-			<div class='entity-card__foot'>
-				<span class='entity-card__members'>
-					<IconUsers size={14} /> {entity.memberCount} members
-				</span>
-				{entity.tags.length > 0 && (
-					<span class='entity-card__tags'>
-						{entity.tags.map((t) => (
-							<Tag key={t} size='small' color='neutral' variant='subtle' rounded>{t}</Tag>
-						))}
-					</span>
-				)}
-			</div>
-		</article>
-	);
+/** Adapts a profile affiliation (`EntityCard`) into the unified card model. */
+function entityToCardModel(e: EntityCard): EntityCardModel {
+	return {
+		id: e.id,
+		entity_type: e.kind,
+		display_title: e.name,
+		display_description: e.description,
+		tags: e.tags,
+		rating_average: 0,
+		rating_count: 0,
+		owner_name: e.name,
+		owner_handle: e.handle,
+		owner_avatar: e.logoUrl ?? null,
+		banner: null,
+		accent: e.kind === 'business' ? 'amber' : 'violet',
+		price_cents: null,
+		price_unit: null,
+		availability: null,
+		location: null,
+		scope: null,
+		taxonomy: e.kind === 'business' ? 'business' : 'team',
+		is_sponsored: false,
+		member_count: e.memberCount,
+		role_label: e.role,
+	};
 }
 
 function EntitySection({ label, items }: { label: string; items: EntityCard[] }) {
@@ -51,7 +46,9 @@ function EntitySection({ label, items }: { label: string; items: EntityCard[] })
 				{label} <span class='tab-subhead__count'>{items.length}</span>
 			</h3>
 			<div class='entity-grid'>
-				{items.map((e) => <EntityCardView key={e.id} entity={e} />)}
+				{items.map((e) => (
+					<ProfileCard key={e.id} entity={entityToCardModel(e)} href={`/${e.handle}`} />
+				))}
 			</div>
 		</>
 	);

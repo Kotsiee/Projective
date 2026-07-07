@@ -4,14 +4,13 @@ import ExploreSearchResultsUncategorised from './results-uncategorised.tsx';
 
 /**
  * @function ExploreSearchResults
- * @description Virtualized data display, now wired up to the live Supabase API.
+ * @description Branches between the federated multi-entity view (`entityType === 'all'`) and the
+ * isolated single-entity view. This is the top-level guardrail: the federated view never exposes the
+ * inspector, sort, or filters; the single-entity view unlocks all three.
  */
 export default function ExploreSearchResults() {
-	const { searchType } = useExploreContext();
-
-	if (searchType.value != 'all') {
-		return <ExploreSearchResultsCategorised />;
-	}
-
-	return <ExploreSearchResultsUncategorised />;
+	const { entityType } = useExploreContext();
+	return entityType.value === 'all'
+		? <ExploreSearchResultsUncategorised />
+		: <ExploreSearchResultsCategorised />;
 }

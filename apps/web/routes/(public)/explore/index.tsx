@@ -4,14 +4,18 @@ import ExploreSearchWrapper from './(_islands)/Search.island.tsx';
 
 /**
  * @function Explore
- * @description Server-side route controller. Reads URL parameters and delegates to the appropriate Island.
- * Passes serializable data (query strings) down as props rather than wrapping with Context on the server.
+ * @description Server-side route controller. A search term (`q`) or an isolated entity type (`type`)
+ * routes to the discovery matrix; otherwise the vibrant multi-entity home hub renders.
  */
 export default function Explore(req: PageProps) {
-	const query = req.url.searchParams.get('q');
+	const params = req.url.searchParams;
+	const query = params.get('q');
+	const type = params.get('type');
 
-	if (query !== null) {
-		return <ExploreSearchWrapper query={query} />;
+	if (query !== null || type !== null) {
+		// deno-lint-ignore no-explicit-any
+		const authenticated = !!(req.state as any)?.isAuthenticated;
+		return <ExploreSearchWrapper query={query ?? ''} authenticated={authenticated} />;
 	}
 
 	return <ExploreHomeWrapper />;

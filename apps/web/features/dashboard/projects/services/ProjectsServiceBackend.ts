@@ -23,6 +23,8 @@ import { StoragePaths } from '@projective/types';
 // #region Interfaces
 export interface FileOptions {
 	attachments?: File[];
+	/** Client-generated BlurHash per attachment, keyed by `file.name` (best-effort). */
+	blurhashes?: Record<string, string>;
 }
 // #endregion
 
@@ -99,6 +101,7 @@ export class ProjectsBackendService {
 				contextType: 'project_global_attachment',
 				attachmentId?: string,
 			): Promise<{ url?: string; id: string }> => {
+				const blurhash = files.blurhashes?.[file.name];
 				const fileId = attachmentId || crypto.randomUUID();
 				const quarantinePath = `${crypto.randomUUID()}/${file.name}`;
 
@@ -119,6 +122,7 @@ export class ProjectsBackendService {
 					target_bucket: targetBucket,
 					target_path: targetPath,
 					status: 'pending_upload',
+					metadata: blurhash ? { blurhash } : {},
 				});
 				if (dbError) throw dbError;
 
@@ -257,6 +261,49 @@ export class ProjectsBackendService {
 				return fail(n.code, n.message, n.status);
 			}
 
+			return ok(data);
+		} catch (err) {
+			const n = normaliseUnknownError(err);
+			return fail(n.code, n.message, 500);
+		}
+	}
+
+	/**
+	 * High-density metadata for the Unified Card / Quick Inspector (spec §4): Kanban column counts,
+	 * next milestone deadline, pending-submission warnings and unsettled escrow. Delegates to
+	 * `projects.get_project_card_summary` (guarded by has_project_access).
+	 */
+	static async getCardSummary(
+		project_id: string,
+		deps: Deps = {},
+		// deno-lint-ignore no-explicit-any
+	): Promise<Result<any>> {
+		const startedAt = Date.now();
+		try {
+			const getClient = deps.getClient ?? supabaseClient;
+			const supabase = await getClient();
+
+			console.log(`[PROJECT_INSPECTOR_SVC] getCardSummary begin project=${project_id}`);
+
+			const { data, error } = await supabase
+				.schema('projects')
+				.rpc('get_project_card_summary', { p_project_id: project_id });
+
+			if (error) {
+				console.error(
+					`[PROJECT_INSPECTOR_SVC] getCardSummary FAILED project=${project_id} msg=${error.message} duration_ms=${
+						Date.now() - startedAt
+					}`,
+				);
+				const n = normaliseSupabaseError(error);
+				return fail(n.code, n.message, n.status);
+			}
+
+			console.log(
+				`[PROJECT_INSPECTOR_SVC] getCardSummary ok project=${project_id} duration_ms=${
+					Date.now() - startedAt
+				}`,
+			);
 			return ok(data);
 		} catch (err) {
 			const n = normaliseUnknownError(err);

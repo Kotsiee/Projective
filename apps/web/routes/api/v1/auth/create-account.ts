@@ -27,8 +27,7 @@ export const handler = define.handlers({
 			});
 		}
 
-		// CRITICAL FIX: It is res.value, not res.data!
-		const email = res.value?.user?.email ?? (typeof body?.email === 'string' ? body.email : '');
+		const email = res.data?.user?.email ?? (typeof body?.email === 'string' ? body.email : '');
 
 		const headers = new Headers({
 			location: verifyUrl,
