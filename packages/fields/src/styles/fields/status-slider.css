@@ -1,0 +1,128 @@
+/* packages/fields/src/styles/fields/status-slider.css */
+
+.status-slider {
+	--ss-color: var(--primary);
+	position: relative;
+	width: 100%;
+	padding: 4px 0 2px;
+}
+
+.status-slider--success {
+	--ss-color: var(--complete, var(--success, var(--primary)));
+}
+.status-slider--warning {
+	--ss-color: var(--in-progress, var(--warning));
+}
+.status-slider--danger {
+	--ss-color: var(--incomplete, var(--danger));
+}
+
+/* Rail sits behind the nodes, vertically centred on them. */
+.status-slider__rail {
+	position: absolute;
+	top: 10px;
+	left: 8px;
+	right: 8px;
+	height: 3px;
+	border-radius: 999px;
+	background-color: color-mix(in srgb, var(--ss-color) 16%, transparent);
+}
+
+.status-slider--sm .status-slider__rail {
+	top: 8px;
+}
+
+.status-slider__rail-fill {
+	height: 100%;
+	border-radius: inherit;
+	background-color: var(--ss-color);
+	transition: width var(--medium, 300ms) ease;
+}
+
+.status-slider__steps {
+	position: relative;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.status-slider__step {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+.status-slider__node {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	border: 2px solid color-mix(in srgb, var(--ss-color) 30%, transparent);
+	background: var(--card, var(--background));
+	padding: 0;
+	cursor: default;
+	transition:
+		background-color var(--fast, 150ms) ease,
+		border-color var(--fast, 150ms) ease,
+		transform var(--fast, 150ms) ease,
+		box-shadow var(--fast, 150ms) ease;
+}
+
+.status-slider--sm .status-slider__node {
+	width: 14px;
+	height: 14px;
+}
+
+.status-slider__step--reached .status-slider__node {
+	background: var(--ss-color);
+	border-color: var(--ss-color);
+}
+
+.status-slider__step--current .status-slider__node {
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-color) 20%, transparent);
+}
+
+.status-slider__step--tone-success .status-slider__node {
+	--ss-color: var(--complete, var(--success));
+}
+.status-slider__step--tone-warning .status-slider__node {
+	--ss-color: var(--in-progress, var(--warning));
+}
+.status-slider__step--tone-danger .status-slider__node {
+	--ss-color: var(--incomplete, var(--danger));
+}
+
+.status-slider__step--selectable .status-slider__node {
+	cursor: pointer;
+}
+
+.status-slider__step--selectable .status-slider__node:hover {
+	transform: scale(1.15);
+	border-color: var(--ss-color);
+}
+
+.status-slider__node:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring, 0 0 0 2px var(--background), 0 0 0 4px var(--primary));
+}
+
+.status-slider__label {
+	font-size: 0.6875rem;
+	line-height: 1.2;
+	color: var(--text-muted, var(--text-secondary));
+	text-align: center;
+	max-width: 8ch;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.status-slider__step--current .status-slider__label {
+	color: var(--text-main, var(--text-primary));
+	font-weight: 600;
+}

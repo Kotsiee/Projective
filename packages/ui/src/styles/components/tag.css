@@ -1,15 +1,15 @@
 /* apps/web/packages/ui/styles/components/tag.css */
 
 .tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius__small);
-    font-weight: 500;
-    line-height: 1;
-    white-space: nowrap;
-    transition: var(--fast) cubic-bezier(0.4, 0, 0.2, 1);
-    box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--border-radius__small);
+	font-weight: 500;
+	line-height: 1;
+	white-space: nowrap;
+	transition: var(--fast) cubic-bezier(0.4, 0, 0.2, 1);
+	box-sizing: border-box;
 }
 
 .tag--rounded {
@@ -18,34 +18,34 @@
 
 /* --- Sizes --- */
 .tag--small {
-    height: 1.5rem;
-    padding: 0 0.5rem;
-    font-size: 0.75rem;
+	height: 1.5rem;
+	padding: 0 0.5rem;
+	font-size: 0.75rem;
 }
 
 .tag--medium {
-    height: 1.75rem;
-    padding: 0 0.625rem;
-    font-size: 0.875rem;
+	height: 1.75rem;
+	padding: 0 0.625rem;
+	font-size: 0.875rem;
 }
 
 .tag--large {
-    height: 2rem;
-    padding: 0 0.75rem;
-    font-size: 1rem;
+	height: 2rem;
+	padding: 0 0.75rem;
+	font-size: 1rem;
 }
 
 /* --- Interaction --- */
 .tag--interactive {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .tag--interactive:hover {
-    filter: brightness(0.95);
+	filter: brightness(0.95);
 }
 
 .tag--interactive:active {
-    transform: scale(0.98);
+	transform: scale(0.98);
 }
 
 /* --- Colors & Variants --- */
@@ -53,91 +53,106 @@
 
 /* Primary */
 .tag--color-primary.tag--variant-solid {
-    background-color: var(--primary);
-    color: #fff;
+	background-color: var(--primary);
+	color: #fff;
 }
 
 .tag--color-primary.tag--variant-subtle {
-    background-color: var(--primary-surface);
-    color: var(--primary);
+	background-color: var(--primary-surface);
+	color: var(--primary);
 }
 
 .tag--color-primary.tag--variant-outline {
-    background-color: transparent;
-    color: var(--primary);
-    border: 1px solid var(--primary);
+	background-color: transparent;
+	color: var(--primary);
+	border: 1px solid var(--primary);
 }
 
 /* Neutral (Often used for the +X indicator) */
 .tag--color-neutral.tag--variant-solid {
-    background-color: var(--input-bg);
-    color: var(--text-main);
+	background-color: var(--input-bg);
+	color: var(--text-main);
 }
 
 /* Secondary (The one you are currently using for Skills) */
 .tag--color-secondary.tag--variant-solid {
-    background-color: var(--text-main);
-    color: var(--bg);
+	background-color: var(--text-main);
+	color: var(--bg);
 }
 
 .tag--color-secondary.tag--variant-subtle {
-    background-color: var(--input-bg);
-    color: var(--text-main);
+	background-color: var(--input-bg);
+	color: var(--text-main);
 }
 
 .tag--color-secondary.tag--variant-outline {
-    background-color: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
+	background-color: transparent;
+	color: var(--text-main);
+	border: 1px solid var(--border-color);
 }
 
 /* Success */
 .tag--color-success.tag--variant-solid {
-    background-color: var(--success);
-    color: #fff;
+	background-color: var(--success);
+	color: #fff;
 }
 
 .tag--color-success.tag--variant-subtle {
-    background-color: hsla(var(--success-hue), var(--success-saturation), var(--success-lightness), 0.12);
-    color: var(--success);
+	background-color: hsla(
+		var(--success-hue),
+		var(--success-saturation),
+		var(--success-lightness),
+		0.12
+	);
+	color: var(--success);
 }
 
 .tag--color-success.tag--variant-outline {
-    background-color: transparent;
-    color: var(--success);
-    border: 1px solid var(--success);
+	background-color: transparent;
+	color: var(--success);
+	border: 1px solid var(--success);
 }
 
 /* Warning */
 .tag--color-warning.tag--variant-solid {
-    background-color: var(--warning);
-    color: #fff;
+	background-color: var(--warning);
+	color: #fff;
 }
 
 .tag--color-warning.tag--variant-subtle {
-    background-color: hsla(var(--warning-hue), var(--warning-saturation), var(--warning-lightness), 0.12);
-    color: var(--warning);
+	background-color: hsla(
+		var(--warning-hue),
+		var(--warning-saturation),
+		var(--warning-lightness),
+		0.12
+	);
+	color: var(--warning);
 }
 
 .tag--color-warning.tag--variant-outline {
-    background-color: transparent;
-    color: var(--warning);
-    border: 1px solid var(--warning);
+	background-color: transparent;
+	color: var(--warning);
+	border: 1px solid var(--warning);
 }
 
 /* Danger */
 .tag--color-danger.tag--variant-solid {
-    background-color: var(--danger);
-    color: #fff;
+	background-color: var(--danger);
+	color: #fff;
 }
 
 .tag--color-danger.tag--variant-subtle {
-    background-color: hsla(var(--danger-hue), var(--danger-saturation), var(--danger-lightness), 0.12);
-    color: var(--danger);
+	background-color: hsla(
+		var(--danger-hue),
+		var(--danger-saturation),
+		var(--danger-lightness),
+		0.12
+	);
+	color: var(--danger);
 }
 
 .tag--color-danger.tag--variant-outline {
-    background-color: transparent;
-    color: var(--danger);
-    border: 1px solid var(--danger);
+	background-color: transparent;
+	color: var(--danger);
+	border: 1px solid var(--danger);
 }

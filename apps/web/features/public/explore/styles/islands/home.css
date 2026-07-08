@@ -17,5 +17,8 @@
 }
 
 @media (max-width: 640px) {
-	.explore-home__body { padding: 0 1rem; gap: 2.5rem; }
+	.explore-home__body {
+		padding: 0 1rem;
+		gap: 2.5rem;
+	}
 }

@@ -1,58 +1,58 @@
 /* #region ICON WRAPPER */
 .icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+	flex-shrink: 0;
 }
 
 /* Ensure child SVGs inherit the wrapper's dimensions and color */
-.icon-wrapper>svg {
-    width: 100%;
-    height: 100%;
-    stroke: var(--icon-stroke, currentColor);
-    fill: var(--icon-fill, none);
+.icon-wrapper > svg {
+	width: 100%;
+	height: 100%;
+	stroke: var(--icon-stroke, currentColor);
+	fill: var(--icon-fill, none);
 }
 
 /* Colors mapped to variables.md */
 .icon-wrapper--inherit {
-    color: inherit;
+	color: inherit;
 }
 
 .icon-wrapper--primary {
-    color: var(--primary);
+	color: var(--primary);
 }
 
 .icon-wrapper--secondary {
-    color: var(--text-main);
+	color: var(--text-main);
 }
 
 .icon-wrapper--muted {
-    color: var(--text-muted);
+	color: var(--text-muted);
 }
 
 .icon-wrapper--danger {
-    color: var(--danger);
+	color: var(--danger);
 }
 
 .icon-wrapper--success {
-    color: var(--success);
+	color: var(--success);
 }
 
 .icon-wrapper--warning {
-    color: var(--warning);
+	color: var(--warning);
 }
 
 /* Spin Animation */
 .icon-wrapper--spin {
-    animation: icon-spin 1s linear infinite;
+	animation: icon-spin 1s linear infinite;
 }
 
 @keyframes icon-spin {
-    100% {
-        transform: rotate(360deg);
-    }
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
 /* #endregion */

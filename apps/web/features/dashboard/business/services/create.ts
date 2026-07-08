@@ -55,6 +55,8 @@ export async function createBusiness(
 			type: 'business_logo' | 'business_banner',
 			blurhash?: string,
 		): Promise<string> => {
+			// Returns the files.items id — org.business_profiles stores branding as
+			// logo_file_id / banner_file_id references, not public URLs.
 			const fileId = crypto.randomUUID();
 			const quarantinePath = `${crypto.randomUUID()}/${file.name}`;
 
@@ -94,20 +96,17 @@ export async function createBusiness(
 				throw scanError;
 			}
 
-			const { data: publicUrlData } = supabase
-				.storage
-				.from(targetBucket)
-				.getPublicUrl(targetPath);
-
-			return publicUrlData.publicUrl;
+			// The files.items id is what persists on the profile (logo_file_id /
+			// banner_file_id); the public URL is derived downstream from that reference.
+			return fileId;
 		};
 
-		let logoUrl = data.logo_url;
-		let bannerUrl = data.banner_url;
+		let logoFileId: string | undefined;
+		let bannerFileId: string | undefined;
 
 		if (files.logo) {
 			try {
-				logoUrl = await processFile(files.logo, 'business_logo', files.logoBlurhash);
+				logoFileId = await processFile(files.logo, 'business_logo', files.logoBlurhash);
 			} catch (e) {
 				console.error('Logo upload failed:', e);
 				return fail('server_error', 'Failed to upload logo', 500);
@@ -116,7 +115,7 @@ export async function createBusiness(
 
 		if (files.banner) {
 			try {
-				bannerUrl = await processFile(files.banner, 'business_banner', files.bannerBlurhash);
+				bannerFileId = await processFile(files.banner, 'business_banner', files.bannerBlurhash);
 			} catch (e) {
 				console.error('Banner upload failed:', e);
 				return fail('server_error', 'Failed to upload banner', 500);
@@ -129,8 +128,8 @@ export async function createBusiness(
 				payload: {
 					...data,
 					id: businessId,
-					logo_url: logoUrl,
-					banner_url: bannerUrl,
+					logo_file_id: logoFileId ?? null,
+					banner_file_id: bannerFileId ?? null,
 				},
 			});
 

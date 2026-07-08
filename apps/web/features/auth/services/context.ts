@@ -34,7 +34,7 @@ export async function switchActiveTeam(
 		// 1. Verify Membership (Security Guard)
 		const { data: membership, error: memberError } = await supabase
 			.schema('org')
-			.from('team_memberships')
+			.from('team_members')
 			.select('id, role')
 			.eq('team_id', teamId)
 			.eq('user_id', user.id)

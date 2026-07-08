@@ -21,7 +21,10 @@ export const handler = define.handlers({
 		}
 
 		const url = new URL(ctx.req.url);
-		const windowHours = Math.min(Math.max(parseInt(url.searchParams.get('window_hours') || '168', 10), 1), 8760);
+		const windowHours = Math.min(
+			Math.max(parseInt(url.searchParams.get('window_hours') || '168', 10), 1),
+			8760,
+		);
 
 		const getClient = () =>
 			// deno-lint-ignore no-explicit-any

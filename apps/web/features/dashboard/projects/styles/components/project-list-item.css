@@ -1,129 +1,129 @@
 .project-list-item {
-    /* Layout */
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    /* Avatar | Content | Indicators */
-    gap: 0.75rem;
-    align-items: center;
+	/* Layout */
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	/* Avatar | Content | Indicators */
+	gap: 0.75rem;
+	align-items: center;
 
-    /* Sizing */
-    width: 100%;
-    padding: 0.75rem;
-    min-height: 4.5rem;
-    /* Ensure consistent height */
+	/* Sizing */
+	width: 100%;
+	padding: 0.75rem;
+	min-height: 4.5rem;
+	/* Ensure consistent height */
 
-    /* Theming */
-    background-color: transparent;
-    border-radius: var(--border-radius);
-    border: 1px solid transparent;
+	/* Theming */
+	background-color: transparent;
+	border-radius: var(--border-radius);
+	border: 1px solid transparent;
 
-    cursor: pointer;
-    transition: all var(--fast) ease;
-    text-decoration: none;
-    color: inherit;
+	cursor: pointer;
+	transition: all var(--fast) ease;
+	text-decoration: none;
+	color: inherit;
 }
 
 /* Interactive States */
 .project-list-item:hover {
-    background-color: var(--field-bg-hover);
+	background-color: var(--field-bg-hover);
 }
 
 .project-list-item:active,
-.project-list-item[aria-selected="true"] {
-    background-color: var(--primary-surface);
-    border-color: var(--primary-surface);
+.project-list-item[aria-selected='true'] {
+	background-color: var(--primary-surface);
+	border-color: var(--primary-surface);
 }
 
 /* Element: Avatar */
 .project-list-item__avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--border-color);
-    background-color: var(--input-bg);
-    flex-shrink: 0;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 1px solid var(--border-color);
+	background-color: var(--input-bg);
+	flex-shrink: 0;
 }
 
 /* Element: Content Wrapper */
 .project-list-item__content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-    /* Critical for truncation in Grid/Flex */
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+	/* Critical for truncation in Grid/Flex */
 }
 
 /* Element: Title */
 .project-list-item__title {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* Element: Meta Row */
 .project-list-item__meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.75rem;
+	color: var(--text-muted);
 }
 
 /* Element: Status Dot */
 .project-list-item__status {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    flex-shrink: 0;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	flex-shrink: 0;
 }
 
 /* Mapped Status Colors */
 .project-list-item__status--active {
-    background-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-surface);
+	background-color: var(--primary);
+	box-shadow: 0 0 0 2px var(--primary-surface);
 }
 
 .project-list-item__status--in-progress {
-    background-color: var(--warning);
+	background-color: var(--warning);
 }
 
 .project-list-item__status--completed {
-    background-color: var(--success);
+	background-color: var(--success);
 }
 
 .project-list-item__status--draft {
-    background-color: var(--text-disabled);
-    border: 1px solid var(--border-color);
+	background-color: var(--text-disabled);
+	border: 1px solid var(--border-color);
 }
 
 .project-list-item__status--archived {
-    background-color: var(--disabled-bg);
-    border: 1px solid var(--border-color);
+	background-color: var(--disabled-bg);
+	border: 1px solid var(--border-color);
 }
 
 /* Element: Indicators */
 .project-list-item__indicators {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
-    min-width: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	min-width: 1.5rem;
 }
 
 .project-list-item__icon--active {
-    color: var(--warning);
-    fill: var(--warning);
+	color: var(--warning);
+	fill: var(--warning);
 }
 
 .project-list-item__unread-dot {
-    width: 0.625rem;
-    height: 0.625rem;
-    background-color: var(--danger);
-    border-radius: 50%;
-    border: 2px solid var(--card);
-    /* Cutout effect */
+	width: 0.625rem;
+	height: 0.625rem;
+	background-color: var(--danger);
+	border-radius: 50%;
+	border: 2px solid var(--card);
+	/* Cutout effect */
 }

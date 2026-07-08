@@ -62,8 +62,12 @@
 	background: var(--primary-surface);
 }
 
-.explore-section__view-all svg { transition: transform var(--fast) ease; }
-.explore-section__view-all:hover svg { transform: translateX(2px); }
+.explore-section__view-all svg {
+	transition: transform var(--fast) ease;
+}
+.explore-section__view-all:hover svg {
+	transform: translateX(2px);
+}
 
 .explore-section__body {
 	width: 100%;

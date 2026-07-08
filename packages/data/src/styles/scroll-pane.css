@@ -1,24 +1,24 @@
 .scroll-pane {
-    position: relative;
-    width: 100%;
-    display: block;
+	position: relative;
+	width: 100%;
+	display: block;
 }
 
 .scroll-pane--container {
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    contain: strict;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	contain: strict;
 }
 
 .scroll-pane--window {
-    height: auto;
-    overflow: visible;
-    overflow-anchor: none;
+	height: auto;
+	overflow: visible;
+	overflow-anchor: none;
 }
 
 .scroll-pane__shim {
-    position: relative;
-    width: 100%;
-    min-width: 100%;
+	position: relative;
+	width: 100%;
+	min-width: 100%;
 }

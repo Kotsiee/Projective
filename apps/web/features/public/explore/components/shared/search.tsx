@@ -38,7 +38,9 @@ export interface ExploreSearchProps {
  * @description The high-conversion search bar: animated placeholder, query input, native entity-type
  * dropdown, and submit. Embedded full-width in the hero and reused in the search header.
  */
-export default function ExploreSearch({ onSearch, initialQuery, initialType, size = 'md' }: ExploreSearchProps) {
+export default function ExploreSearch(
+	{ onSearch, initialQuery, initialType, size = 'md' }: ExploreSearchProps,
+) {
 	const query = useSignal(initialQuery ?? '');
 	const entityType = useSignal<EntityFilter>(initialType ?? 'all');
 	const activeIndex = useSignal(0);
@@ -94,7 +96,10 @@ export default function ExploreSearch({ onSearch, initialQuery, initialType, siz
 				{query.value.length === 0 && (
 					<div class='explore-search-input__placeholder' aria-hidden='true'>
 						{SEARCH_PHRASES.map((phrase, idx) => (
-							<span key={idx} class={`explore-search-input__placeholder-item ${getPlaceholderClass(idx)}`}>
+							<span
+								key={idx}
+								class={`explore-search-input__placeholder-item ${getPlaceholderClass(idx)}`}
+							>
 								{phrase}
 							</span>
 						))}

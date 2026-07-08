@@ -1,126 +1,181 @@
-/* --- GUEST HEADER WRAPPER --- */
+/* Premium glassmorphism guest header. Lives at the top of every public route on
+   desktop/tablet (the mobile header takes over < 768px). Densifies on scroll. */
+
 .navigation__guest__header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    min-height: var(--header-height);
-    background-color: var(--header);
-    z-index: 60;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: var(--header-height);
+	z-index: var(--z-nav, 60);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.25rem;
+	padding: 0 clamp(1rem, 3vw, 2.5rem);
+
+	background: var(--glass-tint);
+	backdrop-filter: blur(var(--glass-blur, 18px)) saturate(150%);
+	-webkit-backdrop-filter: blur(var(--glass-blur, 18px)) saturate(150%);
+	border-bottom: 1px solid transparent;
+	transition:
+		background var(--medium) var(--ease-out),
+		border-color var(--medium) var(--ease-out),
+		box-shadow var(--medium) var(--ease-out);
 }
 
-/* --- LEFT CONTENT (Logo, Search, Links) --- */
+/* Hairline brand gradient that rides the bottom edge. */
+.navigation__guest__header::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5) 30%,
+		hsla(var(--violet-hue), var(--violet-saturation), var(--violet-lightness), 0.5) 70%,
+		transparent
+	);
+	opacity: 0;
+	transition: opacity var(--medium) var(--ease-out);
+}
+
+.navigation__guest__header.is-scrolled {
+	background: var(--glass-panel-strong);
+	backdrop-filter: blur(var(--glass-blur-lg, 30px)) saturate(160%);
+	-webkit-backdrop-filter: blur(var(--glass-blur-lg, 30px)) saturate(160%);
+	box-shadow: var(--shadow-md);
+}
+
+.navigation__guest__header.is-scrolled::after {
+	opacity: 1;
+}
+
+/* --- LEFT: logo + facet links --- */
 .navigation__guest__left {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
+	display: flex;
+	align-items: center;
+	gap: 1.75rem;
+	min-width: 0;
 }
 
 .navigation__guest__logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-    transition: transform var(--medium);
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: var(--text-main);
+	transition: transform var(--medium) var(--ease-spring);
 }
 
 .navigation__guest__logo:hover {
-    transform: scale(1.05);
+	transform: translateY(-1px);
 }
 
-/* --- GUEST SEARCH BAR --- */
-.navigation__guest__search {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--mid);
-    border-radius: 50px;
-    padding: 0 1rem;
-    height: 2.5rem;
-    width: 250px;
-    outline: 1px solid transparent;
-    transition: outline var(--medium), width var(--medium);
+.navigation__guest__logo-mark {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--primary);
+	filter: drop-shadow(0 2px 8px var(--primary-surface));
 }
 
-.navigation__guest__search:focus-within {
-    outline: 1px solid var(--primary);
-    width: 350px;
+.navigation__guest__wordmark {
+	font-size: 1.15rem;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	background: var(--grad-premium-diag);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
 }
 
-.navigation__guest__search-icon {
-    color: var(--text-muted);
-}
-
-.navigation__guest__search-input {
-    background: transparent;
-    border: none;
-    color: var(--text-main);
-    outline: none;
-    width: 100%;
-    font-size: 0.875rem;
-}
-
-.navigation__guest__search-input::placeholder {
-    color: var(--text-muted);
-}
-
-/* --- GUEST LINKS --- */
 .navigation__guest__links {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-left: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
 }
 
 .navigation__guest__link {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-main);
-    text-decoration: none;
-    transition: color var(--fast);
+	display: inline-flex;
+	align-items: center;
+	padding: 0.5rem 0.85rem;
+	border-radius: var(--border-radius, 8px);
+	font-size: 0.9rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition: color var(--fast) var(--ease-out), background var(--fast) var(--ease-out);
+}
+
+.navigation__guest__link::after {
+	content: '';
+	position: absolute;
+	left: 0.85rem;
+	right: 0.85rem;
+	bottom: 0.28rem;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--grad-premium);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform var(--medium) var(--ease-out);
 }
 
 .navigation__guest__link:hover {
-    color: var(--text-secondary);
+	color: var(--text-main);
+	background: var(--input-bg);
 }
 
-.navigation__guest__link svg {
-    color: var(--text-muted);
-    transition: transform var(--medium);
+.navigation__guest__link:hover::after {
+	transform: scaleX(1);
 }
 
-/* Spin the chevron on hover for a nice interactive feel */
-.navigation__guest__link:hover svg {
-    transform: rotate(180deg);
-    color: var(--text-main);
+/* --- CENTER: cinematic search --- */
+.navigation__guest__search {
+	flex: 1;
+	max-width: 420px;
+	margin: 0 auto;
 }
 
-/* --- RIGHT CONTENT (Actions) --- */
+/* --- RIGHT: theme toggle + auth --- */
 .navigation__guest__right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
 }
 
-/* Override ghost button defaults if needed to match design exactly */
 .navigation__guest__login {
-    font-weight: 600 !important;
-    color: var(--text-main) !important;
-}
-
-.navigation__guest__login:hover {
-    color: var(--text-secondary) !important;
-    background-color: transparent !important;
+	font-weight: 600 !important;
+	color: var(--text-main) !important;
 }
 
 .navigation__guest__join {
-    font-weight: 600 !important;
-    padding: 0 1.5rem !important;
+	font-weight: 600 !important;
+	padding: 0 1.35rem !important;
+}
+
+/* --- RESPONSIVE (desktop → tablet; < 768px swaps to the mobile header) --- */
+@media (max-width: 1140px) {
+	.navigation__guest__search {
+		max-width: 300px;
+	}
+}
+
+@media (max-width: 1024px) {
+	.navigation__guest__links {
+		display: none;
+	}
+	.navigation__guest__search {
+		max-width: none;
+	}
+}
+
+@media (max-width: 860px) {
+	.navigation__guest__wordmark {
+		display: none;
+	}
 }

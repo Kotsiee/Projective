@@ -33,18 +33,37 @@ export class StagesServiceBackend {
 
 		const nextSortOrder = (stages?.[0]?.sort_order ?? -1) + 1;
 
+		// deno-lint-ignore no-explicit-any
+		const insertRow: Record<string, any> = {
+			project_id: projectId,
+			name: data.name,
+			sort_order: nextSortOrder,
+			description: data.description ?? {},
+			description_text: data.description_text ?? '',
+			skills: data.skills ?? [],
+			file_upload_required: data.file_upload_required ?? false,
+		};
+
+		// AC4: per-stage IP override (null = inherit the project's global IP mode).
+		if (data.ip_ownership_override) {
+			insertRow.ip_ownership_override = data.ip_ownership_override;
+			insertRow.ip_mode = data.ip_ownership_override;
+		}
+
+		// AC5: timeline sequencing — a stage either anchors at project start or waits on a
+		// predecessor (dependent_on_stage).
+		if (data.start_trigger_type) insertRow.start_trigger_type = data.start_trigger_type;
+		if (data.start_dependency_stage_id) {
+			insertRow.start_dependency_stage_id = data.start_dependency_stage_id;
+		}
+		if (data.start_dependency_lag_days != null) {
+			insertRow.start_dependency_lag_days = data.start_dependency_lag_days;
+		}
+
 		const { data: newStage, error } = await supabase
 			.schema('projects')
 			.from('project_stages')
-			.insert({
-				project_id: projectId,
-				name: data.name,
-				sort_order: nextSortOrder,
-				description: data.description ?? {},
-				description_text: data.description_text ?? '',
-				skills: data.skills ?? [],
-				file_upload_required: data.file_upload_required ?? false,
-			})
+			.insert(insertRow)
 			.select()
 			.single();
 

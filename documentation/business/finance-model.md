@@ -1,8 +1,8 @@
 # Finance Model: Fees, Payouts & Wallet Architecture
 
 > **Source-of-truth note:** `brain.md`'s "Escrow, Wallets & Finance" and "Hiring Process" sections
-> are the authoritative description of *when* escrow locks/releases and how negotiation works.
-> This document is the detailed **implementation-level financial model** that fills in the concrete
+> are the authoritative description of _when_ escrow locks/releases and how negotiation works. This
+> document is the detailed **implementation-level financial model** that fills in the concrete
 > numbers, state machine, and edge cases that `brain.md` deliberately leaves abstract. It
 > consolidates the former `monetization.md`, `payout.md`, and `wallets.md`.
 >
@@ -31,16 +31,16 @@
 ### 1.2 Marketplace Commissions
 
 - Digital asset sales (templates, codebases, design assets): **8–20%** commission.
-- Base rate (8%) is comparable to Etsy; the 20% tier applies to listings using internal
-  "Search Boosts" or promoted placement.
+- Base rate (8%) is comparable to Etsy; the 20% tier applies to listings using internal "Search
+  Boosts" or promoted placement.
 
 ### 1.3 Subscription Tiers (Phase 3+)
 
-| Tier | Target | Key Paywall Triggers | Pricing (Est.) |
-| :--- | :--- | :--- | :--- |
-| **Starter** | Solo Freelancers | Unlimited portfolios, unlimited active stages (capacity-based) | Free |
-| **Pro Team** | Micro-Agencies | High limit on team members and active team projects | £29/mo |
-| **Enterprise** | Large Corps | Unlimited Businesses, multi-department scoping, API access, audit logs | Custom |
+| Tier           | Target           | Key Paywall Triggers                                                   | Pricing (Est.) |
+| :------------- | :--------------- | :--------------------------------------------------------------------- | :------------- |
+| **Starter**    | Solo Freelancers | Unlimited portfolios, unlimited active stages (capacity-based)         | Free           |
+| **Pro Team**   | Micro-Agencies   | High limit on team members and active team projects                    | £29/mo         |
+| **Enterprise** | Large Corps      | Unlimited Businesses, multi-department scoping, API access, audit logs | Custom         |
 
 ### 1.4 Financial Services & Visibility
 
@@ -60,19 +60,19 @@
 
 ## 2. Payout Triggers by Stage Type (CREATE Framework)
 
-| Stage Type | CREATE Category | Payout Trigger (Proof of Work) |
-| :--- | :--- | :--- |
-| **File-Based** | Create, Run | Final submission made and client clicks "Approve" |
-| **Session-Based** | Educate, Advise | Scheduled session duration completed and logged |
-| **Maintenance** | Run, Test | Completion of the `MaintenanceCycleInterval` (Weekly/Monthly) with no open dispute |
+| Stage Type        | CREATE Category | Payout Trigger (Proof of Work)                                                     |
+| :---------------- | :-------------- | :--------------------------------------------------------------------------------- |
+| **File-Based**    | Create, Run     | Final submission made and client clicks "Approve"                                  |
+| **Session-Based** | Educate, Advise | Scheduled session duration completed and logged                                    |
+| **Maintenance**   | Run, Test       | Completion of the `MaintenanceCycleInterval` (Weekly/Monthly) with no open dispute |
 
 > **Stage-level entry points (implementation):** the client drives this loop from the stage Finance
 > tab against **pre-loaded wallet balances** (Stripe fiat top-up deferred). `projects.fund_stage`
 > holds escrow for an **assigned** stage's tickets (spending-limit checked, isolated to the stage)
-> and moves it `assigned → in_progress`, emitting a "stage funded" notification via `comms.fn_notify`.
-> `projects.approve_stage` is the "Approve" trigger above — it releases the stage's held escrow with
-> the 5% fee and team smart-splits, marking the stage `paid`. Both are `SECURITY DEFINER` wrappers
-> over the `finance.*` engine (migrations `0009`, `0305`).
+> and moves it `assigned → in_progress`, emitting a "stage funded" notification via
+> `comms.fn_notify`. `projects.approve_stage` is the "Approve" trigger above — it releases the
+> stage's held escrow with the 5% fee and team smart-splits, marking the stage `paid`. Both are
+> `SECURITY DEFINER` wrappers over the `finance.*` engine (migrations `0009`, `0305`).
 
 ## 3. The "Fair Exit" Logic — 25/50/75 Splits
 
@@ -88,12 +88,14 @@ current time against `stage.deadline`:
 **Worked example:** a £1,000 stage cancelled at 40% duration triggers an automatic £500/£500 split.
 
 > **Implementation (current):** the split is exposed as a **client-selected settlement tier** rather
-> than auto-derived from elapsed duration. `projects.cancel_stage_fair_exit(project_id, stage_id,
-> tier)` (migration `0305`, tier ∈ `{25, 50, 75}`) pays the freelancer that percentage of each held
-> escrow's principal — net of the 5% fee, team-split-aware — and refunds the remainder to the client
-> business wallet, marking the stage `cancelled`. The automatic duration-thresholding above
-> (`<25%` → full refund, `25–75%` → 50/50, `>75%` → full payout) is **not yet wired**; the tier is
-> currently supplied explicitly by the cancelling client.
+> than auto-derived from elapsed duration.
+> `projects.cancel_stage_fair_exit(project_id, stage_id,
+> tier)` (migration `0305`, tier ∈
+> `{25, 50, 75}`) pays the freelancer that percentage of each held escrow's principal — net of the
+> 5% fee, team-split-aware — and refunds the remainder to the client business wallet, marking the
+> stage `cancelled`. The automatic duration-thresholding above (`<25%` → full refund, `25–75%` →
+> 50/50, `>75%` → full payout) is **not yet wired**; the tier is currently supplied explicitly by
+> the cancelling client.
 
 ## 4. Session & Maintenance-Specific Exit Rules
 
@@ -103,10 +105,10 @@ current time against `stage.deadline`:
 - **Freelancer cancels:** client is issued a 100% refund for all remaining sessions.
 - **Completed sessions:** always paid in full to the freelancer once logged.
 
-> Note: `brain.md`'s own Session cancellation table describes a *full forfeit to freelancer* for
+> Note: `brain.md`'s own Session cancellation table describes a _full forfeit to freelancer_ for
 > late (<24h) client cancellations, not a 50% penalty fee. This is a second conflict between this
-> document and the brain files — `brain.md` takes precedence per the source-of-truth hierarchy;
-> the 50% figure here is preserved only as historical/legacy detail pending reconciliation.
+> document and the brain files — `brain.md` takes precedence per the source-of-truth hierarchy; the
+> 50% figure here is preserved only as historical/legacy detail pending reconciliation.
 
 ### Maintenance-Based (Run/Test)
 
@@ -117,8 +119,8 @@ current time against `stage.deadline`:
 
 ## 5. Team Payouts: Per-Stage Smart Splits
 
-A team appears to the client as a single freelancer; internally, funds are auto-routed by a
-pre-set split ratio defined before work starts.
+A team appears to the client as a single freelancer; internally, funds are auto-routed by a pre-set
+split ratio defined before work starts.
 
 - **Automated routing:** on stage approval, the client's single payment is split across the Team
   Vault and individual Member Wallets per the pre-defined ratio.
@@ -126,6 +128,7 @@ pre-set split ratio defined before work starts.
   internal split ratio.
 
 **Default ruleset templates:**
+
 - **Co-op (Equal):** `(100% − Vault%) / N members`.
 - **Finder's Fee:** a fixed percentage to the member who originated the project; remainder split.
 - **Benevolent Dictator:** 100% to Team Vault, manually distributed by the admin.
@@ -137,9 +140,9 @@ pre-set split ratio defined before work starts.
 Projective uses a tiered ledger, not a single monolithic wallet:
 
 - **Personal Wallets:** individual freelancer/client accounts. Owner-only visibility.
-- **Team Vaults:** shared treasury for a Team profile; receives the "vault" portion of a stage
-  split (e.g. a 10% internal overhead cut) for shared software/branding/marketing costs, managed by
-  Team Owner/Admins.
+- **Team Vaults:** shared treasury for a Team profile; receives the "vault" portion of a stage split
+  (e.g. a 10% internal overhead cut) for shared software/branding/marketing costs, managed by Team
+  Owner/Admins.
 - **Business Wallets:** corporate budgeting container — e.g. a company deposits £50,000 and
   allocates it across 20 projects without repeated card charges.
 - **Hidden system wallets** (invisible to users): the **Escrow Pool** (transient stage-lock holding
@@ -162,15 +165,15 @@ Three fund states, plus a state-machine trace of a stage's full lifecycle:
 
 ```json
 {
-  "ledger_entry": {
-    "amount": 100000,
-    "currency": "gbp",
-    "metadata": {
-      "type": "stage_escrow_release",
-      "stage_id": "uuid",
-      "split_ratio": { "vault": 0.10, "member_a": 0.90 }
-    }
-  }
+	"ledger_entry": {
+		"amount": 100000,
+		"currency": "gbp",
+		"metadata": {
+			"type": "stage_escrow_release",
+			"stage_id": "uuid",
+			"split_ratio": { "vault": 0.10, "member_a": 0.90 }
+		}
+	}
 }
 ```
 
@@ -185,16 +188,15 @@ Breakdown: System Fee (5%) → £50 to the Fee Collection Account; Team Vault (1
   funds 3 days before the current cycle ends. If the client's wallet can't cover it, the stage is
   auto-paused and the freelancer is notified to stop work.
 - **Failed Withdrawal:** if a freelancer's bank account is closed/flagged by Stripe, funds bounce
-  back to their Personal Wallet (Available state) with a dashboard prompt to update payment
-  details.
+  back to their Personal Wallet (Available state) with a dashboard prompt to update payment details.
 
 ## 9. Stripe Integration & Tax Handling
 
 - **Architecture:** Stripe Connect (Custom/Express). Projective owns the **ledger** (who is owed
   what, stored in Supabase `wallets`/`transactions` tables); Stripe owns the **fiat rails** (KYC,
   AML, banking).
-- **Fiduciary safety:** funds sit in a Stripe Platform Account, legally segregated from
-  Projective's own operational accounts — it is never "Projective's money."
+- **Fiduciary safety:** funds sit in a Stripe Platform Account, legally segregated from Projective's
+  own operational accounts — it is never "Projective's money."
 - **Contract structure:** the contract is between Client and Freelancer/Team; Projective's ledger
   reflects a "right to payment," not a resale of services.
 - **Tax reporting:** Stripe issues 1099/local tax forms per jurisdiction, reducing Projective's own

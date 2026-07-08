@@ -384,6 +384,12 @@ context without "ping fatigue."
 
 - **Scope:** One channel per Stage.
 - **Participants:** The Client and all Freelancer(s)/Teams assigned to that specific stage.
+- **Access Control:** The stage room is **stage-scoped, not project-scoped** — only the stage's
+  assigned talent (an assigned freelancer, or an active member of an assigned team) and the
+  client/owner side may open, read, or post in it. A project participant who is _not_ assigned to
+  that stage is locked out of its room. (Enforced by `projects.has_stage_access` at the channel-open
+  RPC and in the comms row-level-security policies; the project-wide General Channel below keeps the
+  broader project-level access.)
 - **Purpose:** Deep-dive discussions on current deliverables, task-specific feedback, and file
   iterations.
 
@@ -448,7 +454,14 @@ Designed for organizations managing multiple projects and teams.
   this shared pool to fund Escrow tickets.
 - **Hierarchy Controls:** Owners can set "Spending Caps" for Project Managers to prevent
   unauthorized budget depletion.
-- **Analytics:** Provides a macro-view of organizational burn-rate across all departments.
+- **Analytics:** Provides a macro-view of organizational burn-rate across all departments. The
+  Business Administration dashboard (`/dashboard`) reads live balances, transaction lines and escrow
+  allocations directly from the ledger via the `org.get_business_finance` wrapper.
+- **Opening Platform Credit (MVP demo path):** On creation every Business Wallet is seeded with a
+  one-time promotional platform credit so the internal-wallet flow is exercisable end-to-end — a
+  business can fund a Stage (debiting the credit into Escrow) and watch the hold/release move real
+  ledger lines without an external top-up. This is a demo-path grant, distinct from any future
+  real-money funding, and is recorded as a normal `demo_opening_credit` ledger entry.
 
 ##### Team Wallets (The Distribution Hub)
 
@@ -602,8 +615,15 @@ To ensure the stage is properly funded, the system follows a **Cumulative Escrow
 2. **Sub-Escrow Lock:** The system locks the Hard Budget for _that specific freelancer_ from the
    Business/Client Wallet.
 3. **Stage Activation:** A stage can move to "In Progress" as soon as the first seat is filled and
-   funded. Additional seats can be filled and funded while the stage is active.
-4. **Resolution:** Payouts are released individually. If the "Junior" finishes their tasks and the
+   funded. Additional seats can be filled and funded while the stage is active. (A stage flips from
+   **Open → Assigned** automatically when its first seat is filled.)
+4. **No Double-Booking (Atomic Assignment):** Accepting an application is atomic and
+   conflict-guarded: the same freelancer or team may not hold two live assignments on the same
+   stage, nor be booked on two different stages whose scheduled windows overlap. Concurrent accepts
+   of the same candidate are serialised (per-candidate advisory lock) so a race cannot slip a
+   double-booking past the guard. (Enforced by `projects.assign_from_application` — advisory lock,
+   an active-assignee unique index, and `projects.fn_assignee_slot_conflict`.)
+5. **Resolution:** Payouts are released individually. If the "Junior" finishes their tasks and the
    client approves their contribution, their specific Escrow is released even if the "Senior" is
    still working on their part of the stage.
 
@@ -617,6 +637,10 @@ This model allows for **Elastic Squads**:
   per-ticket bonuses within the same stage.
 - **Team Participation:** A "Team" can claim multiple seats within a stage, or a single seat if they
   are acting as a single unit (with internal payment splitting handled by their Team Wallet).
+- **Team-Lead Application Authority:** Only a **Team Lead** (the team owner, or a member holding a
+  `lead`/`admin` role) may submit an application on behalf of a team — an ordinary member cannot
+  bind the team to a seat. An individual freelancer may only apply as themselves. (Enforced by
+  `org.is_team_lead` inside `projects.apply_to_seat`.)
 
 ---
 
@@ -710,18 +734,18 @@ a Business Wallet incrementally, or partial pre-authorization on Maintenance-cyc
 
 ##### Purchase Methods
 
-| Method | Use Case |
-| :--- | :--- |
-| **Buy Now** | Immediate, single-ticket purchase and escrow lock. |
-| **Basket Checkout** | Batch-purchase multiple tickets across one or more stages/projects in a single checkout flow. |
-| **Invoicing** | For verified Business accounts (KYB Level 3) — routes through Intervaled Invoicing rather than an immediate charge. |
+| Method              | Use Case                                                                                                            |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------ |
+| **Buy Now**         | Immediate, single-ticket purchase and escrow lock.                                                                  |
+| **Basket Checkout** | Batch-purchase multiple tickets across one or more stages/projects in a single checkout flow.                       |
+| **Invoicing**       | For verified Business accounts (KYB Level 3) — routes through Intervaled Invoicing rather than an immediate charge. |
 
 ##### Escrow Lifecycle for Tickets
 
 Funds enter escrow the moment a freelancer **claims** the ticket, and are released upon completion
-(client approval) of the relevant stage. This is the same trigger already described under
-"Resource Allocation & Ticketing" §1 (Claim-and-Commit Protocol) — the ticket-specific escrow is
-committed at the **Claimed** step, not at the subsequent "In Progress" transition.
+(client approval) of the relevant stage. This is the same trigger already described under "Resource
+Allocation & Ticketing" §1 (Claim-and-Commit Protocol) — the ticket-specific escrow is committed at
+the **Claimed** step, not at the subsequent "In Progress" transition.
 
 > **Note on existing terminology:** The "Escrow Lifetimes by Project Type" table (under "Escrow,
 > Wallets & Finance" §2) describes the Pipeline lock trigger as "when a freelancer moves a ticket to
@@ -736,8 +760,8 @@ committed at the **Claimed** step, not at the subsequent "In Progress" transitio
 - **Multi-Stage Initialization:** A ticket may be created within one or multiple stages
   simultaneously, per the client's preference.
 - **Default Selection Rules:**
-  - If a ticket is created **from within a specific stage**, that stage is selected by default;
-    any additional stages must be selected manually.
+  - If a ticket is created **from within a specific stage**, that stage is selected by default; any
+    additional stages must be selected manually.
   - If a ticket is created as a **general ticket** (not initiated from within a specific stage), it
     defaults to having **all available stages** selected, in sequence.
 
@@ -779,8 +803,8 @@ A freelancer may report a ticket if they believe its assigned Workload Intensity
 
 1. **Report Filed:** The ticket enters a 48-hour **"Hidden"** status — it is removed from public
    view and all work on it is suspended.
-2. **Resolution Window:** If the client increases the ticket's Workload Intensity within the
-   48-hour window, the ticket is unhidden and work resumes at the new $W_i$.
+2. **Resolution Window:** If the client increases the ticket's Workload Intensity within the 48-hour
+   window, the ticket is unhidden and work resumes at the new $W_i$.
 3. **Client Non-Response:** If the client does not adjust the $W_i$ within 48 hours, **both parties
    incur a penalty** (see "Reputation & Discovery" §1 for how penalties feed the Reliability Index).
 4. **Unsubstantiated Report:** If the report is resolved with no $W_i$ change (i.e., a moderator or

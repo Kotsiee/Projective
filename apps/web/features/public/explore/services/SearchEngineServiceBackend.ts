@@ -126,7 +126,13 @@ export class SearchEngineServiceBackend {
 
 	/** Record a behavioural interest event (click / impression / save …). Guest-safe. */
 	static async trackInterest(
-		event: { event_type: string; entity_id?: string; entity_type?: string; query?: string; session_id?: string },
+		event: {
+			event_type: string;
+			entity_id?: string;
+			entity_type?: string;
+			query?: string;
+			session_id?: string;
+		},
 		deps: Deps,
 	): Promise<ServiceResult<null>> {
 		const client = await deps.getClient();
@@ -195,7 +201,11 @@ export class SearchEngineServiceBackend {
 		const status = error.code === '42501' || /forbidden/i.test(error.message ?? '') ? 403 : 400;
 		return {
 			ok: false,
-			error: { code: error.code ?? 'search_error', message: error.message ?? 'Search failed', status },
+			error: {
+				code: error.code ?? 'search_error',
+				message: error.message ?? 'Search failed',
+				status,
+			},
 		};
 	}
 	// #endregion

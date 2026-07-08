@@ -23,8 +23,14 @@
 }
 
 @keyframes inspector-in {
-	from { opacity: 0; transform: translateX(16px); }
-	to { opacity: 1; transform: none; }
+	from {
+		opacity: 0;
+		transform: translateX(16px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 .explore-single__empty {
@@ -40,9 +46,18 @@
 	border-radius: var(--border-radius__large);
 }
 
-.explore-single__empty svg { color: var(--text-disabled); }
-.explore-single__empty h3 { margin: 0.5rem 0 0; color: var(--text-main); font-size: 1.05rem; }
-.explore-single__empty p { margin: 0; font-size: 0.88rem; }
+.explore-single__empty svg {
+	color: var(--text-disabled);
+}
+.explore-single__empty h3 {
+	margin: 0.5rem 0 0;
+	color: var(--text-main);
+	font-size: 1.05rem;
+}
+.explore-single__empty p {
+	margin: 0;
+	font-size: 0.88rem;
+}
 
 @media (max-width: 1024px) {
 	.explore-single__inspector {

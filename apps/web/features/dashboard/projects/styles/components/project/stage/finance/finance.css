@@ -52,10 +52,22 @@
 	white-space: nowrap;
 }
 
-.stage-finance__status--in_progress { background: #e0edff; color: #1d4ed8; }
-.stage-finance__status--paid { background: #dcfce7; color: #15803d; }
-.stage-finance__status--cancelled { background: #fee2e2; color: #b91c1c; }
-.stage-finance__status--assigned { background: #fef3c7; color: #b45309; }
+.stage-finance__status--in_progress {
+	background: #e0edff;
+	color: #1d4ed8;
+}
+.stage-finance__status--paid {
+	background: #dcfce7;
+	color: #15803d;
+}
+.stage-finance__status--cancelled {
+	background: #fee2e2;
+	color: #b91c1c;
+}
+.stage-finance__status--assigned {
+	background: #fef3c7;
+	color: #b45309;
+}
 
 .stage-finance__stats {
 	display: grid;
@@ -115,9 +127,14 @@
 	border-bottom: 1px solid var(--border-subtle, #f1f3f5);
 }
 
-.stage-finance__row:last-child { border-bottom: none; }
+.stage-finance__row:last-child {
+	border-bottom: none;
+}
 
-.stage-finance__row-title { flex: 1; font-size: 0.9rem; }
+.stage-finance__row-title {
+	flex: 1;
+	font-size: 0.9rem;
+}
 
 .stage-finance__row-amount {
 	font-variant-numeric: tabular-nums;
@@ -133,9 +150,18 @@
 	color: var(--text-secondary, #4b5563);
 }
 
-.stage-finance__badge--escrow_funded { background: #e0edff; color: #1d4ed8; }
-.stage-finance__badge--released { background: #dcfce7; color: #15803d; }
-.stage-finance__badge--partially_released { background: #fef3c7; color: #b45309; }
+.stage-finance__badge--escrow_funded {
+	background: #e0edff;
+	color: #1d4ed8;
+}
+.stage-finance__badge--released {
+	background: #dcfce7;
+	color: #15803d;
+}
+.stage-finance__badge--partially_released {
+	background: #fef3c7;
+	color: #b45309;
+}
 
 .stage-finance__empty,
 .stage-finance__note {

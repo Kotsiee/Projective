@@ -26,15 +26,20 @@ const STEP_META: Record<number, { kicker: string; title: string; sub: string }> 
 
 export function InputOrchestrator() {
 	const { currentStep, next } = useWizardContext();
-	const { email, firstName, lastName, username, profilePicture } = useOnboardingContext();
+	const { email, firstName, lastName, username, profilePicture, oauthOnboarding } =
+		useOnboardingContext();
 
 	// #region SSO State Hydration
 	// Detects if the user was redirected here from an OAuth callback requiring onboarding.
+	// The callback (routes/api/v1/auth/callback.ts) has already established a session, so
+	// this is an authenticated "finish onboarding" flow — flag it so the final submit
+	// targets /complete-onboarding, and skip the email/password step.
 	useEffect(() => {
 		const match = document.cookie.match(/(?:^|; )sso_partial_data=([^;]*)/);
 		if (match && match[1]) {
 			try {
 				const data = JSON.parse(decodeURIComponent(match[1]));
+				oauthOnboarding.value = true;
 				if (data.email) email.value = data.email;
 				if (data.firstName) firstName.value = data.firstName;
 				if (data.lastName) lastName.value = data.lastName;

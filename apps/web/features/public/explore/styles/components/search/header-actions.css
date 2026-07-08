@@ -19,8 +19,13 @@
 	color: var(--text-muted);
 }
 
-.explore-actions__summary strong { color: var(--text-main); font-weight: 700; }
-.explore-actions__summary span { color: var(--text-secondary); }
+.explore-actions__summary strong {
+	color: var(--text-main);
+	font-weight: 700;
+}
+.explore-actions__summary span {
+	color: var(--text-secondary);
+}
 
 .explore-actions__hint {
 	margin-left: 0.35rem;
@@ -44,5 +49,8 @@
 }
 
 @media (max-width: 560px) {
-	.explore-actions__right { width: 100%; justify-content: flex-end; }
+	.explore-actions__right {
+		width: 100%;
+		justify-content: flex-end;
+	}
 }

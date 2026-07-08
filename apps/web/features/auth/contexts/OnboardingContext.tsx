@@ -13,9 +13,17 @@ export interface OnboardingState {
 	dob: Signal<DateTime | undefined>;
 	isAdult: Signal<boolean | undefined>;
 	profilePicture: Signal<string | undefined>;
+	/** files.items id of an uploaded avatar (set after a successful upload). */
+	avatarFileId: Signal<string | undefined>;
 	objective: Signal<'client' | 'seller' | undefined>;
 	interests: Signal<string[] | undefined>;
 	skills: Signal<string[] | undefined>;
+	/**
+	 * True when the wizard is finishing onboarding for an ALREADY-authenticated
+	 * user (a first-time OAuth sign-up redirected here from the callback). Drives
+	 * the final submit to /complete-onboarding instead of /create-account.
+	 */
+	oauthOnboarding: Signal<boolean>;
 }
 
 const OnboardingContext = createContext<OnboardingState | null>(null);
@@ -31,9 +39,11 @@ export function OnboardingProvider(
 	const dob = useSignal(undefined);
 	const isAdult = useSignal(undefined);
 	const profilePicture = useSignal(undefined);
+	const avatarFileId = useSignal(undefined);
 	const objective = useSignal(undefined);
 	const interests = useSignal(undefined);
 	const skills = useSignal(undefined);
+	const oauthOnboarding = useSignal(false);
 
 	return (
 		<OnboardingContext.Provider
@@ -46,9 +56,11 @@ export function OnboardingProvider(
 				dob,
 				isAdult,
 				profilePicture,
+				avatarFileId,
 				objective,
 				interests,
 				skills,
+				oauthOnboarding,
 			}}
 		>
 			{children}

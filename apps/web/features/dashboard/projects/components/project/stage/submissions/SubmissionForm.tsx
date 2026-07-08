@@ -2,7 +2,7 @@
 import { JSX } from 'preact';
 import { ReadonlySignal, Signal, useSignal } from '@preact/signals';
 import type { FileWithMeta } from '@projective/types';
-import { RichTextField, SelectField, TextField } from '@projective/fields';
+import { Checkbox, ProgressBar, RichTextField, SelectField, TextField } from '@projective/fields';
 import { Button, FileTypeIcon } from '@projective/ui';
 import { formatFileSize } from '@projective/data';
 import { UploadFileIsland } from '@projective/files';
@@ -103,19 +103,28 @@ export function SubmissionForm(
 							{model.checked.value.length}/{ticket.checklist.length} done
 						</span>
 					</div>
+					<ProgressBar
+						value={model.checked.value.length}
+						max={ticket.checklist.length}
+						tone='auto'
+						size='sm'
+						showValue
+						valueFormat='fraction'
+						ariaLabel='Checklist completion'
+						className='submission-checklist__progress'
+					/>
 					<ul class='submission-checklist'>
 						{ticket.checklist.map((item) => {
 							const on = model.checked.value.includes(item.id);
 							return (
-								<li key={item.id}>
-									<label class={`submission-checklist__item${on ? ' is-checked' : ''}`}>
-										<input
-											type='checkbox'
-											checked={on}
-											onChange={() => toggleChecklistItem(item.id)}
-										/>
-										<span>{item.label}</span>
-									</label>
+								<li key={item.id} class={`submission-checklist__item${on ? ' is-checked' : ''}`}>
+									<Checkbox
+										checked={on}
+										onChange={() =>
+											toggleChecklistItem(item.id)}
+										label={item.label}
+										tone='success'
+									/>
 								</li>
 							);
 						})}

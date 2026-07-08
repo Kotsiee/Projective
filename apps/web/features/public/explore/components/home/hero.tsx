@@ -104,7 +104,12 @@ export default function ExploreHomeHero() {
 						<span>Thousands of teams, services and projects are one click away.</span>
 					</div>
 					<div class='explore-hero__cta-actions'>
-						<Button variant='primary' rounded href={cta.href} endIcon={<IconArrowRight size={16} />}>
+						<Button
+							variant='primary'
+							rounded
+							href={cta.href}
+							endIcon={<IconArrowRight size={16} />}
+						>
 							{cta.label}
 						</Button>
 						<div class='explore-hero__role-switch' role='group' aria-label='Preview as role'>

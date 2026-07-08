@@ -5,8 +5,6 @@ import { SelectField, SelectOption } from '@projective/fields';
 import { useComputed } from '@preact/signals';
 import type { ExploreSort } from '@projective/types';
 import { useExploreContext } from '../../contexts/ExploreContext.tsx';
-import { DEFAULT_FILTERS } from '../../contracts/Explore.ts';
-import { SEARCH_SECTIONS, search } from '../../data/exploreSeed.ts';
 
 const SORT_OPTIONS: SelectOption<ExploreSort>[] = [
 	{ label: 'Recommended', value: 'recommended' },
@@ -22,20 +20,10 @@ const SORT_OPTIONS: SelectOption<ExploreSort>[] = [
  * the sort dropdown. Sorting + filtering are guard-railed OFF in the federated (multi-entity) view.
  */
 export default function ExploreSearchHeaderActions() {
-	const { exploreQuery, entityType, sort, isFiltersOpen, filters } = useExploreContext();
+	const { exploreQuery, entityType, sort, isFiltersOpen, totalCount, loading } =
+		useExploreContext();
 
 	const isFederated = useComputed(() => entityType.value === 'all');
-
-	const count = useComputed(() => {
-		const q = exploreQuery.value;
-		if (entityType.value === 'all') {
-			return SEARCH_SECTIONS.reduce(
-				(n, s) => n + search(s.type, q, DEFAULT_FILTERS, 'recommended').length,
-				0,
-			);
-		}
-		return search(entityType.value, q, filters.value, sort.value).length;
-	});
 
 	return (
 		<div class='explore-actions'>
@@ -53,11 +41,19 @@ export default function ExploreSearchHeaderActions() {
 					Filters
 				</Button>
 				<p class='explore-actions__summary'>
-					<strong>{count.value}</strong> results
-					{exploreQuery.value ? <> for <span>“{exploreQuery.value}”</span></> : null}
-					{isFederated.value && (
-						<span class='explore-actions__hint'>· pick a type to sort &amp; filter</span>
-					)}
+					<strong>{totalCount.value}</strong> results
+					{exploreQuery.value
+						? (
+							<>
+								for <span>“{exploreQuery.value}”</span>
+							</>
+						)
+						: null}
+					{loading.value
+						? <span class='explore-actions__hint'>· searching…</span>
+						: isFederated.value && (
+							<span class='explore-actions__hint'>· pick a type to sort &amp; filter</span>
+						)}
 				</p>
 			</div>
 

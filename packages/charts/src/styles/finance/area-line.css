@@ -1,0 +1,111 @@
+/**
+ * Premium Area/Line chart. Every colour is a theme token so the chart re-themes for free between
+ * light and dark; the series stroke/fill colours are passed inline by the caller (typically
+ * `var(--mint)` / `var(--violet)` / `var(--primary)`).
+ */
+.area-line {
+	position: relative;
+	width: 100%;
+}
+
+.area-line__svg {
+	display: block;
+	overflow: visible;
+}
+
+/* #region Axes */
+.area-line__grid line {
+	stroke: var(--hairline);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.area-line__ytick {
+	fill: var(--text-muted);
+	font-size: 0.62rem;
+	text-anchor: end;
+	dominant-baseline: middle;
+	font-variant-numeric: tabular-nums;
+}
+
+.area-line__xtick {
+	fill: var(--text-muted);
+	font-size: 0.62rem;
+	text-anchor: middle;
+}
+/* #endregion */
+
+/* #region Series */
+.area-line__line {
+	fill: none;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: d var(--slow, 350ms) ease;
+}
+
+.area-line__fill {
+	stroke: none;
+	transition: d var(--slow, 350ms) ease;
+}
+/* #endregion */
+
+/* #region Crosshair + tooltip */
+.area-line__marker line {
+	stroke: var(--text-muted);
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+	opacity: 0.7;
+}
+
+.area-line__marker circle {
+	stroke: var(--card);
+	stroke-width: 2;
+}
+
+.area-line__tooltip {
+	position: absolute;
+	min-width: 148px;
+	padding: 0.5rem 0.625rem;
+	background: var(--card);
+	border: 1px solid var(--hairline-strong, var(--hairline));
+	border-radius: var(--border-radius__small, 6px);
+	box-shadow: var(--shadow-lg);
+	pointer-events: none;
+	z-index: 3;
+}
+
+.area-line__tooltip-date {
+	font-size: 0.66rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--text-muted);
+	margin-bottom: 0.375rem;
+}
+
+.area-line__tooltip-row {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 0.74rem;
+	line-height: 1.5;
+}
+
+.area-line__tooltip-swatch {
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+	flex: 0 0 auto;
+}
+
+.area-line__tooltip-label {
+	color: var(--text-secondary);
+	flex: 1 1 auto;
+}
+
+.area-line__tooltip-value {
+	color: var(--text-main);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+/* #endregion */

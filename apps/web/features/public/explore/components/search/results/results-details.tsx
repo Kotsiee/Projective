@@ -64,7 +64,11 @@ export default function ExploreSearchInspector() {
 	const price = priceLabel(e);
 
 	// Contextual primary CTAs.
-	const primaryLabel = isProfile ? 'Hire' : e.entity_type === 'project' ? 'Apply now' : 'Get started';
+	const primaryLabel = isProfile
+		? 'Hire'
+		: e.entity_type === 'project'
+		? 'Apply now'
+		: 'Get started';
 
 	return (
 		<div class={`inspector accent-${e.accent}`}>
@@ -124,7 +128,13 @@ export default function ExploreSearchInspector() {
 			{/* Primary CTAs */}
 			<div class='inspector__cta'>
 				<Button variant='primary' rounded onClick={() => {}}>{primaryLabel}</Button>
-				<Button variant='secondary' outlined rounded startIcon={<IconMessage size={16} />} onClick={() => {}}>
+				<Button
+					variant='secondary'
+					outlined
+					rounded
+					startIcon={<IconMessage size={16} />}
+					onClick={() => {}}
+				>
 					Message
 				</Button>
 			</div>
@@ -134,7 +144,9 @@ export default function ExploreSearchInspector() {
 				{/* Rating + price strip */}
 				<div class='inspector__stat-row'>
 					<div class='inspector__stat'>
-						<span class='inspector__stat-icon'><IconStarFilled size={16} /></span>
+						<span class='inspector__stat-icon'>
+							<IconStarFilled size={16} />
+						</span>
 						<div>
 							<strong>{e.rating_average.toFixed(1)}</strong>
 							<small>{e.rating_count} reviews</small>
@@ -142,7 +154,9 @@ export default function ExploreSearchInspector() {
 					</div>
 					{price && (
 						<div class='inspector__stat'>
-							<span class='inspector__stat-icon'><IconBriefcase size={16} /></span>
+							<span class='inspector__stat-icon'>
+								<IconBriefcase size={16} />
+							</span>
 							<div>
 								<strong>{price}</strong>
 								<small>starting price</small>
@@ -151,7 +165,9 @@ export default function ExploreSearchInspector() {
 					)}
 					{e.location && (
 						<div class='inspector__stat'>
-							<span class='inspector__stat-icon'><IconMapPin size={16} /></span>
+							<span class='inspector__stat-icon'>
+								<IconMapPin size={16} />
+							</span>
 							<div>
 								<strong>{e.location}</strong>
 								<small>location</small>
@@ -172,9 +188,18 @@ export default function ExploreSearchInspector() {
 					<section class='inspector__section'>
 						<h3>Scope</h3>
 						<div class='inspector__scope'>
-							<div><IconUsersGroup size={16} /><span>{e.scope.role_count} open roles</span></div>
-							<div><IconLayersSubtract size={16} /><span>{e.scope.stage_count} stages</span></div>
-							<div><IconClock size={16} /><span>{e.scope.duration_weeks} weeks</span></div>
+							<div>
+								<IconUsersGroup size={16} />
+								<span>{e.scope.role_count} open roles</span>
+							</div>
+							<div>
+								<IconLayersSubtract size={16} />
+								<span>{e.scope.stage_count} stages</span>
+							</div>
+							<div>
+								<IconClock size={16} />
+								<span>{e.scope.duration_weeks} weeks</span>
+							</div>
 							<div class='inspector__scope-budget'>
 								<IconBriefcase size={16} />
 								<span>{money(e.scope.budget_min_cents)} – {money(e.scope.budget_max_cents)}</span>
@@ -188,7 +213,8 @@ export default function ExploreSearchInspector() {
 					<section class='inspector__section'>
 						<h3>Availability</h3>
 						<span class={`inspector__avail inspector__avail--${e.availability}`}>
-							<i />{e.availability}
+							<i />
+							{e.availability}
 						</span>
 					</section>
 				)}

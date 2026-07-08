@@ -42,8 +42,14 @@
 }
 
 @keyframes filters-in {
-	from { opacity: 0; transform: translateX(-8px); }
-	to { opacity: 1; transform: none; }
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 .explore-search__main {
@@ -61,9 +67,13 @@
 }
 
 @media (max-width: 900px) {
-	.explore-search__filters { display: none; }
+	.explore-search__filters {
+		display: none;
+	}
 }
 
 @media (max-width: 640px) {
-	.explore-search { padding: 1rem; }
+	.explore-search {
+		padding: 1rem;
+	}
 }

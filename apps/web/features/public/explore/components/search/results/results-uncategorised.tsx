@@ -2,10 +2,10 @@ import '../../../styles/components/search/results/results-uncategorised.css';
 import { Carousel, DataDisplay } from '@projective/data';
 import type { EntityType, ExploreEntity } from '@projective/types';
 import { useExploreContext } from '../../../contexts/ExploreContext.tsx';
-import { DEFAULT_FILTERS, EntityFilter } from '../../../contracts/Explore.ts';
+import { EntityFilter } from '../../../contracts/Explore.ts';
 import ExploreSection from '../../shared/section.tsx';
 import ExploreCard, { ExploreCardVariant } from '../../shared/explore-card.tsx';
-import { recommended, SEARCH_SECTIONS, search } from '../../../data/exploreSeed.ts';
+import { SEARCH_SECTIONS } from '../../../data/exploreSeed.ts';
 
 function cardVariant(type: EntityType): ExploreCardVariant {
 	if (type === 'product') return 'product';
@@ -21,12 +21,10 @@ function cardVariant(type: EntityType): ExploreCardVariant {
  * bypass the inspector entirely and navigate straight to the target asset page.
  */
 export default function ExploreSearchResultsUncategorised() {
-	const { exploreQuery, entityType } = useExploreContext();
-	const q = exploreQuery.value;
+	const { entityType, sections } = useExploreContext();
 
-	const recs = recommended().filter((e) =>
-		!q || `${e.display_title} ${e.tags.join(' ')}`.toLowerCase().includes(q.toLowerCase())
-	);
+	// Live federated buckets (seed fallback via useLiveSearch).
+	const recs = sections.value.recommended;
 
 	return (
 		<div class='explore-federated'>
@@ -46,7 +44,8 @@ export default function ExploreSearchResultsUncategorised() {
 			)}
 
 			{SEARCH_SECTIONS.map((section) => {
-				const items = search(section.type, q, DEFAULT_FILTERS, 'recommended');
+				const items =
+					sections.value[section.type as 'service' | 'person' | 'product' | 'project'] ?? [];
 				if (items.length === 0) return null;
 				const variant = cardVariant(section.type);
 
@@ -74,9 +73,17 @@ export default function ExploreSearchResultsUncategorised() {
 								<DataDisplay<ExploreEntity, unknown>
 									mode='grid'
 									dataSource={items}
-									columnWidth={section.type === 'project' ? 440 : section.type === 'service' ? 300 : 272}
+									columnWidth={section.type === 'project'
+										? 440
+										: section.type === 'service'
+										? 300
+										: 272}
 									gap={18}
-									estimateHeight={section.type === 'project' ? 252 : section.type === 'service' ? 340 : 342}
+									estimateHeight={section.type === 'project'
+										? 252
+										: section.type === 'service'
+										? 340
+										: 342}
 									scrollMode='window'
 									selectionMode='none'
 									renderItem={(item) => <ExploreCard entity={item} variant={variant} />}

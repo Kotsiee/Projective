@@ -66,6 +66,42 @@ export interface ForecastRunwayChartProps {
 	className?: string;
 }
 
+/** A single (time, amount) sample on an area/line series. `t` is an ISO date used for x labels. */
+export interface AreaLinePoint {
+	t: string;
+	value_cents: number;
+}
+
+/**
+ * One line on the {@link AreaLineChartProps} chart. `color` is any CSS colour (typically a theme
+ * var such as `var(--mint)`), driving both the stroke and the soft gradient area fill. All series
+ * are aligned by index, so they should share the same length + x timeline.
+ */
+export interface AreaLineSeries {
+	id: string;
+	label: string;
+	color: string;
+	points: AreaLinePoint[];
+}
+
+export interface AreaLineChartProps {
+	series: AreaLineSeries[];
+	height?: number;
+	/** ISO-4217 code used to format the y-axis + tooltip. Default `USD`. */
+	currency?: string;
+	/** Draw the soft gradient area beneath each line. Default true. */
+	showArea?: boolean;
+	/** Number of horizontal grid lines / y ticks. Default 4. */
+	yTickCount?: number;
+	/** Override the x-axis label for a given point (defaults to a `d mmm` UTC date). */
+	formatX?: (label: string, index: number) => string;
+	/** Stable prefix for the SVG gradient ids so two charts on one page never collide. */
+	idPrefix?: string;
+	/** Fired as the pointer scrubs the timeline (null on leave). Reports the focused index. */
+	onScrub?: (index: number | null) => void;
+	className?: string;
+}
+
 export interface ChartFocusModalProps {
 	/** Open state — a boolean or a signal so islands can drive it reactively. */
 	open: boolean | Signal<boolean>;

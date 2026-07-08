@@ -21,8 +21,16 @@ function CinematicSlide({ entity }: { entity: ExploreEntity }) {
 			<div class='cinematic-slide__content'>
 				<span class='cinematic-slide__eyebrow'>
 					{entity.is_sponsored
-						? <><IconSparkles size={14} /> Sponsored</>
-						: <><IconTrendingUp size={14} /> Trending now</>}
+						? (
+							<>
+								<IconSparkles size={14} /> Sponsored
+							</>
+						)
+						: (
+							<>
+								<IconTrendingUp size={14} /> Trending now
+							</>
+						)}
 				</span>
 				<h2 class='cinematic-slide__title'>{entity.display_title}</h2>
 				<p class='cinematic-slide__desc'>{entity.display_description}</p>

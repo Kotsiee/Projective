@@ -1,0 +1,73 @@
+/* Headline metrics band — oversized gradient numbers. */
+
+.home-stats {
+	position: relative;
+	overflow: hidden;
+	background: var(--surface-premium-inv);
+	border-block: 1px solid var(--hairline);
+}
+
+.home-stats__glow {
+	position: absolute;
+	inset: 0;
+	background: var(--glow-aurora);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.home-stats__grid {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 1.5rem;
+	text-align: center;
+}
+
+.home-stat {
+	position: relative;
+	padding: 1rem 0.5rem;
+}
+
+.home-stat:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	top: 20%;
+	right: 0;
+	height: 60%;
+	width: 1px;
+	background: var(--hairline);
+}
+
+.home-stat__value {
+	font-size: clamp(2.4rem, 5vw, 3.5rem);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.04em;
+	background: var(--grad-premium-diag);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.home-stat__label {
+	margin-top: 0.6rem;
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.home-stat__sub {
+	margin-top: 0.25rem;
+	font-size: 0.82rem;
+	color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+	.home-stats__grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 2rem 1rem;
+	}
+	.home-stat:nth-child(2)::after {
+		display: none;
+	}
+}

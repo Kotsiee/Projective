@@ -1,265 +1,265 @@
 .project-board {
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - var(--header-height));
-    width: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - var(--header-height));
+	width: 100%;
 }
 
 .project-board__content {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
 .project-board__footer-wrapper {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
 }
 
 .project-board__footer-left,
 .project-board__footer-right {
-    display: flex;
-    gap: 1rem;
+	display: flex;
+	gap: 1rem;
 }
 
 .project-board__kanban-wrapper {
-    width: 100%;
-    min-width: max-content;
-    /* Forces the wrapper to grow as columns are added */
+	width: 100%;
+	min-width: max-content;
+	/* Forces the wrapper to grow as columns are added */
 }
 
 /* Force the internal Kanban component to NOT scroll */
-.project-board__kanban-wrapper>* {
-    overflow: visible !important;
-    width: max-content !important;
+.project-board__kanban-wrapper > * {
+	overflow: visible !important;
+	width: max-content !important;
 }
 
 /* 1. Force the root wrapper and Kanban base to grow indefinitely */
 .project-board__kanban-wrapper,
 .project-board__kanban-wrapper .kanban {
-    height: auto !important;
-    min-height: 0 !important;
-    /* Strip away any min-height constraints */
+	height: auto !important;
+	min-height: 0 !important;
+	/* Strip away any min-height constraints */
 }
 
 /* 2. Allow the horizontal track to expand vertically to fit the tallest column */
 .project-board__kanban-wrapper .kanban__track {
-    height: auto !important;
-    align-items: flex-start !important;
+	height: auto !important;
+	align-items: flex-start !important;
 }
 
 /* 3. Strip max-heights from the columns */
 .project-board__kanban-wrapper .kanban-field {
-    height: auto !important;
-    max-height: none !important;
+	height: auto !important;
+	max-height: none !important;
 }
 
 /* 4. THE MAGIC BULLET: Kill the internal scrollbar on the card container */
 .project-board__kanban-wrapper .kanban-field__body {
-    height: auto !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    /* Forces cards to push the container height down */
+	height: auto !important;
+	max-height: none !important;
+	overflow-y: visible !important;
+	/* Forces cards to push the container height down */
 }
 
 /* #region 2. HEADER & TOOLBAR */
 .project-board__header {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    padding: 1.5rem;
-    background-color: var(--bg);
-    border-bottom: 1px solid var(--border-color);
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.5rem;
+	background-color: var(--bg);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .project-board__header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1.5rem;
 }
 
 .project-board__panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
 }
 
 .project-board__title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-main);
-    letter-spacing: -0.02em;
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--text-main);
+	letter-spacing: -0.02em;
 }
 
 .project-board__subtitle {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	letter-spacing: 0.05em;
 }
 
 .project-board__details {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    flex-wrap: wrap;
+	display: flex;
+	gap: 1.5rem;
+	align-items: center;
+	flex-wrap: wrap;
 }
 
 .project-board__details-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background-color: color-mix(in srgb, var(--card) 60%, var(--bg));
-    padding: 0.6rem 1rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	background-color: color-mix(in srgb, var(--card) 60%, var(--bg));
+	padding: 0.6rem 1rem;
+	border-radius: var(--border-radius);
+	border: 1px solid var(--border-color);
 }
 
 .project-board__details-label {
-    font-size: 0.725rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+	font-size: 0.725rem;
+	font-weight: 700;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
 }
 
 .project-board__details-section__content {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
 }
 
 .project-board__metric {
-    display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
+	display: flex;
+	align-items: baseline;
+	gap: 0.35rem;
 }
 
 .project-board__metric-value {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text-main);
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--text-main);
 }
 
 .project-board__metric-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--text-muted);
 }
 
 /* Toolbar */
 .project-board__toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
 }
 
 .project-board__search {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    padding: 0 var(--input-padding-x);
-    height: var(--input-height);
-    border-radius: var(--border-radius);
-    flex: 1;
-    max-width: 400px;
-    transition: border-color var(--fast) ease;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background-color: var(--input-bg);
+	border: 1px solid var(--border-color);
+	padding: 0 var(--input-padding-x);
+	height: var(--input-height);
+	border-radius: var(--border-radius);
+	flex: 1;
+	max-width: 400px;
+	transition: border-color var(--fast) ease;
 }
 
 .project-board__search:focus-within {
-    border-color: var(--primary);
+	border-color: var(--primary);
 }
 
 .project-board__search-icon {
-    color: var(--text-muted);
+	color: var(--text-muted);
 }
 
 .project-board__search-input {
-    border: none;
-    background: transparent;
-    color: var(--text-main);
-    font-family: inherit;
-    font-size: 0.875rem;
-    height: 100%;
-    width: 100%;
-    outline: none;
+	border: none;
+	background: transparent;
+	color: var(--text-main);
+	font-family: inherit;
+	font-size: 0.875rem;
+	height: 100%;
+	width: 100%;
+	outline: none;
 }
 
 .project-board__search-input::placeholder {
-    color: var(--text-muted);
+	color: var(--text-muted);
 }
 
 .project-board__toolbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
 }
 
 /* Filters Dropdown Row */
 .project-board__filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    padding: 1.25rem;
-    background-color: color-mix(in srgb, var(--primary-surface) 40%, var(--bg));
-    border-radius: var(--border-radius);
-    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border-color));
-    animation: filterSlideDown var(--fast) cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    transform-origin: top;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25rem;
+	padding: 1.25rem;
+	background-color: color-mix(in srgb, var(--primary-surface) 40%, var(--bg));
+	border-radius: var(--border-radius);
+	border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border-color));
+	animation: filterSlideDown var(--fast) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	transform-origin: top;
 }
 
 @keyframes filterSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scaleY(0.95);
-    }
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scaleY(0.95);
+	}
 
-    to {
-        opacity: 1;
-        transform: translateY(0) scaleY(1);
-    }
+	to {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
 }
 
 .project-board__filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    min-width: 160px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 160px;
 }
 
 .project-board__filter-group label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--text-secondary);
 }
 
 .project-board__select,
 .project-board__input {
-    height: var(--input-height);
-    padding: 0 var(--input-padding-x);
-    background-color: var(--field-bg);
-    border: 1px solid var(--field-border);
-    border-radius: var(--field-radius);
-    color: var(--field-text);
-    font-family: inherit;
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color var(--fast) ease;
+	height: var(--input-height);
+	padding: 0 var(--input-padding-x);
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-radius: var(--field-radius);
+	color: var(--field-text);
+	font-family: inherit;
+	font-size: 0.875rem;
+	outline: none;
+	transition: border-color var(--fast) ease;
 }
 
 .project-board__select:focus,
 .project-board__input:focus {
-    border-color: var(--primary);
+	border-color: var(--primary);
 }
 
 /* #endregion */

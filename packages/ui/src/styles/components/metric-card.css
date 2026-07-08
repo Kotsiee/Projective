@@ -1,0 +1,146 @@
+/**
+ * MetricCard — financial KPI / quick-action card. A single `--metric-accent` per accent modifier
+ * tints the icon chip + left rule; everything else uses palette tokens so light/dark just works.
+ */
+.metric-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1rem 1.1rem;
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius__large, 12px);
+	box-shadow: var(--shadow-sm);
+	overflow: hidden;
+	text-align: left;
+	text-decoration: none;
+	color: inherit;
+	font: inherit;
+	--metric-accent: var(--primary);
+}
+
+/* Accent left rule. */
+.metric-card::before {
+	content: '';
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	background: var(--metric-accent);
+	opacity: 0.85;
+}
+
+/* #region Accents */
+.metric-card--primary {
+	--metric-accent: var(--primary);
+}
+.metric-card--mint {
+	--metric-accent: var(--mint);
+}
+.metric-card--violet {
+	--metric-accent: var(--violet);
+}
+.metric-card--amber {
+	--metric-accent: var(--amber);
+}
+.metric-card--success {
+	--metric-accent: var(--success);
+}
+.metric-card--danger {
+	--metric-accent: var(--danger);
+}
+.metric-card--neutral {
+	--metric-accent: var(--text-secondary);
+}
+/* #endregion */
+
+/* #region Interactive (shortcut) */
+.metric-card--interactive {
+	cursor: pointer;
+	transition:
+		transform var(--fast, 150ms) ease,
+		box-shadow var(--fast, 150ms) ease,
+		border-color var(--fast, 150ms) ease;
+}
+
+.metric-card--interactive:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-md);
+	border-color: color-mix(in srgb, var(--metric-accent) 40%, var(--hairline));
+}
+
+.metric-card--interactive:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+/* #endregion */
+
+.metric-card__top {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.metric-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: var(--border-radius__small, 6px);
+	background: color-mix(in srgb, var(--metric-accent) 15%, transparent);
+	color: var(--metric-accent);
+	flex: 0 0 auto;
+}
+
+.metric-card__label {
+	font-size: 0.74rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.metric-card__delta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15rem;
+	font-size: 0.7rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	flex: 0 0 auto;
+}
+
+.metric-card__delta--success {
+	color: var(--success);
+}
+.metric-card__delta--danger {
+	color: var(--danger);
+}
+.metric-card__delta--neutral {
+	color: var(--text-muted);
+}
+
+.metric-card__value {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.15;
+	color: var(--text-main);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+.metric-card__sublabel {
+	font-size: 0.76rem;
+	color: var(--text-muted);
+}
+
+.metric-card__footer {
+	margin-top: 0.35rem;
+	font-size: 0.76rem;
+	color: var(--text-secondary);
+}

@@ -11,11 +11,26 @@
 }
 
 /* Dynamic entity themes ---------------------------------------------------- */
-.explore-search-header.accent-mint   { --hdr-accent: var(--mint);   --hdr-accent-2: hsl(150, 84%, 50%); }
-.explore-search-header.accent-violet { --hdr-accent: var(--violet); --hdr-accent-2: hsl(280, 90%, 70%); }
-.explore-search-header.accent-amber  { --hdr-accent: var(--amber);  --hdr-accent-2: hsl(20, 95%, 60%); }
-.explore-search-header.accent-ocean  { --hdr-accent: hsl(199, 89%, 60%); --hdr-accent-2: hsl(220, 90%, 66%); }
-.explore-search-header.accent-multi  { --hdr-accent: var(--mint);   --hdr-accent-2: var(--violet); }
+.explore-search-header.accent-mint {
+	--hdr-accent: var(--mint);
+	--hdr-accent-2: hsl(150, 84%, 50%);
+}
+.explore-search-header.accent-violet {
+	--hdr-accent: var(--violet);
+	--hdr-accent-2: hsl(280, 90%, 70%);
+}
+.explore-search-header.accent-amber {
+	--hdr-accent: var(--amber);
+	--hdr-accent-2: hsl(20, 95%, 60%);
+}
+.explore-search-header.accent-ocean {
+	--hdr-accent: hsl(199, 89%, 60%);
+	--hdr-accent-2: hsl(220, 90%, 66%);
+}
+.explore-search-header.accent-multi {
+	--hdr-accent: var(--mint);
+	--hdr-accent-2: var(--violet);
+}
 
 /* Themed graphic asset: a soft accent aurora bleeding from the top-right. */
 .explore-search-header__glow {
@@ -24,8 +39,16 @@
 	height: 220px;
 	z-index: -1;
 	background:
-		radial-gradient(50% 80% at 80% 0%, color-mix(in srgb, var(--hdr-accent) 45%, transparent), transparent 70%),
-		radial-gradient(45% 70% at 55% 10%, color-mix(in srgb, var(--hdr-accent-2) 38%, transparent), transparent 72%);
+		radial-gradient(
+			50% 80% at 80% 0%,
+			color-mix(in srgb, var(--hdr-accent) 45%, transparent),
+			transparent 70%
+		),
+		radial-gradient(
+		45% 70% at 55% 10%,
+		color-mix(in srgb, var(--hdr-accent-2) 38%, transparent),
+		transparent 72%
+	);
 	filter: blur(14px);
 	opacity: 0.65;
 	transition: background var(--slow) ease;
@@ -81,7 +104,11 @@
 	font-weight: 850;
 	letter-spacing: -0.03em;
 	line-height: 1.05;
-	background: linear-gradient(100deg, var(--text-main), color-mix(in srgb, var(--hdr-accent) 70%, var(--text-main)));
+	background: linear-gradient(
+		100deg,
+		var(--text-main),
+		color-mix(in srgb, var(--hdr-accent) 70%, var(--text-main))
+	);
 	-webkit-background-clip: text;
 	background-clip: text;
 	-webkit-text-fill-color: transparent;

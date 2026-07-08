@@ -1,11 +1,178 @@
+/* Home page aggregator. Imported once by the hero island so every home section's
+   CSS ships to the client (islands + server-rendered partials alike share one page).
+   Contains the page shell + shared premium section primitives + scroll-reveal. */
+
+@import './hero.css';
+@import './marquee.css';
+@import './value.css';
+@import './how.css';
+@import './showcase.css';
+@import './reviews.css';
+@import './stats.css';
+@import './cta.css';
+
+/* #region Page shell */
 .home {
-    position: relative;
-    padding: 0;
-    margin: 0;
-
-    height: calc(100% + (var(--header-height) + 1rem));
-    width: calc(100% + (var(--side-nav-width) + 1rem));
-
-    top: calc((var(--header-height) + 1rem) * -1);
-    left: calc((var(--side-nav-width) + 1rem) * -1);
+	position: relative;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow-x: clip;
+	background: var(--bg);
 }
+
+/* Centred content column shared by every section. */
+.home-shell {
+	width: 100%;
+	max-width: 1240px;
+	margin: 0 auto;
+	padding-inline: clamp(1.25rem, 5vw, 4rem);
+}
+
+.home-section {
+	position: relative;
+	padding-block: clamp(4rem, 9vw, 8rem);
+}
+
+.home-section--tight {
+	padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+/* #endregion */
+
+/* #region Shared typographic primitives */
+.home-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.4rem 0.85rem;
+	border-radius: 999px;
+	border: 1px solid var(--hairline);
+	background: var(--glass-panel);
+	backdrop-filter: blur(var(--glass-blur-sm, 8px));
+	-webkit-backdrop-filter: blur(var(--glass-blur-sm, 8px));
+	font-size: 0.76rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--text-secondary);
+}
+
+.home-eyebrow svg {
+	color: var(--primary);
+}
+
+.home-display {
+	margin: 1.25rem 0 0;
+	font-size: clamp(2rem, 5vw, 3.5rem);
+	line-height: 1.04;
+	font-weight: 700;
+	letter-spacing: -0.035em;
+	color: var(--text-main);
+}
+
+.home-display em {
+	font-style: normal;
+	background: var(--grad-premium-diag);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.home-lede {
+	margin: 1.15rem 0 0;
+	max-width: 52ch;
+	font-size: clamp(1rem, 1.4vw, 1.15rem);
+	line-height: 1.65;
+	color: var(--text-muted);
+}
+
+.home-section__head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1.5rem;
+	margin-bottom: 2.5rem;
+	flex-wrap: wrap;
+}
+
+.home-section__head-text {
+	max-width: 40rem;
+}
+
+.home-section__title {
+	margin: 0.75rem 0 0;
+	font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+	line-height: 1.1;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	color: var(--text-main);
+}
+
+.home-section__title em {
+	font-style: normal;
+	background: var(--grad-premium-diag);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.home-section__sub {
+	margin: 0.6rem 0 0;
+	font-size: 1rem;
+	line-height: 1.6;
+	color: var(--text-muted);
+}
+
+.home-section__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.5rem 1rem;
+	border-radius: 999px;
+	border: 1px solid var(--hairline);
+	font-size: 0.88rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	white-space: nowrap;
+	transition:
+		color var(--fast) ease,
+		border-color var(--fast) ease,
+		background var(--fast) ease,
+		transform var(--fast) var(--ease-out);
+}
+
+.home-section__link:hover {
+	color: var(--primary);
+	border-color: var(--primary);
+	background: var(--primary-surface);
+	transform: translateX(2px);
+}
+/* #endregion */
+
+/* #region Scroll reveal — zero-JS via CSS scroll-driven animations.
+   Falls back to fully visible where unsupported; disabled for reduced motion. */
+.reveal {
+	opacity: 1;
+}
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.reveal {
+			opacity: 0;
+			animation: home-reveal linear both;
+			animation-timeline: view();
+			animation-range: entry 2% cover 26%;
+		}
+	}
+}
+
+@keyframes home-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+/* #endregion */

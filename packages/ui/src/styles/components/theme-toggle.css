@@ -1,0 +1,136 @@
+/* packages/ui/src/styles/components/theme-toggle.css
+   Spring-physics light/dark switch. The thumb overshoots slightly on toggle via the
+   --ease-spring curve; the track cross-fades between daylight and a starfield. */
+
+.theme-toggle {
+	--tt-w: 3.4rem;
+	--tt-h: 1.8rem;
+	--tt-pad: 3px;
+	--tt-thumb: calc(var(--tt-h) - var(--tt-pad) * 2);
+	display: inline-flex;
+	align-items: center;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	line-height: 0;
+}
+
+.theme-toggle--compact {
+	--tt-w: 3rem;
+	--tt-h: 1.6rem;
+}
+
+.theme-toggle__track {
+	position: relative;
+	display: block;
+	width: var(--tt-w);
+	height: var(--tt-h);
+	border-radius: 999px;
+	background: radial-gradient(
+		120% 140% at 15% -20%,
+		hsl(41, 96%, 62%) 0%,
+		hsl(199, 84%, 60%) 60%,
+		hsl(206, 70%, 52%) 100%
+	);
+	border: 1px solid var(--glass-hairline, rgba(0, 0, 0, 0.12));
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
+	transition: background var(--slow, 350ms) var(--ease-in-out, ease);
+	overflow: hidden;
+}
+
+.theme-toggle--dark .theme-toggle__track {
+	background: radial-gradient(
+		120% 140% at 85% -10%,
+		hsl(258, 60%, 42%) 0%,
+		hsl(230, 55%, 20%) 55%,
+		hsl(230, 60%, 10%) 100%
+	);
+}
+
+/* Starfield — invisible in light, fades in for dark. */
+.theme-toggle__stars {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transition: opacity var(--slow, 350ms) var(--ease-in-out, ease);
+	background-image:
+		radial-gradient(1px 1px at 20% 35%, #fff 50%, transparent 51%),
+		radial-gradient(1px 1px at 62% 25%, rgba(255, 255, 255, 0.85) 50%, transparent 51%),
+		radial-gradient(1.4px 1.4px at 44% 68%, #fff 50%, transparent 51%),
+		radial-gradient(1px 1px at 78% 60%, rgba(255, 255, 255, 0.7) 50%, transparent 51%);
+	pointer-events: none;
+}
+
+.theme-toggle--dark .theme-toggle__stars {
+	opacity: 1;
+}
+
+.theme-toggle__thumb {
+	position: absolute;
+	top: var(--tt-pad);
+	left: var(--tt-pad);
+	width: var(--tt-thumb);
+	height: var(--tt-thumb);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #fff;
+	color: hsl(41, 90%, 45%);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+	transform: translateX(0);
+	transition:
+		transform var(--slow, 350ms) var(--ease-spring, ease),
+		color var(--medium, 250ms) ease,
+		background var(--medium, 250ms) ease;
+}
+
+.theme-toggle--dark .theme-toggle__thumb {
+	transform: translateX(calc(var(--tt-w) - var(--tt-thumb) - var(--tt-pad) * 2));
+	background: hsl(230, 30%, 96%);
+	color: hsl(250, 45%, 40%);
+}
+
+.theme-toggle__glyph {
+	position: absolute;
+	transition:
+		opacity var(--medium, 250ms) var(--ease-out, ease),
+		transform var(--slow, 350ms) var(--ease-spring, ease);
+}
+
+.theme-toggle__glyph--sun {
+	opacity: 1;
+	transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle__glyph--moon {
+	opacity: 0;
+	transform: rotate(-90deg) scale(0.4);
+}
+
+.theme-toggle--dark .theme-toggle__glyph--sun {
+	opacity: 0;
+	transform: rotate(90deg) scale(0.4);
+}
+
+.theme-toggle--dark .theme-toggle__glyph--moon {
+	opacity: 1;
+	transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle:focus-visible .theme-toggle__track {
+	outline: none;
+	box-shadow:
+		var(--focus-ring, 0 0 0 3px rgba(66, 153, 225, 0.5)),
+		inset 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.theme-toggle__thumb,
+	.theme-toggle__glyph,
+	.theme-toggle__track,
+	.theme-toggle__stars {
+		transition-duration: 1ms;
+	}
+}

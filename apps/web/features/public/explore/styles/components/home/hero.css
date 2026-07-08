@@ -22,8 +22,12 @@
 }
 
 @keyframes hero-drift {
-	from { transform: translate3d(-2%, -1%, 0) scale(1); }
-	to { transform: translate3d(2%, 2%, 0) scale(1.06); }
+	from {
+		transform: translate3d(-2%, -1%, 0) scale(1);
+	}
+	to {
+		transform: translate3d(2%, 2%, 0) scale(1.06);
+	}
 }
 
 .explore-hero__inner {
@@ -50,7 +54,9 @@
 	border-radius: 999px;
 }
 
-.explore-hero__badge svg { color: var(--mint); }
+.explore-hero__badge svg {
+	color: var(--mint);
+}
 
 .explore-hero__title {
 	margin: 0;
@@ -83,7 +89,9 @@
 }
 
 @keyframes hero-caret {
-	50% { opacity: 0; }
+	50% {
+		opacity: 0;
+	}
 }
 
 .explore-hero__subtitle {
@@ -116,9 +124,20 @@
 	border-radius: var(--border-radius__large);
 }
 
-.explore-hero__cta-copy { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
-.explore-hero__cta-copy strong { font-size: 0.95rem; color: var(--text-main); }
-.explore-hero__cta-copy span { font-size: 0.82rem; color: var(--text-muted); }
+.explore-hero__cta-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-width: 0;
+}
+.explore-hero__cta-copy strong {
+	font-size: 0.95rem;
+	color: var(--text-main);
+}
+.explore-hero__cta-copy span {
+	font-size: 0.82rem;
+	color: var(--text-muted);
+}
 
 .explore-hero__cta-actions {
 	display: flex;
@@ -136,7 +155,9 @@
 	color: var(--text-muted);
 }
 
-.explore-hero__role-switch > span { margin-right: 0.25rem; }
+.explore-hero__role-switch > span {
+	margin-right: 0.25rem;
+}
 
 .explore-hero__role {
 	padding: 0.15rem 0.5rem;
@@ -151,7 +172,9 @@
 	transition: color var(--fast) ease, background var(--fast) ease, border-color var(--fast) ease;
 }
 
-.explore-hero__role:hover { color: var(--text-main); }
+.explore-hero__role:hover {
+	color: var(--text-main);
+}
 
 .explore-hero__role.is-active {
 	color: var(--primary);
@@ -160,7 +183,15 @@
 }
 
 @media (max-width: 720px) {
-	.explore-hero { padding: 2.5rem 1rem 2rem; }
-	.explore-hero__cta { flex-direction: column; align-items: flex-start; }
-	.explore-hero__cta-actions { align-items: flex-start; width: 100%; }
+	.explore-hero {
+		padding: 2.5rem 1rem 2rem;
+	}
+	.explore-hero__cta {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.explore-hero__cta-actions {
+		align-items: flex-start;
+		width: 100%;
+	}
 }

@@ -24,7 +24,10 @@
 	background: var(--card);
 	border: 1px solid var(--hairline);
 	border-radius: 999px;
-	transition: color var(--fast) ease, border-color var(--fast) ease, background var(--fast) ease,
+	transition:
+		color var(--fast) ease,
+		border-color var(--fast) ease,
+		background var(--fast) ease,
 		transform var(--fast) ease;
 }
 
@@ -41,11 +44,35 @@
 }
 
 /* Shared accent palette (cards, pills, banners, cinematic) ---------------- */
-.accent-mint    { --accent: var(--mint);    --accent-surface: var(--mint-surface); }
-.accent-violet  { --accent: var(--violet);  --accent-surface: var(--violet-surface); }
-.accent-amber   { --accent: var(--amber);   --accent-surface: var(--amber-surface); }
-.accent-primary { --accent: var(--primary); --accent-surface: var(--primary-surface); }
-.accent-ocean   { --accent: hsl(199, 89%, 60%); --accent-surface: hsla(199, 89%, 60%, 0.15); }
-.accent-ember   { --accent: hsl(334, 86%, 66%); --accent-surface: hsla(334, 86%, 66%, 0.15); }
-.accent-forest  { --accent: hsl(142, 71%, 55%); --accent-surface: hsla(142, 71%, 55%, 0.15); }
-.accent-neutral { --accent: hsl(220, 9%, 68%);  --accent-surface: hsla(220, 9%, 68%, 0.14); }
+.accent-mint {
+	--accent: var(--mint);
+	--accent-surface: var(--mint-surface);
+}
+.accent-violet {
+	--accent: var(--violet);
+	--accent-surface: var(--violet-surface);
+}
+.accent-amber {
+	--accent: var(--amber);
+	--accent-surface: var(--amber-surface);
+}
+.accent-primary {
+	--accent: var(--primary);
+	--accent-surface: var(--primary-surface);
+}
+.accent-ocean {
+	--accent: hsl(199, 89%, 60%);
+	--accent-surface: hsla(199, 89%, 60%, 0.15);
+}
+.accent-ember {
+	--accent: hsl(334, 86%, 66%);
+	--accent-surface: hsla(334, 86%, 66%, 0.15);
+}
+.accent-forest {
+	--accent: hsl(142, 71%, 55%);
+	--accent-surface: hsla(142, 71%, 55%, 0.15);
+}
+.accent-neutral {
+	--accent: hsl(220, 9%, 68%);
+	--accent-surface: hsla(220, 9%, 68%, 0.14);
+}

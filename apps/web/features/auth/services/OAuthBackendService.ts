@@ -42,16 +42,34 @@ export class OAuthBackendService {
 			//    for the follow-up onboarding lookup.
 			const { client: supabase, data, error } = await exchangeOAuthCode(code, verifier);
 			if (error || !data.session) {
-				return fail('unauthorized', 'Failed to exchange OAuth code for session', 401);
+				// Surface the real GoTrue reason (server logs) instead of a blanket 401.
+				// deno-lint-ignore no-explicit-any
+				const e = error as any;
+				console.error(
+					'[OAuthBackendService] ❌ Code exchange failed:',
+					JSON.stringify({
+						message: e?.message ?? (data.session ? null : 'No session returned'),
+						status: e?.status,
+						code: e?.code,
+						name: e?.name,
+					}),
+				);
+				return fail(
+					'unauthorized',
+					error?.message || 'Failed to exchange OAuth code for session',
+					401,
+				);
 			}
 
-			// 2. Check if user is fully onboarded (exists in org.users_public)
+			// 2. Check if user is fully onboarded (exists in org.users_public).
+			//    maybeSingle() → a brand-new OAuth user simply has no profile row yet
+			//    (provisioning is deferred to complete_onboarding), so this must not error.
 			const { data: profile } = await supabase
 				.schema('org')
 				.from('users_public')
 				.select('user_id')
 				.eq('user_id', data.user.id)
-				.single();
+				.maybeSingle();
 
 			const isOnboarded = !!profile;
 
@@ -81,6 +99,7 @@ export class OAuthBackendService {
 				},
 			});
 		} catch (err) {
+			console.error('[OAuthBackendService] 💥 Unexpected callback failure:', err);
 			const n = normaliseUnknownError(err);
 			return fail(n.code, n.message, 500);
 		}

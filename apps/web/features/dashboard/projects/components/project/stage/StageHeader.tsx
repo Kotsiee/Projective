@@ -19,7 +19,7 @@ export const stageTabs = () => {
 		{ label: 'Tasks', href: 'tasks' },
 		{ label: 'Submissions', href: 'submissions' },
 		{ label: 'Finance', href: 'finance' },
-		{ label: 'Members', href: 'members' },
+		{ label: 'Staffing', href: 'staffing' },
 	];
 
 	return tabs;
@@ -28,7 +28,7 @@ export const stageTabs = () => {
 // #region Component
 export default function StageHeader() {
 	const { stage, stage_id } = useStageContext();
-	const { project, project_id } = useProjectContext();
+	const { project_id } = useProjectContext();
 
 	let tabs: { label: string; href: string }[] = [];
 	if (stage.value) {
@@ -47,7 +47,7 @@ export default function StageHeader() {
 			{/* Left: Identity */}
 			<div class='stage-header__left'>
 				<img
-					src={project.value?.banner_url || 'https://placehold.co/32'}
+					src={stage.value?.assignee?.avatar_url || 'https://placehold.co/32'}
 					alt='Stage Assignee Avatar'
 					class='stage-header__avatar'
 				/>

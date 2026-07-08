@@ -10,7 +10,10 @@
 	border: 1.5px solid var(--hairline-strong);
 	border-radius: 999px;
 	box-shadow: 0 12px 34px -20px rgba(0, 0, 0, 0.6);
-	transition: border-color var(--medium) ease, box-shadow var(--medium) ease, background var(--medium) ease,
+	transition:
+		border-color var(--medium) ease,
+		box-shadow var(--medium) ease,
+		background var(--medium) ease,
 		transform var(--medium) ease;
 }
 
@@ -31,7 +34,9 @@
 	border-radius: 20px;
 }
 
-.explore-search-input--lg .explore-search-input__input { font-weight: 500; }
+.explore-search-input--lg .explore-search-input__input {
+	font-weight: 500;
+}
 
 .explore-search-input__leading {
 	display: inline-flex;
@@ -58,7 +63,10 @@
 	outline: none;
 }
 
-.explore-search-input--lg .explore-search-input__input { font-size: 1.05rem; padding: 0.65rem 0; }
+.explore-search-input--lg .explore-search-input__input {
+	font-size: 1.05rem;
+	padding: 0.65rem 0;
+}
 
 /* Rotating placeholder ---------------------------------------------------- */
 .explore-search-input__placeholder {
@@ -78,13 +86,26 @@
 	transition: transform var(--slow) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--slow) ease;
 }
 
-.explore-search-input--lg .explore-search-input__placeholder-item { font-size: 1.05rem; }
+.explore-search-input--lg .explore-search-input__placeholder-item {
+	font-size: 1.05rem;
+}
 
-.explore-search-input__placeholder-item--active { transform: translateY(0); opacity: 1; }
-.explore-search-input__placeholder-item--prev { transform: translateY(-120%); opacity: 0; }
-.explore-search-input__placeholder-item--next { transform: translateY(120%); opacity: 0; }
+.explore-search-input__placeholder-item--active {
+	transform: translateY(0);
+	opacity: 1;
+}
+.explore-search-input__placeholder-item--prev {
+	transform: translateY(-120%);
+	opacity: 0;
+}
+.explore-search-input__placeholder-item--next {
+	transform: translateY(120%);
+	opacity: 0;
+}
 
-.explore-search-input__clear { flex-shrink: 0; }
+.explore-search-input__clear {
+	flex-shrink: 0;
+}
 
 .explore-search-input__divider {
 	width: 1px;
@@ -113,8 +134,13 @@
 	height: 2.4rem;
 }
 
-.explore-search-input--lg .explore-search-input__submit { width: 2.8rem; height: 2.8rem; }
+.explore-search-input--lg .explore-search-input__submit {
+	width: 2.8rem;
+	height: 2.8rem;
+}
 
 @media (max-width: 560px) {
-	.explore-search-input__dropdown { width: 96px; }
+	.explore-search-input__dropdown {
+		width: 96px;
+	}
 }

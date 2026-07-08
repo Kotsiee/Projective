@@ -1,0 +1,88 @@
+/* packages/fields/src/styles/fields/checkbox.css */
+
+.checkbox {
+	--cb-color: var(--primary);
+	display: inline-flex;
+	align-items: flex-start;
+	gap: 8px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.checkbox--success {
+	--cb-color: var(--complete, var(--success, var(--primary)));
+}
+
+.checkbox--disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
+/* Visually-hidden native input keeps keyboard + a11y semantics. */
+.checkbox__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.checkbox__box {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--border-radius__xsmall, 4px);
+	border: 1px solid var(--border-color, hsl(220, 8%, 65%));
+	background: var(--card, var(--background));
+	color: #fff;
+	transition:
+		background-color var(--fast, 150ms) ease,
+		border-color var(--fast, 150ms) ease,
+		box-shadow var(--fast, 150ms) ease;
+}
+
+.checkbox--sm .checkbox__box {
+	width: 15px;
+	height: 15px;
+}
+
+.checkbox--on .checkbox__box {
+	background: var(--cb-color);
+	border-color: var(--cb-color);
+}
+
+.checkbox__input:focus-visible + .checkbox__box {
+	box-shadow: var(--focus-ring, 0 0 0 2px var(--background), 0 0 0 4px var(--primary));
+}
+
+.checkbox:hover:not(.checkbox--disabled) .checkbox__box {
+	border-color: var(--cb-color);
+}
+
+.checkbox__text {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+	line-height: 1.25;
+}
+
+.checkbox__label {
+	font-size: 0.875rem;
+	color: var(--text-main, var(--text-primary));
+}
+
+.checkbox--sm .checkbox__label {
+	font-size: 0.8125rem;
+}
+
+.checkbox__description {
+	font-size: 0.75rem;
+	color: var(--text-muted, var(--text-secondary));
+}

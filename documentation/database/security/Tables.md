@@ -67,13 +67,13 @@ endpoints.
 A comprehensive, immutable record of critical actions. This table provides the necessary trail for
 dispute resolution and security auditing.
 
-| Column             | Type  | Notes                                            |
-| :----------------- | :---- | :----------------------------------------------- |
-| `user_id`          | uuid  | The human user performing the action.            |
+| Column             | Type  | Notes                                                       |
+| :----------------- | :---- | :---------------------------------------------------------- |
+| `user_id`          | uuid  | The human user performing the action.                       |
 | `action`           | text  | e.g., `user.onboarded`, `stage.approved`, `dispute.opened`. |
-| `actor_profile_id` | uuid  | The profile ID active at the time of the action. |
-| `ip`               | inet  | Client IP address.                               |
-| `metadata`         | jsonb | Structured data regarding the change.            |
+| `actor_profile_id` | uuid  | The profile ID active at the time of the action.            |
+| `ip`               | inet  | Client IP address.                                          |
+| `metadata`         | jsonb | Structured data regarding the change.                       |
 
 ```sql
 CREATE TABLE security.audit_logs (

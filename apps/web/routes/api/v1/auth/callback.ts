@@ -47,7 +47,13 @@ export const handler = define.handlers({
 		// Delegate the PKCE exchange + onboarding detection to the Fat Service.
 		const res = await OAuthBackendService.handleCallback(code, verifier);
 		if (!res.ok) {
-			return loginError(headers, 'We could not complete sign-in. Please try again.');
+			// Log the real reason to the terminal; surface a trimmed reason in the URL
+			// so the failure is diagnosable during local development.
+			console.error('[callback] ❌ OAuth sign-in failed:', JSON.stringify(res.error));
+			const reason = res.error?.message
+				? `Sign-in failed: ${res.error.message}`
+				: 'We could not complete sign-in. Please try again.';
+			return loginError(headers, reason);
 		}
 
 		// Establish the secure HTTP-only session.

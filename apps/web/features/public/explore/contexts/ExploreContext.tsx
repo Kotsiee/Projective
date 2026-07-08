@@ -2,8 +2,16 @@ import { ComponentChildren, createContext } from 'preact';
 import { useContext, useEffect } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { EntityType, ExploreEntity } from '@projective/types';
-import { DEFAULT_FILTERS, EntityFilter, ExploreState, UserRole } from '../contracts/Explore.ts';
-import { byId } from '../data/exploreSeed.ts';
+import {
+	DEFAULT_FILTERS,
+	EMPTY_SECTIONS,
+	EntityFilter,
+	ExploreState,
+	SearchSections,
+	UserRole,
+} from '../contracts/Explore.ts';
+import { byId, recommended, search } from '../data/exploreSeed.ts';
+import { SearchService } from '../services/SearchService.ts';
 
 // #region 1. CONTEXT INITIALIZATION
 // Exported so content projected into the global middle-nav via `setMiddleNav` (which renders
@@ -48,6 +56,13 @@ export function ExploreProvider(props: ExploreProviderProps) {
 	const selectedItem = useSignal<ExploreEntity | null>(null);
 	const isFiltersOpen = useSignal<boolean>(props.initialFiltersOpen ?? false);
 	const userRole = useSignal<UserRole>(props.initialRole || 'guest');
+
+	// Live results state (populated by useLiveSearch on the search island; seed fallback).
+	const results = useSignal<ExploreEntity[]>([]);
+	const sections = useSignal<SearchSections>({ ...EMPTY_SECTIONS });
+	const loading = useSignal<boolean>(false);
+	const totalCount = useSignal<number>(0);
+	const usingSeed = useSignal<boolean>(true);
 	// #endregion
 
 	// #region 4. HYDRATION (On Mount)
@@ -98,13 +113,29 @@ export function ExploreProvider(props: ExploreProviderProps) {
 
 	// Isolating on a concrete entity type resets any inspector selection cleanly.
 	useEffect(() => {
-		filters.value = { ...filters.value, entity_type: entityType.value === 'all' ? null : entityType.value as EntityType };
+		filters.value = {
+			...filters.value,
+			entity_type: entityType.value === 'all' ? null : entityType.value as EntityType,
+		};
 		if (entityType.value === 'all') selectedItem.value = null;
 	}, [entityType.value]);
 
 	return (
 		<ExploreContext.Provider
-			value={{ exploreQuery, entityType, sort, filters, selectedItem, isFiltersOpen, userRole }}
+			value={{
+				exploreQuery,
+				entityType,
+				sort,
+				filters,
+				selectedItem,
+				isFiltersOpen,
+				userRole,
+				results,
+				sections,
+				loading,
+				totalCount,
+				usingSeed,
+			}}
 		>
 			{props.children}
 		</ExploreContext.Provider>
@@ -118,3 +149,111 @@ export function useExploreContext(): ExploreState {
 	}
 	return ctx;
 }
+
+// #region 6. LIVE SEARCH (backend-wired, seed fallback)
+
+/** Build the federated section buckets from the seed — instant paint + fallback. */
+function seedGlobal(q: string | null): SearchSections {
+	const query = q ?? '';
+	const bucket = (t: EntityType) => search(t, query, DEFAULT_FILTERS, 'recommended');
+	return {
+		recommended: recommended().filter((e) =>
+			!query ||
+			`${e.display_title} ${e.tags.join(' ')}`.toLowerCase().includes(query.toLowerCase())
+		),
+		service: bucket('service'),
+		person: bucket('person'),
+		product: bucket('product'),
+		project: bucket('project'),
+	};
+}
+
+function sectionsTotal(s: SearchSections): number {
+	return s.service.length + s.person.length + s.product.length + s.project.length;
+}
+
+/**
+ * @hook useLiveSearch
+ * @description Drives the search results off the live ranking endpoint. Reads the reactive facets
+ * (query / entity type / sort / filters), paints the seed immediately for a rich first frame, then
+ * debounces a call to {@link SearchService.query}. The live response replaces the seed only when it
+ * returns real rows — so an empty/unavailable backend gracefully keeps the seeded showcase. Call once
+ * from the search island (NOT the home hub, which renders the seed directly).
+ */
+export function useLiveSearch(): void {
+	const {
+		exploreQuery,
+		entityType,
+		sort,
+		filters,
+		results,
+		sections,
+		loading,
+		totalCount,
+		usingSeed,
+	} = useExploreContext();
+
+	useEffect(() => {
+		const q = exploreQuery.value ?? '';
+		const type = entityType.value;
+
+		// 1. Instant seed paint (doubles as the fallback).
+		if (type === 'all') {
+			const seed = seedGlobal(q);
+			sections.value = seed;
+			totalCount.value = sectionsTotal(seed);
+		} else {
+			const seed = search(type as EntityType, q, filters.value, sort.value);
+			results.value = seed;
+			totalCount.value = seed.length;
+		}
+		usingSeed.value = true;
+		loading.value = true;
+
+		// 2. Live query (debounced) — replaces the seed only on real data.
+		let cancelled = false;
+		const timer = setTimeout(async () => {
+			try {
+				const data = await SearchService.query({
+					query: q,
+					type,
+					sort: sort.value,
+					filters: filters.value,
+				});
+				if (cancelled) return;
+
+				if (data.mode === 'global') {
+					const live: SearchSections = {
+						recommended: data.recommended,
+						service: data.sections.service,
+						person: data.sections.person,
+						// The ranking engine has no product bucket — keep the seeded products.
+						product: sections.value.product,
+						project: data.sections.project,
+					};
+					if (data.recommended.length + sectionsTotal(live) > 0) {
+						sections.value = live;
+						totalCount.value = sectionsTotal(live);
+						usingSeed.value = false;
+					}
+				} else if (data.items.length > 0) {
+					results.value = data.items;
+					totalCount.value = data.count;
+					usingSeed.value = false;
+				}
+			} catch (_) {
+				// Live backend unavailable — the seed paint from step 1 stands.
+			} finally {
+				if (!cancelled) loading.value = false;
+			}
+		}, 280);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timer);
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [exploreQuery.value, entityType.value, sort.value, JSON.stringify(filters.value)]);
+}
+
+// #endregion

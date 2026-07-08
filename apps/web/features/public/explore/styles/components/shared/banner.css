@@ -40,7 +40,9 @@
 	z-index: 1;
 }
 
-.explore-banner--split .explore-banner__content { max-width: 20rem; }
+.explore-banner--split .explore-banner__content {
+	max-width: 20rem;
+}
 
 .explore-banner__eyebrow {
 	display: inline-flex;
@@ -68,7 +70,9 @@
 	text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
 }
 
-.explore-banner--split .explore-banner__title { font-size: 1.3rem; }
+.explore-banner--split .explore-banner__title {
+	font-size: 1.3rem;
+}
 
 .explore-banner__text {
 	margin: 0;
@@ -77,9 +81,13 @@
 	color: rgba(255, 255, 255, 0.85);
 }
 
-.explore-banner--split .explore-banner__text { font-size: 0.85rem; }
+.explore-banner--split .explore-banner__text {
+	font-size: 0.85rem;
+}
 
-.explore-banner__cta { margin-top: 0.4rem; }
+.explore-banner__cta {
+	margin-top: 0.4rem;
+}
 
 /* Bright white pill CTA regardless of the ui secondary theming. */
 .explore-banner__cta .btn {
@@ -89,7 +97,9 @@
 	font-weight: 700;
 }
 
-.explore-banner__cta .btn:hover { background: rgba(255, 255, 255, 0.88); }
+.explore-banner__cta .btn:hover {
+	background: rgba(255, 255, 255, 0.88);
+}
 
 .explore-banner__asset {
 	position: relative;
@@ -101,7 +111,10 @@
 	z-index: 1;
 }
 
-.explore-banner--split .explore-banner__asset { width: 120px; height: 120px; }
+.explore-banner--split .explore-banner__asset {
+	width: 120px;
+	height: 120px;
+}
 
 .explore-banner__glyph {
 	font-size: 5.5rem;
@@ -128,6 +141,12 @@
 }
 
 @media (max-width: 720px) {
-	.explore-banner { flex-direction: column; align-items: flex-start; text-align: left; }
-	.explore-banner__asset { display: none; }
+	.explore-banner {
+		flex-direction: column;
+		align-items: flex-start;
+		text-align: left;
+	}
+	.explore-banner__asset {
+		display: none;
+	}
 }

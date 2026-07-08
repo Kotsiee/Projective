@@ -12,7 +12,10 @@
 	align-items: stretch;
 }
 
-.home-carousel .data-carousel__item > * { width: 100%; min-height: 356px; }
+.home-carousel .data-carousel__item > * {
+	width: 100%;
+	min-height: 356px;
+}
 
 .home-carousel .data-carousel__nav-button {
 	background: var(--card);
@@ -21,7 +24,9 @@
 	box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.6);
 }
 
-.home-carousel .data-carousel__nav-button:hover { color: var(--primary); }
+.home-carousel .data-carousel__nav-button:hover {
+	color: var(--primary);
+}
 
 /* Side-by-side half-width banner pair. */
 .home-banner-pair {
@@ -32,9 +37,13 @@
 }
 
 @media (max-width: 860px) {
-	.home-banner-pair { grid-template-columns: 1fr; }
+	.home-banner-pair {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Keep the data-display grids from clipping card shadows. */
 .home-sections .data-grid__card,
-.home-sections .data-masonry__item { overflow: visible; }
+.home-sections .data-masonry__item {
+	overflow: visible;
+}

@@ -1,0 +1,127 @@
+/* Client reviews — a masonry-ish grid of testimonial cards. */
+
+.home-reviews {
+	position: relative;
+	background: var(--bg);
+}
+
+.home-reviews__grid {
+	columns: 3;
+	column-gap: 1.25rem;
+}
+
+.home-review {
+	break-inside: avoid;
+	margin-bottom: 1.25rem;
+	padding: 1.6rem;
+	border-radius: var(--border-radius__large, 12px);
+	border: 1px solid var(--hairline);
+	background: var(--card);
+	transition:
+		transform var(--medium) var(--ease-out),
+		box-shadow var(--medium) var(--ease-out),
+		border-color var(--medium) ease;
+}
+
+.home-review:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--shadow-lg);
+	border-color: var(--accent, var(--primary));
+}
+
+.home-review--featured {
+	background:
+		var(--grad-premium-soft),
+		var(--card);
+	border-color: var(--accent, var(--primary));
+}
+
+.home-review__stars {
+	display: inline-flex;
+	gap: 0.12rem;
+	color: var(--amber);
+	margin-bottom: 0.9rem;
+}
+
+.home-review__quote {
+	margin: 0 0 1.25rem;
+	font-size: 0.98rem;
+	line-height: 1.62;
+	color: var(--text-secondary);
+}
+
+.home-review--featured .home-review__quote {
+	font-size: 1.1rem;
+	color: var(--text-main);
+}
+
+.home-review__author {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.home-review__avatar {
+	width: 2.5rem;
+	height: 2.5rem;
+	flex-shrink: 0;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-weight: 700;
+	font-size: 0.85rem;
+	background: var(--accent-fill, var(--grad-premium-diag));
+}
+
+.home-review__name {
+	display: block;
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.home-review__role {
+	display: block;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+/* Accent tints per review (set inline via --accent / --accent-fill). */
+.home-review.accent-mint {
+	--accent: var(--mint);
+	--accent-fill: linear-gradient(135deg, #0b3b34, #10b981);
+}
+.home-review.accent-violet {
+	--accent: var(--violet);
+	--accent-fill: linear-gradient(135deg, #2a1b52, #7c3aed);
+}
+.home-review.accent-ocean {
+	--accent: hsl(199, 84%, 55%);
+	--accent-fill: linear-gradient(135deg, #082f49, #0284c7);
+}
+.home-review.accent-amber {
+	--accent: var(--amber);
+	--accent-fill: linear-gradient(135deg, #43290a, #f59e0b);
+}
+.home-review.accent-ember {
+	--accent: hsl(340, 82%, 60%);
+	--accent-fill: linear-gradient(135deg, #3b0764, #db2777);
+}
+.home-review.accent-forest {
+	--accent: hsl(142, 60%, 45%);
+	--accent-fill: linear-gradient(135deg, #052e16, #16a34a);
+}
+
+@media (max-width: 960px) {
+	.home-reviews__grid {
+		columns: 2;
+	}
+}
+
+@media (max-width: 620px) {
+	.home-reviews__grid {
+		columns: 1;
+	}
+}

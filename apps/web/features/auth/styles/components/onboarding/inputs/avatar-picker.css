@@ -1,0 +1,88 @@
+/* #region Avatar picker — circular profile-picture uploader (onboarding step 2) */
+.avatar-picker {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 0.5rem;
+}
+
+.avatar-picker__circle {
+	position: relative;
+	width: 96px;
+	height: 96px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.06);
+	padding: 0;
+	cursor: pointer;
+	overflow: hidden;
+	display: grid;
+	place-items: center;
+	color: var(--text-muted);
+	transition: border-color var(--medium) ease, transform var(--medium) ease;
+}
+
+.avatar-picker__circle:hover {
+	border-color: var(--text-main);
+	transform: translateY(-1px);
+}
+
+.avatar-picker__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.avatar-picker__initials {
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+/* Hover / keyboard-focus overlay */
+.avatar-picker__overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	opacity: 0;
+	transition: opacity var(--medium) ease;
+}
+
+.avatar-picker__circle:hover .avatar-picker__overlay,
+.avatar-picker__circle:focus-visible .avatar-picker__overlay {
+	opacity: 1;
+}
+
+.avatar-picker__overlay-text {
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+}
+
+.avatar-picker__input {
+	display: none;
+}
+
+.avatar-picker__spinner {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 3px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #fff;
+	animation: avatarSpin 0.8s linear infinite;
+}
+
+@keyframes avatarSpin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+/* #endregion */

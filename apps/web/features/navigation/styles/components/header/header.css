@@ -1,125 +1,125 @@
 .navigation__header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    min-height: var(--header-height);
-    background-color: var(--header);
-    z-index: 60;
-    display: flex;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	min-height: var(--header-height);
+	background-color: var(--header);
+	z-index: 60;
+	display: flex;
 }
 
 .navigation__logo {
-    width: 4rem;
-    min-height: var(--header-height);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--medium);
+	width: 4rem;
+	min-height: var(--header-height);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform var(--medium);
 
-    &:hover {
-        transform: scale(1.1);
-    }
+	&:hover {
+		transform: scale(1.1);
+	}
 }
 
 .navigation__content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	padding: 0 1rem;
 }
 
 .navigation__search {
-    width: 300px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--mid);
-    border-radius: 50px;
-    outline: 1px solid var(--border-color);
-    transition: all var(--medium);
+	width: 300px;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background-color: var(--mid);
+	border-radius: 50px;
+	outline: 1px solid var(--border-color);
+	transition: all var(--medium);
 
-    .navigation__search__btn {
-        color: var(--text-color);
-        opacity: 0.7;
-        transition: opacity var(--medium);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        left: 0.15rem;
-        width: 2.15rem;
-        height: 2.15rem;
+	.navigation__search__btn {
+		color: var(--text-color);
+		opacity: 0.7;
+		transition: opacity var(--medium);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		left: 0.15rem;
+		width: 2.15rem;
+		height: 2.15rem;
 
-        &:hover {
-            opacity: 1;
-        }
-    }
+		&:hover {
+			opacity: 1;
+		}
+	}
 
-    .navigation__search__input {
-        height: 2.15rem;
-        width: 100%;
-    }
+	.navigation__search__input {
+		height: 2.15rem;
+		width: 100%;
+	}
 
-    &:has(.navigation__search__input:focus) {
-        outline: 1px solid var(--primary);
-        width: 500px;
-    }
+	&:has(.navigation__search__input:focus) {
+		outline: 1px solid var(--primary);
+		width: 500px;
+	}
 }
 
 .navigation__actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: nowrap;
-    width: fit-content;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: nowrap;
+	width: fit-content;
 }
 
 .navigation__user {
-    /* Strip the default button padding so we can control it via the label */
-    padding: 0 !important;
+	/* Strip the default button padding so we can control it via the label */
+	padding: 0 !important;
 
-    /* Optional: adds a subtle border to make the pill pop */
-    border: 1px solid var(--border-color);
+	/* Optional: adds a subtle border to make the pill pop */
+	border: 1px solid var(--border-color);
 }
 
 /* Ensure the flex wrappers take up the full button height */
 .navigation__user .btn__content {
-    height: 100%;
+	height: 100%;
 }
 
 .navigation__user .btn__label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-    height: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.5rem;
+	height: 100%;
 
-    /* Asymmetric padding: 
-       0.25rem top/bottom, 0.75rem left (menu), 0.25rem right (avatar) */
-    padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+	/* Asymmetric padding: 
+	   0.25rem top/bottom, 0.75rem left (menu), 0.25rem right (avatar) */
+	padding: 0.25rem 0.25rem 0.25rem 0.75rem;
 }
 
 .navigation__user-icon {
-    /* Ensures the icon inherits the correct text color */
-    color: var(--text-main);
+	/* Ensures the icon inherits the correct text color */
+	color: var(--text-main);
 }
 
 .navigation__user-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    overflow: hidden;
-    /* Clips the image perfectly to the circle */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	overflow: hidden;
+	/* Clips the image perfectly to the circle */
 }
 
 .navigation__user-avatar img {
-    /* 2rem (32px) fits perfectly inside the 2.5rem (40px) button */
-    height: 2rem;
-    width: 2rem;
+	/* 2rem (32px) fits perfectly inside the 2.5rem (40px) button */
+	height: 2rem;
+	width: 2rem;
 
-    /* CRUCIAL: Prevents the image from squishing if it isn't perfectly square */
-    object-fit: cover;
+	/* CRUCIAL: Prevents the image from squishing if it isn't perfectly square */
+	object-fit: cover;
 }

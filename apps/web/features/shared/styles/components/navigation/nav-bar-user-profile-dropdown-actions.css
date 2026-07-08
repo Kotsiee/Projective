@@ -1,31 +1,31 @@
 .nav-bar-user__profile__dropdown__actions {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
-  border-top: 1px solid var(--border-color);
-  /* Separator from top content */
-  gap: 2px;
+	display: flex;
+	flex-direction: column;
+	padding: 0.5rem;
+	border-top: 1px solid var(--border-color);
+	/* Separator from top content */
+	gap: 2px;
 
-  a {
-    display: flex;
-    align-items: center;
-    padding: 0.6rem 0.75rem;
-    border-radius: var(--border-radius__small);
-    cursor: pointer;
-    color: var(--text-main);
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: background-color var(--fast);
+	a {
+		display: flex;
+		align-items: center;
+		padding: 0.6rem 0.75rem;
+		border-radius: var(--border-radius__small);
+		cursor: pointer;
+		color: var(--text-main);
+		font-size: 0.9rem;
+		text-decoration: none;
+		transition: background-color var(--fast);
 
-    &:hover {
-      background-color: var(--field-bg-hover);
-      color: var(--text-main);
-    }
+		&:hover {
+			background-color: var(--field-bg-hover);
+			color: var(--text-main);
+		}
 
-    /* Optional: Specific style for Log Out if you add a class later */
-    &.action--logout:hover {
-      background-color: var(--danger-surface);
-      color: var(--danger);
-    }
-  }
+		/* Optional: Specific style for Log Out if you add a class later */
+		&.action--logout:hover {
+			background-color: var(--danger-surface);
+			color: var(--danger);
+		}
+	}
 }

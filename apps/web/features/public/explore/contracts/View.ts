@@ -1,7 +1,7 @@
 import { Signal } from '@preact/signals';
-import { ProjectResponse } from './ProjectResponse.ts';
+import { FullProjectResponse } from '@projective/types';
 
-export type ExploreResponses = ProjectResponse;
+export type ExploreResponses = FullProjectResponse;
 export type ViewMode = 'grid' | 'list' | 'masonry';
 export type SortType = 'recommended' | 'price' | 'rating' | 'recent';
 export type SearchType =

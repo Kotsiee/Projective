@@ -2,7 +2,13 @@ import '../../styles/components/search/filters.css';
 import { useSignal } from '@preact/signals';
 import { IconStar, IconStarFilled } from '@tabler/icons-preact';
 import { SelectField, SelectOption, SliderField } from '@projective/fields';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from '@projective/ui';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+	Button,
+} from '@projective/ui';
 import type { Availability } from '@projective/types';
 import { useExploreContext } from '../../contexts/ExploreContext.tsx';
 import { DEFAULT_FILTERS } from '../../contracts/Explore.ts';
@@ -117,7 +123,9 @@ export default function ExploreSearchFilters() {
 									key={opt.value}
 									role='radio'
 									aria-checked={availability.value === opt.value}
-									class={`explore-filters__seg ${availability.value === opt.value ? 'is-active' : ''}`}
+									class={`explore-filters__seg ${
+										availability.value === opt.value ? 'is-active' : ''
+									}`}
 									onClick={() => {
 										availability.value = opt.value;
 										patch({ availability: opt.value === 'any' ? null : opt.value });

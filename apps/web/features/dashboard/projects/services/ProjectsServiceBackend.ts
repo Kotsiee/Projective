@@ -183,6 +183,7 @@ export class ProjectsBackendService {
 
 			const rpcPayload = {
 				id: projectId,
+				client_business_id: rawData.client_business_id || null,
 				title: rawData.title,
 				description: rawData.description,
 				description_text: projectDescriptionText,

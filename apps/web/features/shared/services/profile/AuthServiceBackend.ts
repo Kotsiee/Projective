@@ -30,6 +30,41 @@ function dedupeOrgRefs(refs: Array<OrgRef | null | undefined>): OrgRef[] {
 	}
 	return [...seen.values()];
 }
+
+/**
+ * Resolve a users_public.avatar_file_id into a public storage URL.
+ *
+ * A finalized file lives at `bucket_id`/`storage_path` with `status = 'clean'`
+ * (see the scan-file edge function, which promotes the quarantined upload into
+ * its target bucket). Avatars target the public `public_assets` bucket, so
+ * getPublicUrl yields a directly-usable URL. Returns null when there is no
+ * avatar or the upload has not finished scanning yet (so callers never render a
+ * URL to an object that isn't in place).
+ *
+ * @param {SupabaseClient} sb - Authenticated client (files.items SELECT is authed-only).
+ * @param {string | null | undefined} fileId - The avatar_file_id, if any.
+ * @returns {Promise<string | null>} The public URL, or null.
+ */
+async function resolveAvatarUrl(
+	sb: SupabaseClient,
+	fileId: string | null | undefined,
+): Promise<string | null> {
+	if (!fileId) return null;
+
+	const { data: file } = await sb
+		.schema('files')
+		.from('items')
+		.select('bucket_id, storage_path, status')
+		.eq('id', fileId)
+		.maybeSingle();
+
+	if (!file || file.status !== 'clean' || !file.bucket_id || !file.storage_path) {
+		return null;
+	}
+
+	const { data } = sb.storage.from(file.bucket_id).getPublicUrl(file.storage_path);
+	return data?.publicUrl ?? null;
+}
 // #endregion
 
 export class AuthBackendService {
@@ -97,6 +132,9 @@ export class AuthBackendService {
 		]);
 		const hasFreelancer = !!freelancerRes.data;
 
+		// Resolve the avatar file id into a public storage URL (null if unset/unscanned).
+		const avatarUrl = await resolveAvatarUrl(sb, publicProfile?.avatar_file_id);
+
 		// 5. Construct Payload
 		const payload = {
 			id: userRes.user.id,
@@ -105,7 +143,7 @@ export class AuthBackendService {
 					publicProfile.username
 				: null,
 			username: publicProfile?.username ?? null,
-			avatarUrl: publicProfile?.avatar_file_id ?? null,
+			avatarUrl,
 
 			activeProfileType: (sessionContext?.active_profile_type as
 				| 'freelancer'

@@ -30,6 +30,27 @@ export type UserRole = 'guest' | 'client' | 'freelancer';
 export type EntityFilter = EntityType | 'all';
 
 /**
+ * Federated result buckets consumed by the multi-entity view. `recommended` drives the top carousel;
+ * the remaining keys map onto the fixed `SEARCH_SECTIONS`. Populated from the live ranking endpoint
+ * (with a seed fallback), so the UI no longer reads the static `exploreSeed` at render time.
+ */
+export interface SearchSections {
+	recommended: ExploreEntity[];
+	service: ExploreEntity[];
+	person: ExploreEntity[];
+	product: ExploreEntity[];
+	project: ExploreEntity[];
+}
+
+export const EMPTY_SECTIONS: SearchSections = {
+	recommended: [],
+	service: [],
+	person: [],
+	product: [],
+	project: [],
+};
+
+/**
  * @interface ExploreState
  * @description Central reactive state contract for the Explore & Search discovery engine.
  */
@@ -48,6 +69,17 @@ export interface ExploreState {
 	isFiltersOpen: Signal<boolean>;
 	/** Session role — drives the contextual hero CTA. */
 	userRole: Signal<UserRole>;
+
+	/** Live single-entity results (from `/api/v1/public/search`, seed fallback). */
+	results: Signal<ExploreEntity[]>;
+	/** Live federated section buckets. */
+	sections: Signal<SearchSections>;
+	/** True while a live query is in flight. */
+	loading: Signal<boolean>;
+	/** Total result count for the active view (drives the header summary). */
+	totalCount: Signal<number>;
+	/** True when results are served from the seed fallback rather than the live backend. */
+	usingSeed: Signal<boolean>;
 }
 
 /** Convenience: default filter parameter set. */

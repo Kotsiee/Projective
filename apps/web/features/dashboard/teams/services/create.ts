@@ -94,20 +94,17 @@ export async function createTeam(
 				throw scanError;
 			}
 
-			const { data: publicUrlData } = supabase
-				.storage
-				.from(targetBucket)
-				.getPublicUrl(targetPath);
-
-			return publicUrlData.publicUrl;
+			// The files.items id is what persists on the team (avatar_file_id /
+			// banner_file_id); the public URL is derived downstream from that reference.
+			return fileId;
 		};
 
-		let avatarUrl = data.avatar_url;
-		let bannerUrl = data.banner_url;
+		let avatarFileId: string | undefined;
+		let bannerFileId: string | undefined;
 
 		if (files.avatar) {
 			try {
-				avatarUrl = await processFile(files.avatar, 'team_avatar', files.avatarBlurhash);
+				avatarFileId = await processFile(files.avatar, 'team_avatar', files.avatarBlurhash);
 			} catch (e) {
 				console.error('Avatar upload failed:', e);
 
@@ -117,7 +114,7 @@ export async function createTeam(
 
 		if (files.banner) {
 			try {
-				bannerUrl = await processFile(files.banner, 'team_banner', files.bannerBlurhash);
+				bannerFileId = await processFile(files.banner, 'team_banner', files.bannerBlurhash);
 			} catch (e) {
 				console.error('Banner upload failed:', e);
 				return fail('server_error', 'Failed to upload banner', 500);
@@ -131,8 +128,8 @@ export async function createTeam(
 					...data,
 					id: teamId,
 					owner_id: user.id,
-					avatar_url: avatarUrl,
-					banner_url: bannerUrl,
+					avatar_file_id: avatarFileId ?? null,
+					banner_file_id: bannerFileId ?? null,
 				},
 			});
 

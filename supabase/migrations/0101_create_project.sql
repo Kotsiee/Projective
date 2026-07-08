@@ -7,9 +7,9 @@ AS $$
 DECLARE
     v_project_id uuid;
     v_owner_id uuid;
+    v_business_id uuid;
     v_stage jsonb;
     v_attachment_id text;
-    v_old_trigger_setting text;
 BEGIN
     -- 1. Identity Verification
     v_owner_id := auth.uid();
@@ -19,15 +19,27 @@ BEGIN
 
     v_project_id := (payload->>'id')::uuid;
 
-    -- 2. Suppress legacy schema trigger interference within this transaction execution bounds
-    -- This prevents old scripts referencing non-existent properties (like NEW.team_id) from fracturing execution
-    SHOW session_replication_role INTO v_old_trigger_setting;
-    SET LOCAL session_replication_role = 'replica';
+    -- Resolve the acting organisation context. A project may be owned personally
+    -- (client_business_id NULL) or by a business the caller is an active member of.
+    v_business_id := NULLIF(payload->>'client_business_id', '')::uuid;
+    IF v_business_id IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM org.business_members bm
+            WHERE bm.business_id = v_business_id
+              AND bm.user_id = v_owner_id
+              AND bm.status = 'active'
+        ) THEN
+            RAISE EXCEPTION 'You are not an active member of this business' USING ERRCODE = '42501';
+        END IF;
+    END IF;
 
-    -- 3. Insert into core projects relation
+    -- 2. Insert into core projects relation. The AFTER-INSERT triggers on
+    -- projects.projects (search sync + entity project counts) are correct and must
+    -- run here; they are intentionally NOT suppressed.
     INSERT INTO projects.projects (
         id,
         owner_user_id,
+        client_business_id,
         title,
         description,
         description_text,
@@ -46,6 +58,7 @@ BEGIN
     ) VALUES (
         v_project_id,
         v_owner_id,
+        v_business_id,
         payload->>'title',
         COALESCE(payload->'description', '{}'::jsonb),
         COALESCE(payload->>'description_text', ''),
@@ -63,11 +76,16 @@ BEGIN
         COALESCE(payload->'screening_questions', '[]'::jsonb)
     );
 
-    -- 4. Insert nested stages
+    -- 3. Insert nested stages. Persist the per-stage IP override (AC4) and the
+    -- timeline-sequencing fields (AC5) so the CREATE-framework builder round-trips.
+    -- Stage rows are inserted first with their (optional) client-supplied ids, then a
+    -- second pass wires start_dependency_stage_id so intra-batch references resolve
+    -- regardless of stage order.
     IF payload ? 'stages' AND jsonb_typeof(payload->'stages') = 'array' THEN
         FOR v_stage IN SELECT * FROM jsonb_array_elements(payload->'stages')
         LOOP
             INSERT INTO projects.project_stages (
+                id,
                 project_id,
                 name,
                 description,
@@ -75,21 +93,70 @@ BEGIN
                 sort_order,
                 file_upload_required,
                 default_tasks,
-                skills
+                skills,
+                start_trigger_type,
+                fixed_start_date,
+                start_dependency_lag_days,
+                hire_trigger_active,
+                file_revisions_allowed,
+                file_duration_mode,
+                file_duration_days,
+                file_due_date,
+                session_duration_minutes,
+                session_count,
+                session_preferred_days,
+                session_end_date,
+                ip_ownership_override,
+                ip_mode
             ) VALUES (
+                COALESCE(NULLIF(v_stage->>'id', '')::uuid, gen_random_uuid()),
                 v_project_id,
-                v_stage->>'name',
+                COALESCE(v_stage->>'name', v_stage->>'title'),
                 COALESCE(v_stage->'description', '{}'::jsonb),
                 COALESCE(v_stage->>'description_text', ''),
                 COALESCE((v_stage->>'sort_order')::integer, 0),
                 COALESCE((v_stage->>'file_upload_required')::boolean, false),
                 COALESCE(v_stage->'default_tasks', '[]'::jsonb),
-                COALESCE(ARRAY(SELECT jsonb_array_elements_text(v_stage->'skills')), '{}'::text[])
+                COALESCE(ARRAY(SELECT jsonb_array_elements_text(v_stage->'skills')), '{}'::text[]),
+                COALESCE((v_stage->>'start_trigger_type')::start_trigger_type, 'on_project_start'::start_trigger_type),
+                (v_stage->>'fixed_start_date')::timestamptz,
+                COALESCE((v_stage->>'start_dependency_lag_days')::integer, 0),
+                COALESCE((v_stage->>'hire_trigger_active')::boolean, true),
+                COALESCE((v_stage->>'file_revisions_allowed')::integer, 0),
+                v_stage->>'file_duration_mode',
+                (v_stage->>'file_duration_days')::integer,
+                (v_stage->>'file_due_date')::timestamptz,
+                (v_stage->>'session_duration_minutes')::integer,
+                COALESCE((v_stage->>'session_count')::integer, 1),
+                CASE
+                    WHEN v_stage ? 'session_preferred_days'
+                    THEN ARRAY(SELECT jsonb_array_elements_text(v_stage->'session_preferred_days'))
+                    ELSE NULL
+                END,
+                (v_stage->>'session_end_date')::timestamptz,
+                NULLIF(v_stage->>'ip_ownership_override', '')::ip_option_mode,
+                COALESCE(
+                    NULLIF(v_stage->>'ip_mode', '')::ip_option_mode,
+                    NULLIF(v_stage->>'ip_ownership_override', '')::ip_option_mode,
+                    'exclusive_transfer'::ip_option_mode
+                )
             );
+        END LOOP;
+
+        -- Second pass: resolve sequential dependencies now that every stage row exists.
+        FOR v_stage IN SELECT * FROM jsonb_array_elements(payload->'stages')
+        LOOP
+            IF NULLIF(v_stage->>'id', '') IS NOT NULL
+               AND NULLIF(v_stage->>'start_dependency_stage_id', '') IS NOT NULL THEN
+                UPDATE projects.project_stages
+                SET start_dependency_stage_id = (v_stage->>'start_dependency_stage_id')::uuid
+                WHERE id = (v_stage->>'id')::uuid
+                  AND project_id = v_project_id;
+            END IF;
         END LOOP;
     END IF;
 
-    -- 5. Insert Global Attachments
+    -- 4. Insert Global Attachments
     IF payload ? 'global_attachments' AND jsonb_typeof(payload->'global_attachments') = 'array' THEN
         FOR v_attachment_id IN SELECT * FROM jsonb_array_elements_text(payload->'global_attachments')
         LOOP
@@ -103,13 +170,6 @@ BEGIN
         END LOOP;
     END IF;
 
-    -- 6. Restore standard session trigger configurations
-    EXECUTE 'SET LOCAL session_replication_role = ' || quote_literal(v_old_trigger_setting);
-
     RETURN v_project_id;
-EXCEPTION WHEN OTHERS THEN
-    -- Safety anchor to preserve system settings configuration integrity in case of structural fault
-    EXECUTE 'SET LOCAL session_replication_role = ' || quote_literal(v_old_trigger_setting);
-    RAISE;
 END;
 $$;

@@ -17,15 +17,15 @@ The authoritative product specification lives in
 
 ## Tech Stack
 
-| Layer | Choice | Why |
-| :--- | :--- | :--- |
-| **Runtime** | Deno 2.x | Secure-by-default, native TypeScript, zero-config workspaces. |
-| **Framework** | Fresh 2.x (Vite) | Islands Architecture — zero-JS by default, selective hydration for dashboards. |
-| **Language** | TypeScript (strict) | Non-negotiable for workload-intensity math and financial-ledger integrity. |
-| **Database** | Supabase / PostgreSQL | Relational integrity for escrow/wallets + built-in Row-Level Security & Realtime. |
-| **Search** | Postgres + pgvector | Weighted ranking engine fusing vector, full-text, and cross-schema signals in one round trip. |
-| **Architecture** | Modular Monolith | Deno Workspaces: physical integration, logical isolation, shared types. |
-| **Styling** | Pure CSS + BEM | Native nesting/variables, no CSS-in-JS build overhead. |
+| Layer            | Choice                | Why                                                                                           |
+| :--------------- | :-------------------- | :-------------------------------------------------------------------------------------------- |
+| **Runtime**      | Deno 2.x              | Secure-by-default, native TypeScript, zero-config workspaces.                                 |
+| **Framework**    | Fresh 2.x (Vite)      | Islands Architecture — zero-JS by default, selective hydration for dashboards.                |
+| **Language**     | TypeScript (strict)   | Non-negotiable for workload-intensity math and financial-ledger integrity.                    |
+| **Database**     | Supabase / PostgreSQL | Relational integrity for escrow/wallets + built-in Row-Level Security & Realtime.             |
+| **Search**       | Postgres + pgvector   | Weighted ranking engine fusing vector, full-text, and cross-schema signals in one round trip. |
+| **Architecture** | Modular Monolith      | Deno Workspaces: physical integration, logical isolation, shared types.                       |
+| **Styling**      | Pure CSS + BEM        | Native nesting/variables, no CSS-in-JS build overhead.                                        |
 
 The financial core (escrow hold/release, team payout splits, platform fees, fair-exit logic) is
 implemented as `SECURITY DEFINER` functions in Postgres — see
@@ -59,8 +59,8 @@ Projective/
 ```
 
 Feature folders in `apps/web/features/` use a consistent shape — `components/`, `contexts/`,
-`contracts/`, `islands/`, `routes/`, `services/`, `styles/` — so routes stay thin ("thin
-controllers → fat services").
+`contracts/`, `islands/`, `routes/`, `services/`, `styles/` — so routes stay thin ("thin controllers
+→ fat services").
 
 ---
 
@@ -88,15 +88,15 @@ deno task dev
 
 ### Common Tasks
 
-| Command | What it does |
-| :--- | :--- |
-| `deno task dev` | Start the Vite dev server (`:3000`, HMR, islands). |
-| `deno task build` | Production build. |
-| `deno task start` | Serve the built app. |
-| `deno task check` | Format check + lint + typecheck + name validation (run before committing). |
-| `deno task test` | Run the test suite with coverage. |
-| `deno task db:reset` | Reset the local database. |
-| `deno task db:smoke` | Run the DB smoke-test query. |
+| Command              | What it does                                                               |
+| :------------------- | :------------------------------------------------------------------------- |
+| `deno task dev`      | Start the Vite dev server (`:3000`, HMR, islands).                         |
+| `deno task build`    | Production build.                                                          |
+| `deno task start`    | Serve the built app.                                                       |
+| `deno task check`    | Format check + lint + typecheck + name validation (run before committing). |
+| `deno task test`     | Run the test suite with coverage.                                          |
+| `deno task db:reset` | Reset the local database.                                                  |
+| `deno task db:smoke` | Run the DB smoke-test query.                                               |
 
 > **Islands note:** Vite discovers islands at startup — **restart the dev server after adding a new
 > `*.island.tsx` file**. Islands never import the Supabase client directly; all data access goes

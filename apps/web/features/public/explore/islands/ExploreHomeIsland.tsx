@@ -1,4 +1,5 @@
 import '../styles/islands/home.css';
+import '../styles/premium.css';
 import ExploreHomeHero from '../components/home/hero.tsx';
 import ExploreHomeCategories from '../components/home/categories.tsx';
 import ExploreHomeCinematic from '../components/home/cinematic.tsx';

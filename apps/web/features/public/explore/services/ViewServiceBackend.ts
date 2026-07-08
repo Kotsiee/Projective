@@ -11,8 +11,12 @@ export interface Deps {
 	getClient?: () => Promise<SupabaseClient>;
 }
 
+/** Discriminated result so `if (!res.ok)` narrows `data`/`error` at the call site. */
+type ViewError = { status?: number; message: string; code?: string };
+type ViewResult = { ok: true; data: FullProjectResponse } | { ok: false; error: ViewError };
+
 export class ViewBackendService {
-	static async getView(entity: string, id: string, deps: Deps = {}) {
+	static async getView(entity: string, id: string, deps: Deps = {}): Promise<ViewResult> {
 		if (!deps.getClient) {
 			return { ok: false, error: { status: 500, message: 'Missing database client context' } };
 		}
@@ -26,7 +30,7 @@ export class ViewBackendService {
 		}
 	}
 
-	private static async getProjectView(id: string, deps: Deps) {
+	private static async getProjectView(id: string, deps: Deps): Promise<ViewResult> {
 		const client = await deps.getClient!();
 
 		// 1. Fetch Core Project (No thumbnail logic)
@@ -80,12 +84,9 @@ export class ViewBackendService {
 		}
 
 		const owner: BaseOwner = {
-			id: ownerRaw.id || project.owner_user_id,
-			type: ownerRaw.type,
-			name: ownerRaw.name || 'Unknown',
-			username_or_slug: ownerRaw.slug || ownerRaw.username || '',
-			avatar: ownerRaw.avatar_file_id ? (fileMap.get(ownerRaw.avatar_file_id) || null) : null,
-			banner: ownerRaw.banner_file_id ? (fileMap.get(ownerRaw.banner_file_id) || null) : null,
+			profile_id: ownerRaw.id || project.owner_user_id,
+			display_name: ownerRaw.name || 'Unknown',
+			avatar_image: ownerRaw.avatar_file_id ? (fileMap.get(ownerRaw.avatar_file_id) || null) : null,
 		};
 
 		// 4. Fetch Stages & Roles
@@ -111,6 +112,8 @@ export class ViewBackendService {
 			default_tasks: s.default_tasks || [],
 			start_date: s.fixed_start_date || null,
 			end_date: s.file_due_date || null,
+			sort_order: s.sort_order ?? 0,
+			unit_price_cents: s.unit_price_cents ?? null,
 		}));
 
 		const formattedRoles: ProjectRoleResponse[] = rolesList.map((r: any) => {
@@ -141,12 +144,14 @@ export class ViewBackendService {
 			title: project.title,
 			description: project.description || null,
 			format: project.format,
+			structure_variation: project.structure_variation ?? 'standard',
 			status: project.status,
 			is_active: project.status !== 'draft' && project.visibility === 'public',
 			industry_category_id: project.industry_category_id || '',
 			target_project_start_date: project.target_project_start_date,
 			owner,
 			nda_required: project.nda_required,
+			allow_deadline_bonuses: project.allow_deadline_bonuses ?? false,
 			ip_ownership_mode: project.ip_ownership_mode,
 			languages: project.language_requirement || [],
 			locations: project.location_restriction || [],

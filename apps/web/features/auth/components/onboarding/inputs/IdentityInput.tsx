@@ -1,12 +1,13 @@
 import { useWizardContext } from '@projective/ui';
 import { DateField, TextField } from '@projective/fields';
 import { useOnboardingContext } from '../../../contexts/OnboardingContext.tsx';
+import { AvatarPicker } from './AvatarPicker.tsx';
 import { Signal } from '@preact/signals';
 import { evaluateAge, validateUsername } from 'packages/backend/src/core/validation/email.ts';
 
 export function IdentityInput() {
 	const { next, back } = useWizardContext();
-	const { firstName, lastName, username, dob, isAdult } = useOnboardingContext();
+	const { firstName, lastName, username, dob, isAdult, oauthOnboarding } = useOnboardingContext();
 
 	const usernameStatus = validateUsername(username.value || '');
 	const ageStatus = evaluateAge(dob.value);
@@ -27,6 +28,8 @@ export function IdentityInput() {
 
 	return (
 		<div class='auth-form'>
+			<AvatarPicker />
+
 			<div class='auth-namerow'>
 				<TextField
 					id='join-firstname'
@@ -81,7 +84,10 @@ export function IdentityInput() {
 			)}
 
 			<div class='auth-btnrow'>
-				<button type='button' class='auth-btn-secondary' onClick={back}>Back</button>
+				{/* OAuth sign-ups skip the email/password step, so there is nothing to go back to. */}
+				{!oauthOnboarding.value && (
+					<button type='button' class='auth-btn-secondary' onClick={back}>Back</button>
+				)}
 				<button
 					type='button'
 					class='auth-cta'

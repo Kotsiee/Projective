@@ -1,0 +1,101 @@
+/* Showcase blocks — top services (scroll rail), active projects, talent/teams grids.
+   Cards come from the shared EntityCard; these styles own only the layout + rail chrome. */
+
+.home-showcase {
+	position: relative;
+}
+
+.home-showcase--alt {
+	background: var(--surface-premium-inv);
+	border-block: 1px solid var(--hairline);
+}
+
+/* Horizontal scroll rail (services). */
+.home-rail {
+	position: relative;
+}
+
+.home-rail__viewport {
+	display: flex;
+	gap: 1.25rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+	padding: 0.5rem 0.25rem 1.5rem;
+	margin: 0 -0.25rem;
+	scrollbar-width: none;
+}
+
+.home-rail__viewport::-webkit-scrollbar {
+	display: none;
+}
+
+.home-rail__item {
+	flex: 0 0 clamp(280px, 30vw, 340px);
+	scroll-snap-align: start;
+}
+
+.home-rail__nav {
+	display: inline-flex;
+	gap: 0.5rem;
+}
+
+.home-rail__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	border: 1px solid var(--hairline);
+	background: var(--glass-panel);
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition:
+		color var(--fast) ease,
+		border-color var(--fast) ease,
+		background var(--fast) ease,
+		transform var(--fast) var(--ease-out);
+}
+
+.home-rail__btn:hover:not(:disabled) {
+	color: var(--primary);
+	border-color: var(--primary);
+	transform: translateY(-1px);
+}
+
+.home-rail__btn:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* Grid layout (talent, projects). */
+.home-grid {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.home-grid--talent {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.home-grid--projects {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.home-grid__item {
+	min-width: 0;
+}
+
+@media (max-width: 960px) {
+	.home-grid--talent {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 720px) {
+	.home-grid--talent,
+	.home-grid--projects {
+		grid-template-columns: 1fr;
+	}
+}

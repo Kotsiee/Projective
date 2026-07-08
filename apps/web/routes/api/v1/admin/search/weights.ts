@@ -20,10 +20,13 @@ const PatchSchema = z.object({
 });
 
 function unauthorized(): Response {
-	return new Response(JSON.stringify({ error: { code: 'unauthorized', message: 'Sign in required' } }), {
-		status: 401,
-		headers: { 'Content-Type': 'application/json' },
-	});
+	return new Response(
+		JSON.stringify({ error: { code: 'unauthorized', message: 'Sign in required' } }),
+		{
+			status: 401,
+			headers: { 'Content-Type': 'application/json' },
+		},
+	);
 }
 
 export const handler = define.handlers({
@@ -53,12 +56,16 @@ export const handler = define.handlers({
 		try {
 			body = await ctx.req.json();
 		} catch {
-			return new Response(JSON.stringify({ error: { message: 'Invalid JSON body' } }), { status: 400 });
+			return new Response(JSON.stringify({ error: { message: 'Invalid JSON body' } }), {
+				status: 400,
+			});
 		}
 		const parsed = PatchSchema.safeParse(body);
 		if (!parsed.success) {
 			return new Response(
-				JSON.stringify({ error: { message: 'Invalid weight update', details: parsed.error.flatten() } }),
+				JSON.stringify({
+					error: { message: 'Invalid weight update', details: parsed.error.flatten() },
+				}),
 				{ status: 400, headers: { 'Content-Type': 'application/json' } },
 			);
 		}
@@ -67,7 +74,9 @@ export const handler = define.handlers({
 			// deno-lint-ignore no-explicit-any
 			Promise.resolve((ctx.state as any).supabaseClient ?? supabaseClient(ctx.req));
 
-		const res = await SearchEngineServiceBackend.setWeight(parsed.data.key, parsed.data.weight, { getClient });
+		const res = await SearchEngineServiceBackend.setWeight(parsed.data.key, parsed.data.weight, {
+			getClient,
+		});
 		if (!res.ok) {
 			return new Response(JSON.stringify({ error: res.error }), {
 				status: res.error.status,

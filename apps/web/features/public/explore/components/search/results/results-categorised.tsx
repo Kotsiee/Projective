@@ -5,7 +5,6 @@ import type { EntityType, ExploreEntity } from '@projective/types';
 import { useExploreContext } from '../../../contexts/ExploreContext.tsx';
 import ExploreCard, { ExploreCardVariant } from '../../shared/explore-card.tsx';
 import ExploreSearchInspector from './results-details.tsx';
-import { search } from '../../../data/exploreSeed.ts';
 
 function cardVariant(type: EntityType): ExploreCardVariant {
 	if (type === 'product') return 'product';
@@ -21,10 +20,11 @@ function cardVariant(type: EntityType): ExploreCardVariant {
  * inspector, compressing the results workspace to the left.
  */
 export default function ExploreSearchResultsCategorised() {
-	const { entityType, exploreQuery, filters, sort, selectedItem } = useExploreContext();
+	const { entityType, selectedItem, results } = useExploreContext();
 	const type = entityType.value as EntityType;
 
-	const items = search(type, exploreQuery.value, filters.value, sort.value);
+	// Live single-entity results (sorted + filtered server-side; seed fallback via useLiveSearch).
+	const items = results.value;
 	const variant = cardVariant(type);
 	const isMasonry = type === 'product';
 	const hasInspector = selectedItem.value !== null;

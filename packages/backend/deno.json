@@ -1,8 +1,8 @@
 {
-  "name": "@projective/backend",
-  "version": "0.0.0",
-  "exports": "./mod.ts",
-  "compilerOptions": {
-    "lib": ["deno.ns", "dom"]
-  }
+	"name": "@projective/backend",
+	"version": "0.0.0",
+	"exports": "./mod.ts",
+	"compilerOptions": {
+		"lib": ["deno.ns", "dom"]
+	}
 }

@@ -4,13 +4,15 @@
  * `DataDisplay` table (built for arbitrarily long remote datasets), this renders a real semantic
  * `<table>` with `table-layout: fixed` + an explicit `<colgroup>`, so column widths, truncation
  * and header↔body alignment are exact under high density. It ships sticky headers, dark-mode
- * zebra striping, `--hairline` micro-borders, clean horizontal scroll for mobile, and — the point
- * of the finance ledger — segmented row styling that isolates platform-fee lines (the 5% service
- * charge) from raw project payouts via `isFeeLine`.
+ * zebra striping, `--hairline` micro-borders, clean horizontal scroll for mobile, segmented row
+ * styling that isolates platform-fee lines (`isFeeLine`) — and, when `expandedContent` is passed,
+ * a per-row expand chevron that reveals a full-width detail panel beneath the row.
  */
 
 import '../../styles/components/ledger-table.css';
-import type { ComponentChildren } from 'preact';
+import { type ComponentChildren, Fragment } from 'preact';
+import { useState } from 'preact/hooks';
+import { IconChevronRight } from '@tabler/icons-preact';
 
 export interface LedgerColumn<T> {
 	id: string;
@@ -31,6 +33,12 @@ export interface LedgerTableProps<T> {
 	/** Marks the isolated platform-fee (5% service charge) rows for segmented styling. */
 	isFeeLine?: (row: T) => boolean;
 	onRowClick?: (row: T) => void;
+	/**
+	 * When provided, each row gets a leading expand chevron; clicking it toggles a full-width
+	 * detail panel rendered beneath the row. Return `null`/`false` for a row to make it
+	 * non-expandable (chevron hidden).
+	 */
+	expandedContent?: (row: T) => ComponentChildren;
 	/** Sticky header. Default true. */
 	stickyHeader?: boolean;
 	/** Zebra striping keyed on row index. Default true. */
@@ -55,6 +63,7 @@ export function LedgerTable<T>(props: LedgerTableProps<T>) {
 		rowKey,
 		isFeeLine,
 		onRowClick,
+		expandedContent,
 		stickyHeader = true,
 		striped = true,
 		dense = false,
@@ -63,6 +72,12 @@ export function LedgerTable<T>(props: LedgerTableProps<T>) {
 		emptyLabel = 'No transactions to show',
 		className,
 	} = props;
+
+	const expandable = typeof expandedContent === 'function';
+	const [open, setOpen] = useState<Record<string, boolean>>({});
+	const toggle = (key: string) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+
+	const totalCols = columns.length + (expandable ? 1 : 0);
 
 	return (
 		<div
@@ -86,6 +101,7 @@ export function LedgerTable<T>(props: LedgerTableProps<T>) {
 					{caption && <caption class='ledger-table__caption'>{caption}</caption>}
 
 					<colgroup>
+						{expandable && <col style={{ width: '38px' }} />}
 						{columns.map((c) => (
 							<col key={c.id} style={{ width: c.width ? `${c.width}px` : 'auto' }} />
 						))}
@@ -93,6 +109,13 @@ export function LedgerTable<T>(props: LedgerTableProps<T>) {
 
 					<thead class='ledger-table__head'>
 						<tr>
+							{expandable && (
+								<th
+									class='ledger-table__th ledger-table__cell--center'
+									scope='col'
+									aria-hidden='true'
+								/>
+							)}
 							{columns.map((c) => (
 								<th
 									key={c.id}
@@ -109,37 +132,68 @@ export function LedgerTable<T>(props: LedgerTableProps<T>) {
 						{rows.length === 0
 							? (
 								<tr class='ledger-table__empty-row'>
-									<td class='ledger-table__empty' colSpan={columns.length}>
+									<td class='ledger-table__empty' colSpan={totalCols}>
 										{emptyLabel}
 									</td>
 								</tr>
 							)
 							: rows.map((row, i) => {
 								const fee = isFeeLine?.(row) ?? false;
+								const key = rowKey(row);
+								const detail = expandable ? expandedContent!(row) : null;
+								const canExpand = expandable && detail != null && detail !== false;
+								const isOpen = canExpand && !!open[key];
 								return (
-									<tr
-										key={rowKey(row)}
-										class={[
-											'ledger-table__row',
-											striped && i % 2 === 1 && 'ledger-table__row--stripe',
-											fee && 'ledger-table__row--fee',
-											onRowClick && 'ledger-table__row--interactive',
-										].filter(Boolean).join(' ')}
-										onClick={onRowClick ? () => onRowClick(row) : undefined}
-									>
-										{columns.map((c) => (
-											<td
-												key={c.id}
-												class={[
-													'ledger-table__td',
-													`ledger-table__cell--${resolveAlign(c)}`,
-													c.numeric && 'ledger-table__cell--num',
-												].filter(Boolean).join(' ')}
-											>
-												{c.render(row)}
-											</td>
-										))}
-									</tr>
+									<Fragment key={key}>
+										<tr
+											class={[
+												'ledger-table__row',
+												striped && i % 2 === 1 && 'ledger-table__row--stripe',
+												fee && 'ledger-table__row--fee',
+												(onRowClick || canExpand) && 'ledger-table__row--interactive',
+												isOpen && 'ledger-table__row--expanded',
+											].filter(Boolean).join(' ')}
+											onClick={canExpand
+												? () => toggle(key)
+												: onRowClick
+												? () => onRowClick(row)
+												: undefined}
+										>
+											{expandable && (
+												<td class='ledger-table__td ledger-table__cell--center ledger-table__expander'>
+													{canExpand && (
+														<span
+															class={`ledger-table__chevron${
+																isOpen ? ' ledger-table__chevron--open' : ''
+															}`}
+															aria-hidden='true'
+														>
+															<IconChevronRight size={15} stroke={2.4} />
+														</span>
+													)}
+												</td>
+											)}
+											{columns.map((c) => (
+												<td
+													key={c.id}
+													class={[
+														'ledger-table__td',
+														`ledger-table__cell--${resolveAlign(c)}`,
+														c.numeric && 'ledger-table__cell--num',
+													].filter(Boolean).join(' ')}
+												>
+													{c.render(row)}
+												</td>
+											))}
+										</tr>
+										{isOpen && (
+											<tr class='ledger-table__detail-row'>
+												<td class='ledger-table__detail' colSpan={totalCols}>
+													{detail}
+												</td>
+											</tr>
+										)}
+									</Fragment>
 								);
 							})}
 					</tbody>

@@ -24,7 +24,9 @@ export const handler = define.handlers({
 		try {
 			body = await ctx.req.json();
 		} catch {
-			return new Response(JSON.stringify({ error: { message: 'Invalid JSON body' } }), { status: 400 });
+			return new Response(JSON.stringify({ error: { message: 'Invalid JSON body' } }), {
+				status: 400,
+			});
 		}
 
 		const parsed = TrackSchema.safeParse(body);

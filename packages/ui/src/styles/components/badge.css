@@ -1,0 +1,93 @@
+/**
+ * StatusBadge — a tone-driven pill. Each tone modifier sets a single `--badge-color`; the variant
+ * modifiers derive the fill/border/text from it via color-mix, so all tones re-theme automatically
+ * (the underlying palette tokens flip under `:root[data-theme='dark']`).
+ */
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	border-radius: 999px;
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+	vertical-align: middle;
+	--badge-color: var(--text-muted);
+}
+
+.status-badge__dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--badge-color);
+	flex: 0 0 auto;
+}
+
+/* #region Sizes */
+.status-badge--md {
+	padding: 0.22rem 0.6rem;
+	font-size: 0.72rem;
+	letter-spacing: 0.01em;
+}
+
+.status-badge--sm {
+	padding: 0.12rem 0.45rem;
+	font-size: 0.66rem;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+/* #endregion */
+
+/* #region Tones */
+.status-badge--neutral {
+	--badge-color: var(--text-secondary);
+}
+.status-badge--primary {
+	--badge-color: var(--primary);
+}
+.status-badge--success {
+	--badge-color: var(--success);
+}
+.status-badge--warning {
+	--badge-color: var(--warning);
+}
+.status-badge--danger {
+	--badge-color: var(--danger);
+}
+.status-badge--info {
+	--badge-color: var(--text-blue);
+}
+.status-badge--mint {
+	--badge-color: var(--mint);
+}
+.status-badge--violet {
+	--badge-color: var(--violet);
+}
+.status-badge--amber {
+	--badge-color: var(--amber);
+}
+/* #endregion */
+
+/* #region Variants */
+.status-badge--soft {
+	background: color-mix(in srgb, var(--badge-color) 14%, transparent);
+	color: var(--badge-color);
+}
+
+.status-badge--outline {
+	background: transparent;
+	color: var(--badge-color);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--badge-color) 45%, transparent);
+}
+
+.status-badge--solid {
+	background: var(--badge-color);
+	color: hsl(0, 0%, 100%);
+}
+
+/* Neutral solid needs a legible dark-on-light / light-on-dark treatment. */
+.status-badge--neutral.status-badge--solid {
+	background: var(--mid);
+	color: var(--text-main);
+}
+/* #endregion */

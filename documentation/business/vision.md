@@ -21,8 +21,8 @@ avoid:
 
 While the platform starts with digital services (design, dev, marketing), the underlying "Stage &
 Team" architecture is industry-agnostic. Future iterations are intended to support location-based
-services requiring credentials and certifications, positioning Projective to eventually compete
-with legacy directories like the Yellow Pages.
+services requiring credentials and certifications, positioning Projective to eventually compete with
+legacy directories like the Yellow Pages.
 
 ## Philosophy of Trust
 

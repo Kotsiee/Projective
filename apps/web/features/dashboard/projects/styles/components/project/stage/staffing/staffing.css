@@ -1,0 +1,50 @@
+/* apps/web/features/dashboard/projects/styles/components/project/stage/staffing/staffing.css */
+
+.stage-staffing {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.stage-staffing__status {
+	padding: 4px 8px 8px;
+	max-width: 560px;
+}
+
+.stage-staffing__seats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 12px;
+}
+
+.stage-staffing__muted {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--text-muted, var(--text-secondary));
+}
+
+.stage-staffing__error {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--incomplete, var(--danger));
+}
+
+.stage-staffing__create {
+	padding-top: 4px;
+}
+
+.stage-staffing__form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px 16px;
+	border: 1px dashed var(--hairline-strong, var(--border-color));
+	border-radius: var(--border-radius__large, 12px);
+	max-width: 480px;
+}
+
+.stage-staffing__form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}

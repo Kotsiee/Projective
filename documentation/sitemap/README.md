@@ -6,8 +6,8 @@
 flat index of every route path in the app — what exists, at a glance.
 
 This folder is the **per-route detail expansion** layer: file paths, API endpoint tables with
-permission enums, component wiring, and session/audit mechanics for each route group. Use
-`brain.md` to find *what route* handles something; use this folder to find *how* it's built.
+permission enums, component wiring, and session/audit mechanics for each route group. Use `brain.md`
+to find _what route_ handles something; use this folder to find _how_ it's built.
 
 ## Structure
 
@@ -23,9 +23,9 @@ permission enums, component wiring, and session/audit mechanics for each route g
 
 `dashboard/README.md` references `finance/` and `account/` (Settings) sub-modules that don't yet
 exist as separate files in this folder. If you're adding dashboard documentation, check whether
-those are still missing before assuming the reference is stale — populate them rather than
-removing the reference if the routes are real (they appear in `brain.md`'s sitemap table under
-`/wallet` and `/settings`).
+those are still missing before assuming the reference is stale — populate them rather than removing
+the reference if the routes are real (they appear in `brain.md`'s sitemap table under `/wallet` and
+`/settings`).
 
 ## For Future Agents
 

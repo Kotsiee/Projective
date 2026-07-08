@@ -19,7 +19,7 @@
 		"names": "deno run -A scripts/validate_names.ts",
 		"check": "deno fmt --check && deno lint && deno check && deno run -A scripts/validate_names.ts",
 		"test": "deno test --fail-fast --coverage=coverage -A --trace-leaks",
-		"dev": "vite --port 3000 --open --host --mode development",
+		"dev": "vite --port 3000 --host --mode development",
 		"build": "vite build --mode production",
 		"start": "deno serve -A --watch --port 3000 --env-file=.env.production apps/web/_fresh/server.js",
 		"update": "deno run -A -r jsr:@fresh/update .",

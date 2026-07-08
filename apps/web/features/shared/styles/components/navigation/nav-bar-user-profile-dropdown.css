@@ -1,126 +1,126 @@
 .nav-bar-user__profile__dropdown {
-  /* Positioning */
-  position: absolute;
-  top: calc(var(--header-height) + 0.5rem);
-  right: 0;
-  z-index: 1000;
-  width: 320px;
+	/* Positioning */
+	position: absolute;
+	top: calc(var(--header-height) + 0.5rem);
+	right: 0;
+	z-index: 1000;
+	width: 320px;
 
-  /* Visuals */
-  background-color: var(--card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius__large);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+	/* Visuals */
+	background-color: var(--card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__large);
+	box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
 
-  /* Layout */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  /* Clips children to border radius */
-  animation: dropdown-fade-in var(--fast) ease-out forwards;
+	/* Layout */
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	/* Clips children to border radius */
+	animation: dropdown-fade-in var(--fast) ease-out forwards;
 }
 
 @keyframes dropdown-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* --- Header Section --- */
 .nav-bar-user__profile__dropdown__current {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--card);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.25rem;
+	border-bottom: 1px solid var(--border-color);
+	background-color: var(--card);
 }
 
 .nav-bar-user__profile__dropdown__current__profile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  min-width: 0;
-  /* Text truncation fix */
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	min-width: 0;
+	/* Text truncation fix */
 }
 
 .nav-bar-user__profile__dropdown__current__profile img {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  object-fit: cover;
-  flex-shrink: 0;
+	height: 3rem;
+	width: 3rem;
+	border-radius: 50%;
+	border: 1px solid var(--border-color);
+	object-fit: cover;
+	flex-shrink: 0;
 }
 
 .nav-bar-user__profile__dropdown__avatar-placeholder {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  background-color: var(--input-bg);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+	height: 3rem;
+	width: 3rem;
+	border-radius: 50%;
+	background-color: var(--input-bg);
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
 }
 
 .nav-bar-user__profile__dropdown__current__profile__name {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
 }
 
 .nav-bar-user__profile__dropdown__current__profile__name__name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .nav-bar-user__profile__dropdown__current__profile__name__username {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* --- Context Switch Button --- */
 .nav-bar-user__profile__dropdown__current__switch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.25rem;
-  width: 2.25rem;
-  border-radius: var(--border-radius__small);
-  border: 1px solid var(--border-color);
-  background-color: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--fast) ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 2.25rem;
+	width: 2.25rem;
+	border-radius: var(--border-radius__small);
+	border: 1px solid var(--border-color);
+	background-color: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all var(--fast) ease;
 
-  &:hover {
-    background-color: var(--input-bg);
-    color: var(--text-main);
-    border-color: var(--text-muted);
-  }
+	&:hover {
+		background-color: var(--input-bg);
+		color: var(--text-main);
+		border-color: var(--text-muted);
+	}
 
-  /* Active state controlled by parent component if needed, 
-	   but hovering is usually enough for this toggle */
+	/* Active state controlled by parent component if needed, 
+	  but hovering is usually enough for this toggle */
 }
 
 .nav-bar-user__profile__dropdown__content {
-  /* Allows content to dictate height, but provides padding wrapper if needed */
-  background-color: var(--card);
+	/* Allows content to dictate height, but provides padding wrapper if needed */
+	background-color: var(--card);
 }

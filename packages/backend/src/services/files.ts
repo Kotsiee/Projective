@@ -1,4 +1,5 @@
 import { supabaseClient } from '../core/clients/supabase.ts';
+import type { SupabaseClient } from 'supabaseClient';
 import { StoragePaths } from '@projective/types';
 
 export class FileService {
@@ -14,8 +15,14 @@ export class FileService {
 		 * the `metadata` jsonb as `metadata->>'blurhash'` — no dedicated column.
 		 */
 		blurhash?: string | null,
+		/**
+		 * Authenticated Supabase client. REQUIRED for the insert to satisfy the
+		 * files.items RLS policy (`owner_user_id = auth.uid()`); the anon fallback
+		 * cannot insert. Pass `supabaseClient(req)` from a route handler.
+		 */
+		client?: SupabaseClient,
 	) {
-		const supabase = await supabaseClient();
+		const supabase = client ?? await supabaseClient();
 
 		const { bucket: targetBucket, path: targetPath } = StoragePaths.generate(filename, context);
 
@@ -59,8 +66,8 @@ export class FileService {
 		};
 	}
 
-	static async finalizeUpload(fileId: string) {
-		const supabase = await supabaseClient();
+	static async finalizeUpload(fileId: string, client?: SupabaseClient) {
+		const supabase = client ?? await supabaseClient();
 
 		const { data: scanResult, error: scanError } = await supabase.functions.invoke('scan-file', {
 			body: { fileId },

@@ -163,6 +163,82 @@
 	--sponsored-frame: hsla(var(--amber-hue, 37), 95%, 55%, 0.35);
 	/* #endregion */
 
+	/* #region 4d. PREMIUM SHOWCASE SURFACES
+	   The design language behind the guest showcase (hero, glass navbar, premium
+	   cards, CTAs). Everything is composed from palette tokens so the whole system
+	   re-themes for free — never hard-code hex here. Blur is a plain length (no dark
+	   override needed); glass/shadow/glow flip under the dark block below. */
+
+	/* Vertical brand gradient — CTAs, gradient card borders, headline text fills. */
+	--grad-premium: linear-gradient(180deg, var(--primary) 0%, var(--mint) 58%, var(--aqua) 100%);
+	--grad-premium-diag: linear-gradient(
+		135deg,
+		var(--primary) 0%,
+		var(--violet) 55%,
+		var(--aqua) 100%
+	);
+	--grad-premium-soft: linear-gradient(
+		160deg,
+		var(--primary-surface),
+		var(--violet-surface) 60%,
+		transparent
+	);
+	--grad-premium-text: linear-gradient(180deg, var(--text-main) 0%, var(--text-muted) 150%);
+
+	/* Subtle full-bleed section backdrops — flip light/dark automatically. */
+	--surface-premium: linear-gradient(180deg, var(--header) 0%, var(--bg) 100%);
+	--surface-premium-inv: linear-gradient(180deg, var(--bg) 0%, var(--mid) 100%);
+
+	/* Radial spotlight + layered aurora glows for the hero backdrop. */
+	--glow-spotlight: radial-gradient(
+		120% 130% at 50% -10%,
+		var(--primary-surface) 0%,
+		transparent 55%
+	);
+	--glow-aurora:
+		radial-gradient(46% 60% at 12% 8%, var(--mint-surface) 0%, transparent 60%),
+		radial-gradient(42% 58% at 88% 14%, var(--violet-surface) 0%, transparent 60%),
+		radial-gradient(60% 55% at 50% 108%, var(--primary-surface) 0%, transparent 62%);
+
+	/* Frosted glass — navbar, floating panels, premium cards. */
+	--glass-blur: 18px;
+	--glass-blur-sm: 8px;
+	--glass-blur-lg: 30px;
+	--glass-panel: hsla(var(--card-hue), var(--card-saturation), var(--card-lightness), 0.65);
+	--glass-panel-strong: hsla(var(--card-hue), var(--card-saturation), var(--card-lightness), 0.85);
+	--glass-tint: hsla(var(--header-hue), var(--header-saturation), var(--header-lightness), 0.72);
+	--glass-hairline: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.12);
+
+	/* Elevation scale (shadows were previously all inlined magic numbers). */
+	--shadow-sm:
+		0 1px 2px hsla(var(--text-hue), var(--text-saturation), 8%, 0.06),
+		0 1px 3px hsla(var(--text-hue), var(--text-saturation), 8%, 0.1);
+	--shadow-md:
+		0 4px 12px hsla(var(--text-hue), var(--text-saturation), 8%, 0.08),
+		0 2px 4px hsla(var(--text-hue), var(--text-saturation), 8%, 0.06);
+	--shadow-lg:
+		0 12px 32px hsla(var(--text-hue), var(--text-saturation), 8%, 0.12),
+		0 4px 10px hsla(var(--text-hue), var(--text-saturation), 8%, 0.08);
+	--shadow-xl:
+		0 24px 60px hsla(var(--text-hue), var(--text-saturation), 8%, 0.18),
+		0 8px 18px hsla(var(--text-hue), var(--text-saturation), 8%, 0.1);
+
+	/* Accent glows — hover halos on premium buttons / cards. */
+	--glow-primary: 0 10px 34px -8px hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.5
+	);
+	--glow-mint: 0 10px 34px -8px var(--mint-surface);
+	--glow-violet: 0 10px 34px -8px hsla(
+		var(--violet-hue),
+		var(--violet-saturation),
+		var(--violet-lightness),
+		0.5
+	);
+	/* #endregion */
+
 	/* #region 4. GLOBAL SEMANTICS */
 	--text-main: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
 	--text-blue: hsl(var(--primary-hue), var(--primary-saturation), 30%);
@@ -243,6 +319,20 @@
 	--auth-orb-b: hsla(186, 60%, 42%, 0.28);
 	--auth-orb-c: hsla(258, 80%, 68%, 0.18);
 	--auth-ghost: hsla(168, 84%, 68%, 0.14);
+
+	/* Premium surfaces on the near-black canvas: glass thins, shadows go pure-black,
+	   glows intensify so elevation still reads. */
+	--glass-panel: hsla(var(--card-hue), var(--card-saturation), var(--card-lightness), 0.55);
+	--glass-panel-strong: hsla(var(--card-hue), var(--card-saturation), var(--card-lightness), 0.78);
+	--glass-tint: hsla(var(--header-hue), var(--header-saturation), 8%, 0.62);
+	--glass-hairline: hsla(0, 0%, 100%, 0.1);
+
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+	--shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.4);
+	--shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55), 0 6px 14px rgba(0, 0, 0, 0.45);
+	--shadow-xl: 0 28px 70px rgba(0, 0, 0, 0.66), 0 10px 22px rgba(0, 0, 0, 0.5);
+
+	--grad-premium-text: linear-gradient(180deg, var(--text-main) 0%, var(--text-muted) 165%);
 }
 
 /* #endregion */

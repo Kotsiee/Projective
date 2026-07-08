@@ -157,6 +157,7 @@ export default function NewStageModal(
 
 		isSubmitting.value = true;
 		try {
+			const dependsOnStage = followsStage.value !== 'none';
 			const payload = {
 				name: name.value,
 				description: description.value,
@@ -168,6 +169,9 @@ export default function NewStageModal(
 				end_date: isOneOff && dueDate.value ? dueDate.value.toISO() : null,
 				ip_ownership_override: ipMode.value !== 'none' ? ipMode.value : null,
 				nda_required: ndaRequired.value,
+				// AC5: sequencing — anchor at project start, or run after a predecessor stage.
+				start_trigger_type: dependsOnStage ? 'dependent_on_stage' : 'on_project_start',
+				start_dependency_stage_id: dependsOnStage ? followsStage.value : null,
 			};
 
 			await StagesService.createStage(projectId, payload);

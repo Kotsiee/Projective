@@ -1,7 +1,7 @@
 # Feature Rollout Priority
 
 > **Source-of-truth note:** `brain.md`'s "Features" section is authoritative for what each feature
-> *is* and how it works. This document is trimmed to the one thing `brain.md` doesn't cover: the
+> _is_ and how it works. This document is trimmed to the one thing `brain.md` doesn't cover: the
 > phased rollout priority — which features ship in the MVP vs. later phases.
 
 ## Feature Priority Matrix

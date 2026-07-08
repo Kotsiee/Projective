@@ -1,11 +1,12 @@
 import '../styles/islands/search.css';
+import '../styles/premium.css';
 import { useEffect } from 'preact/hooks';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import ExploreSearchHeaderSearch from '../components/search/header-search.tsx';
 import ExploreSearchHeaderActions from '../components/search/header-actions.tsx';
 import ExploreSearchFilters from '../components/search/filters.tsx';
 import ExploreSearchResults from '../components/search/results/results.tsx';
-import { ExploreContext, useExploreContext } from '../contexts/ExploreContext.tsx';
+import { ExploreContext, useExploreContext, useLiveSearch } from '../contexts/ExploreContext.tsx';
 
 /**
  * @function ExploreSearchIsland
@@ -18,10 +19,15 @@ import { ExploreContext, useExploreContext } from '../contexts/ExploreContext.ts
  * for guests (for whom the middle-nav chrome is gated off) and CSS-hidden when the docked version
  * is active — so there's never a duplicate.
  */
-export default function ExploreSearchIsland({ authenticated = false }: { authenticated?: boolean }) {
+export default function ExploreSearchIsland(
+	{ authenticated = false }: { authenticated?: boolean },
+) {
 	const ctx = useExploreContext();
 	const { isFiltersOpen, entityType } = ctx;
 	const { setMiddleNav } = useNavigationContext();
+
+	// Drive results off the live ranking endpoint (seed fallback baked in).
+	useLiveSearch();
 
 	// Guardrail: the filter sidebar is only available once a concrete entity type is isolated.
 	const showFilters = isFiltersOpen.value && entityType.value !== 'all';
@@ -55,9 +61,13 @@ export default function ExploreSearchIsland({ authenticated = false }: { authent
 				<ExploreSearchHeaderActions />
 			</div>
 
-			<div class={`explore-search__content ${showFilters ? 'explore-search__content--filtered' : ''}`}>
-				{/* Guests get the inline sidebar (their middle-nav chrome is gated off); authenticated
-				    users get the docked version projected via setMiddleNav above — never both. */}
+			<div
+				class={`explore-search__content ${showFilters ? 'explore-search__content--filtered' : ''}`}
+			>
+				{
+					/* Guests get the inline sidebar (their middle-nav chrome is gated off); authenticated
+				    users get the docked version projected via setMiddleNav above — never both. */
+				}
 				{showFilters && !authenticated && (
 					<aside class='explore-search__filters'>
 						<ExploreSearchFilters />

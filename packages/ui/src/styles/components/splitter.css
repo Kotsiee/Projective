@@ -1,75 +1,75 @@
 /* #region 1. BLOCK: splitter */
 .splitter {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+	display: flex;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
 }
 
 .splitter--resizing {
-    user-select: none;
+	user-select: none;
 }
 
 .splitter--horizontal.splitter--resizing {
-    cursor: col-resize;
+	cursor: col-resize;
 }
 
 .splitter--vertical.splitter--resizing {
-    cursor: row-resize;
+	cursor: row-resize;
 }
 
 .splitter__pane {
-    height: 100%;
+	height: 100%;
 }
 
 .splitter__pane-wrapper {
-    flex-grow: 0;
-    flex-shrink: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+	flex-grow: 0;
+	flex-shrink: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 }
 
 .splitter__pane-wrapper--collapsed {
-    display: none;
+	display: none;
 }
 
 /* #endregion */
 
 /* #region 2. ELEMENT: splitter__gutter */
 .splitter__gutter {
-    background-color: var(--field-border, hsla(0, 0%, 10%, 0.15));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color var(--fast, 100ms);
-    z-index: 10;
-    flex-shrink: 0;
-    position: relative;
-    outline: none;
+	background-color: var(--field-border, hsla(0, 0%, 10%, 0.15));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color var(--fast, 100ms);
+	z-index: 10;
+	flex-shrink: 0;
+	position: relative;
+	outline: none;
 }
 
 .splitter__gutter:hover,
 .splitter__gutter:focus-visible {
-    background-color: var(--primary, #186f7e);
+	background-color: var(--primary, #186f7e);
 }
 
 .splitter__gutter--horizontal {
-    width: 4px;
-    height: 100%;
-    cursor: col-resize;
+	width: 4px;
+	height: 100%;
+	cursor: col-resize;
 }
 
 .splitter__gutter--vertical {
-    height: 4px;
-    width: 100%;
-    cursor: row-resize;
+	height: 4px;
+	width: 100%;
+	cursor: row-resize;
 }
 
 .splitter__divider-stack {
-    width: 100%;
-    height: 1px;
-    background-color: var(--field-border, hsla(0, 0%, 10%, 0.15));
+	width: 100%;
+	height: 1px;
+	background-color: var(--field-border, hsla(0, 0%, 10%, 0.15));
 }
 
 /* #endregion */

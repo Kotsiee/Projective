@@ -19,6 +19,15 @@ export interface PaginatedSearchQuery {
 export interface Deps {
 	getClient?: () => Promise<SupabaseClient>;
 }
+
+/**
+ * Discriminated result so `if (!res.ok)` narrows `data`/`error` at the call site. The error branch
+ * is permissive enough to hold both our own `{ status, message }` guards and a raw Supabase
+ * `PostgrestError` (which carries `code`/`message` but no `status`).
+ */
+type SearchData = { items: PartialEntityResponse[]; meta: { totalCount: number } };
+type SearchError = { status?: number; message: string; code?: string };
+type SearchResult = { ok: true; data: SearchData } | { ok: false; error: SearchError };
 // #endregion
 
 export class SearchBackendService {
@@ -32,7 +41,11 @@ export class SearchBackendService {
 	// #endregion
 
 	// #region 3. Main Router
-	static async search(entity: string, params: PaginatedSearchQuery, deps: Deps = {}) {
+	static async search(
+		entity: string,
+		params: PaginatedSearchQuery,
+		deps: Deps = {},
+	): Promise<SearchResult> {
 		if (!deps.getClient) {
 			console.error('[SearchBackendService] Missing database client context');
 			return { ok: false, error: { status: 500, message: 'Missing database client context' } };
@@ -53,7 +66,10 @@ export class SearchBackendService {
 	// #endregion
 
 	// #region 4. Entity Search Implementations
-	private static async searchPeople(params: PaginatedSearchQuery, deps: Deps) {
+	private static async searchPeople(
+		params: PaginatedSearchQuery,
+		deps: Deps,
+	): Promise<SearchResult> {
 		const client = await deps.getClient!();
 
 		const selectColumns = params.countOnly
@@ -116,7 +132,10 @@ export class SearchBackendService {
 		};
 	}
 
-	private static async searchProjects(params: PaginatedSearchQuery, deps: Deps) {
+	private static async searchProjects(
+		params: PaginatedSearchQuery,
+		deps: Deps,
+	): Promise<SearchResult> {
 		const client = await deps.getClient!();
 
 		// Step 1: Query the Fast Search Index
@@ -205,7 +224,10 @@ export class SearchBackendService {
 		};
 	}
 
-	private static async searchServices(params: PaginatedSearchQuery, deps: Deps) {
+	private static async searchServices(
+		params: PaginatedSearchQuery,
+		deps: Deps,
+	): Promise<SearchResult> {
 		const client = await deps.getClient!();
 
 		const selectColumns = params.countOnly

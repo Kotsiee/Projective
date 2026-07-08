@@ -1,0 +1,78 @@
+/* packages/ui/src/styles/components/ripple.css
+   Shared ripple surface — the material tap ink used by links, card borders, and
+   list rows (the Button ships its own copy so it stays dependency-free). */
+
+.ripple-surface {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.ripple-surface__layer {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	border-radius: inherit;
+	z-index: 0;
+}
+
+.ripple-surface__ink {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	margin: -9px 0 0 -9px;
+	border-radius: 50%;
+	background: var(--ripple-ink, currentColor);
+	opacity: 0.2;
+	transform: scale(0);
+	animation: ripple-surface-expand 600ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+	pointer-events: none;
+}
+
+@keyframes ripple-surface-expand {
+	to {
+		transform: scale(16);
+		opacity: 0;
+	}
+}
+
+/* Premium gradient border — a 1px brand frame that brightens + lifts on hover.
+   Uses the mask-composite technique so the fill stays transparent. */
+.ripple-surface--premium {
+	border-radius: var(--border-radius__large, 12px);
+	transition:
+		transform var(--medium, 250ms) var(--ease-out, ease),
+		box-shadow var(--medium, 250ms) var(--ease-out, ease);
+}
+
+.ripple-surface--premium::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	padding: 1px;
+	background: var(--grad-premium-diag);
+	-webkit-mask:
+		linear-gradient(#000 0 0) content-box,
+		linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask:
+		linear-gradient(#000 0 0) content-box,
+		linear-gradient(#000 0 0);
+	mask-composite: exclude;
+	opacity: 0.55;
+	transition: opacity var(--medium, 250ms) var(--ease-out, ease);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.ripple-surface--premium:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--glow-primary);
+}
+
+.ripple-surface--premium:hover::before {
+	opacity: 1;
+}

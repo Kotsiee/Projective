@@ -1,62 +1,65 @@
 .nav-bar-user__profile__dropdown__switch {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
 /* --- Segmented Control Container --- */
 .nav-bar-user__profile__dropdown__switch__controls {
-  display: flex;
-  background-color: var(--input-bg);
-  padding: 0.25rem;
-  margin: 1rem 1rem 0.5rem 1rem;
-  /* Margin inside the dropdown */
-  border-radius: var(--border-radius);
-  gap: 0.25rem;
+	display: flex;
+	background-color: var(--input-bg);
+	padding: 0.25rem;
+	margin: 1rem 1rem 0.5rem 1rem;
+	/* Margin inside the dropdown */
+	border-radius: var(--border-radius);
+	gap: 0.25rem;
 }
 
 .nav-bar-user__profile__dropdown__switch__label {
-  flex: 1;
-  position: relative;
-  cursor: pointer;
+	flex: 1;
+	position: relative;
+	cursor: pointer;
 }
 
 /* Hide the actual input but keep accessible if needed (visually-hidden utility class assumed, or defined here) */
 .visually-hidden {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
 }
 
 /* --- The Pill Visuals --- */
 .nav-bar-user__profile__dropdown__switch__pill {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.4rem 0;
-  border-radius: var(--border-radius__small);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  transition: all var(--fast) ease;
-  user-select: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0.4rem 0;
+	border-radius: var(--border-radius__small);
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--text-muted);
+	transition: all var(--fast) ease;
+	user-select: none;
 }
 
-.nav-bar-user__profile__dropdown__switch__label:hover .nav-bar-user__profile__dropdown__switch__pill {
-  color: var(--text-main);
+.nav-bar-user__profile__dropdown__switch__label:hover
+	.nav-bar-user__profile__dropdown__switch__pill {
+	color: var(--text-main);
 }
 
 /* Checked State */
-.nav-bar-user__profile__dropdown__switch__label input:checked+.nav-bar-user__profile__dropdown__switch__pill {
-  background-color: var(--card);
-  color: var(--text-main);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  font-weight: 600;
+.nav-bar-user__profile__dropdown__switch__label
+	input:checked
+	+ .nav-bar-user__profile__dropdown__switch__pill {
+	background-color: var(--card);
+	color: var(--text-main);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	font-weight: 600;
 }
 
 /* --- Content Area --- */
 .nav-bar-user__profile__dropdown__switch__content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }

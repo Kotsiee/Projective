@@ -1,14 +1,14 @@
 .data-chat__scroll-pane {
-    transform: scaleY(-1);
+	transform: scaleY(-1);
 }
 
 .data-chat__item {
-    transform: scaleY(-1);
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+	transform: scaleY(-1);
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
 .data-chat__row {
-    width: 100%;
+	width: 100%;
 }

@@ -1,0 +1,221 @@
+/**
+ * Business Profile Management settings (US-008 AC2). Palette-token driven, so it re-themes for
+ * light/dark automatically.
+ */
+.bsettings {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding: 1.5rem clamp(1rem, 3vw, 2rem) 3rem;
+	max-width: 780px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+.bsettings--center {
+	min-height: 60vh;
+	align-items: center;
+	justify-content: center;
+}
+
+/* #region Header */
+.bsettings-header__eyebrow {
+	font-size: 0.72rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--primary);
+}
+
+.bsettings-header__title {
+	margin: 0.15rem 0 0.25rem;
+	font-size: clamp(1.4rem, 3vw, 1.8rem);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--text-main);
+}
+
+.bsettings-header__subtitle {
+	margin: 0;
+	font-size: 0.88rem;
+	color: var(--text-muted);
+}
+/* #endregion */
+
+/* #region Card */
+.bsettings-card {
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: var(--border-radius__large, 12px);
+	box-shadow: var(--shadow-sm);
+	padding: 1.25rem 1.4rem;
+}
+
+.bsettings-card__header {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	margin-bottom: 1.25rem;
+}
+
+.bsettings-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: var(--border-radius__small, 6px);
+	background: var(--primary-surface);
+	color: var(--primary);
+	flex: 0 0 auto;
+}
+
+.bsettings-card__icon--muted {
+	background: var(--mid);
+	color: var(--text-muted);
+}
+
+.bsettings-card__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 650;
+	color: var(--text-main);
+}
+
+.bsettings-card__subtitle {
+	margin: 0.1rem 0 0;
+	font-size: 0.78rem;
+	color: var(--text-muted);
+}
+
+.bsettings-card__footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin-top: 1.5rem;
+	flex-wrap: wrap;
+}
+/* #endregion */
+
+/* #region Logo */
+.bsettings-logo {
+	display: flex;
+	gap: 1.1rem;
+	align-items: center;
+	margin-bottom: 1.5rem;
+	flex-wrap: wrap;
+}
+
+.bsettings-logo__preview {
+	width: 76px;
+	height: 76px;
+	border-radius: var(--border-radius__large, 12px);
+	overflow: hidden;
+	background: var(--mid);
+	border: 1px solid var(--hairline);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+}
+
+.bsettings-logo__preview img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.bsettings-logo__placeholder {
+	color: var(--text-muted);
+}
+
+.bsettings-logo__drop {
+	flex: 1 1 260px;
+	min-width: 220px;
+}
+/* #endregion */
+
+/* #region Fields */
+.bsettings-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.bsettings-note {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.78rem;
+	color: var(--text-muted);
+	margin-right: auto;
+}
+/* #endregion */
+
+/* #region Blocked (AC4) */
+.bsettings-card--blocked {
+	opacity: 0.85;
+	border-style: dashed;
+}
+
+.bsettings-badge {
+	margin-left: auto;
+	padding: 0.22rem 0.6rem;
+	border-radius: 999px;
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+	background: var(--mid);
+	border: 1px solid var(--hairline);
+	white-space: nowrap;
+}
+
+.bsettings-blocked__text {
+	margin: 0;
+	font-size: 0.84rem;
+	color: var(--text-muted);
+	line-height: 1.55;
+}
+/* #endregion */
+
+/* #region Loading + prompts */
+.bsettings-spinner {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 3px solid var(--hairline-strong, var(--hairline));
+	border-top-color: var(--primary);
+	animation: bsettings-spin 0.8s linear infinite;
+}
+
+@keyframes bsettings-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.bsettings-prompt {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+	text-align: center;
+	max-width: 400px;
+}
+
+.bsettings-prompt__title {
+	margin: 0;
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.bsettings-prompt__text {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+}
+/* #endregion */

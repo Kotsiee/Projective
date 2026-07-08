@@ -24,6 +24,7 @@ import {
 	IPOptionMode,
 	PortfolioDisplayRights,
 	ProjectFormat,
+	TimelinePreset,
 	Visibility,
 } from '@projective/types';
 import { ProjectsService } from '@/features/dashboard/projects/services/ProjectsService.ts';
@@ -45,6 +46,7 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 	const attachments = useSignal<FileWithMeta[]>([]);
 	const format = useSignal<ProjectFormat>(ProjectFormat.Pipeline);
 	const visibility = useSignal<Visibility>(Visibility.Public);
+	const timelinePreset = useSignal<TimelinePreset>(TimelinePreset.Sequential);
 
 	// Advanced options
 	const ipMode = useSignal<IPOptionMode>(IPOptionMode.ExclusiveTransfer);
@@ -67,6 +69,11 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 		{ label: 'Public - Visible on Marketplace', value: Visibility.Public },
 		{ label: 'Invite Only - Hidden from searches', value: Visibility.InviteOnly },
 		{ label: 'Unlisted - Anyone with link can view', value: Visibility.Unlisted },
+	], []);
+
+	const timelineOptions: SelectOption<string>[] = useMemo(() => [
+		{ label: 'Sequential - Stages run one after another', value: TimelinePreset.Sequential },
+		{ label: 'Simultaneous - Stages run in parallel', value: TimelinePreset.Simultaneous },
 	], []);
 
 	const ipOptions: SelectOption<string>[] = useMemo(() => [
@@ -117,6 +124,7 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 				description: description.value,
 				visibility: visibility.value,
 				currency: currency.value,
+				timeline_preset: timelinePreset.value,
 				legal_and_screening: {
 					ip_ownership_mode: ipMode.value,
 					nda_required: ndaRequired.value === 'true',
@@ -207,6 +215,17 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
 							floating
 						/>
 					</div>
+
+					<SelectField
+						name='timelinePreset'
+						label='Timeline Sequencing'
+						options={timelineOptions}
+						value={timelinePreset.value}
+						onChange={(v) => timelinePreset.value = v as TimelinePreset}
+						multiple={false}
+						searchable={false}
+						floating
+					/>
 
 					<FileDrop
 						id='project-attachments'

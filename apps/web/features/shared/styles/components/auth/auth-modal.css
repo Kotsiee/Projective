@@ -1,57 +1,57 @@
 /* #region AUTH MODAL BEM STYLES */
 .auth-modal__form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    /* Padding is now handled by the .overlay-modal__body from ModalLayout */
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	/* Padding is now handled by the .overlay-modal__body from ModalLayout */
 }
 
 .auth-modal__forgot-password {
-    display: block;
-    text-align: right;
-    font-size: 0.75rem;
-    color: var(--primary);
-    text-decoration: none;
-    margin-top: -0.75rem;
-    /* Pulls the link up closer to the password field */
-    font-weight: 500;
-    transition: color var(--fast) ease;
+	display: block;
+	text-align: right;
+	font-size: 0.75rem;
+	color: var(--primary);
+	text-decoration: none;
+	margin-top: -0.75rem;
+	/* Pulls the link up closer to the password field */
+	font-weight: 500;
+	transition: color var(--fast) ease;
 }
 
 .auth-modal__forgot-password:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
+	color: var(--primary-hover);
+	text-decoration: underline;
 }
 
 .auth-modal__divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    margin: 1.5rem 0;
-    font-weight: 500;
+	display: flex;
+	align-items: center;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.75rem;
+	margin: 1.5rem 0;
+	font-weight: 500;
 }
 
 .auth-modal__divider::before,
 .auth-modal__divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border-color);
+	content: '';
+	flex: 1;
+	border-bottom: 1px solid var(--border-color);
 }
 
 .auth-modal__divider::before {
-    margin-right: 0.75em;
+	margin-right: 0.75em;
 }
 
 .auth-modal__divider::after {
-    margin-left: 0.75em;
+	margin-left: 0.75em;
 }
 
 .auth-modal__sso {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
 }
 
 /* #endregion */

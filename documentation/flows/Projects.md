@@ -218,21 +218,22 @@ Step 6: Review & Publish
 ## 3. Lifecycle, Kanban & Submissions State Machines
 
 > Implemented in migrations `0119_project_lifecycle.sql`, `0120_submissions_engine.sql`,
-> `0121_kanban_sync.sql`, `0122_project_card_summary.sql`, `0303_projects_lifecycle_rls.sql`.
-> All mutations flow through SECURITY DEFINER `projects.*` RPCs (finance stays unexposed) and are
-> called from FreshJS services (`ProjectLifecycleService*`, `SubmissionsService*`, `TicketsService*`).
+> `0121_kanban_sync.sql`, `0122_project_card_summary.sql`, `0303_projects_lifecycle_rls.sql`. All
+> mutations flow through SECURITY DEFINER `projects.*` RPCs (finance stays unexposed) and are called
+> from FreshJS services (`ProjectLifecycleService*`, `SubmissionsService*`, `TicketsService*`).
 
 ### 3.1 Project Lifecycle (`projects.set_project_status`)
 
-Owner-only transitions over the `project_status` enum, recorded to `projects.project_status_history`:
+Owner-only transitions over the `project_status` enum, recorded to
+`projects.project_status_history`:
 
-| From              | To          | Validation gate                                                              |
-| ----------------- | ----------- | --------------------------------------------------------------------------- |
-| draft / on_hold   | active      | Project must have a title **and ≥ 1 stage**                                  |
-| active / on_hold  | completed   | **Every ticket terminal** (completed/cancelled) **and no held escrow**      |
-| active            | on_hold     | Owner discretion                                                            |
-| draft/active/hold | cancelled   | Owner discretion                                                            |
-| completed/cancelled | *(any)*   | Rejected — terminal states are immutable                                    |
+| From                | To        | Validation gate                                                        |
+| ------------------- | --------- | ---------------------------------------------------------------------- |
+| draft / on_hold     | active    | Project must have a title **and ≥ 1 stage**                            |
+| active / on_hold    | completed | **Every ticket terminal** (completed/cancelled) **and no held escrow** |
+| active              | on_hold   | Owner discretion                                                       |
+| draft/active/hold   | cancelled | Owner discretion                                                       |
+| completed/cancelled | _(any)_   | Rejected — terminal states are immutable                               |
 
 ### 3.2 Kanban Synchronization (`projects.move_ticket` + `trg_ticket_review_submission`)
 
@@ -241,18 +242,20 @@ Review=in_review, Done=completed).
 
 - **→ Review**: an `AFTER UPDATE` trigger auto-generates a `stage_submissions` ledger row for the
   ticket's current stage (idempotent with an explicit `submit_deliverable`).
-- **→ Done**: requires **client/owner review authority** (`projects.can_review_project`); a freelancer
-  cannot self-confirm delivery. Confirming a Done move settles the installment (existing escrow-sync
-  trigger) and logs a `milestone_confirmed` activity. Every move is written to `ticket_history`.
+- **→ Done**: requires **client/owner review authority** (`projects.can_review_project`); a
+  freelancer cannot self-confirm delivery. Confirming a Done move settles the installment (existing
+  escrow-sync trigger) and logs a `milestone_confirmed` activity. Every move is written to
+  `ticket_history`.
 
 ### 3.3 Submissions & Deliverables (`submit_deliverable` / `review_submission`)
 
 - **Submit** (freelancer / project participant): files a deliverable + links already-uploaded file
-  ids and pushes the ticket into Review. Status vocabulary: `draft | pending_review | accepted |
+  ids and pushes the ticket into Review. Status vocabulary:
+  `draft | pending_review | accepted |
   revisions_requested`.
-- **Review** (client / owner only, guarded by `projects.can_review_project`): `accept` →
-  `accepted`; `request_revision` → `revisions_requested`, opens a `stage_revision_requests` row and
-  bounces the ticket back to In Progress.
+- **Review** (client / owner only, guarded by `projects.can_review_project`): `accept` → `accepted`;
+  `request_revision` → `revisions_requested`, opens a `stage_revision_requests` row and bounces the
+  ticket back to In Progress.
 
 ### 3.4 Quick-Inspector metadata (`projects.get_project_card_summary`)
 

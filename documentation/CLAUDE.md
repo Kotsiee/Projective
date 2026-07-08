@@ -2,14 +2,14 @@
 
 ## The Hierarchy (Non-Negotiable)
 
-1. **`business/brain.md`** and **`business/brain2.md`** are the absolute, overriding source of
-   truth for all business logic, database schemas, project workflows, and architectural rules.
+1. **`business/brain.md`** and **`business/brain2.md`** are the absolute, overriding source of truth
+   for all business logic, database schemas, project workflows, and architectural rules.
 2. **`codebase_context.md`** (repo root) is the technical reference for UI component APIs, styling
    variables, and Deno/Fresh system directives — not this folder.
 3. Every other file under `documentation/` is supplementary. It exists to either (a) provide
    concrete detail the brain files intentionally leave abstract, or (b) cover material the brain
-   files don't address at all (investor narrative, market data, per-route API tables, user
-   stories, per-domain database schema).
+   files don't address at all (investor narrative, market data, per-route API tables, user stories,
+   per-domain database schema).
 
 ## Rules for Editing This Folder
 
@@ -25,18 +25,18 @@
   pattern to follow).
 - **Empty stub files are intentional placeholders, not accidents** (see `database/README.md`'s
   coverage table). Don't delete a stub just because it's empty — populate it or leave it.
-- **Islands Architecture constraint applies to any code examples you write here too**: never show
-  an Island importing the Supabase client directly, and never suggest fetching data inside an
-  Island — see `business/brain2.md` §2 for the full rule.
+- **Islands Architecture constraint applies to any code examples you write here too**: never show an
+  Island importing the Supabase client directly, and never suggest fetching data inside an Island —
+  see `business/brain2.md` §2 for the full rule.
 
 ## Keep Documentation in Sync With Reality
 
-- **Business rule changes must be reflected here.** Any time a business rule, workflow, or
-  financial mechanic changes — whether the change originates in a conversation, a spec, or code —
-  the corresponding markdown in this folder (`brain.md`/`brain2.md` for durable logic, or the
-  relevant satellite doc) must be updated in the same pass. Documentation drift is exactly the
-  failure mode this folder was reorganized to eliminate; don't reintroduce it by leaving a rule
-  change undocumented.
+- **Business rule changes must be reflected here.** Any time a business rule, workflow, or financial
+  mechanic changes — whether the change originates in a conversation, a spec, or code — the
+  corresponding markdown in this folder (`brain.md`/`brain2.md` for durable logic, or the relevant
+  satellite doc) must be updated in the same pass. Documentation drift is exactly the failure mode
+  this folder was reorganized to eliminate; don't reintroduce it by leaving a rule change
+  undocumented.
 - **CSS variable changes belong in `apps/web/styles/themes/variables/`, not here.** If work
   introduces or changes a CSS variable (new token, renamed variable, new semantic mapping), update
   the appropriate file there (`colour.css`, `fields.css`, `font.css`, `ui.css`) directly — do not

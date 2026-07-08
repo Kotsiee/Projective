@@ -9,7 +9,8 @@ export type ButtonVariant =
 	| 'warning'
 	| 'danger'
 	| 'info'
-	| 'link';
+	| 'link'
+	| 'premium';
 
 export type ButtonSize = 'small' | 'medium' | 'large';
 

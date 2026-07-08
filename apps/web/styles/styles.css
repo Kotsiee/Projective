@@ -11,6 +11,10 @@
    client — so this must live in the always-loaded global sheet. */
 @import '../features/auth/styles/pages/auth-shell.css';
 
+/* Global public footer — rendered by the public layout (a server component), so its
+   CSS must live in the always-loaded global sheet, not an island bundle. */
+@import '../features/navigation/styles/components/footer/footer.public.css';
+
 /* 1. GLOBAL BOX MODEL FIX
    This ensures that width: 100% INCLUDES padding, 
    stopping elements from bleeding off the screen horizontally. */
