@@ -78,6 +78,7 @@ export default defineConfig({
 			'@utils': path.resolve(ROOT, 'apps/web/utils.ts'),
 
 			'@projective/backend': path.resolve(ROOT, 'packages/backend/mod.ts'),
+			'@projective/ui/skeletons': path.resolve(ROOT, 'packages/ui/skeletons.ts'),
 			'@projective/ui': path.resolve(ROOT, 'packages/ui/mod.ts'),
 			'@projective/utils': path.resolve(ROOT, 'packages/utils/mod.ts'),
 			'@projective/types': path.resolve(ROOT, 'packages/types/mod.ts'),

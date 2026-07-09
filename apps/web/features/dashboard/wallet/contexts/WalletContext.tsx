@@ -34,7 +34,6 @@ import {
 	WALLET_FX,
 	type WalletDataset,
 } from '../contracts/Wallet.ts';
-import { WALLET_DATASET } from '../data/walletSeed.ts';
 
 const UPDATED_AT = '2026-07-05T12:00:00.000Z';
 
@@ -64,9 +63,14 @@ export interface WalletState {
 export const WalletStateContext = createContext<WalletState | null>(null);
 
 export function WalletProvider(
-	{ children, dataset = WALLET_DATASET }: {
+	{ children, dataset }: {
 		children: ComponentChildren;
-		dataset?: WalletDataset;
+		/**
+		 * The wallet seed, owned by the server route/layout and passed down as `initialData` (see
+		 * apps/web/CLAUDE.md — data flows Route → props → island). Kept out of the island bundle so
+		 * the provider imports no data module directly.
+		 */
+		dataset: WalletDataset;
 	},
 ) {
 	const personas = dataset.personas;

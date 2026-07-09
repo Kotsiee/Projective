@@ -130,6 +130,8 @@ export async function subscribeMessages(
 								avatarUrl: profile?.avatar_url,
 							},
 							attachments: mappedAttachments,
+							piiMasked: newMsg.pii_masked ?? false,
+							piiCategories: newMsg.pii_categories ?? [],
 						};
 
 						console.log(`[Realtime] ${eventType} Hydrated:`, eventData.id);

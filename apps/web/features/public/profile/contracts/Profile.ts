@@ -79,6 +79,12 @@ export interface ProfileMeta {
 	baseRate: string;
 	memberSince: string;
 	ratings: RatingByRole;
+	/**
+	 * Live resource allocation (spec §"Resource Allocation" §2/§3): the freelancer's current summed
+	 * Workload Intensity (W_i) and their concurrency cap, rendered as the Workload Capacity Gauge.
+	 * Optional — only person profiles carry it.
+	 */
+	workload?: { current: number; cap: number };
 }
 // #endregion
 

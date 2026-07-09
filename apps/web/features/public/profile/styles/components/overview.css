@@ -253,6 +253,20 @@
 }
 
 /* Languages — plain text + fluency */
+.pmeta-workload {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.pmeta-workload__label {
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted);
+}
+
 .pmeta-langs {
 	display: flex;
 	flex-direction: column;

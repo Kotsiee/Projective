@@ -13,7 +13,6 @@ import { useEffect } from 'preact/hooks';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import { ProfileContext, ProfileProvider, useProfileContext } from '../contexts/ProfileContext.tsx';
 import type { ProfileData } from '../contracts/Profile.ts';
-import { mockProfile } from '../data/mockProfile.ts';
 
 import ProfileSideRail from '../components/rail/ProfileSideRail.tsx';
 import ProfileEditFooter from '../components/edit/ProfileEditFooter.tsx';
@@ -61,16 +60,16 @@ function AvailabilityInner() {
 }
 
 export interface AvailabilityIslandProps {
-	profile?: ProfileData;
+	/** Resolved by the server route (apps/web/CLAUDE.md — data flows Route → props → island). */
+	profile: ProfileData;
 	isSelf?: boolean;
 }
 
 export default function AvailabilityIsland(
 	{ profile, isSelf = false }: AvailabilityIslandProps,
 ) {
-	const data = profile ?? mockProfile;
 	return (
-		<ProfileProvider profile={data} isSelf={isSelf}>
+		<ProfileProvider profile={profile} isSelf={isSelf}>
 			<AvailabilityInner />
 		</ProfileProvider>
 	);

@@ -17,6 +17,85 @@
 	gap: 12px;
 }
 
+/* Freelancer-only capacity card (Workload Capacity Gauge). */
+.stage-staffing__capacity {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	max-width: 560px;
+	padding: 14px 16px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+}
+
+.stage-staffing__capacity-note {
+	margin: 0;
+	font-size: 0.78rem;
+	line-height: 1.4;
+	color: var(--text-muted);
+}
+
+/* Owner assignment-routing picker. */
+.stage-staffing__routing {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	max-width: 560px;
+	padding: 14px 16px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--card);
+}
+
+.stage-staffing__routing-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-secondary);
+}
+
+.stage-staffing__modes {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.stage-staffing__mode {
+	padding: 0.4rem 0.75rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.82rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: border-color var(--fast), color var(--fast), background var(--fast);
+}
+
+.stage-staffing__mode:hover:not(:disabled) {
+	border-color: color-mix(in srgb, var(--primary) 55%, var(--border-color));
+	color: var(--text-main);
+}
+
+.stage-staffing__mode--active {
+	border-color: var(--primary);
+	background: var(--primary-surface, color-mix(in srgb, var(--primary) 12%, transparent));
+	color: var(--primary);
+	cursor: default;
+}
+
+.stage-staffing__routing-desc {
+	margin: 0;
+	font-size: 0.78rem;
+	line-height: 1.4;
+	color: var(--text-muted);
+}
+
 .stage-staffing__muted {
 	margin: 0;
 	font-size: 0.875rem;

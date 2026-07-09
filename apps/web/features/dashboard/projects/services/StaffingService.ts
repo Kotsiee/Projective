@@ -68,6 +68,15 @@ export interface ApplyPayload {
 	applicantProfileId: string;
 	message?: string | null;
 }
+
+/** The viewer's live Workload Intensity vs. cap (spec §3), for the Workload Capacity Gauge. */
+export interface WorkloadCapacityDTO {
+	current: number;
+	cap: number;
+	ratio: number | null;
+	ticket_count: number;
+	project_current: number | null;
+}
 // #endregion
 
 const base = (projectId: string, stageId: string) =>
@@ -120,6 +129,12 @@ export class StaffingService {
 			body: JSON.stringify(payload),
 		});
 		return unwrap<SeatApplicationDTO>(res, 'Failed to apply');
+	}
+
+	/** The viewing freelancer's live workload capacity (global + this project), for the gauge. */
+	static async getMyCapacity(projectId: string): Promise<WorkloadCapacityDTO | null> {
+		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/workload`);
+		return unwrap<WorkloadCapacityDTO | null>(res, 'Failed to load workload capacity');
 	}
 
 	/** Accepts an application → atomically assigns the applicant to the stage (conflict-guarded). */

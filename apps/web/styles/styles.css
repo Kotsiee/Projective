@@ -15,6 +15,16 @@
    CSS must live in the always-loaded global sheet, not an island bundle. */
 @import '../features/navigation/styles/components/footer/footer.public.css';
 
+/* Business admin dashboard (US-008). The overview is now server-rendered (route +
+   static presentational components), so its CSS must live in the always-loaded
+   global sheet rather than an island bundle. */
+@import '../features/dashboard/overview/styles/overview.css';
+
+/* Business list + profile settings (US-008). Both pages now server-render their static
+   chrome (headers, cards) around atomic islands, so their CSS lives in the global sheet. */
+@import '../features/dashboard/business/styles/pages/business-island.css';
+@import '../features/dashboard/business/styles/business-settings.css';
+
 /* 1. GLOBAL BOX MODEL FIX
    This ensures that width: 100% INCLUDES padding, 
    stopping elements from bleeding off the screen horizontally. */

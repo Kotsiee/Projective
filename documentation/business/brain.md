@@ -406,23 +406,36 @@ context without "ping fatigue."
 - **Participants:** Only members of a specific Team.
 - **Logic:** If multiple teams are hired for one project, each team receives a separate, private
   channel. The Client cannot see these messages.
+- **Access Control:** Talent-side only — an assigned freelancer or an active member of an assigned
+  team. The client/owner is locked out. (Enforced by `comms.can_access_scope` on the `team_private`
+  scope, at the channel-open RPC and in the comms row-level-security policies, so the channel never
+  leaks over the realtime stream.)
 - **Purpose:** Internal strategy, peer review, and task delegation.
 
 ##### D. Business Channels (Private - Client Side)
 
 - **Scope:** Internal to the Client's Business.
-- **Participants:** Only members of the Business entity.
+- **Participants:** Only verified (active) members of the Business entity, plus the project owner.
 - **Logic:** This channel is hidden from all freelancers.
+- **Access Control:** Client-side only — the project owner or an active member of the paying client
+  business (`projects.can_review_project`). (Enforced by `comms.can_access_scope` on the
+  `business_private` scope in the comms RLS policies.)
 - **Purpose:** Budget discussions, internal stakeholder alignment, and freelancer performance
   reviews.
 
 #### 3. Technical Implementation: The "Handover" State
 
-Architecturally, the `MessageService` tracks the `ProjectStatus`.
+The protected phase is tracked at the project level by `projects.handover_unlocked_at` (NULL while
+protected; a timestamp once unlocked), read via `projects.is_protected_phase`.
 
-1. **`status: active`**: The PII Filter (Regex/AI) scans every message payload. If a match is found,
-   the message is flagged or blocked.
-2. **`status: completed`**: The filter is disabled for that specific project thread, allowing for
+1. **Protected (`handover_unlocked_at IS NULL`)**: A `BEFORE INSERT` trigger on stage messages
+   (`comms.mask_pii`) scans every payload and **masks + flags** any email address, external phone
+   number, or third-party payment link/handle (the row is stored with a `[… hidden]` placeholder and
+   `pii_masked = true`). Enforcement lives in SQL so it cannot be bypassed via direct writes; the
+   `@projective/backend` `PIIFilter` mirrors the same rules for instant client feedback.
+2. **The "Projective Unlock" (`handover_unlocked_at` set)**: When the **final escrow releases**
+   (`projects.approve_stage` settles the last stage) — or the project is force-completed — the filter
+   switches off for that project's threads and the full, unrestricted file library unlocks, allowing
    the "Contact Handover."
 
 ---
@@ -661,9 +674,12 @@ and ensure accountability.
     caps.
   - **Escrow Lock:** The ticket-specific escrow is committed to that freelancer.
 - **In Progress (The Commitment):** The freelancer moves the ticket to "Doing."
-- **Claim Expiry (TTL):** To prevent "Ticket Parking," claimed tickets have a Time-To-Live. If no
-  activity is detected (task check-ins or file uploads) before the TTL expires, the ticket is
-  auto-released back to the backlog.
+- **Claim Expiry (TTL):** To prevent "Ticket Parking," claimed tickets have a Time-To-Live
+  (`claim_ttl_minutes`, default 24h). If no commitment is detected before the TTL expires, the
+  `projects.fn_release_expired_claims` sweep auto-releases the ticket back to the backlog. A parked
+  claim earns nothing: any escrow held at claim is **refunded to the client in full** and the
+  freelancer is paid $0 — deliberately distinct from a mid-work removal (see "Freelancer Removal
+  Mid-Ticket"), where the freelancer is compensated.
 
 #### 2. The Weighting Engine (Workload Intensity)
 
@@ -694,13 +710,20 @@ Clients can refine the intensity of a specific ticket using Difficulty Multiplie
 
 #### 3. Concurrency Limits
 
-To maintain platform health, the system enforces limits at two layers:
+To maintain platform health, the system enforces limits at two layers. Both are expressed as a sum
+of Workload Intensity ($W_i$) and are validated by `projects.check_ticket_capacity` before **any**
+claim or assignment; a violation raises a clean, user-facing error rather than silently over-loading
+the freelancer:
 
-1. **Project Hard Cap:** Set by the Client/Business for a specific stage. It limits how many tickets
-   a freelancer can hold _within that project_ (e.g., "Max 2 active tickets").
-2. **Global Soft Cap:** A platform-wide limit based on the freelancer's total $W_i$ across all
-   projects. If a freelancer is at their global limit, they cannot claim new tickets anywhere until
-   they submit current work
+1. **Project Hard Cap:** Set by the Client/Business on a stage
+   (`project_stages.max_concurrent_intensity`, `NULL` = unlimited) — the max summed $W_i$ a single
+   freelancer may hold concurrently within that stage (a cap of `2.0` == "max two standard-weight
+   tickets").
+2. **Global Soft Cap:** The max summed $W_i$ a freelancer may hold across all projects
+   (`org.freelancer_profiles.max_workload_intensity`, falling back to the
+   `global_workload_cap_default` platform parameter). At the global limit they cannot claim new
+   tickets anywhere until they submit current work. The live figure feeds the **Workload Capacity
+   Gauge** via `projects.get_workload_capacity`.
 
 #### 4. Assignment Modes
 
@@ -714,6 +737,18 @@ Clients can configure how work is distributed within a stage:
 - **Parallel Stream (One-Offs):** In one-off projects, all freelancers work on the stage objectives
   simultaneously. Payouts are tied to their individual seat contracts rather than specific ticket
   units.
+
+> **Implementation:** a stage's `assignment_mode` (`projects.assignment_routing_mode` enum:
+> `open_pull` | `round_robin` | `manual` | `parallel_stream`, set via
+> `projects.set_stage_assignment_mode`) governs routing. Self-claim (`projects.claim_ticket`) is
+> permitted **only** in `open_pull`; the other modes route through owner/system RPCs —
+> `auto_assign_round_robin` (next ready ticket → the capacity-cleared roster member with the lowest
+> current $W_i$), `assign_ticket_manual` (owner pin, override), and `assign_parallel_stream` (fan
+> the stage's ready tickets across the roster for concurrent execution). Every path funnels through
+> `projects.fn_assign_ticket_core`, so the concurrency caps above are always enforced. The owner
+> selects the mode — and triggers a round-robin / parallel-stream pass — from the **Assignment
+> routing** control in the stage's Staffing tab; the current mode is surfaced through
+> `projects.get_stage_details`.
 
 #### 5. Ticket Lifecycle & Business Rules
 

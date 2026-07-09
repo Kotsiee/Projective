@@ -18,6 +18,8 @@ export * from './src/components/icon/index.ts';
 export * from './src/components/media/index.ts';
 export * from './src/components/badge/index.ts';
 export * from './src/components/metric/index.ts';
+export * from './src/components/channel-tabs/index.ts';
+export * from './src/components/pii-notice/index.ts';
 export * from './src/components/ledger/index.ts';
 export * from './src/hooks/useRipple.ts';
 export * from './src/hooks/useWizard.tsx';

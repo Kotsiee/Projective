@@ -35,19 +35,18 @@ tree.
 
 ## Master Epic Board
 
-| ⬜ Todo                          | 🟡 In Progress                       | ✅ Done                    |
-| :------------------------------- | :----------------------------------- | :------------------------- |
-| E9 · Marketplace & IP Governance | E0 · Platform Foundation & Security  | _(no epic fully complete)_ |
-| E10 · Dispute Resolution         | E1 · Identity, Access & Onboarding   |                            |
-| E11 · Sessions & Scheduling      | E2 · Organizational Structures       |                            |
-| E12 · Compliance, Taxes & Legal  | E3 · Project & Stage Engine          |                            |
-|                                  | E4 · Resource Allocation & Ticketing |                            |
-|                                  | E5 · Hiring & Negotiation            |                            |
-|                                  | E6 · Finance, Escrow & Wallets       |                            |
-|                                  | E7 · Collaboration & Communications  |                            |
-|                                  | E8 · Discovery & Reputation          |                            |
+| ⬜ Todo                          | 🟡 In Progress                       | ✅ Done                               |
+| :------------------------------- | :----------------------------------- | :------------------------------------ |
+| E9 · Marketplace & IP Governance | E0 · Platform Foundation & Security  | E7 · Collaboration & Communications   |
+| E10 · Dispute Resolution         | E1 · Identity, Access & Onboarding   |                                       |
+| E11 · Sessions & Scheduling      | E2 · Organizational Structures       |                                       |
+| E12 · Compliance, Taxes & Legal  | E3 · Project & Stage Engine          |                                       |
+|                                  | E4 · Resource Allocation & Ticketing |                                       |
+|                                  | E5 · Hiring & Negotiation            |                                       |
+|                                  | E6 · Finance, Escrow & Wallets       |                                       |
+|                                  | E8 · Discovery & Reputation          |                                       |
 
-**Snapshot:** 0 epics done · 9 in progress · 4 todo. The platform's **transactional core** (auth,
+**Snapshot:** 1 epic done · 8 in progress · 4 todo. The platform's **transactional core** (auth,
 projects, stages, tickets, escrow SQL engine, messaging, files, search) is materially built; the
 **trust, commerce, and compliance layers** (disputes, marketplace, sessions, KYC/tax) are largely
 unstarted. The **guest presentation shell** (glass navbar with live search + light/dark toggle,

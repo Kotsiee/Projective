@@ -97,6 +97,71 @@ export class StagesServiceBackend {
 	}
 	// #endregion
 
+	// #region Assignment routing (spec §"Assignment Modes")
+	/**
+	 * Sets how a stage distributes work via `projects.set_stage_assignment_mode` (0310). Owner-only
+	 * (SQL-enforced by `can_review_project`). Modes: `open_pull` (freelancers self-claim), `round_robin`
+	 * (system routes to the lowest-$W_i$ member), `manual` (owner pins), `parallel_stream` (one-off
+	 * fan-out).
+	 *
+	 * @param _projectId - Owning project id (route scoping; the RPC is keyed on the stage).
+	 * @param stageId - Stage to configure.
+	 * @param mode - Target routing mode.
+	 * @param req - Caller request, for user-scoped RLS.
+	 */
+	static async setAssignmentMode(
+		_projectId: string,
+		stageId: string,
+		mode: 'open_pull' | 'round_robin' | 'manual' | 'parallel_stream',
+		req?: Request,
+	) {
+		const supabase = await supabaseClient(req);
+		const { error } = await supabase
+			.schema('projects')
+			.rpc('set_stage_assignment_mode', { p_stage_id: stageId, p_mode: mode });
+		if (error) throw error;
+		return { success: true, mode };
+	}
+
+	/**
+	 * Runs the stage's automatic routing pass (owner-triggered). `round_robin` assigns the next ready
+	 * ticket to the lowest-loaded eligible member (`projects.auto_assign_round_robin`); `parallel_stream`
+	 * fans every ready ticket across the roster for concurrent execution (`projects.assign_parallel_stream`).
+	 * Both enforce the concurrency caps. A no-op for the pull/manual modes.
+	 *
+	 * @param _projectId - Owning project id (route scoping; the RPCs are keyed on the stage).
+	 * @param stageId - Stage to auto-assign within.
+	 * @param mode - The stage's current routing mode (drives which RPC runs).
+	 * @param req - Caller request, for user-scoped RLS.
+	 * @returns `{ mode, assigned }` — for round-robin, `assigned` is the RPC verdict object; for
+	 *          parallel-stream it is the count of tickets distributed.
+	 */
+	static async autoAssign(
+		_projectId: string,
+		stageId: string,
+		mode: 'open_pull' | 'round_robin' | 'manual' | 'parallel_stream',
+		req?: Request,
+	) {
+		const supabase = await supabaseClient(req);
+
+		if (mode === 'round_robin') {
+			const { data, error } = await supabase
+				.schema('projects')
+				.rpc('auto_assign_round_robin', { p_stage_id: stageId });
+			if (error) throw error;
+			return { mode, assigned: data };
+		}
+		if (mode === 'parallel_stream') {
+			const { data, error } = await supabase
+				.schema('projects')
+				.rpc('assign_parallel_stream', { p_stage_id: stageId });
+			if (error) throw error;
+			return { mode, assigned: data as number };
+		}
+		throw new Error('Auto-assign is only available in round-robin or parallel-stream mode.');
+	}
+	// #endregion
+
 	// #region Reorder
 	/**
 	 * Reorders stages atomically via `projects.reorder_stages`. Ticket sort order is independent

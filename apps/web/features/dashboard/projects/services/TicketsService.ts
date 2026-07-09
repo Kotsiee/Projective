@@ -90,13 +90,17 @@ export class TicketsService {
 		projectId: string,
 		ticketId: string,
 		reason: string,
+		reportedIntensity?: number,
 	): Promise<void> {
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/tickets/${ticketId}/report`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
-			body: JSON.stringify({ reason }),
+			body: JSON.stringify({ reason, reported_intensity: reportedIntensity }),
 		});
-		if (!res.ok) throw new Error(`Failed to report ticket`);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to file workload report');
+		}
 	}
 
 	static async purchaseTicket(

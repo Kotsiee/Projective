@@ -140,6 +140,7 @@
 		"supabaseClient": "npm:@supabase/supabase-js@2.76.1",
 		"packages/": "./packages/",
 		"@projective/backend": "./packages/backend/mod.ts",
+		"@projective/ui/skeletons": "./packages/ui/skeletons.ts",
 		"@projective/ui": "./packages/ui/mod.ts",
 		"@projective/utils": "./packages/utils/mod.ts",
 		"@projective/types": "./packages/types/mod.ts",

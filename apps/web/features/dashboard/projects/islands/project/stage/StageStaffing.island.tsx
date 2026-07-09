@@ -8,8 +8,11 @@ import {
 	type OpenSeatDTO,
 	StaffingService,
 	type StageStaffingDTO,
+	type WorkloadCapacityDTO,
 } from '../../../services/StaffingService.ts';
+import { StagesService } from '../../../services/StagesService.ts';
 import {
+	type AssignmentMode,
 	type SeatDraftModel,
 	StageStaffingPanel,
 } from '../../../components/project/stage/staffing/StageStaffingPanel.tsx';
@@ -25,6 +28,10 @@ export interface StageStaffingIslandProps {
 	canManage: boolean;
 	/** The viewing freelancer's own profile id, if they are a freelancer (enables Apply). */
 	currentFreelancerId?: string | null;
+	/** The stage's current assignment routing mode (drives the owner picker). */
+	assignmentMode?: AssignmentMode;
+	/** Called after the routing mode changes so the parent can re-fetch the stage. */
+	onStageChanged?: () => void | Promise<void>;
 	/** Optional server-hydrated initial staffing payload (Route → Service → Island, one-way). */
 	initialData?: StageStaffingDTO | null;
 }
@@ -39,12 +46,23 @@ export interface StageStaffingIslandProps {
  * StageStaffingPanel (which composes the shared RosterCard / StatusSlider primitives).
  */
 export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
-	const { projectId, stageId, stageStatus, canManage, currentFreelancerId, initialData } = props;
+	const {
+		projectId,
+		stageId,
+		stageStatus,
+		canManage,
+		currentFreelancerId,
+		assignmentMode,
+		onStageChanged,
+		initialData,
+	} = props;
 
 	const staffing = useSignal<StageStaffingDTO | null>(initialData ?? null);
 	const loading = useSignal(!initialData);
 	const busy = useSignal(false);
 	const error = useSignal<string | null>(null);
+	// The viewing freelancer's own capacity, for the Workload Capacity Gauge (spec §3).
+	const myCapacity = useSignal<WorkloadCapacityDTO | null>(null);
 
 	const seatDraft: SeatDraftModel = {
 		description: useSignal(''),
@@ -65,6 +83,12 @@ export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
 
 	useEffect(() => {
 		if (!initialData) void refresh();
+		// Only a freelancer viewer has a workload to gauge; owners/clients skip the fetch.
+		if (currentFreelancerId) {
+			StaffingService.getMyCapacity(projectId)
+				.then((cap) => (myCapacity.value = cap))
+				.catch(() => {/* non-fatal: the gauge simply stays hidden */});
+		}
 	}, []);
 
 	const onCreateSeat = async () => {
@@ -115,6 +139,43 @@ export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
 		}
 	};
 
+	const onSetMode = async (mode: AssignmentMode) => {
+		busy.value = true;
+		try {
+			await StagesService.setAssignmentMode(projectId, stageId, mode);
+			toast.success('Assignment routing updated.');
+			// Re-fetch the stage so the picker reflects the new mode, then refresh staffing.
+			await onStageChanged?.();
+			await refresh();
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			busy.value = false;
+		}
+	};
+
+	const onAutoAssign = async () => {
+		if (assignmentMode !== 'round_robin' && assignmentMode !== 'parallel_stream') return;
+		busy.value = true;
+		try {
+			const res = await StagesService.autoAssign(projectId, stageId, assignmentMode);
+			if (assignmentMode === 'parallel_stream') {
+				const n = typeof res.assigned === 'number' ? res.assigned : 0;
+				if (n > 0) toast.success(`Distributed ${n} ticket${n === 1 ? '' : 's'} across the roster.`);
+				else toast.error('No ready tickets could be distributed.');
+			} else {
+				const r = res.assigned ?? {};
+				if (r.assigned) toast.success('Assigned the next ticket to the lowest-loaded member.');
+				else toast.error(r.reason || 'No ticket could be assigned.');
+			}
+			await refresh();
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			busy.value = false;
+		}
+	};
+
 	return (
 		<StageStaffingPanel
 			staffing={staffing.value}
@@ -123,11 +184,15 @@ export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
 			canManage={canManage}
 			stageStatus={stageStatus}
 			currentFreelancerId={currentFreelancerId}
+			myCapacity={myCapacity.value}
+			assignmentMode={assignmentMode}
 			seatDraft={seatDraft}
 			busy={busy.value}
 			onCreateSeat={onCreateSeat}
 			onApply={onApply}
 			onAssign={onAssign}
+			onSetMode={onSetMode}
+			onAutoAssign={onAutoAssign}
 		/>
 	);
 }
@@ -143,7 +208,7 @@ export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
  * freelancer gets their own profile id so the per-seat Apply affordance is enabled (US-004).
  */
 export default function StageStaffingRoute(): JSX.Element {
-	const { stage } = useStageContext();
+	const { stage, refresh } = useStageContext();
 	const s = stage.value;
 
 	if (!s) {
@@ -167,6 +232,8 @@ export default function StageStaffingRoute(): JSX.Element {
 			stageStatus={s.status}
 			canManage={canManage}
 			currentFreelancerId={currentFreelancerId}
+			assignmentMode={s.assignment_mode}
+			onStageChanged={refresh}
 		/>
 	);
 }

@@ -1,5 +1,13 @@
-import '../styles/pages/business-island.css';
+/**
+ * @file BusinessList.island.tsx
+ * @description Atomic island for the Businesses list: the search toolbar + the virtualized,
+ * paginated `DataDisplay` grid (live search over `/api/v1/dashboard/business`). Only the
+ * interactive surface lives here — the static page header is server-rendered by the route. The
+ * grid's own `RestDataSource` owns its windowed fetching/pagination model.
+ */
 
+// business-island.css is loaded globally (styles.css) — the page header is server-rendered, so a
+// CSS import here (an island bundle) is not where this stylesheet belongs.
 import { useMemo } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import { IconPlus, IconSearch } from '@tabler/icons-preact';
@@ -9,10 +17,9 @@ import { Button } from '@projective/ui';
 import { DashboardBusiness } from '../contracts/Business.ts';
 import { BusinessCard } from '../components/BusinessCard.tsx';
 
-export default function BusinessesIsland() {
+export default function BusinessListIsland() {
 	const searchQuery = useSignal('');
 
-	// DataSource configuration for the Businesses API
 	const dataSource = useMemo(() => {
 		return new RestDataSource<DashboardBusiness, DashboardBusiness>({
 			url: '/api/v1/dashboard/business',
@@ -33,16 +40,7 @@ export default function BusinessesIsland() {
 	};
 
 	return (
-		<div className='business-island'>
-			{/* Page Header */}
-			<div className='business-island__page-header'>
-				<h1>Businesses</h1>
-				<p>
-					Manage your legal entities, billing profiles, and client relationships.
-				</p>
-			</div>
-
-			{/* Controls Toolbar */}
+		<>
 			<div className='business-island__toolbar'>
 				<div className='business-island__controls'>
 					<div className='business-island__search'>
@@ -69,7 +67,6 @@ export default function BusinessesIsland() {
 				</div>
 			</div>
 
-			{/* Data Grid */}
 			<div className='business-island__content'>
 				<DataDisplay<DashboardBusiness, DashboardBusiness>
 					dataSource={dataSource}
@@ -83,6 +80,6 @@ export default function BusinessesIsland() {
 					scrollMode='window'
 				/>
 			</div>
-		</div>
+		</>
 	);
 }

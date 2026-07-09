@@ -361,6 +361,30 @@ export class TicketsServiceBackend {
 		if (error) throw error;
 		return data ?? [];
 	}
+
+	/**
+	 * The caller's live Workload Intensity (W_i) against their concurrency cap (spec §3), for the
+	 * Workload Capacity Gauge. Returns the global figure plus a project-scoped `project_current`.
+	 * Backed by `projects.get_workload_capacity` (mig 0310); `p_user_id` defaults to auth.uid().
+	 *
+	 * @param projectId - Project to scope the project-local W_i figure to.
+	 * @param req - Caller request, for user-scoped RLS / auth.uid().
+	 */
+	static async getWorkloadCapacity(projectId: string, req?: Request) {
+		const supabase = await supabaseClient(req);
+		const { data, error } = await supabase
+			.schema('projects')
+			.rpc('get_workload_capacity', { p_project_id: projectId });
+		if (error) throw error;
+		return data as {
+			user_id: string;
+			current: number;
+			cap: number;
+			ratio: number | null;
+			ticket_count: number;
+			project_current: number | null;
+		} | null;
+	}
 	// #endregion
 
 	// #region Deletion (Force Majeure)
@@ -404,31 +428,20 @@ export class TicketsServiceBackend {
 	) {
 		const supabase = await supabaseClient(req);
 
-		const { data: { user } } = await supabase.auth.getUser();
-		if (!user) throw new Error('Authentication required to file a workload report.');
-
-		const { data: ticket } = await supabase
+		// Single clean endpoint: `projects.file_workload_report` (mig 0310) captures the ticket's
+		// current intensity, binds the reporter to auth.uid(), and runs under invoker rights so the
+		// "File workload report" RLS policy (0204) still restricts filing to the ticket's assignee.
+		// Its AFTER-INSERT trigger evicts the ticket and opens the 48h hidden window.
+		const { data: reportId, error } = await supabase
 			.schema('projects')
-			.from('tickets')
-			.select('workload_intensity')
-			.eq('id', ticketId)
-			.single();
-
-		const { data: report, error } = await supabase
-			.schema('projects')
-			.from('ticket_workload_reports')
-			.insert({
-				ticket_id: ticketId,
-				reporter_user_id: user.id,
-				claimed_intensity: ticket?.workload_intensity ?? null,
-				reported_intensity: input.reported_intensity ?? null,
-				reason: input.reason,
-			})
-			.select()
-			.single();
+			.rpc('file_workload_report', {
+				p_ticket_id: ticketId,
+				p_reason: input.reason,
+				p_reported_intensity: input.reported_intensity ?? null,
+			});
 
 		if (error) throw error;
-		return report;
+		return { id: reportId as string };
 	}
 	// #endregion
 

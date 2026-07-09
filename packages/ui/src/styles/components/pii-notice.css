@@ -1,0 +1,80 @@
+/**
+ * PiiNotice — inline amber warning shown under a masked message (E7 protected phase). A single
+ * `--pii-accent` drives the icon, border and chip tint, so the tone re-themes with the palette.
+ */
+.pii-notice {
+	--pii-accent: var(--amber, var(--warning));
+
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+	padding: 0.4rem 0.65rem;
+	background: color-mix(in srgb, var(--pii-accent) 12%, transparent);
+	border-left: 2px solid var(--pii-accent);
+	border-radius: var(--border-radius__small, 4px);
+	font-size: 0.78rem;
+	color: var(--text-secondary);
+	animation: pii-notice-in var(--medium, 350ms) var(--ease-out, ease-out) both;
+}
+
+@keyframes pii-notice-in {
+	from {
+		opacity: 0;
+		transform: translateY(-2px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.pii-notice__icon {
+	display: inline-flex;
+	align-items: center;
+	flex: 0 0 auto;
+	color: var(--pii-accent);
+}
+
+.pii-notice__text {
+	line-height: 1.3;
+}
+
+.pii-notice__chips {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+.pii-notice__chip {
+	padding: 0.1rem 0.4rem;
+	background: color-mix(in srgb, var(--pii-accent) 16%, transparent);
+	border-radius: 999px;
+	font-size: 0.66rem;
+	font-weight: 600;
+	line-height: 1.2;
+	color: color-mix(in srgb, var(--pii-accent) 78%, var(--text-main));
+	white-space: nowrap;
+}
+
+/* #region Compact */
+.pii-notice--compact {
+	flex-wrap: nowrap;
+	gap: 0.35rem;
+	padding: 0.22rem 0.5rem;
+	font-size: 0.72rem;
+}
+
+.pii-notice--compact .pii-notice__text {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+/* #endregion */
+
+@media (prefers-reduced-motion: reduce) {
+	.pii-notice {
+		animation: none;
+	}
+}

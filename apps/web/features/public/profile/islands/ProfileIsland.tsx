@@ -16,7 +16,6 @@ import { useEffect, useRef } from 'preact/hooks';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import { ProfileContext, ProfileProvider, useProfileContext } from '../contexts/ProfileContext.tsx';
 import type { ProfileData, ProfileTabKey } from '../contracts/Profile.ts';
-import { mockProfile } from '../data/mockProfile.ts';
 
 import ProfileBanner from '../components/header/ProfileBanner.tsx';
 import ProfileHeader from '../components/header/ProfileHeader.tsx';
@@ -148,7 +147,8 @@ function ProfileInner() {
 
 // #region Public export
 export interface ProfileIslandProps {
-	profile?: ProfileData;
+	/** Resolved by the server route (apps/web/CLAUDE.md — data flows Route → props → island). */
+	profile: ProfileData;
 	isSelf?: boolean;
 	startInEdit?: boolean;
 }
@@ -156,10 +156,8 @@ export interface ProfileIslandProps {
 export default function ProfileIsland(
 	{ profile, isSelf = false, startInEdit = false }: ProfileIslandProps,
 ) {
-	// The route may pass a resolved profile; fall back to the frontend seed.
-	const data = profile ?? mockProfile;
 	return (
-		<ProfileProvider profile={data} isSelf={isSelf} startInEdit={startInEdit}>
+		<ProfileProvider profile={profile} isSelf={isSelf} startInEdit={startInEdit}>
 			<ProfileInner />
 		</ProfileProvider>
 	);

@@ -1,5 +1,9 @@
-import BusinessesIslandWrapper from '../(_islands)/BusinessIslandWrapper.tsx';
+import NewBusinessIsland from '@features/dashboard/business/islands/NewBusiness.tsx';
 
-export default function Business() {
-	return <BusinessesIslandWrapper />;
+/**
+ * `/business/new` — the multi-step business creation wizard. The wizard owns its own form state
+ * provider, so the route renders the island directly.
+ */
+export default function NewBusinessRoute() {
+	return <NewBusinessIsland />;
 }

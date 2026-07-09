@@ -204,7 +204,17 @@ export async function sendMessage(
 			if (linkError) return fail('500', 'Message created but attachments failed', 500);
 		}
 
-		return ok({ id: msg.id, channelId: finalChannelId, timestamp: msg.created_at });
+		// The BEFORE INSERT PII trigger (mig 0311) may have masked `body` and set the flags during a
+		// project's protected phase; `.select()` returns the post-trigger row, so echo the masked body
+		// and flags back to the sender's optimistic message.
+		return ok({
+			id: msg.id,
+			channelId: finalChannelId,
+			timestamp: msg.created_at,
+			body: msg.body,
+			piiMasked: msg.pii_masked ?? false,
+			piiCategories: msg.pii_categories ?? [],
+		});
 	} catch (err) {
 		const n = normaliseUnknownError(err);
 		return fail(n.code, n.message, 500);

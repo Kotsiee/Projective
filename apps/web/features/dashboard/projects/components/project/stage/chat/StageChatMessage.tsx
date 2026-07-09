@@ -22,6 +22,7 @@ import {
 	Avatar,
 	FileTypeIcon,
 	type LightboxMedia,
+	PiiNotice,
 	Popover,
 	toast,
 } from '@projective/ui';
@@ -243,6 +244,9 @@ export default function ChatMessage(
 					<div class='chat-msg__bubble'>
 						<MessageAttachments message={message} onDelete={onDelete} />
 						{hasText && <div class='chat-msg__text'>{message.text}</div>}
+						{message.piiMasked && (
+							<PiiNotice categories={message.piiCategories} compact />
+						)}
 						{isSelf && <span class='chat-msg__self-time'>{formatTime(message.timestamp)}</span>}
 					</div>
 

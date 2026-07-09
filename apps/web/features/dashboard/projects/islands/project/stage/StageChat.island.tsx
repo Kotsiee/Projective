@@ -8,10 +8,33 @@ import { getCsrfToken } from '@projective/utils';
 import { generateBlurhash } from '@/utils/processors/blurhash.ts';
 import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { effect, untracked, useSignal } from '@preact/signals';
-import { IconMessages } from '@tabler/icons-preact';
+import { IconBuildingSkyscraper, IconMessages, IconUsers } from '@tabler/icons-preact';
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import ChatMessageInput from '@features/dashboard/projects/components/project/stage/chat/StageChatMessageInput.tsx';
 import { FileWithMeta } from '@projective/types';
+import type { JSX } from 'preact';
+import { type ChannelTab, ChannelTabs, FileHandoverCard } from '@projective/ui';
+import { HandoverLibrary, type HandoverLibraryFile } from '@projective/files';
+import type { StageChannelSummary } from '@features/shared/services/comms/getStageChannels.ts';
+
+/** Per-scope tab presentation. RLS is the real gate; this is UX only. */
+const SCOPE_META: Record<string, { label: string; icon: () => JSX.Element; lockedHint: string }> = {
+	stage_all: {
+		label: 'General',
+		icon: () => <IconMessages size={15} />,
+		lockedHint: 'You are not a member of this stage room.',
+	},
+	team_private: {
+		label: 'Team',
+		icon: () => <IconUsers size={15} />,
+		lockedHint: 'Only the assigned talent can view the Team channel.',
+	},
+	business_private: {
+		label: 'Business',
+		icon: () => <IconBuildingSkyscraper size={15} />,
+		lockedHint: 'Only the client business can view the Business channel.',
+	},
+};
 
 export default function ProjectChatIsland() {
 	const { stage, refresh } = useStageContext();
@@ -22,9 +45,87 @@ export default function ProjectChatIsland() {
 	const replyingTo = useSignal<ChatMessageData | null>(null);
 	const pendingUploads = useRef(new Map<string, { message: string; files: FileWithMeta[] }>());
 
+	// Private-channel state (General / Team / Business) + the Projective-Unlock handover status.
+	const channels = useSignal<StageChannelSummary[]>([]);
+	const activeChannelId = useSignal<string | null>(null);
+	const handoverUnlockedAt = useSignal<string | null>(null);
+	const libraryFiles = useSignal<HandoverLibraryFile[]>([]);
+
+	// Seed the active channel from the stage's General room so the room works even before (or if) the
+	// scoped-channel fetch resolves.
+	if (activeChannelId.value === null && stage?.value?.channel_id) {
+		activeChannelId.value = stage.value.channel_id;
+	}
+
+	/** Load the three scoped rooms + handover state for this stage. */
+	const fetchChannels = async (stageId: string) => {
+		try {
+			const res = await fetch(`/api/v1/dashboard/comms/channels/stage/${stageId}`);
+			if (!res.ok) return; // e.g. 403 for a non-member — fall back to the General room.
+			const data = await res.json();
+			const list: StageChannelSummary[] = data.channels ?? [];
+			channels.value = list;
+			handoverUnlockedAt.value = data.handoverUnlockedAt ?? null;
+
+			// Keep the current tab if still accessible, else snap to the General room (or first allowed).
+			const stillValid = list.find((c) => c.id === activeChannelId.value && c.accessible);
+			if (!stillValid) {
+				const general = list.find((c) => c.visibility === 'stage_all' && c.accessible);
+				const firstOpen = list.find((c) => c.accessible);
+				activeChannelId.value = (general ?? firstOpen)?.id ?? activeChannelId.value;
+			}
+		} catch {
+			// Network hiccup — the General-room fallback above keeps chat usable.
+		}
+	};
+
+	useEffect(() => {
+		const stageId = stage?.value?.stage_id;
+		if (stageId) fetchChannels(stageId);
+	}, [stage?.value?.stage_id, stage?.value?.channel_id]);
+
+	// Once handover is unlocked, load the stage's shared files for the unrestricted downloader.
+	useEffect(() => {
+		const channelId = activeChannelId.value;
+		if (!handoverUnlockedAt.value || !channelId) return;
+		(async () => {
+			try {
+				const res = await fetch(
+					`/api/v1/dashboard/comms/channels/${channelId}/files?type=channel&limit=100`,
+				);
+				if (!res.ok) return;
+				const data = await res.json();
+				// deno-lint-ignore no-explicit-any
+				libraryFiles.value = (data.items ?? []).map((it: any) => ({
+					id: it.attachment?.id ?? it.id,
+					name: it.attachment?.name ?? 'file',
+					mimeType: it.attachment?.type ?? '',
+					size: it.attachment?.size ?? 0,
+					url: it.attachment?.url,
+					uploadedAt: it.message?.timestamp,
+					senderName: it.message?.sender?.name,
+				}));
+			} catch {
+				// Non-fatal — the confirmation card still renders.
+			}
+		})();
+	}, [handoverUnlockedAt.value, activeChannelId.value]);
+
+	const downloadOne = (f: HandoverLibraryFile) => {
+		if (!f.url) return;
+		const a = document.createElement('a');
+		a.href = f.url;
+		a.download = f.name;
+		a.rel = 'noopener';
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+	};
+	const downloadAll = () => libraryFiles.value.forEach(downloadOne);
+
 	const handleSend = async (message: string, files: FileWithMeta[], retryId?: string) => {
 		const tempId = retryId || crypto.randomUUID();
-		const targetChannel = stage?.value?.channel_id || 'new';
+		const targetChannel = activeChannelId.value || 'new';
 
 		// Optimistic UI
 		if (!retryId) {
@@ -111,14 +212,26 @@ export default function ProjectChatIsland() {
 
 			optimisticMsgs.value = optimisticMsgs.value.map((m) =>
 				m.tempId === tempId
-					? { ...m, id: realMsg.id, status: 'sent', timestamp: realMsg.timestamp }
+					? {
+						...m,
+						id: realMsg.id,
+						status: 'sent',
+						timestamp: realMsg.timestamp,
+						// The server (PII trigger) may have masked contact info during the protected phase.
+						text: realMsg.body ?? m.text,
+						piiMasked: realMsg.piiMasked ?? false,
+						piiCategories: realMsg.piiCategories ?? [],
+					}
 					: m
 			);
 			pendingUploads.current.delete(tempId);
 
 			// Reload the stage so it picks up the freshly-created channel_id and the
 			// realtime data source re-subscribes to it.
-			if (isNewChannel) refresh();
+			if (isNewChannel) {
+				refresh();
+				if (stage?.value?.stage_id) fetchChannels(stage.value.stage_id);
+			}
 		} catch (err) {
 			console.error('Failed to send message:', err);
 			optimisticMsgs.value = optimisticMsgs.value.map((m) =>
@@ -176,13 +289,65 @@ export default function ProjectChatIsland() {
 	}, []);
 
 	const dataSource = useMemo(() => {
-		if (!stage?.value || !stage.value.channel_id) return null;
-		return new ChatNetworkSource(stage.value.channel_id);
-	}, [stage?.value?.channel_id]);
+		if (!activeChannelId.value) return null;
+		return new ChatNetworkSource(activeChannelId.value);
+	}, [activeChannelId.value]);
+
+	// Build the channel tab strip (General / Team / Business), locking scopes the viewer can't access.
+	const tabs: ChannelTab[] = channels.value.map((c) => {
+		const meta = SCOPE_META[c.visibility] ?? { label: c.name, icon: undefined, lockedHint: '' };
+		return {
+			id: c.id,
+			label: meta.label,
+			icon: meta.icon ? meta.icon() : undefined,
+			locked: !c.accessible,
+			lockedHint: meta.lockedHint,
+		};
+	});
+
+	const isUnlocked = !!handoverUnlockedAt.value;
 
 	return (
 		<MediaViewerProvider>
 			<div class='project-chat-island messages-container'>
+				{tabs.length > 1 && (
+					<div class='stage-chat__tabs' style={{ padding: '0 0.75rem' }}>
+						<ChannelTabs
+							tabs={tabs}
+							activeId={activeChannelId.value ?? ''}
+							onSelect={(id) => (activeChannelId.value = id)}
+						/>
+					</div>
+				)}
+
+				{isUnlocked && (
+					<div
+						class='stage-chat__handover'
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							gap: '0.75rem',
+							padding: '0.75rem',
+						}}
+					>
+						<FileHandoverCard
+							projectTitle={stage?.value?.title ?? 'This project'}
+							ipMode={stage?.value?.ip_mode}
+							unlockedAt={handoverUnlockedAt.value ?? undefined}
+							fileCount={libraryFiles.value.length || undefined}
+							onDownloadAll={libraryFiles.value.length ? downloadAll : undefined}
+						/>
+						{libraryFiles.value.length > 0 && (
+							<HandoverLibrary
+								files={libraryFiles.value}
+								onDownload={downloadOne}
+								onDownloadAll={downloadAll}
+								title='Delivered assets'
+							/>
+						)}
+					</div>
+				)}
+
 				<div class='project-chat-island__messages'>
 					{dataSource
 						? (

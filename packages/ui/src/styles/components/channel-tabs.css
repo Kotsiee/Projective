@@ -1,0 +1,89 @@
+/**
+ * ChannelTabs — locked-aware channel strip for stage rooms (E7). Each tab draws its own animated
+ * underline (scaleX from center), so switching tabs reads as a slide without any JS measurement.
+ * All colours come from palette tokens; locked tabs simply dim and lose the affordance.
+ */
+.channel-tabs {
+	display: flex;
+	align-items: stretch;
+	gap: 0.25rem;
+	border-bottom: 1px solid var(--hairline);
+	overflow-x: auto;
+}
+
+.channel-tabs__tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.55rem 0.85rem;
+	background: none;
+	border: none;
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--fast, 150ms) var(--ease-out, ease-out);
+}
+
+/* Sliding underline — collapsed by default, expands from the center when active. */
+.channel-tabs__tab::after {
+	content: '';
+	position: absolute;
+	inset: auto 0.55rem -1px;
+	height: 2px;
+	border-radius: 999px;
+	background: var(--primary);
+	transform: scaleX(0);
+	transform-origin: center;
+	transition:
+		transform var(--fast, 150ms) var(--ease-out, ease-out),
+		background var(--fast, 150ms) var(--ease-out, ease-out);
+}
+
+.channel-tabs__tab:hover:not(:disabled) {
+	color: var(--text-main);
+}
+
+.channel-tabs__tab:focus-visible {
+	outline: none;
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent);
+	border-radius: var(--border-radius__small, 4px);
+}
+
+.channel-tabs__tab--active {
+	color: var(--primary);
+}
+
+.channel-tabs__tab--active::after {
+	transform: scaleX(1);
+}
+
+.channel-tabs__tab--locked {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.channel-tabs__icon,
+.channel-tabs__lock {
+	display: inline-flex;
+	align-items: center;
+	flex: 0 0 auto;
+}
+
+.channel-tabs__lock {
+	color: var(--text-muted);
+}
+
+.channel-tabs__label {
+	line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.channel-tabs__tab,
+	.channel-tabs__tab::after {
+		transition: none;
+	}
+}

@@ -41,6 +41,10 @@ export interface ChatMessageData {
 	replyTo?: ChatMessageReply;
 	/** Emoji reactions aggregated by glyph. */
 	reactions?: ChatMessageReaction[];
+	/** True when the anti-disintermediation filter masked contact info during the protected phase. */
+	piiMasked?: boolean;
+	/** Which PII categories were masked (e.g. 'email', 'phone', 'payment_link'). */
+	piiCategories?: string[];
 }
 
 export interface ChatRealtimeEvent {

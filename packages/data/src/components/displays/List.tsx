@@ -3,7 +3,7 @@ import '../../styles/skeleton.css';
 import type { Dataset } from '../../core/dataset.ts';
 import type { VirtualItem, Virtualizer } from '../../core/virtualizer.ts';
 import { Row } from '../internal/Row.tsx';
-import { ListCardSkeleton } from '@projective/ui';
+import { ListCardSkeleton } from '@projective/ui/skeletons';
 
 export interface ListProps<T> {
 	dataset: Dataset<T>;

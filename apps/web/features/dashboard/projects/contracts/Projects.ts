@@ -120,6 +120,9 @@ export interface StageDetails {
 		role: StageRole;
 		permissions: StagePermission[];
 	};
+
+	/** How this stage routes work to freelancers (spec §"Assignment Modes"). */
+	assignment_mode: 'open_pull' | 'round_robin' | 'manual' | 'parallel_stream';
 }
 
 export interface StageState {

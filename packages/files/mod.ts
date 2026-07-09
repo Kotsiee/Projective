@@ -3,6 +3,7 @@
 // store + types, extracted out of apps/web so any feature can reuse it.
 
 export * from './src/UploadFile.tsx';
+export * from './src/HandoverLibrary.tsx';
 
 // Store + types, exposed for callers that need to drive or type the library
 // (e.g. building a submission deliverable bundle from selected files).

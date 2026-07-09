@@ -7,19 +7,22 @@ Status is edited **in place** — move a feature between lanes, don't append not
 
 ## E0 · Platform Foundation & Security
 
-| ⬜ Todo                                         | 🟡 In Progress                                     | ✅ Done                                                                    |
-| :---------------------------------------------- | :------------------------------------------------- | :------------------------------------------------------------------------- |
-| Departmental isolation (dept-scoped visibility) | Session context / active-profile propagation       | Row-level security & permission grants                                     |
-|                                                 |                                                    | Main `/dashboard` — live Business Administration panel (US-008)            |
-|                                                 |                                                    | Realtime infrastructure                                                    |
-|                                                 |                                                    | Storage buckets & file security                                            |
-|                                                 |                                                    | Notifications pipeline (writer + API + SSE inbox)                          |
-|                                                 |                                                    | Shared package suite (ui, fields, data, charts, time, files, utils, types) |
+| ⬜ Todo                                         | 🟡 In Progress                               | ✅ Done                                                                    |
+| :---------------------------------------------- | :------------------------------------------- | :------------------------------------------------------------------------- |
+| Departmental isolation (dept-scoped visibility) | Session context / active-profile propagation | Row-level security & permission grants                                     |
+|                                                 |                                              | Main `/dashboard` — live Business Administration panel (US-008)            |
+|                                                 |                                              | Realtime infrastructure                                                    |
+|                                                 |                                              | Storage buckets & file security                                            |
+|                                                 |                                              | Notifications pipeline (writer + API + SSE inbox)                          |
+|                                                 |                                              | Shared package suite (ui, fields, data, charts, time, files, utils, types) |
 
 _Evidence:_ `supabase/migrations/0200`–`0207`; notifications — `comms.fn_notify` (`0305`),
 `api/v1/notifications` (list) + `.../notifications/stream` (SSE), `features/dashboard/inbox`
-(`NotificationsInbox.island`); `/dashboard` — `features/dashboard/overview` (`DashboardOverview.island`),
-`packages/*` (charts `AreaLineChart`, ui `TransactionLedger`/`StatusBadge`/`MetricCard`).
+(`NotificationsInbox.island`); `/dashboard` — server-rendered route
+(`routes/(dashboard)/dashboard/index.tsx` loads finance + members via
+`BusinessOverviewServiceBackend` and renders `features/dashboard/overview` as static server
+components; only `FinanceChart.island` + `RefreshButton.island` hydrate, refresh via Fresh
+Partial), `packages/*` (charts `AreaLineChart`, ui `TransactionLedger`/`StatusBadge`/`MetricCard`).
 
 ---
 
@@ -49,20 +52,22 @@ _Evidence:_ `routes/(auth)/*`, `api/v1/auth/*` (incl. `switch-profile`, `switch-
 
 ## E2 · Organizational Structures
 
-| ⬜ Todo                                   | 🟡 In Progress                       | ✅ Done                                               |
-| :---------------------------------------- | :----------------------------------- | :---------------------------------------------------- |
-| Business RBAC (Owner/PM/Observer perms)   | Business member management (add/remove) | Team create / list / view                          |
-| Team RBAC (Lead/Member/Contributor perms) | Two-entity workspace (frontend seed) | Team member management                                |
-| Spending caps / budget controls           |                                      | Business admin dashboard — live balances, finance ledger, members (US-008) |
-|                                           |                                      | Business profile management — legal name / logo / billing email (US-008 AC2) |
-|                                           |                                      | Member visibility list (roles + seat state, US-008 AC5) |
-|                                           |                                      | Business create / view / settings                     |
-|                                           |                                      | Team Vault / Business Wallet init + `*.created` audit |
-|                                           |                                      | Multi-business / team active-context switching        |
+| ⬜ Todo                                   | 🟡 In Progress                          | ✅ Done                                                                      |
+| :---------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------------------- |
+| Business RBAC (Owner/PM/Observer perms)   | Business member management (add/remove) | Team create / list / view                                                    |
+| Team RBAC (Lead/Member/Contributor perms) | Two-entity workspace (frontend seed)    | Team member management                                                       |
+| Spending caps / budget controls           |                                         | Business admin dashboard — live balances, finance ledger, members (US-008)   |
+|                                           |                                         | Business profile management — legal name / logo / billing email (US-008 AC2) |
+|                                           |                                         | Member visibility list (roles + seat state, US-008 AC5)                      |
+|                                           |                                         | Business create / view / settings                                            |
+|                                           |                                         | Team Vault / Business Wallet init + `*.created` audit                        |
+|                                           |                                         | Multi-business / team active-context switching                               |
 
-_Evidence:_ `routes/(dashboard)/business/*`, `.../teams/*`, `.../dashboard`; `api/v1/dashboard/business/*`
-(`[id]` GET/PATCH, `[id]/finance`, `[id]/memebers`); `features/dashboard/overview`;
-`migrations/0107,0110,0111,0209–0212,0301,0309`; context switch:
+_Evidence:_ `routes/(dashboard)/business/*` (list + `[businessid]/settings` server-render their
+static chrome and load `getBusinessAdminProfile` server-side; only `BusinessList.island` +
+`BusinessProfileForm.island` hydrate), `.../teams/*`, `.../dashboard`;
+`api/v1/dashboard/business/*` (`[id]` GET/PATCH, `[id]/finance`, `[id]/memebers`);
+`features/dashboard/overview`; `migrations/0107,0110,0111,0209–0212,0301,0309`; context switch:
 `features/auth/services/context.ts`; `features/public/workspace` (seed).
 
 ---
@@ -95,19 +100,32 @@ _Evidence:_ `api/v1/dashboard/projects/new/{save,publish}`, `.../stages/*`,
 
 ## E4 · Resource Allocation & Ticketing
 
-| ⬜ Todo                                   | 🟡 In Progress                              | ✅ Done                                                               |
-| :---------------------------------------- | :------------------------------------------ | :-------------------------------------------------------------------- |
-| Claim TTL auto-release ("ticket parking") | Workload-intensity weighting engine         | Ticket lifecycle (create/edit/move/delete)                            |
-| Round-Robin assignment mode               | Concurrency caps (project + global $W_i$)   | Claim-and-commit protocol                                             |
-| Parallel-Stream assignment (one-offs)     | Cost/pricing model (frontend deterministic) | Ticket purchase ("Buy Now") + escrow lock                             |
-|                                           |                                             | Manual assignment mode (accept application → assign)                  |
-|                                           |                                             | Ticket reassign / force-complete-stage                                |
-|                                           |                                             | Conflict-free assignment (no double-book on overlapping active slots) |
-|                                           |                                             | Workload-intensity report (48h hidden loop)                           |
+| ⬜ Todo | 🟡 In Progress                              | ✅ Done                                                                |
+| :------ | :------------------------------------------ | :--------------------------------------------------------------------- |
+| —       | Cost/pricing model (frontend deterministic) | Ticket lifecycle (create/edit/move/delete)                             |
+|         |                                             | Claim-and-commit protocol                                              |
+|         |                                             | Ticket purchase ("Buy Now") + escrow lock                              |
+|         |                                             | Concurrency caps — global + per-stage $W_i$ validation on claim/assign |
+|         |                                             | Claim TTL auto-release ("ticket parking", client-refunded)             |
+|         |                                             | Round-Robin assignment (next ticket → lowest-$W_i$ member)             |
+|         |                                             | Parallel-Stream assignment (one-off fan-out across the roster)         |
+|         |                                             | Manual assignment mode (owner pin / accept application → assign)       |
+|         |                                             | Assignment-mode picker + auto-assign trigger (stage Staffing tab)      |
+|         |                                             | Ticket reassign / force-complete-stage                                 |
+|         |                                             | Conflict-free assignment (no double-book on overlapping active slots)  |
+|         |                                             | Workload-intensity report loop + assignee "flag mismatch" UI           |
+|         |                                             | Workload Capacity Gauge (`packages/charts`) — staffing + profile       |
 
 _Evidence:_ `api/v1/dashboard/projects/[pid]/tickets/*` (claim, complete, move, purchase, reassign,
-report, finance, timeline), `.../stages/[id]/applications/[id]/assign` (manual assignment);
-`migrations/0007,0115,0117,0121,0307`; pricing:
+report, finance, timeline), `.../[pid]/workload` (gauge capacity feed),
+`.../stages/[id]/{assignment-mode,auto-assign}` (routing picker + trigger),
+`.../stages/[id]/applications/[id]/assign` (manual assignment); automation engine —
+`migrations/0310` (`fn_release_expired_claims`, `check_ticket_capacity`, `get_workload_capacity`,
+`assignment_routing_mode` + `set_stage_assignment_mode` + `auto_assign_round_robin` /
+`assign_parallel_stream` / `assign_ticket_manual`, `file_workload_report`; mode surfaced via
+`get_stage_details`) over `migrations/0007,0104,0115,0117,0121,0307`; gauge — `packages/charts`
+`WorkloadCapacityGauge`, consumed in `StageStaffingPanel` + `ProfileMetaSidebar`; routing picker —
+`StageStaffingPanel`; dispute UI — `WorkloadReportMenu`; pricing:
 `features/dashboard/projects/contracts/new/ticketPricing.ts`.
 
 ---
@@ -144,42 +162,53 @@ _Evidence:_ `migrations/0009_finance_tables.sql` + `projects.*` wrappers (`0115,
 funding/approval/fair-exit — `projects.fund_stage`/`approve_stage`/`cancel_stage_fair_exit`
 (`0305`), `api/v1/dashboard/projects/[pid]/stages/[sid]/{fund,approve,cancel,finance}`,
 `StageFinance.island`; ticket finance — `.../tickets/[id]/finance`. Wallet Hub —
-`features/dashboard/wallet` (seed). Stripe: `infra/stripe/README.md` only.
+`features/dashboard/wallet`; seed (`walletSeed.ts`) is owned by the server layout
+(`routes/(dashboard)/wallet/_layout.tsx`) and passed to the persistent `WalletShell.island` as
+`initialData` props (out of the client bundle), swap the constant for a Service when the wallet
+backend lands. Stripe: `infra/stripe/README.md` only.
 
 ---
 
 ## E7 · Collaboration & Communications
 
-| ⬜ Todo                            | 🟡 In Progress                          | ✅ Done                                                         |
-| :--------------------------------- | :-------------------------------------- | :-------------------------------------------------------------- |
-| PII filter / protected phase       | Channel architecture (stage + DM built) | Realtime messaging (channels/messages/subscribe)                |
-| "Projective Unlock" handover state |                                         | Stage chat                                                      |
-| Team private channels              |                                         | Stage-scoped workspace access control (assigned talent + owner) |
-| Business private channels          |                                         | Project channel provisioning                                    |
-|                                    |                                         | File library / upload / folders / access                        |
-|                                    |                                         | Message attachments                                             |
+| ⬜ Todo | 🟡 In Progress | ✅ Done                                                         |
+| :------ | :------------- | :-------------------------------------------------------------- |
+|         |                | Realtime messaging (channels/messages/subscribe)                |
+|         |                | Stage chat                                                      |
+|         |                | Stage-scoped workspace access control (assigned talent + owner) |
+|         |                | Project channel provisioning                                    |
+|         |                | File library / upload / folders / access                        |
+|         |                | Message attachments                                             |
+|         |                | Team & Business private channels (scoped RLS, tabbed UI)        |
+|         |                | Anti-disintermediation PII filter / protected phase             |
+|         |                | "Projective Unlock" handover state + file-library downloader    |
 
-_Evidence:_ `api/v1/dashboard/comms/channels/*`; `features/dashboard/messages`; `api/v1/files/*`,
-`packages/files`; stage access — `projects.has_stage_access` gates the channel-open RPC + comms RLS
-(`0308`); `migrations/0112,0113,0202,0206,0207,0208,0300,0308`.
+_Evidence:_ `api/v1/dashboard/comms/channels/*` (incl. `channels/stage/[stageid]`);
+`features/dashboard/messages`; `api/v1/files/*`, `packages/files`; scoped-channel access —
+`comms.can_access_scope` / `comms.has_channel_access` gate the channel-open RPC + comms RLS; PII —
+`comms.mask_pii` BEFORE-INSERT trigger gated by `projects.is_protected_phase`, mirrored by
+`@projective/backend` `PIIFilter`; handover — `projects.handover_unlocked_at` set in
+`projects.approve_stage`; shared UI `ChannelTabs` / `PiiNotice` / `FileHandoverCard` / `HandoverLibrary`;
+tests `tests/communications_e7.test.ts`; `migrations/0112,0113,0202,0206,0207,0208,0300,0308,0311`.
 
 ---
 
 ## E8 · Discovery & Reputation
 
-| ⬜ Todo                                     | 🟡 In Progress                            | ✅ Done                                         |
-| :------------------------------------------ | :---------------------------------------- | :---------------------------------------------- |
-| Reliability Index ($R_i$) computation       | Explore home hub (frontend seed)          | Search-ranking engine (pgvector + weighted RPC) |
-| Availability-boost / workload-aware ranking | Reviews (schema built, UI mock)           | Federated + single-entity search RPC            |
-| Reciprocal-review governance                | Public profile pages (frontend mock)      | Admin search weights & analytics                |
-| "Architect" tier & discovery boost          | Premium search UI polish (glass cascade)  | Search telemetry (interest events, query logs)  |
-| Client Trust Score & warning modal          |                                           | `/api/v1/*/search` routes                       |
-|                                             |                                           | Search UI ↔ live engine (adapter + seed fallback) |
+| ⬜ Todo                                     | 🟡 In Progress                           | ✅ Done                                           |
+| :------------------------------------------ | :--------------------------------------- | :------------------------------------------------ |
+| Reliability Index ($R_i$) computation       | Explore home hub (frontend seed)         | Search-ranking engine (pgvector + weighted RPC)   |
+| Availability-boost / workload-aware ranking | Reviews (schema built, UI mock)          | Federated + single-entity search RPC              |
+| Reciprocal-review governance                | Public profile pages (frontend mock)     | Admin search weights & analytics                  |
+| "Architect" tier & discovery boost          | Premium search UI polish (glass cascade) | Search telemetry (interest events, query logs)    |
+| Client Trust Score & warning modal          |                                          | `/api/v1/*/search` routes                         |
+|                                             |                                          | Search UI ↔ live engine (adapter + seed fallback) |
 
 _Evidence:_ `migrations/0214,0216,0217–0220`; `api/v1/public/search/*`, `.../admin/search/*`;
-`SearchEngineServiceBackend.ts`. Frontend wiring: `explore/services/{SearchService,scoredToExplore}.ts`,
-`explore/contexts/ExploreContext.tsx` (`useLiveSearch`), `explore/components/search/*` (results read
-context signals); Explore home hub + inspector still seed-backed (`features/public/explore/data`).
+`SearchEngineServiceBackend.ts`. Frontend wiring:
+`explore/services/{SearchService,scoredToExplore}.ts`, `explore/contexts/ExploreContext.tsx`
+(`useLiveSearch`), `explore/components/search/*` (results read context signals); Explore home hub +
+inspector still seed-backed (`features/public/explore/data`).
 
 ---
 
@@ -211,8 +240,10 @@ explicitly omits products.
 | Dispute Summary PDF / reputation impact  |                |                                             |
 | `/disputes` routes                       |                |                                             |
 
-_Evidence:_ `migrations/0007` (`ticket_workload_reports`, `fn_open/resolve_workload_report`);
-`api/v1/dashboard/projects/[pid]/tickets/[id]/report.ts`. No dispute UI or Evidence Vault.
+_Evidence:_ `migrations/0007` (`ticket_workload_reports`, `fn_open/resolve_workload_report`) +
+`projects.file_workload_report` (`0310`); `api/v1/dashboard/projects/[pid]/tickets/[id]/report.ts`;
+the assignee "flag mismatch" micro-interaction (`WorkloadReportMenu`) is wired. No Evidence Vault,
+cooling-off/settlement tooling, or auditor workflow.
 
 ---
 

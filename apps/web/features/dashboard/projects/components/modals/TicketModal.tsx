@@ -29,6 +29,7 @@ import { TicketInlineField } from '@features/dashboard/projects/components/proje
 import { TicketDangerModal } from '@features/dashboard/projects/components/project/ticket/TicketDangerModal.tsx';
 import { TicketFinanceSidebar } from '@features/dashboard/projects/components/project/ticket/TicketFinanceSidebar.tsx';
 import { TicketActionsMenu } from '@features/dashboard/projects/components/project/ticket/TicketActionsMenu.tsx';
+import { WorkloadReportMenu } from '@features/dashboard/projects/components/project/ticket/WorkloadReportMenu.tsx';
 // #endregion
 
 // #region Types
@@ -374,6 +375,18 @@ export function TicketModal(
 									isClaimed={isClaimed}
 									onMutated={handleMenuMutated}
 									onRequestDelete={() => (dangerOpen.value = true)}
+								/>
+							)}
+							{
+								/* Assignee-only: flag a workload-intensity mismatch (spec §"Reporting"). The
+							    owner uses the actions menu instead; RLS is the hard backstop server-side. */
+							}
+							{!isOwner && isClaimed && ticket && (
+								<WorkloadReportMenu
+									projectId={ticket.project_id}
+									ticketId={ticket.id}
+									currentIntensity={ticket.workload_intensity}
+									onReported={handleMenuMutated}
 								/>
 							)}
 							<button

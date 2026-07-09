@@ -101,6 +101,12 @@
 	color: var(--text-main);
 }
 
+/* Assignee's "flag workload mismatch" affordance — warns on hover. */
+.tkt__icon-btn--flag:hover {
+	background: var(--warning-surface, color-mix(in srgb, var(--warning) 14%, transparent));
+	color: var(--warning);
+}
+
 /* Status pill */
 .tkt__status {
 	display: inline-flex;
@@ -712,6 +718,144 @@
 	color: var(--text-muted);
 }
 /* #endregion */
+/* #endregion */
+
+/* #region Workload-mismatch report (assignee flag micro-interaction) */
+.wl-report {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	width: 300px;
+	padding: 0.9rem;
+}
+
+.wl-report__head {
+	display: flex;
+	gap: 0.6rem;
+	align-items: flex-start;
+}
+
+.wl-report__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	flex-shrink: 0;
+	border-radius: 9999px;
+	background: var(--warning-surface, color-mix(in srgb, var(--warning) 14%, transparent));
+	color: var(--warning);
+}
+
+.wl-report__title {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--text-main);
+}
+
+.wl-report__sub {
+	margin: 0.15rem 0 0;
+	font-size: 0.75rem;
+	line-height: 1.35;
+	color: var(--text-muted);
+}
+
+.wl-report__label {
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted);
+}
+
+.wl-report__textarea {
+	width: 100%;
+	resize: vertical;
+	padding: 0.5rem 0.6rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	background: var(--card);
+	color: var(--text-main);
+	font: inherit;
+	font-size: 0.8rem;
+}
+
+.wl-report__textarea:focus-visible {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: var(--focus-ring);
+}
+
+.wl-report__presets {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.35rem;
+}
+
+.wl-report__preset {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.3rem;
+	padding: 0.4rem 0.55rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.78rem;
+	cursor: pointer;
+	transition: border-color var(--fast), color var(--fast), background var(--fast);
+}
+
+.wl-report__preset:hover {
+	border-color: color-mix(in srgb, var(--warning) 55%, var(--border-color));
+}
+
+.wl-report__preset--active {
+	border-color: var(--warning);
+	background: var(--warning-surface, color-mix(in srgb, var(--warning) 14%, transparent));
+	color: var(--text-main);
+}
+
+.wl-report__preset-x {
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.wl-report__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: 0.2rem;
+}
+
+.wl-report__btn {
+	padding: 0.45rem 0.85rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius__small);
+	background: transparent;
+	color: var(--text-main);
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background var(--fast), border-color var(--fast), opacity var(--fast);
+}
+
+.wl-report__btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.wl-report__btn--danger {
+	border-color: transparent;
+	background: var(--danger);
+	color: #fff;
+}
+
+.wl-report__btn--danger:not(:disabled):hover {
+	background: color-mix(in srgb, var(--danger) 88%, #000);
+}
 /* #endregion */
 
 /* #region Inline editable fields (shared by TicketInlineField) */

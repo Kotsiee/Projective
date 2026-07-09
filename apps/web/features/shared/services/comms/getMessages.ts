@@ -148,6 +148,10 @@ export async function getMessages(
 					avatarUrl: profile.avatar_url,
 				},
 				attachments: mappedAttachments,
+				// Anti-disintermediation: the DB masks contact info during the protected phase and
+				// flags the row (mig 0311). Surface the flag so the UI can show the PII notice.
+				piiMasked: msg.pii_masked ?? false,
+				piiCategories: msg.pii_categories ?? [],
 			};
 		}).reverse();
 		console.log('Fetched messages:', items);

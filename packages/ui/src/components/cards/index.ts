@@ -5,6 +5,7 @@ export { ProfileCard } from './ProfileCard.tsx';
 export { ProjectCard } from './ProjectCard.tsx';
 export { ProductCard } from './ProductCard.tsx';
 export { RosterCard } from './RosterCard.tsx';
+export * from './FileHandoverCard.tsx';
 export type {
 	EntityCardMenuItem,
 	EntityCardProps,
@@ -15,3 +16,4 @@ export type {
 	RosterCardProps,
 	RosterSkill,
 } from '../../types/components/roster-card.ts';
+export type { FileHandoverCardProps } from '../../types/components/file-handover-card.ts';

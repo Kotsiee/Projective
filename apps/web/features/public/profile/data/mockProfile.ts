@@ -64,6 +64,7 @@ export const mockProfile: ProfileData = {
 			asFreelancer: { score: 4.9, count: 128 },
 			asClient: { score: 4.7, count: 22 },
 		},
+		workload: { current: 7.5, cap: 10 },
 	},
 
 	services: [

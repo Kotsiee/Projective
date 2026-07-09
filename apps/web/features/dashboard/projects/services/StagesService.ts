@@ -43,6 +43,50 @@ export class StagesService {
 		if (!res.ok) throw new Error(`Failed to delete stage: ${res.statusText}`);
 	}
 
+	// #region Assignment routing (spec §"Assignment Modes")
+	/** Sets how the stage distributes work (owner-only, SQL-enforced). */
+	static async setAssignmentMode(
+		projectId: string,
+		stageId: string,
+		mode: 'open_pull' | 'round_robin' | 'manual' | 'parallel_stream',
+	): Promise<any> {
+		const res = await fetch(
+			`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/assignment-mode`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+				body: JSON.stringify({ mode }),
+			},
+		);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to set assignment mode');
+		}
+		return await res.json();
+	}
+
+	/** Runs the stage's automatic routing pass (round-robin: next ticket; parallel-stream: fan out). */
+	static async autoAssign(
+		projectId: string,
+		stageId: string,
+		mode: 'round_robin' | 'parallel_stream',
+	): Promise<{ mode: string; assigned: any }> {
+		const res = await fetch(
+			`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/auto-assign`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-CSRF': getCsrfToken() || '' },
+				body: JSON.stringify({ mode }),
+			},
+		);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({} as any));
+			throw new Error(err?.error?.message || err?.error || 'Failed to auto-assign');
+		}
+		return await res.json();
+	}
+	// #endregion
+
 	// #region Finance — fund / approve / fair-exit (US-005, US-007)
 	static async getStageFinance(projectId: string, stageId: string): Promise<any> {
 		const res = await fetch(`/api/v1/dashboard/projects/${projectId}/stages/${stageId}/finance`);

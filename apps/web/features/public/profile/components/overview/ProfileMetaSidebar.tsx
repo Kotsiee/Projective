@@ -15,6 +15,7 @@ import {
 	IconStarFilled,
 	IconUserStar,
 } from '@tabler/icons-preact';
+import { WorkloadCapacityGauge } from '@projective/charts';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import { localTimeAtOffset } from '../../utils.ts';
 import { StatusDot } from '../header/StatusDot.tsx';
@@ -85,6 +86,22 @@ export default function ProfileMetaSidebar() {
 					</span>
 				</div>
 			</div>
+
+			{m.workload && (
+				<>
+					<div class='pmeta-divider' />
+					<div class='pmeta-workload'>
+						<span class='pmeta-workload__label'>Current capacity</span>
+						<WorkloadCapacityGauge
+							variant='bar'
+							current={m.workload.current}
+							max={m.workload.cap}
+							label='Workload'
+							caption='Live intensity across active projects'
+						/>
+					</div>
+				</>
+			)}
 
 			<div class='pmeta-divider' />
 

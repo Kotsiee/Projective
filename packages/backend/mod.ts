@@ -16,3 +16,4 @@ export * from './src/core/index.ts';
 
 export * from './src/services/files.ts';
 export * from './src/services/moderation.ts';
+export * from './src/services/pii.ts';

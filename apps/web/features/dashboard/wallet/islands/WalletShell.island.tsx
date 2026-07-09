@@ -18,6 +18,7 @@ import {
 	WalletProvider,
 	WalletStateContext,
 } from '../contexts/WalletContext.tsx';
+import type { WalletDataset } from '../contracts/Wallet.ts';
 import { WalletPersonaRail } from '../components/WalletPersonaRail.tsx';
 
 function WalletShellInner({ children }: { children: ComponentChildren }) {
@@ -48,9 +49,11 @@ function WalletShellInner({ children }: { children: ComponentChildren }) {
 	return <div class='wallet-shell'>{children}</div>;
 }
 
-export default function WalletShellIsland({ children }: { children: ComponentChildren }) {
+export default function WalletShellIsland(
+	{ dataset, children }: { dataset: WalletDataset; children: ComponentChildren },
+) {
 	return (
-		<WalletProvider>
+		<WalletProvider dataset={dataset}>
 			<WalletShellInner>{children}</WalletShellInner>
 		</WalletProvider>
 	);
