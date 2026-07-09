@@ -1,0 +1,141 @@
+/* Business / Teams 70-30 operational workspace. */
+.workspace {
+	width: 100%;
+	padding: 1.5rem;
+}
+
+.workspace__grid {
+	display: grid;
+	grid-template-columns: minmax(280px, 30%) 1fr;
+	gap: 1.25rem;
+	align-items: start;
+	max-width: 1500px;
+	margin: 0 auto;
+}
+
+/* --- 30% aside roster --- */
+.workspace__aside {
+	position: sticky;
+	top: 1.5rem;
+}
+
+.workspace__roster-panel {
+	max-height: calc(100vh - var(--header-height, 64px) - 3rem);
+}
+.workspace__roster-panel .glass-panel__body {
+	overflow-y: auto;
+}
+
+.workspace__roster-add {
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 10px;
+	color: var(--primary, hsl(186, 57%, 40%));
+	background: var(--primary-surface, hsla(186, 57%, 40%, 0.12));
+	transition:
+		transform var(--fast, 150ms) var(--ease-out, ease),
+		background var(--fast, 150ms) var(--ease-out, ease);
+}
+.workspace__roster-add:hover {
+	transform: translateY(-1px);
+	background: var(--primary-surface, hsla(186, 57%, 40%, 0.2));
+}
+
+/* --- 70% main --- */
+.workspace__main {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	min-width: 0;
+}
+
+.workspace__header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+.workspace__title {
+	margin: 0;
+	font-size: 1.6rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+.workspace__subtitle {
+	margin: 0.25rem 0 0;
+	font-size: 0.9rem;
+	color: var(--text-muted, hsl(0, 0%, 55%));
+	max-width: 60ch;
+}
+
+.workspace__cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.65rem 1.25rem;
+	border: none;
+	border-radius: 12px;
+	color: #fff;
+	font-weight: 650;
+	font-size: 0.9rem;
+	white-space: nowrap;
+	background: var(
+		--grad-premium-diag,
+		linear-gradient(135deg, hsl(186, 57%, 40%), hsl(258, 85%, 66%))
+	);
+	box-shadow: var(--glow-primary, 0 10px 28px -10px hsla(186, 57%, 40%, 0.5));
+}
+
+/* --- Quick actions --- */
+.workspace__quick-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 0.75rem;
+}
+
+/* --- Activity + health split --- */
+.workspace__split {
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+	gap: 1.25rem;
+	align-items: start;
+}
+
+.workspace__activity .glass-panel__body {
+	max-height: 460px;
+	overflow-y: auto;
+}
+
+.workspace__metric-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.85rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1080px) {
+	.workspace__grid {
+		grid-template-columns: 1fr;
+	}
+	.workspace__aside {
+		position: static;
+	}
+	.workspace__roster-panel {
+		max-height: none;
+	}
+	.workspace__split {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 560px) {
+	.workspace {
+		padding: 1rem;
+	}
+	.workspace__metric-grid {
+		grid-template-columns: 1fr;
+	}
+}

@@ -17,5 +17,11 @@ export interface CreateAccountRequest {
 	objective?: 'client' | 'seller';
 	skills?: string[];
 	interests?: string[];
+	/**
+	 * Same-origin path to return to after verification completes (the page the
+	 * visitor was on when they hit "Join"). Validated server-side against open
+	 * redirects; falls back to /dashboard.
+	 */
+	redirectTo?: string;
 }
 // #endregion

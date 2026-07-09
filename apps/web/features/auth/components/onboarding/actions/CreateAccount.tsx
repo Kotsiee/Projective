@@ -30,10 +30,18 @@ export function CreateAccountButton({ enabled }: { enabled: boolean }) {
 	const isLoading = useSignal(false);
 	const isOAuth = oauthOnboarding.value;
 
+	/** Return target captured by the "Join" button (/join?redirectTo=…), if any. */
+	const getRedirectTo = (): string | undefined => {
+		const rt = new URLSearchParams(globalThis.location.search).get('redirectTo');
+		// Only forward same-origin relative paths; the server re-validates anyway.
+		return rt && rt.startsWith('/') && !rt.startsWith('//') ? rt : undefined;
+	};
+
 	const handleCreateAccount = async () => {
 		if (!enabled || isLoading.value) return;
 
 		isLoading.value = true;
+		const redirectTo = getRedirectTo();
 
 		try {
 			if (isOAuth) {
@@ -48,6 +56,7 @@ export function CreateAccountButton({ enabled }: { enabled: boolean }) {
 					skills: skills.value,
 					interests: interests.value,
 					avatarFileId: avatarFileId.value,
+					redirectTo,
 				});
 
 				globalThis.location.href = res.redirectTo ?? '/dashboard';
@@ -64,6 +73,7 @@ export function CreateAccountButton({ enabled }: { enabled: boolean }) {
 				objective: objective.value,
 				skills: skills.value,
 				interests: interests.value,
+				redirectTo,
 			};
 
 			const res = await CreateAccountService.createAccount(payload);

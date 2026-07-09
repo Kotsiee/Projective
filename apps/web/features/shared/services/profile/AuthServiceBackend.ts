@@ -93,7 +93,7 @@ export class AuthBackendService {
 		const { data: publicProfile } = await sb
 			.schema('org')
 			.from('users_public')
-			.select('user_id, first_name, last_name, username, avatar_file_id')
+			.select('user_id, first_name, last_name, username, avatar_file_id, is_operator')
 			.eq('user_id', userRes.user.id)
 			.single();
 
@@ -156,6 +156,9 @@ export class AuthBackendService {
 			freelancerProfileId: hasFreelancer ? userId : null,
 			businesses,
 			teams,
+
+			// Account-level "Client / Operator Mode" modifier — gates the Businesses nav space.
+			isOperator: !!publicProfile?.is_operator,
 		};
 
 		return { ok: true, data: payload };

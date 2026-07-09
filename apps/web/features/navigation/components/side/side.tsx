@@ -1,8 +1,9 @@
 import { Button, IconButton, Tooltip } from '@projective/ui';
 import { apps, INavApp } from '../../contracts/navigation.ts';
 import '../../styles/components/side/side.css';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { useNavigationContext } from '../../contexts/NavigationContext.tsx';
+import { useUserContext } from '../../contexts/UserContext.tsx';
 import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@tabler/icons-preact';
 
 // Mini-component to handle local expansion state
@@ -93,6 +94,7 @@ function SidebarItem(
 
 export default function NavigationSide() {
 	const { isTopSideNavExpanded, toggleTopSideNav } = useNavigationContext();
+	const { user } = useUserContext();
 	const [selected, setSelected] = useState('');
 
 	useEffect(() => {
@@ -102,10 +104,33 @@ export default function NavigationSide() {
 		}
 	}, []);
 
+	// Persona/account visibility gates. Reading `user.value` here keeps the nav
+	// reactive: switching persona (freelancer ⇄ business/team) or toggling
+	// Operator Mode re-runs `me`, updates the signal, and the affected tabs mount
+	// or unmount instantly — no full reload.
+	// Teams is a freelancer-only space. It shows while acting as a freelancer — either the
+	// active persona is the freelancer profile, or the freelancer has switched into one of
+	// their team contexts (which clears activeProfileType but sets activeTeamId). It never
+	// shows for clients (operator/business persona with no freelancer identity in play).
+	const isFreelancer = user.value?.activeProfileType === 'freelancer' ||
+		!!user.value?.activeTeamId;
+	const isOperator = user.value?.isOperator === true;
+
+	const visibleGroups = useMemo(() =>
+		apps
+			.map((group) =>
+				group.filter((app) => {
+					if (app.requires === 'freelancer') return isFreelancer;
+					if (app.requires === 'operator') return isOperator;
+					return true;
+				})
+			)
+			.filter((group) => group.length > 0), [isFreelancer, isOperator]);
+
 	return (
 		<nav class='navigation__side'>
 			<div class='navigation__side__apps'>
-				{apps.map((group, i) => (
+				{visibleGroups.map((group, i) => (
 					<div key={i} style={{ width: '100%' }}>
 						<ul class='navigation__side__items'>
 							{group.map((app, j) => (
@@ -117,7 +142,7 @@ export default function NavigationSide() {
 								/>
 							))}
 						</ul>
-						{i < apps.length - 1 && <hr class='navigation__side__divider' />}
+						{i < visibleGroups.length - 1 && <hr class='navigation__side__divider' />}
 					</div>
 				))}
 			</div>

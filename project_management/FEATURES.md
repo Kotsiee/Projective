@@ -54,20 +54,35 @@ _Evidence:_ `routes/(auth)/*`, `api/v1/auth/*` (incl. `switch-profile`, `switch-
 
 | ⬜ Todo                                   | 🟡 In Progress                          | ✅ Done                                                                      |
 | :---------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------------------- |
-| Business RBAC (Owner/PM/Observer perms)   | Business member management (add/remove) | Team create / list / view                                                    |
-| Team RBAC (Lead/Member/Contributor perms) | Two-entity workspace (frontend seed)    | Team member management                                                       |
-| Spending caps / budget controls           |                                         | Business admin dashboard — live balances, finance ledger, members (US-008)   |
+| Business RBAC (Owner/PM/Observer perms)   | Business member management (add/remove) | Draft-first entity creation (name + `@handle`, modal, draft status)          |
+| Team RBAC (Lead/Member/Contributor perms) | Two-entity workspace (frontend seed)    | Business / Teams 70/30 workspace index (glass roster + operational overview) |
+| Spending caps / budget controls           |                                         | Dynamic nav gating — Businesses (Operator Mode) / Teams (freelancer-only)    |
+|                                           |                                         | Team create / view                                                           |
+|                                           |                                         | Team member management                                                       |
+|                                           |                                         | Business admin dashboard — live balances, finance ledger, members (US-008)   |
 |                                           |                                         | Business profile management — legal name / logo / billing email (US-008 AC2) |
 |                                           |                                         | Member visibility list (roles + seat state, US-008 AC5)                      |
 |                                           |                                         | Business create / view / settings                                            |
 |                                           |                                         | Team Vault / Business Wallet init + `*.created` audit                        |
 |                                           |                                         | Multi-business / team active-context switching                               |
 
-_Evidence:_ `routes/(dashboard)/business/*` (list + `[businessid]/settings` server-render their
-static chrome and load `getBusinessAdminProfile` server-side; only `BusinessList.island` +
-`BusinessProfileForm.island` hydrate), `.../teams/*`, `.../dashboard`;
-`api/v1/dashboard/business/*` (`[id]` GET/PATCH, `[id]/finance`, `[id]/memebers`);
-`features/dashboard/overview`; `migrations/0107,0110,0111,0209–0212,0301,0309`; context switch:
+_Evidence:_ `routes/(dashboard)/business/index.tsx` + `teams/index.tsx` render the 70/30 workspace
+(shared `features/dashboard/shared/components/EntityWorkspace.tsx`; `BusinessWorkspace.island` /
+`TeamsWorkspace.island` — the old `BusinessList.island` / `TeamsList.island` + `BusinessCard` /
+`TeamCard` search-grid are removed). Creation is in-context: `CreateBusinessModal.island` /
+`CreateTeamModal.island` capture only Name + `@handle` (relaxed Zod in
+`features/dashboard/{business,teams}/contracts/new/_validation.ts`) and call the minimal-payload
+`create_business` / `create_team` RPCs, which default the entity to `status = 'draft'`
+(the standalone `/business/new` + `/teams/new` wizard routes/islands are deleted). `[businessid]/settings`
+still server-loads `getBusinessAdminProfile` and completes the deferred profile. Nav gating —
+`features/navigation/contracts/navigation.ts` + `components/side/side.tsx` show **Businesses** only
+when `isOperator` (account-level `org.users_public.is_operator`, surfaced via `getMe`/`UserContext`)
+and **Teams** only when `activeProfileType === 'freelancer'`. New primitives: `@projective/fields`
+`HandleField`; `@projective/ui` `GlassPanel` / `QuickActionCard` / `ActivityFeed` / `EntityRoster` /
+`MetricPlaceholder`. `api/v1/dashboard/business/*` (`[id]` GET/PATCH, `[id]/finance`,
+`[id]/memebers`); `features/dashboard/overview`;
+`migrations/0107,0110,0111,0209–0212,0301,0309,20260709120000_business_teams_overhaul` (`is_operator`
++ `status`/tier surfacing + `set_operator_mode` + minimal-payload create RPCs); context switch:
 `features/auth/services/context.ts`; `features/public/workspace` (seed).
 
 ---
@@ -91,8 +106,17 @@ _Evidence:_ `api/v1/dashboard/projects/new/{save,publish}`, `.../stages/*`,
 `.../stages/[id]/submissions/*`, `.../stages/[id]/seats/*`,
 `.../stages/[id]/applications/[id]/assign`;
 `services/{Projects,ProjectLifecycle,Stages,Submissions,Staffing}ServiceBackend.ts`;
-`migrations/0101,0115–0122,0204,0303,0306–0308`. Staffing UI: the stage **Staffing** tab
-(`[stageid]/staffing.tsx` → `StageStaffing` island) on `@projective/ui` RosterCard +
+`migrations/0101,0115–0122,0204,0303,0306–0308`. Stage shell: `[stageid]/_layout.tsx` server-loads
+the stage (`ProjectsBackendService.getStage`) and seeds it into `StageLayout.island`'s `StageProvider`
+as `initialStage`, so every tab paints without the first-load "Loading…" flash (provider keeps
+`refresh()` + falls back to a client fetch). The **Finance** (`getStageFinance`), **Staffing**
+(`getStageStaffing`), **Files** (`getStage`→`getFiles`→`parseStageFiles`) and **Submissions**
+(`SubmissionsServiceBackend.listForStage` → `SubmissionsProvider initialSubmissions`) tabs each
+additionally server-hydrate their own payload — client-side actions/filtering/mutations stay
+interactive. Staffing UI: the stage **Staffing** tab
+(`[stageid]/staffing.tsx` server-loads the roster via `StaffingServiceBackend.getStageStaffing` and
+passes it to the `StageStaffing` island as `initialData` — no client fetch on mount) on
+`@projective/ui` RosterCard +
 `@projective/fields` StatusSlider/Checkbox/ProgressBar. Checklist/roster seed:
 `features/dashboard/projects/contracts/Submissions.ts`.
 
@@ -114,7 +138,7 @@ _Evidence:_ `api/v1/dashboard/projects/new/{save,publish}`, `.../stages/*`,
 |         |                                             | Ticket reassign / force-complete-stage                                 |
 |         |                                             | Conflict-free assignment (no double-book on overlapping active slots)  |
 |         |                                             | Workload-intensity report loop + assignee "flag mismatch" UI           |
-|         |                                             | Workload Capacity Gauge (`packages/charts`) — staffing + profile       |
+|         |                                             | Workload Capacity Gauge (`packages/charts`) — staffing                 |
 
 _Evidence:_ `api/v1/dashboard/projects/[pid]/tickets/*` (claim, complete, move, purchase, reassign,
 report, finance, timeline), `.../[pid]/workload` (gauge capacity feed),
@@ -124,7 +148,7 @@ report, finance, timeline), `.../[pid]/workload` (gauge capacity feed),
 `assignment_routing_mode` + `set_stage_assignment_mode` + `auto_assign_round_robin` /
 `assign_parallel_stream` / `assign_ticket_manual`, `file_workload_report`; mode surfaced via
 `get_stage_details`) over `migrations/0007,0104,0115,0117,0121,0307`; gauge — `packages/charts`
-`WorkloadCapacityGauge`, consumed in `StageStaffingPanel` + `ProfileMetaSidebar`; routing picker —
+`WorkloadCapacityGauge`, consumed in `StageStaffingPanel`; routing picker —
 `StageStaffingPanel`; dispute UI — `WorkloadReportMenu`; pricing:
 `features/dashboard/projects/contracts/new/ticketPricing.ts`.
 
@@ -161,7 +185,9 @@ _Evidence:_ Buy Now — `api/v1/dashboard/projects/[pid]/tickets/[id]/purchase.t
 _Evidence:_ `migrations/0009_finance_tables.sql` + `projects.*` wrappers (`0115,0117,0305`); stage
 funding/approval/fair-exit — `projects.fund_stage`/`approve_stage`/`cancel_stage_fair_exit`
 (`0305`), `api/v1/dashboard/projects/[pid]/stages/[sid]/{fund,approve,cancel,finance}`,
-`StageFinance.island`; ticket finance — `.../tickets/[id]/finance`. Wallet Hub —
+`StageFinance.island` (its route server-loads the snapshot via `StagesServiceBackend.getStageFinance`
+into `initialData` — the tab paints instantly, actions stay client-side); ticket finance —
+`.../tickets/[id]/finance`. Wallet Hub —
 `features/dashboard/wallet`; seed (`walletSeed.ts`) is owned by the server layout
 (`routes/(dashboard)/wallet/_layout.tsx`) and passed to the persistent `WalletShell.island` as
 `initialData` props (out of the client bundle), swap the constant for a Service when the wallet
@@ -198,7 +224,7 @@ tests `tests/communications_e7.test.ts`; `migrations/0112,0113,0202,0206,0207,02
 | ⬜ Todo                                     | 🟡 In Progress                           | ✅ Done                                           |
 | :------------------------------------------ | :--------------------------------------- | :------------------------------------------------ |
 | Reliability Index ($R_i$) computation       | Explore home hub (frontend seed)         | Search-ranking engine (pgvector + weighted RPC)   |
-| Availability-boost / workload-aware ranking | Reviews (schema built, UI mock)          | Federated + single-entity search RPC              |
+| Availability-boost / workload-aware ranking | Reviews — profile tab UI (frontend mock) | Federated + single-entity search RPC              |
 | Reciprocal-review governance                | Public profile pages (frontend mock)     | Admin search weights & analytics                  |
 | "Architect" tier & discovery boost          | Premium search UI polish (glass cascade) | Search telemetry (interest events, query logs)    |
 | Client Trust Score & warning modal          |                                          | `/api/v1/*/search` routes                         |
@@ -208,7 +234,15 @@ _Evidence:_ `migrations/0214,0216,0217–0220`; `api/v1/public/search/*`, `.../a
 `SearchEngineServiceBackend.ts`. Frontend wiring:
 `explore/services/{SearchService,scoredToExplore}.ts`, `explore/contexts/ExploreContext.tsx`
 (`useLiveSearch`), `explore/components/search/*` (results read context signals); Explore home hub +
-inspector still seed-backed (`features/public/explore/data`).
+inspector still seed-backed (`features/public/explore/data`). Public profile surface
+(`features/public/profile`) — seed-backed (`data/mockProfile.ts`), Explore-standardised entity cards
+(shared `@projective/ui` `ServiceCard`/`ProjectCard`/`ProfileCard`, grid-locked, bookmark save icon),
+custom `@projective/ui` `NavTabs` bar with hash routing (`#services`…#`reviews`), shared-Accordion
+project groups, a live **Reviews** tab reachable from the meta-sidebar rating badges, an owner
+Editor-Mode suite (Details/Services/Projects/Portfolio/Teams/Experience/Education/Members/Settings/
+Availability modules via `EntityControlCenter` add/hide-show + tab-visibility toggles), and a
+re-engineered side rail persisting collapse to `localStorage` (`profile_sidebar_collapsed`,
+auto-expands on edit).
 
 ---
 
@@ -259,8 +293,17 @@ cooling-off/settlement tooling, or auditor workflow.
 | Lesson-plan / tutoring vs advisory    |                                       |         |
 
 _Evidence:_ `packages/time` (Calendar/Availability components, mock data via
-`features/public/profile/data/mockProfile.ts`); `routes/.../[stageid]/calendar.tsx`. No session
-backend or conferencing integration.
+`features/public/profile/data/mockProfile.ts`); `routes/.../[stageid]/calendar.tsx`. The calendar
+engine ships a premium interaction layer: a **boundless** (truly infinite, both directions) virtual
+viewport with bounce-snap settling (½-hour on day/week, week-row in month); a custom velocity
+scrollbar (`useViewportScroll`) whose thumb rests centred at 50%, shrinks/drifts with scroll
+velocity, and acts as a drag-to-accelerate jog control (displacement → continuous scroll speed);
+that scrollbar doubles as a **Schedule Minimap** (`TimelineScrollbar`) — ultra-thin
+Available / Reserved / Unavailable ticks + a current-time anchor mapped from a window around the
+viewport; plus middle-mouse grab-pan, a midnight/multi-day demarcation band, and a "return to
+present" teleport (`PresentButton`). External profile viewers are privacy-masked (`masked` prop):
+booked activity collapses to anonymous **Reserved** blocks. No session backend or conferencing
+integration.
 
 ---
 

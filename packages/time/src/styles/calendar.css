@@ -211,42 +211,152 @@
 	user-select: none;
 }
 
-/* #region Floating custom scrollbar — Gantt-parity relative thumb ---------- */
+/* #region Velocity scrollbar + Schedule Minimap --------------------------- */
 .cal-scrollbar {
 	position: absolute;
 	top: 0;
 	right: 0;
 	bottom: 0;
-	width: 14px;
-	/* Track is transparent on idle; only the thumb is interactive. */
+	width: 16px;
+	/* Track + minimap are inert; only the thumb is interactive. */
 	pointer-events: none;
 	z-index: 6;
 }
 
+/* Minimap track — a subtle luxury instrument behind the thumb. A hairline rail
+   carries ultra-thin availability ticks and the current-time anchor. */
+.cal-scrollbar__track {
+	position: absolute;
+	right: 5px;
+	width: 4px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--text-main) 6%, transparent);
+	overflow: hidden;
+	opacity: 0.9;
+}
+
+.cal-scrollbar__tick {
+	position: absolute;
+	right: 0;
+	width: 4px;
+	border-radius: 2px;
+	/* Ultra-thin, low-opacity — reads as a texture, never as chrome. */
+	opacity: 0.55;
+}
+
+.cal-scrollbar__tick[data-state='available'] {
+	background: color-mix(in srgb, var(--primary) 62%, transparent);
+}
+
+.cal-scrollbar__tick[data-state='reserved'] {
+	background: color-mix(in srgb, var(--text-main) 40%, transparent);
+}
+
+.cal-scrollbar__tick[data-state='unavailable'] {
+	background: color-mix(in srgb, var(--danger) 42%, transparent);
+	opacity: 0.4;
+}
+
+/* Current date/time anchor — a crisp, distinct micro-line across the rail. */
+.cal-scrollbar__now {
+	position: absolute;
+	right: -1px;
+	width: 6px;
+	height: 2px;
+	margin-top: -1px;
+	border-radius: 2px;
+	background: var(--danger);
+	box-shadow: 0 0 5px color-mix(in srgb, var(--danger) 70%, transparent);
+}
+
+/* The thumb is a *relative velocity* control: it rests centred at 50% and eases
+   home when idle (drift → 0). `top`/`height` therefore DO transition — but not
+   while dragging, when they must track the finger / accelerate live. */
 .cal-scrollbar__thumb {
 	position: absolute;
-	right: 4px;
+	right: 3px;
 	width: 6px;
 	border-radius: 999px;
-	background: color-mix(in srgb, var(--text-main) 24%, transparent);
+	background: color-mix(in srgb, var(--text-main) 26%, transparent);
 	pointer-events: auto;
-	cursor: default;
+	cursor: grab;
 	touch-action: none;
 	transition:
-		top 200ms var(--cal-ease),
-		height 200ms var(--cal-ease),
+		top 220ms var(--cal-ease),
+		height 220ms var(--cal-ease),
 		width 120ms ease,
 		background 120ms ease;
 }
 
 .cal-scrollbar__thumb[data-active='true'] {
 	width: 8px;
-	background: color-mix(in srgb, var(--text-main) 50%, transparent);
+	background: color-mix(in srgb, var(--text-main) 52%, transparent);
 }
 
-/* No positional easing while actively dragging — the thumb must track the finger. */
+/* No positional easing while actively accelerating — the thumb tracks the finger. */
 .cal-scrollbar__thumb[data-dragging='true'] {
+	cursor: grabbing;
+	background: color-mix(in srgb, var(--primary) 66%, transparent);
 	transition: width 120ms ease, background 120ms ease;
+}
+/* #endregion */
+
+/* #region Return-to-present teleport — floating pill ----------------------- */
+.cal-jump {
+	position: absolute;
+	left: 50%;
+	bottom: 18px;
+	z-index: 7;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.42rem 0.55rem 0.42rem 0.7rem;
+	border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--card) 88%, var(--primary));
+	color: var(--text-main);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	cursor: pointer;
+	backdrop-filter: blur(10px) saturate(1.2);
+	box-shadow:
+		0 6px 20px color-mix(in srgb, var(--primary) 28%, transparent),
+		0 1px 3px rgba(0, 0, 0, 0.16);
+	/* Hidden resting state — eased in only when the present is off-screen. */
+	opacity: 0;
+	transform: translate(-50%, 14px) scale(0.94);
+	pointer-events: none;
+	transition:
+		opacity 260ms var(--cal-ease),
+		transform 260ms var(--cal-ease),
+		background 160ms ease,
+		border-color 160ms ease;
+}
+
+.cal-jump[data-show='true'] {
+	opacity: 1;
+	transform: translate(-50%, 0) scale(1);
+	pointer-events: auto;
+}
+
+.cal-jump:hover {
+	background: color-mix(in srgb, var(--card) 78%, var(--primary));
+	border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+}
+
+.cal-jump:active {
+	transform: translate(-50%, 1px) scale(0.98);
+}
+
+.cal-jump__icon {
+	display: inline-flex;
+	color: var(--primary);
+}
+
+.cal-jump__dir {
+	display: inline-flex;
+	color: var(--text-muted);
 }
 /* #endregion */
 
@@ -278,6 +388,42 @@
 .cal-svg__hour--day {
 	stroke: var(--cal-hairline-strong);
 }
+
+/* #region Midnight demarcation — premium boundary between calendar days -------
+   A crisp accent rule under a soft downward gradient wash into the new day, with
+   a dated pill so scrolling past 00:00 reads unmistakably. Tokens only, so it
+   inverts cleanly for dark mode. */
+.cal-svg__daybreak {
+	stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+	stroke-width: 1.5;
+	shape-rendering: crispEdges;
+}
+
+.cal-svg__daybreak-wash {
+	fill: url(#cal-daybreak-grad);
+	pointer-events: none;
+}
+
+.cal-svg__daybreak-stop-a {
+	stop-color: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.cal-svg__daybreak-stop-b {
+	stop-color: transparent;
+}
+
+.cal-svg__daybreak-tag-bg {
+	fill: color-mix(in srgb, var(--primary) 90%, var(--card));
+}
+
+.cal-svg__daybreak-tag-text {
+	fill: #fff;
+	font-size: 10.5px;
+	font-weight: 650;
+	letter-spacing: 0.01em;
+	font-variant-numeric: tabular-nums;
+}
+/* #endregion */
 
 .cal-svg__label {
 	fill: var(--text-disabled);
@@ -331,6 +477,27 @@
 	fill: var(--text-muted);
 	font-size: 11px;
 	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+}
+
+/* Masked booking for external viewers — an anonymous "Reserved" block. No accent,
+   no title/attendee, so nothing about the engagement leaks. A faint diagonal
+   texture signals "held" without exposing detail. */
+.cal-svg__event--reserved {
+	cursor: default;
+}
+
+.cal-svg__reserved-bg {
+	fill: color-mix(in srgb, var(--text-main) 9%, transparent);
+	stroke: color-mix(in srgb, var(--text-main) 14%, transparent);
+	stroke-width: 1;
+}
+
+.cal-svg__reserved-title {
+	fill: var(--text-muted);
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
 	pointer-events: none;
 }
 
@@ -501,6 +668,18 @@
 
 .cal-month__chip:hover {
 	background: color-mix(in srgb, var(--cal-event-accent, var(--primary)) 14%, transparent);
+}
+
+/* Masked booking chip for external viewers — neutral, no accent, no detail. */
+.cal-month__chip--reserved {
+	--cal-event-accent: color-mix(in srgb, var(--text-main) 34%, transparent);
+	cursor: default;
+	background: color-mix(in srgb, var(--text-main) 6%, transparent);
+}
+
+.cal-month__chip--reserved .cal-month__chip-title {
+	color: var(--text-muted);
+	font-style: italic;
 }
 
 .cal-month__chip-dot {

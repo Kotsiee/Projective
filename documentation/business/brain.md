@@ -127,6 +127,13 @@ Teams on Projective exist to eliminate the legal and financial friction of colla
 
 - **No Incorporation Required:** Form a group, invite members, and start accepting enterprise-level
   projects without setting up a legal entity or a joint bank account.
+- **Freelancer-Only Space:** The Teams workspace belongs to the freelancer side of the platform. It
+  is visible only when the active persona is a Freelancer profile, and is never surfaced to a
+  Client/Business persona.
+- **Draft-First Creation:** Creating a Team is deliberately low-friction — a member supplies only a
+  display **Name** and a unique alphanumeric **`@handle`**. The Team is created instantly in a
+  **Draft/Unverified** state; branding, contribution splits, roles, and member invitations are
+  completed afterwards on the Team's settings page.
 - **Automated Payment Splitting:** Payments are distributed at the moment of Escrow release. If a
   Stage payout is $1,000, Projective automatically routes percentages to individual member wallets
   based on predefined **Contribution Agreements**.
@@ -286,6 +293,14 @@ A Business is a collaborative shell for project consumers. It acts as the "Emplo
 the platform's workflows, providing a centralised point of management for work requested by various
 team members.
 
+- **Client / Operator Mode (Visibility Gate):** The Businesses space is a client-side surface gated
+  by an account-level **Client / Operator Mode** modifier. An account only sees the Businesses
+  space — and can only create or manage Businesses — once it has opted into Operator Mode. This
+  keeps the client/hiring surface out of the way for accounts that operate purely as freelancers.
+- **Draft-First Creation:** Creating a Business is low-friction — the owner supplies only a display
+  **Name** and a unique alphanumeric **`@handle`**. The Business is created instantly in a
+  **Draft/Unverified** state; legal name, logo, billing details, member roles, and financial setup
+  are completed afterwards on the Business settings page.
 - **Unified Management:** Instead of isolated projects, a Business can manage "Sets" of projects,
   allowing for cross-project visibility.
 - **Shared Capital (The Business Wallet):** Much like Freelancer Teams, Businesses utilise a shared

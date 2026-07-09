@@ -16,8 +16,11 @@ import type {
 	ProfileData,
 	ProfileDraft,
 	ProfileTabKey,
+	ReviewRole,
 	ViewerRelationship,
 } from '../contracts/Profile.ts';
+
+export type ReviewsFilter = 'all' | ReviewRole;
 
 // #region Booking modal state
 export interface BookingModalState {
@@ -30,7 +33,22 @@ export interface BookingModalState {
 // #endregion
 
 export type CalendarView = 'day' | 'week' | 'month';
-export type ListGridView = 'grid' | 'list';
+
+/** The specialised editing modules mounted into the side rail during Editor Mode. */
+export type EditSectionKey =
+	| 'details'
+	| 'services'
+	| 'projects'
+	| 'portfolio'
+	| 'teams'
+	| 'experience'
+	| 'education'
+	| 'members'
+	| 'settings'
+	| 'availability';
+
+/** localStorage key for the persisted side-nav collapse state (spec-mandated name). */
+export const SIDEBAR_COLLAPSED_KEY = 'profile_sidebar_collapsed';
 
 export interface ProfileState {
 	profile: Signal<ProfileData>;
@@ -41,8 +59,12 @@ export interface ProfileState {
 	isScrolled: Signal<boolean>;
 	activeTab: Signal<ProfileTabKey>;
 
-	servicesView: Signal<ListGridView>;
-	projectsView: Signal<ListGridView>;
+	/** The active editing module while in Editor Mode. */
+	editSection: Signal<EditSectionKey>;
+
+	/** Which role's reviews the Reviews tab is filtered to (set by the rating badges). */
+	reviewsFilter: Signal<ReviewsFilter>;
+
 	calendarView: Signal<CalendarView>;
 	/** ISO date (YYYY-MM-DD) the calendar is centred on. */
 	calendarCursor: Signal<string>;
@@ -50,15 +72,25 @@ export interface ProfileState {
 	/** Whether the side-nav action rail is collapsed to icons (persisted). */
 	railCollapsed: Signal<boolean>;
 
+	/** Owner-only: tab keys whose public visibility is toggled off. */
+	hiddenTabs: Signal<Set<ProfileTabKey>>;
+	/** Owner-only: individual entity ids (services/projects/etc.) hidden from the public. */
+	hiddenItems: Signal<Set<string>>;
+
 	draft: Signal<ProfileDraft>;
 	bookingModal: Signal<BookingModalState>;
 
 	// Actions
 	setTab: (tab: ProfileTabKey) => void;
+	/** Opens the Reviews tab, optionally pre-filtered to a role (freelancer/client). */
+	openReviews: (role?: ReviewsFilter) => void;
+	setEditSection: (section: EditSectionKey) => void;
 	startEditing: () => void;
 	cancelEditing: () => void;
 	saveEditing: () => void;
 	updateDraft: (patch: Partial<ProfileDraft>) => void;
+	toggleTabHidden: (tab: ProfileTabKey) => void;
+	toggleItemHidden: (id: string) => void;
 
 	toggleFollow: () => void;
 	toggleSaved: () => void;
@@ -89,7 +121,6 @@ function draftFromProfile(p: ProfileData): ProfileDraft {
 		workplace: p.meta.workplace,
 		school: p.meta.school,
 		title: p.meta.title,
-		baseRate: p.meta.baseRate,
 		languages: p.meta.languages.map((l) => ({ ...l })),
 		publicBookingEnabled: p.availability.publicBookingEnabled,
 	};
@@ -122,14 +153,20 @@ export function ProfileProvider(
 	const isEditing = useSignal(isSelf && startInEdit);
 	const isScrolled = useSignal(false);
 	const activeTab = useSignal<ProfileTabKey>('services');
+	const editSection = useSignal<EditSectionKey>('details');
+	const reviewsFilter = useSignal<ReviewsFilter>('all');
 
-	const servicesView = useSignal<ListGridView>('grid');
-	const projectsView = useSignal<ListGridView>('grid');
 	const calendarView = useSignal<CalendarView>('week');
 	const calendarCursor = useSignal<string>(firstBookableDate(profile));
 
-	// Rail collapse — collapsed by default, restored from localStorage.
-	const railCollapsed = useSignal<boolean>(readRailCollapsed());
+	// Rail collapse — collapsed by default when viewing, restored from localStorage.
+	// If the page opens straight into Editor Mode, start expanded (see startEditing).
+	const railCollapsed = useSignal<boolean>(
+		isSelf && startInEdit ? false : readRailCollapsed(),
+	);
+
+	const hiddenTabs = useSignal<Set<ProfileTabKey>>(new Set());
+	const hiddenItems = useSignal<Set<string>>(new Set());
 
 	const draft = useSignal<ProfileDraft>(draftFromProfile(profile));
 
@@ -146,14 +183,33 @@ export function ProfileProvider(
 		activeTab.value = tab;
 	};
 
+	const openReviews = (role: ReviewsFilter = 'all') => {
+		reviewsFilter.value = role;
+		activeTab.value = 'reviews';
+		if (typeof globalThis !== 'undefined' && globalThis.history?.replaceState) {
+			globalThis.history.replaceState(null, '', '#reviews');
+		}
+	};
+
+	const setEditSection = (section: EditSectionKey) => {
+		editSection.value = section;
+	};
+
 	const startEditing = () => {
 		draft.value = draftFromProfile(profileSig.value);
+		editSection.value = 'details';
 		isEditing.value = true;
+		// Entering Editor Mode auto-expands the side nav and persists that state.
+		railCollapsed.value = false;
+		writeSidebarCollapsed(false);
 	};
 
 	const cancelEditing = () => {
 		draft.value = draftFromProfile(profileSig.value);
 		isEditing.value = false;
+		// Back to the normal-view default: collapsed, persisted.
+		railCollapsed.value = true;
+		writeSidebarCollapsed(true);
 	};
 
 	const saveEditing = () => {
@@ -175,12 +231,14 @@ export function ProfileProvider(
 				workplace: d.workplace,
 				school: d.school,
 				title: d.title,
-				baseRate: d.baseRate,
 				languages: d.languages.map((l) => ({ ...l })),
 			},
 			availability: { ...p.availability, publicBookingEnabled: d.publicBookingEnabled },
 		};
 		isEditing.value = false;
+		// Back to the normal-view default: collapsed, persisted.
+		railCollapsed.value = true;
+		writeSidebarCollapsed(true);
 	};
 
 	const updateDraft = (patch: Partial<ProfileDraft>) => {
@@ -198,9 +256,19 @@ export function ProfileProvider(
 	const toggleRail = () => {
 		const next = !railCollapsed.value;
 		railCollapsed.value = next;
-		if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
-			globalThis.localStorage.setItem('profile_rail_collapsed', String(next));
-		}
+		writeSidebarCollapsed(next);
+	};
+
+	const toggleTabHidden = (tab: ProfileTabKey) => {
+		const next = new Set(hiddenTabs.value);
+		next.has(tab) ? next.delete(tab) : next.add(tab);
+		hiddenTabs.value = next;
+	};
+
+	const toggleItemHidden = (id: string) => {
+		const next = new Set(hiddenItems.value);
+		next.has(id) ? next.delete(id) : next.add(id);
+		hiddenItems.value = next;
 	};
 
 	const openBooking = (
@@ -235,18 +303,24 @@ export function ProfileProvider(
 				isEditing,
 				isScrolled,
 				activeTab,
-				servicesView,
-				projectsView,
+				editSection,
+				reviewsFilter,
 				calendarView,
 				calendarCursor,
 				railCollapsed,
+				hiddenTabs,
+				hiddenItems,
 				draft,
 				bookingModal,
 				setTab,
+				openReviews,
+				setEditSection,
 				startEditing,
 				cancelEditing,
 				saveEditing,
 				updateDraft,
+				toggleTabHidden,
+				toggleItemHidden,
 				toggleFollow,
 				toggleSaved,
 				toggleConnect,
@@ -274,13 +348,20 @@ export function useProfileContext(): ProfileState {
 export { ProfileContext };
 
 // #region Local helpers
-/** Reads the persisted rail-collapse preference; defaults to collapsed. */
+/** Reads the persisted sidebar-collapse preference; defaults to collapsed. */
 function readRailCollapsed(): boolean {
 	if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
-		const stored = globalThis.localStorage.getItem('profile_rail_collapsed');
+		const stored = globalThis.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
 		if (stored !== null) return stored === 'true';
 	}
 	return true; // collapsed by default
+}
+
+/** Persists the sidebar-collapse preference. Safe on the server (no-op). */
+function writeSidebarCollapsed(next: boolean): void {
+	if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
+		globalThis.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+	}
 }
 
 /** Picks a sensible starting date for the calendar cursor from seed bookings. */

@@ -53,11 +53,16 @@ Registration, login, OAuth, email verification, password recovery, and multi-per
 
 Businesses and Freelancer Teams (the "Virtual Agency"), their membership, roles, and shared vaults.
 
-- **Done:** Business & Team create/list/view/settings routes and member APIs; org-unit formation
-  (US-002) fully wired — `org.create_business`/`org.create_team` persist branding + `bio`,
-  initialise the finance wallet / Team Vault (`treasury_wallet_id`), write `business.created` /
-  `team.created` audit rows, and the org context switch upserts `session_context` (`0110`, `0107`,
-  `0111`, `0209`–`0212`, `0301`).
+- **Done:** Business & Teams spaces redesigned into a 70/30 workspace (glass roster + operational
+  overview) with in-context, draft-first creation — the `CreateBusinessModal` / `CreateTeamModal`
+  islands capture only Name + `@handle` and the minimal-payload `org.create_business` /
+  `org.create_team` RPCs create the entity in `status = 'draft'`, initialise the finance wallet /
+  Team Vault (`treasury_wallet_id`), and write `business.created` / `team.created` audit rows
+  (US-002 fully wired; extended metadata deferred to settings). The left-nav gates the surfaces:
+  **Businesses** appears only under account-level **Client / Operator Mode** (`is_operator` /
+  `org.set_operator_mode`) and **Teams** is freelancer-only. Org context switch upserts
+  `session_context` (`0110`, `0107`, `0111`, `0209`–`0212`, `0301`,
+  `20260709120000_business_teams_overhaul`).
 - **Done (US-008):** The Business Administration dashboard is live — `/dashboard` renders real-time
   wallet balances, an Area/Line volume chart and a filterable Transaction Ledger read straight from
   the `finance.*` ledger via `org.get_business_finance` (`0309`), plus the member visibility list

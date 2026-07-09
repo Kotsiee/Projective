@@ -13,6 +13,7 @@ import {
 } from '../../../contexts/SubmissionsContext.tsx';
 import { validateSubmission } from '../../../contracts/Submissions.ts';
 import { SEED_FREELANCERS } from '../../../contexts/submissionsSeed.ts';
+import type { SubmissionDTO } from '../../../services/SubmissionsService.ts';
 import {
 	SubmissionForm,
 	type SubmissionFormModel,
@@ -229,7 +230,18 @@ function SubmissionsSurface() {
 /* #endregion */
 
 /* #region Island */
-export default function StageSubmissionsIsland(): JSX.Element {
+export interface StageSubmissionsIslandProps {
+	/**
+	 * Server-hydrated deliverable ledger from the route (Route → Service → props, one-way; see
+	 * apps/web/CLAUDE.md), threaded into the SubmissionsProvider so the surface paints without a
+	 * client hydration fetch on mount.
+	 */
+	initialSubmissions?: SubmissionDTO[] | null;
+}
+
+export default function StageSubmissionsIsland(
+	{ initialSubmissions = null }: StageSubmissionsIslandProps = {},
+): JSX.Element {
 	const { stage } = useStageContext();
 	const s = stage?.value;
 
@@ -253,8 +265,9 @@ export default function StageSubmissionsIsland(): JSX.Element {
 			multiFreelancer={multiFreelancer}
 			currentFreelancerId={me.id}
 			author={{ id: me.id, name: me.name }}
-			projectId={(s as any).project_id}
-			stageId={(s as any).stage_id}
+			projectId={s.project_id}
+			stageId={s.stage_id}
+			initialSubmissions={initialSubmissions}
 		>
 			<SubmissionsSurface />
 		</SubmissionsProvider>

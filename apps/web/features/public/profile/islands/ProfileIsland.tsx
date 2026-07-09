@@ -29,9 +29,10 @@ import PortfolioTab from '../components/tabs/PortfolioTab.tsx';
 import ExperienceTab from '../components/tabs/ExperienceTab.tsx';
 import EducationTab from '../components/tabs/EducationTab.tsx';
 import TeamsTab from '../components/tabs/TeamsTab.tsx';
+import ReviewsTab from '../components/tabs/ReviewsTab.tsx';
 
 import ProfileSideRail from '../components/rail/ProfileSideRail.tsx';
-import ProfileEditForm from '../components/edit/ProfileEditForm.tsx';
+import ProfileEditPanel from '../components/edit/ProfileEditPanel.tsx';
 import ProfileEditFooter from '../components/edit/ProfileEditFooter.tsx';
 
 // #region Tab panel switch
@@ -49,6 +50,8 @@ function ProfileTabPanel({ tab }: { tab: ProfileTabKey }) {
 			return <EducationTab />;
 		case 'teams':
 			return <TeamsTab />;
+		case 'reviews':
+			return <ReviewsTab />;
 		default:
 			return null;
 	}
@@ -130,7 +133,7 @@ function ProfileInner() {
 			<div class='profile__canvas'>
 				<ProfileHeader />
 
-				{editing ? <ProfileEditForm /> : (
+				{editing ? <ProfileEditPanel /> : (
 					<>
 						<ProfileOverview />
 						<ProfileTabs />

@@ -1,73 +1,14 @@
 /* =========================================================================
-   Profile tab bar + shared tab-panel primitives (view toggles, empty states)
+   Profile tab bar (sticky wrapper for the shared NavTabs primitive) + shared
+   tab-panel primitives (headings, empty states). Tab visuals themselves live in
+   the `@projective/ui` NavTabs component — this file only pins the bar.
    ========================================================================= */
 
 .profile-tabs {
-	display: flex;
-	align-items: center;
-	gap: 0.25rem;
-	overflow-x: auto;
-	scrollbar-width: none;
-	border-bottom: 1px solid var(--border-color);
 	position: sticky;
 	top: var(--header-height);
 	background: var(--bg);
 	z-index: 5;
-}
-
-.profile-tabs::-webkit-scrollbar {
-	display: none;
-}
-
-.profile-tabs__tab {
-	position: relative;
-	display: inline-flex;
-	align-items: center;
-	gap: 0.4rem;
-	padding: 0.85rem 0.9rem;
-	border: none;
-	background: transparent;
-	color: var(--text-muted);
-	font-size: 0.92rem;
-	font-weight: 550;
-	white-space: nowrap;
-	cursor: pointer;
-	transition: color var(--fast);
-}
-
-.profile-tabs__tab:hover {
-	color: var(--text-main);
-}
-
-.profile-tabs__tab[data-active='true'] {
-	color: var(--text-main);
-}
-
-.profile-tabs__tab[data-active='true']::after {
-	content: '';
-	position: absolute;
-	left: 0.9rem;
-	right: 0.9rem;
-	bottom: -1px;
-	height: 2px;
-	border-radius: 2px 2px 0 0;
-	background: var(--primary);
-}
-
-.profile-tabs__count {
-	font-size: 0.72rem;
-	font-weight: 600;
-	color: var(--text-muted);
-	background: var(--card-dark);
-	border-radius: 999px;
-	padding: 0.05rem 0.4rem;
-	min-width: 1.15rem;
-	text-align: center;
-}
-
-.profile-tabs__tab[data-active='true'] .profile-tabs__count {
-	color: var(--primary);
-	background: var(--primary-surface);
 }
 
 /* #region Shared tab-panel chrome */
@@ -96,34 +37,49 @@
 	margin: 0.15rem 0 0;
 }
 
-/* Grid/List view toggle */
-.view-toggle {
-	display: inline-flex;
-	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius);
-	overflow: hidden;
+/* =========================================================================
+   Profile filter chips — the exact pattern used by the Projects-page sidebar
+   list (`.project-sidebar-list__tag`). Shared by the Portfolio & Reviews tabs.
+   ========================================================================= */
+.profile-filters {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	margin-bottom: 1.25rem;
+	scrollbar-width: none;
 }
 
-.view-toggle__btn {
+.profile-filter {
 	display: inline-flex;
 	align-items: center;
-	justify-content: center;
-	width: 2.1rem;
-	height: 2.1rem;
-	border: none;
-	background: var(--card);
+	gap: 0.4rem;
+	white-space: nowrap;
+	padding: 0.3rem 0.8rem;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	border-radius: 16px;
+	background: var(--field-bg);
+	border: 1px solid var(--border-color);
 	color: var(--text-muted);
 	cursor: pointer;
-	transition: background var(--fast), color var(--fast);
+	transition: all var(--fast);
 }
 
-.view-toggle__btn[data-active='true'] {
+.profile-filter:hover {
+	background: var(--field-bg-hover);
+	color: var(--text-main);
+}
+
+.profile-filter--active {
 	background: var(--primary-surface);
 	color: var(--primary);
+	border-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.3);
 }
 
-.view-toggle__btn:not(:last-child) {
-	border-right: 1px solid var(--border-color);
+.profile-filter__count {
+	font-size: 0.72rem;
+	font-weight: 600;
+	opacity: 0.75;
 }
 
 /* Empty state */

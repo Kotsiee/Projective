@@ -248,14 +248,6 @@ export default function ProfileEditForm() {
 							placeholder='e.g. Independent Design Lead'
 						/>
 					</div>
-					<div class='pedit__field'>
-						<label class='pedit__label'>Base rate</label>
-						<TextField
-							value={d.baseRate}
-							onChange={(v) => updateDraft({ baseRate: v })}
-							placeholder='e.g. £85–£120 / hr'
-						/>
-					</div>
 				</div>
 
 				<div class='pedit__field'>

@@ -6,6 +6,17 @@
 @import 'themes/utils/tooltip.css';
 @import '../../../packages/ui/src/styles/components/list-card.css';
 
+/* Workspace primitives (Business/Teams 70-30 view). These package + field component
+   stylesheets are consumed by island bundles and a server-rendered shell, so — per the
+   bundling note below — they must live in the always-loaded global sheet. */
+@import '../../../packages/ui/src/styles/components/glass-panel.css';
+@import '../../../packages/ui/src/styles/components/quick-action-card.css';
+@import '../../../packages/ui/src/styles/components/activity-feed.css';
+@import '../../../packages/ui/src/styles/components/entity-roster.css';
+@import '../../../packages/ui/src/styles/components/metric-placeholder.css';
+@import '../../../packages/fields/src/styles/fields/handle-field.css';
+@import '../features/dashboard/shared/styles/workspace.css';
+
 /* Auth flow design system. Global because the shell/visual panes are rendered by
    server components (routes/layout), whose CSS imports are not bundled to the
    client — so this must live in the always-loaded global sheet. */
@@ -20,9 +31,8 @@
    global sheet rather than an island bundle. */
 @import '../features/dashboard/overview/styles/overview.css';
 
-/* Business list + profile settings (US-008). Both pages now server-render their static
-   chrome (headers, cards) around atomic islands, so their CSS lives in the global sheet. */
-@import '../features/dashboard/business/styles/pages/business-island.css';
+/* Business profile settings (US-008) — server-renders its static chrome around atomic
+   islands, so its CSS lives in the global sheet. */
 @import '../features/dashboard/business/styles/business-settings.css';
 
 /* 1. GLOBAL BOX MODEL FIX

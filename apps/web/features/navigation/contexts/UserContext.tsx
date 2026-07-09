@@ -26,6 +26,11 @@ export interface UserProfile {
 	businesses: UserOrgRef[];
 	/** Teams the user owns or actively belongs to. */
 	teams: UserOrgRef[];
+	/**
+	 * Account-level "Client / Operator Mode" modifier. When true the user has
+	 * opted into client/hiring tooling and the Businesses nav space is revealed.
+	 */
+	isOperator: boolean;
 }
 
 export interface UserState {
@@ -79,6 +84,7 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 						rawUser.id ?? rawUser.user_id ?? null,
 					businesses: Array.isArray(rawUser.businesses) ? rawUser.businesses : [],
 					teams: Array.isArray(rawUser.teams) ? rawUser.teams : [],
+					isOperator: rawUser.isOperator ?? rawUser.is_operator ?? false,
 				};
 			}
 

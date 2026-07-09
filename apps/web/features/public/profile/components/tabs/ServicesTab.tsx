@@ -8,16 +8,12 @@
 
 import '../../styles/components/services.css';
 
-import { IconButton, ServiceCard } from '@projective/ui';
-import {
-	IconCalendarEvent,
-	IconExternalLink,
-	IconLayoutGrid,
-	IconList,
-} from '@tabler/icons-preact';
+import { ServiceCard } from '@projective/ui';
+import { IconCalendarEvent, IconExternalLink } from '@tabler/icons-preact';
 import type { EntityCardMenuItem } from '@projective/ui';
 import type { EntityCardModel } from '@projective/types';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
+import { bannerBackground } from '../../utils.ts';
 import type { ServiceItem } from '../../contracts/Profile.ts';
 
 /** Adapts a profile `ServiceItem` into the unified card model. */
@@ -33,7 +29,7 @@ function serviceToCardModel(s: ServiceItem): EntityCardModel {
 		owner_name: '',
 		owner_handle: '',
 		owner_avatar: null,
-		banner: s.thumbnailUrl ? `url("${s.thumbnailUrl}") center / cover no-repeat` : null,
+		banner: bannerBackground(s.thumbnailUrl),
 		accent: 'primary',
 		price_cents: null,
 		price_unit: null,
@@ -55,36 +51,18 @@ function serviceMenu(s: ServiceItem): EntityCardMenuItem[] {
 }
 
 export default function ServicesTab() {
-	const { profile, servicesView } = useProfileContext();
-	const services = profile.value.services;
-	const view = servicesView.value;
+	const { profile, hiddenItems } = useProfileContext();
+	// Owner-hidden items are dropped from the presentation surface (the control
+	// centre in Editor Mode still lists every item with its hidden state).
+	const hidden = hiddenItems.value;
+	const services = profile.value.services.filter((s) => !hidden.has(s.id));
 
 	return (
-		<section class='svc' data-view={view}>
+		<section class='svc'>
 			<header class='tab-head'>
 				<div>
 					<h2 class='tab-head__title'>Services</h2>
 					<p class='tab-head__sub'>{services.length} offerings you can hire or book</p>
-				</div>
-				<div class='view-toggle' role='group' aria-label='View mode'>
-					<IconButton
-						aria-label='Grid view'
-						variant={view === 'grid' ? 'primary' : 'secondary'}
-						ghost={view !== 'grid'}
-						size='small'
-						onClick={() => (servicesView.value = 'grid')}
-					>
-						<IconLayoutGrid size={17} />
-					</IconButton>
-					<IconButton
-						aria-label='List view'
-						variant={view === 'list' ? 'primary' : 'secondary'}
-						ghost={view !== 'list'}
-						size='small'
-						onClick={() => (servicesView.value = 'list')}
-					>
-						<IconList size={17} />
-					</IconButton>
 				</div>
 			</header>
 

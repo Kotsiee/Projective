@@ -2,37 +2,7 @@
    Portfolio tab — fluid CSS-columns masonry of media bricks
    ========================================================================= */
 
-/* #region Live category filter bar */
-.pfolio-filters {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.4rem;
-	margin-bottom: 1.25rem;
-}
-
-.pfolio-filter {
-	padding: 0.4rem 0.9rem;
-	border-radius: 999px;
-	border: 1px solid var(--border-color);
-	background: var(--card);
-	color: var(--text-secondary);
-	font-size: 0.85rem;
-	font-weight: 550;
-	cursor: pointer;
-	transition: background var(--fast), color var(--fast), border-color var(--fast);
-}
-
-.pfolio-filter:hover {
-	border-color: var(--primary);
-	color: var(--text-main);
-}
-
-.pfolio-filter[data-active='true'] {
-	background: var(--primary);
-	border-color: var(--primary);
-	color: #fff;
-}
-/* #endregion */
+/* The category filter bar now uses the shared `.profile-filter` chips (see tabs.css). */
 
 .pfolio-masonry {
 	columns: 4 220px;

@@ -18,5 +18,11 @@ export interface CompleteOnboardingRequest {
 	interests?: string[];
 	/** files.items id of an uploaded avatar (optional). */
 	avatarFileId?: string;
+	/**
+	 * Same-origin path to return to after onboarding completes (the page the
+	 * visitor was on when they hit "Join"). Validated server-side against open
+	 * redirects; falls back to /dashboard.
+	 */
+	redirectTo?: string;
 }
 // #endregion

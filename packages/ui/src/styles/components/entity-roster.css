@@ -1,0 +1,136 @@
+/* EntityRoster — premium vertical roster of active entities. */
+.entity-roster {
+	list-style: none;
+	margin: 0;
+	padding: 0.4rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.entity-roster--empty {
+	padding: 2rem 1rem;
+	text-align: center;
+	font-size: 0.85rem;
+	color: var(--text-muted, hsl(0, 0%, 55%));
+}
+
+.roster-item {
+	--ri-accent: var(--primary, hsl(186, 57%, 40%));
+	--ri-surface: var(--primary-surface, hsla(186, 57%, 40%, 0.12));
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.6rem 0.7rem;
+	border-radius: 12px;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition:
+		background var(--fast, 150ms) var(--ease-out, ease),
+		border-color var(--fast, 150ms) var(--ease-out, ease);
+}
+.roster-item--mint {
+	--ri-accent: var(--mint, hsl(160, 70%, 42%));
+	--ri-surface: var(--mint-surface, hsla(160, 70%, 42%, 0.14));
+}
+.roster-item--violet {
+	--ri-accent: var(--violet, hsl(258, 85%, 66%));
+	--ri-surface: var(--violet-surface, hsla(258, 85%, 66%, 0.14));
+}
+.roster-item--amber {
+	--ri-accent: var(--amber, hsl(38, 92%, 55%));
+	--ri-surface: hsla(38, 92%, 55%, 0.15);
+}
+
+.roster-item:hover {
+	background: var(--surface-hover, hsla(0, 0%, 50%, 0.06));
+}
+
+.roster-item--active {
+	background: var(--ri-surface);
+	border-color: color-mix(in srgb, var(--ri-accent) 45%, transparent);
+}
+
+.roster-item__avatar {
+	flex-shrink: 0;
+	display: grid;
+	place-items: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--ri-surface);
+	color: var(--ri-accent);
+	font-weight: 700;
+	font-size: 0.85rem;
+}
+.roster-item__avatar-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.roster-item__initials {
+	letter-spacing: 0.02em;
+}
+
+.roster-item__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.05rem;
+	min-width: 0;
+	flex: 1;
+}
+.roster-item__name {
+	font-size: 0.88rem;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.roster-item__handle {
+	font-size: 0.75rem;
+	color: var(--text-muted, hsl(0, 0%, 55%));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.roster-item__badges {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.25rem;
+}
+
+.roster-item__badge {
+	font-size: 0.62rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 0.12rem 0.4rem;
+	border-radius: 999px;
+	line-height: 1.3;
+	white-space: nowrap;
+}
+
+.roster-item__badge--draft {
+	color: var(--amber, hsl(38, 92%, 45%));
+	background: hsla(38, 92%, 55%, 0.16);
+}
+.roster-item__badge--tier-free {
+	color: var(--text-muted, hsl(0, 0%, 50%));
+	background: hsla(0, 0%, 50%, 0.12);
+}
+.roster-item__badge--tier-pro {
+	color: var(--violet, hsl(258, 70%, 55%));
+	background: var(--violet-surface, hsla(258, 85%, 66%, 0.16));
+}
+.roster-item__badge--tier-enterprise {
+	color: #fff;
+	background: var(
+		--grad-premium-diag,
+		linear-gradient(135deg, hsl(186, 57%, 40%), hsl(258, 85%, 66%))
+	);
+}

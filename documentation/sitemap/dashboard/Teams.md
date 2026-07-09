@@ -13,11 +13,10 @@ system to manage roles, invitations, and access across organizations.
 The routing logic focuses on team discovery, formation, and granular management of team-specific
 settings.
 
-| Route Path        | File Path            | Description                                                                          |
-| :---------------- | :------------------- | :----------------------------------------------------------------------------------- |
-| `/teams`          | `index.tsx`          | Overview of all teams the user belongs to. Uses `DataDisplay` for list management.   |
-| `/teams/new`      | `new/index.tsx`      | Creation flow for defining a new team entity and initial role setup.                 |
-| `/teams/[teamid]` | `[teamid]/index.tsx` | **Team Hub**: Directs to specific team projects, member rosters, and activity feeds. |
+| Route Path        | File Path            | Description                                                                                                                                                                                                                                                                        |
+| :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/teams`          | `index.tsx`          | **Teams Workspace**: a 70/30 split — a 30% glassmorphism roster panel (entity initials, name, `@handle`, tier + Draft badges) and a 70% operational overview (activity feed, quick-action widgets, org-health metrics). New teams are created in-context via the `CreateTeamModal` island (name + `@handle` only, entity starts Draft/Unverified). |
+| `/teams/[teamid]` | `[teamid]/index.tsx` | **Team Hub**: Directs to specific team projects, member rosters, and activity feeds.                                                                                                                                                                                              |
 
 ### 🛡️ Team-Specific Protection
 
@@ -44,6 +43,19 @@ These endpoints manage the underlying relationships between profiles and team or
 ---
 
 ## 🔒 Security & Logic
+
+### Low-Friction, Draft-First Creation
+
+Teams no longer use a standalone multi-step creation flow. Creation happens in-context via the
+`CreateTeamModal` island, which requires only a display **Name** and a unique alphanumeric
+**`@handle`** (slug). The `create_team` RPC persists these minimal fields and marks the new team
+**Draft/Unverified** (`status = 'draft'`); role setup, branding, splits and member invitations are
+deferred to the team's settings page.
+
+### Freelancer-Only Visibility
+
+The **Teams** tab in the left nav is a freelancer-only space — it appears only when the active
+persona is a Freelancer profile (`activeProfileType === 'freelancer'`) and never for clients.
 
 ### Permission Hierarchy
 

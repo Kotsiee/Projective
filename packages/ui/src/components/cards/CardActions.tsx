@@ -1,5 +1,11 @@
 import { useSignal } from '@preact/signals';
-import { IconDots, IconFlag, IconHeart, IconHeartFilled, IconShare3 } from '@tabler/icons-preact';
+import {
+	IconBookmark,
+	IconBookmarkFilled,
+	IconDots,
+	IconFlag,
+	IconShare3,
+} from '@tabler/icons-preact';
 import type { EntityCardMenuItem } from '../../types/components/entity-card.ts';
 
 /**
@@ -53,7 +59,7 @@ export function CardActions({ title, shareUrl, saved, onSave, menuItems }: CardA
 				aria-label={isSaved ? 'Unsave' : 'Save'}
 				onClick={toggleSave}
 			>
-				{isSaved ? <IconHeartFilled size={17} /> : <IconHeart size={17} />}
+				{isSaved ? <IconBookmarkFilled size={17} /> : <IconBookmark size={17} />}
 			</button>
 			<button type='button' class='entity-card__action' aria-label='Share' onClick={share}>
 				<IconShare3 size={17} />

@@ -41,6 +41,13 @@ export default function NavigationGuestHeader() {
 		globalThis.location.href = term ? `/explore?q=${encodeURIComponent(term)}` : '/explore';
 	};
 
+	// Capture where the visitor was so onboarding can return them there. Computed
+	// at click time so it reflects the live URL, not the page this island mounted on.
+	const joinHref = () => {
+		const here = `${globalThis.location.pathname}${globalThis.location.search}`;
+		return here && here !== '/' ? `/join?redirectTo=${encodeURIComponent(here)}` : '/join';
+	};
+
 	return (
 		<>
 			<header
@@ -96,6 +103,10 @@ export default function NavigationGuestHeader() {
 						variant='premium'
 						rounded
 						href='/join'
+						onClick={(e: MouseEvent) => {
+							e.preventDefault();
+							globalThis.location.href = joinHref();
+						}}
 						className='navigation__guest__join'
 						startIcon={<IconSparkles size={16} />}
 					>

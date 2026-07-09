@@ -76,15 +76,8 @@ export interface ProfileMeta {
 	workplace: string;
 	school: string;
 	title: string;
-	baseRate: string;
 	memberSince: string;
 	ratings: RatingByRole;
-	/**
-	 * Live resource allocation (spec §"Resource Allocation" §2/§3): the freelancer's current summed
-	 * Workload Intensity (W_i) and their concurrency cap, rendered as the Workload Capacity Gauge.
-	 * Optional — only person profiles carry it.
-	 */
-	workload?: { current: number; cap: number };
 }
 // #endregion
 
@@ -164,6 +157,27 @@ export interface EntityCard {
 	description: string;
 	tags: string[];
 }
+
+/** Which side of an engagement a review was written about. */
+export type ReviewRole = 'freelancer' | 'client';
+
+/** A single review in the profile's live review history (Reviews tab). */
+export interface ReviewItem {
+	id: string;
+	/** Whether this rates the profile as a freelancer/provider or as a client. */
+	role: ReviewRole;
+	/** 0–5 stars (halves allowed). */
+	rating: number;
+	title: string;
+	body: string;
+	authorName: string;
+	authorHandle: string;
+	authorAvatarUrl?: string;
+	/** Context the review was left in (service/project name). */
+	context: string;
+	/** ISO date the review was posted. */
+	date: string;
+}
 // #endregion
 
 // #region Availability engine
@@ -230,7 +244,8 @@ export type ProfileTabKey =
 	| 'portfolio'
 	| 'experience'
 	| 'education'
-	| 'teams';
+	| 'teams'
+	| 'reviews';
 
 export interface ProfileData {
 	id: string;
@@ -261,6 +276,8 @@ export interface ProfileData {
 	education: TimelineEntry[];
 	teams: EntityCard[];
 	businesses: EntityCard[];
+	/** Live review history surfaced in the Reviews tab. */
+	reviews: ReviewItem[];
 
 	availability: AvailabilitySettings;
 
@@ -282,7 +299,6 @@ export interface ProfileDraft {
 	workplace: string;
 	school: string;
 	title: string;
-	baseRate: string;
 	languages: LanguageProficiency[];
 	publicBookingEnabled: boolean;
 }

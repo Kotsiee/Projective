@@ -1,0 +1,78 @@
+/* =============================================================================
+   NavTabs — premium, navigation-optimised tab strip. The active tab is conveyed
+   by a sliding accent underline; the whole surface ripples on tap via
+   RippleSurface. All colours are palette tokens so it re-themes automatically.
+   ========================================================================== */
+
+.nav-tabs {
+	display: flex;
+	align-items: stretch;
+	gap: 0.15rem;
+	overflow-x: auto;
+	scrollbar-width: none;
+	border-bottom: 1px solid var(--hairline, var(--border-color));
+}
+
+.nav-tabs::-webkit-scrollbar {
+	display: none;
+}
+
+.nav-tabs__tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.8rem 0.95rem;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	font-family: inherit;
+	font-size: 0.92rem;
+	font-weight: 550;
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	text-decoration: none;
+	border-radius: var(--border-radius__small) var(--border-radius__small) 0 0;
+	transition: color var(--fast) ease, background var(--fast) ease;
+}
+
+.nav-tabs__tab:hover {
+	color: var(--text-main);
+	background: var(--button-hover, rgba(255, 255, 255, 0.05));
+}
+
+.nav-tabs__tab:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.nav-tabs__tab[data-active='true'] {
+	color: var(--text-main);
+	font-weight: 650;
+}
+
+/* Sliding accent underline for the active tab. */
+.nav-tabs__tab::after {
+	content: '';
+	position: absolute;
+	left: 0.6rem;
+	right: 0.6rem;
+	bottom: -1px;
+	height: 2px;
+	border-radius: 2px 2px 0 0;
+	background: var(--primary);
+	transform: scaleX(0);
+	transform-origin: center;
+	transition: transform var(--medium) ease;
+}
+
+.nav-tabs__tab[data-active='true']::after {
+	transform: scaleX(1);
+}
+
+.nav-tabs__icon {
+	display: inline-flex;
+	align-items: center;
+	color: currentColor;
+}

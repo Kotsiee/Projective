@@ -14,12 +14,11 @@ permissions.
 The routing for Businesses is designed to mirror the Teams structure, emphasizing the "Step-Ladder"
 transition from solo client to organizational entity.
 
-| Route Path                 | File Path                  | Description                                                                                                        |
-| :------------------------- | :------------------------- | :----------------------------------------------------------------------------------------------------------------- |
-| `/business`                | `index.tsx`                | Directory of all business entities owned or managed by the user.                                                   |
-| `/business/new`            | `new/index.tsx`            | Registration flow for a new business entity, including legal name and branding setup.                              |
-| `/business/[bid]`          | `[bid]/index.tsx`          | **Business Hub**: High-level view of projects, total spend, and active collaborators associated with the business. |
-| `/business/[bid]/settings` | `[bid]/settings/index.tsx` | Management of business metadata, billing preferences, and department setup (Phase 3).                              |
+| Route Path                 | File Path                  | Description                                                                                                                                                                                                    |
+| :------------------------- | :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/business`                | `index.tsx`                | **Business Workspace**: a 70/30 split — a 30% glassmorphism roster panel (entity initials, name, `@handle`, tier + Draft badges) and a 70% operational overview (activity feed, quick-action widgets, org-health metrics). New businesses are created in-context via the `CreateBusinessModal` island (name + `@handle` only, entity starts Draft/Unverified). |
+| `/business/[bid]`          | `[bid]/index.tsx`          | **Business Hub**: High-level view of projects, total spend, and active collaborators associated with the business.                                                                                            |
+| `/business/[bid]/settings` | `[bid]/settings/index.tsx` | Management of business metadata, billing preferences, and department setup (Phase 3). Draft businesses complete their extended profile (branding, legal, billing) here.                                        |
 
 ---
 
@@ -41,6 +40,20 @@ structures.
 ---
 
 ## 🔒 Security & Logic
+
+### Low-Friction, Draft-First Creation
+
+The Businesses space no longer uses a standalone multi-step registration wizard. Creation happens
+in-context via the `CreateBusinessModal` island, which requires only a display **Name** and a unique
+alphanumeric **`@handle`** (slug). The `create_business` RPC persists these minimal fields and marks
+the new entity **Draft/Unverified** (`status = 'draft'`). All extended metadata (branding, legal,
+billing, members, financials) is deferred to `/business/[bid]/settings`.
+
+### Operator-Mode Visibility
+
+The **Businesses** tab in the left nav is gated by the account-level **Client / Operator Mode** flag
+(`org.users_public.is_operator`, surfaced as `isOperator` via `getMe`/`UserContext`). The tab — and
+this whole space — is hidden until the account opts into Operator Mode (`org.set_operator_mode`).
 
 ### Organizational Context
 

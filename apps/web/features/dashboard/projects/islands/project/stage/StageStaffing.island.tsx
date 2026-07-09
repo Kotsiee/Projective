@@ -207,7 +207,18 @@ export function StageStaffing(props: StageStaffingIslandProps): JSX.Element {
  * needs: the owner/client gets seat-definition + assign authority (`canManage`), and an assigned
  * freelancer gets their own profile id so the per-seat Apply affordance is enabled (US-004).
  */
-export default function StageStaffingRoute(): JSX.Element {
+export interface StageStaffingRouteProps {
+	/**
+	 * Server-hydrated staffing payload resolved by the route (Route → Service → props, one-way; see
+	 * apps/web/CLAUDE.md). Threaded to the island as `initialData` so it doesn't re-fetch on mount;
+	 * the island still falls back to a client fetch when absent.
+	 */
+	initialData?: StageStaffingDTO | null;
+}
+
+export default function StageStaffingRoute(
+	{ initialData }: StageStaffingRouteProps = {},
+): JSX.Element {
 	const { stage, refresh } = useStageContext();
 	const s = stage.value;
 
@@ -234,6 +245,7 @@ export default function StageStaffingRoute(): JSX.Element {
 			currentFreelancerId={currentFreelancerId}
 			assignmentMode={s.assignment_mode}
 			onStageChanged={refresh}
+			initialData={initialData}
 		/>
 	);
 }

@@ -34,6 +34,50 @@
 	flex-direction: column;
 }
 
+/* #region Interval-state legend — Available / Reserved / Unavailable -------- */
+.avail-page__legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	padding: 0 0.25rem 0.85rem;
+}
+
+.avail-page__legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--text-secondary);
+}
+
+.avail-page__legend-swatch {
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 3px;
+	background: var(--text-disabled);
+}
+
+.avail-page__legend-item[data-state='available'] .avail-page__legend-swatch {
+	background: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.avail-page__legend-item[data-state='reserved'] .avail-page__legend-swatch {
+	background: color-mix(in srgb, var(--text-main) 22%, transparent);
+	border: 1px solid color-mix(in srgb, var(--text-main) 30%, transparent);
+}
+
+.avail-page__legend-item[data-state='unavailable'] .avail-page__legend-swatch {
+	background: repeating-linear-gradient(
+		45deg,
+		color-mix(in srgb, var(--text-main) 22%, transparent),
+		color-mix(in srgb, var(--text-main) 22%, transparent) 3px,
+		transparent 3px,
+		transparent 6px
+	);
+}
+/* #endregion */
+
 /* #region Weekly rules list ------------------------------------------------ */
 .avail-page__rules {
 	display: flex;

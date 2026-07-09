@@ -7,6 +7,10 @@ export interface DashboardBusiness {
 	banner_url: string | null;
 	country: string | null;
 	default_currency: string | null;
+	/** Lifecycle status — 'draft' until the entity is verified/completed. */
+	status?: 'draft' | 'active' | 'archived' | string | null;
+	/** Plan/tier surfaced as a roster metadata badge (free, pro, enterprise…). */
+	tier?: string | null;
 	created_at: string;
 	active_projects_count: number;
 	total_count: number;

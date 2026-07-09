@@ -55,8 +55,11 @@ function EntitySection({ label, items }: { label: string; items: EntityCard[] })
 }
 
 export default function TeamsTab() {
-	const { profile } = useProfileContext();
-	const { teams, businesses } = profile.value;
+	const { profile, hiddenItems } = useProfileContext();
+	// Owner-hidden affiliations are dropped from the presentation surface.
+	const hidden = hiddenItems.value;
+	const teams = profile.value.teams.filter((t) => !hidden.has(t.id));
+	const businesses = profile.value.businesses.filter((b) => !hidden.has(b.id));
 
 	const empty = teams.length === 0 && businesses.length === 0;
 

@@ -1,109 +1,17 @@
 /* =========================================================================
-   Teams tab — entity cards for teams & businesses
+   Teams tab — teams & businesses laid out through the shared `@projective/ui`
+   ProfileCard (variant='profile'). Only the grid shell lives here; the card
+   itself owns all of its styling in packages/ui.
+
+   NOTE: this file intentionally defines NO `.entity-card*` rules. The shared
+   EntityCard component already owns that class namespace; duplicating it here
+   previously leaked a second hover border/outline onto every card. Card visuals
+   are the source of truth in packages/ui — keep them there.
    ========================================================================= */
 
 .entity-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: 1rem;
+	gap: 1.25rem;
+	align-items: stretch;
 }
-
-.entity-card {
-	display: flex;
-	flex-direction: column;
-	gap: 0.65rem;
-	padding: 1rem 1.1rem;
-	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius__large);
-	background: var(--card);
-	transition: border-color var(--fast), transform var(--fast);
-}
-
-.entity-card:hover {
-	border-color: var(--primary);
-	transform: translateY(-1px);
-}
-
-/* #region Head */
-.entity-card__head {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-}
-
-.entity-card__avatar {
-	flex-shrink: 0;
-	display: inline-flex;
-}
-
-.entity-card__id {
-	display: flex;
-	flex-direction: column;
-	min-width: 0;
-}
-
-.entity-card__name {
-	font-size: 0.95rem;
-	font-weight: 650;
-	color: var(--text-main);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.entity-card__handle {
-	font-size: 0.8rem;
-	color: var(--text-muted);
-}
-
-.entity-card__role {
-	flex-shrink: 0;
-	margin-left: auto;
-	padding: 0.2rem 0.55rem;
-	font-size: 0.72rem;
-	font-weight: 600;
-	color: var(--primary);
-	background: var(--primary-surface);
-	border-radius: 999px;
-	white-space: nowrap;
-}
-/* #endregion */
-
-.entity-card__desc {
-	margin: 0;
-	font-size: 0.88rem;
-	line-height: 1.55;
-	color: var(--text-secondary);
-}
-
-/* #region Foot */
-.entity-card__foot {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.6rem;
-	margin-top: 0.15rem;
-	padding-top: 0.65rem;
-	border-top: 1px solid var(--border-color);
-}
-
-.entity-card__members {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.3rem;
-	font-size: 0.8rem;
-	font-weight: 600;
-	color: var(--text-secondary);
-}
-
-.entity-card__members svg {
-	color: var(--text-muted);
-}
-
-.entity-card__tags {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.35rem;
-	margin-left: auto;
-}
-/* #endregion */

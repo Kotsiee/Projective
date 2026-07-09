@@ -26,7 +26,17 @@ export default function NavigationMobileHeader() {
 					<span class='navigation__mobile__logo-text'>projective</span>
 				</div>
 
-				<a href='/join' class='navigation__mobile__join'>
+				<a
+					href='/join'
+					class='navigation__mobile__join'
+					onClick={(e) => {
+						e.preventDefault();
+						const here = `${globalThis.location.pathname}${globalThis.location.search}`;
+						globalThis.location.href = here && here !== '/'
+							? `/join?redirectTo=${encodeURIComponent(here)}`
+							: '/join';
+					}}
+				>
 					Join
 				</a>
 			</header>

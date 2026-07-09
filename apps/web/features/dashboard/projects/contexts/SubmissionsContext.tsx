@@ -99,6 +99,12 @@ export interface SubmissionsProviderProps {
 	 */
 	projectId?: string;
 	stageId?: string;
+	/**
+	 * Server-hydrated deliverable ledger resolved by the route (Route → Service → props, one-way; see
+	 * apps/web/CLAUDE.md). When present the surface paints instantly with no client hydration fetch on
+	 * mount; mutations still persist and the surface falls back to a client fetch if absent.
+	 */
+	initialSubmissions?: SubmissionDTO[] | null;
 	children: ComponentChildren;
 }
 
@@ -126,6 +132,7 @@ export function SubmissionsProvider({
 	author,
 	projectId,
 	stageId,
+	initialSubmissions = null,
 	children,
 }: SubmissionsProviderProps) {
 	const isLive = Boolean(projectId && stageId);
@@ -136,8 +143,11 @@ export function SubmissionsProvider({
 		freelancers: SEED_FREELANCERS,
 		currentFreelancerId,
 		tickets: SEED_TICKETS,
-		// Live mode starts empty and hydrates from the backend; seed only backs isolated stories.
-		submissions: isLive ? [] : SEED_SUBMISSIONS,
+		// Server-hydrated ledger when the route pre-loaded it; else live mode starts empty and
+		// hydrates from the backend, and seed only backs isolated stories.
+		submissions: initialSubmissions
+			? initialSubmissions.map(fromDTO)
+			: (isLive ? [] : SEED_SUBMISSIONS),
 		revisionPolicy: SEED_REVISION_POLICY,
 	});
 
@@ -147,7 +157,8 @@ export function SubmissionsProvider({
 	// boundary: any failure is logged via the telemetry tags and leaves the surface empty rather than
 	// crashing the island.
 	useEffect(() => {
-		if (!isLive) return;
+		// Skip the hydration fetch when the route already server-hydrated the ledger.
+		if (!isLive || initialSubmissions) return;
 		let cancelled = false;
 		(async () => {
 			try {

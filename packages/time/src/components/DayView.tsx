@@ -13,6 +13,8 @@ export interface DayViewProps {
 	slotMinutes: number;
 	pxPerHour?: number;
 	scrollToHour?: number;
+	/** Hide private booking detail from external viewers. */
+	masked?: boolean;
 	onSelectSlot?: (date: string, startMin: number) => void;
 	onEventClick?: (event: CalendarEvent) => void;
 	onAnchorChange?: (iso: string) => void;

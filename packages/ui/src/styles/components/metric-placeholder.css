@@ -1,0 +1,115 @@
+/* MetricPlaceholder — a soft premium-gradient tile with shimmering skeleton bars
+   for org-health metrics that aren't wired to data yet. */
+.metric-placeholder {
+	--mp-accent: var(--primary, hsl(186, 57%, 40%));
+	--mp-surface: var(--primary-surface, hsla(186, 57%, 40%, 0.12));
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	min-height: 8rem;
+	padding: 1.1rem;
+	border-radius: var(--border-radius__large, 14px);
+	background: var(--card-bg, hsl(0, 0%, 100%));
+	border: 1px solid var(--glass-hairline, hsla(0, 0%, 50%, 0.12));
+	overflow: hidden;
+	isolation: isolate;
+}
+.metric-placeholder--mint {
+	--mp-accent: var(--mint, hsl(160, 70%, 42%));
+	--mp-surface: var(--mint-surface, hsla(160, 70%, 42%, 0.14));
+}
+.metric-placeholder--violet {
+	--mp-accent: var(--violet, hsl(258, 85%, 66%));
+	--mp-surface: var(--violet-surface, hsla(258, 85%, 66%, 0.14));
+}
+.metric-placeholder--amber {
+	--mp-accent: var(--amber, hsl(38, 92%, 55%));
+	--mp-surface: hsla(38, 92%, 55%, 0.15);
+}
+
+/* Diagonal gradient wash. */
+.metric-placeholder::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(150deg, var(--mp-surface), transparent 62%);
+	opacity: 0.9;
+	pointer-events: none;
+	z-index: 0;
+}
+
+.metric-placeholder__top {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+.metric-placeholder__icon {
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 10px;
+	background: var(--mp-surface);
+	color: var(--mp-accent);
+}
+.metric-placeholder__label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-color, inherit);
+}
+
+.metric-placeholder__bars {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: auto;
+}
+.metric-placeholder__bar {
+	height: 0.85rem;
+	border-radius: 6px;
+	background: linear-gradient(
+		90deg,
+		hsla(0, 0%, 50%, 0.10) 25%,
+		hsla(0, 0%, 50%, 0.18) 37%,
+		hsla(0, 0%, 50%, 0.10) 63%
+	);
+	background-size: 400% 100%;
+	animation: metric-placeholder-shimmer 1.6s ease-in-out infinite;
+}
+.metric-placeholder__bar--lg {
+	width: 70%;
+}
+.metric-placeholder__bar--md {
+	width: 45%;
+}
+
+.metric-placeholder__hint {
+	position: relative;
+	z-index: 1;
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--mp-accent);
+	opacity: 0.75;
+}
+
+@keyframes metric-placeholder-shimmer {
+	0% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0 50%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.metric-placeholder__bar {
+		animation: none;
+	}
+}

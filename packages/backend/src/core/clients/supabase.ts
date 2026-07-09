@@ -69,3 +69,31 @@ export function freshAnonClient(): SupabaseClient {
 		},
 	});
 }
+
+let adminClient: SupabaseClient | null = null;
+
+/**
+ * Returns a cached service-role client that bypasses RLS.
+ *
+ * Use ONLY in server-side flows that must read/write on behalf of a user who
+ * cannot yet authenticate themselves — e.g. the /verify page polling for a
+ * confirmation while the waiting device still has no session. Never expose the
+ * result of an admin query to an untrusted caller; scope every query tightly.
+ */
+export function supabaseAdminClient(): SupabaseClient {
+	const SUPABASE_URL = Config.SUPABASE_URL;
+	const SERVICE_ROLE_KEY = Config.SUPABASE_SERVICE_ROLE_KEY;
+	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+		throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+	}
+	if (!adminClient) {
+		adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+			auth: {
+				persistSession: false,
+				detectSessionInUrl: false,
+				autoRefreshToken: false,
+			},
+		});
+	}
+	return adminClient;
+}

@@ -42,7 +42,7 @@ export default function NavBarUserProfileDropdownTeams() {
 				)}
 			</div>
 
-			<a href='/teams/new' class='nav-bar-user__profile__dropdown__add'>
+			<a href='/teams' class='nav-bar-user__profile__dropdown__add'>
 				+ Create New Team
 			</a>
 		</div>

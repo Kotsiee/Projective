@@ -118,16 +118,10 @@
 	color: var(--primary);
 }
 
-.skill-pill--more {
-	cursor: pointer;
-	background: transparent;
-	color: var(--primary);
-	border-color: var(--primary-half);
-	font-weight: 600;
-}
-
-.skill-pill--more:hover {
-	background: var(--primary-surface);
+/* "+N more" / "Show less" toggle is the design-system Button (rounded secondary
+   pill); it sits inline with the skill pills via the row's center alignment. */
+.profile-skills__more {
+	align-self: center;
 }
 /* #endregion */
 
@@ -224,49 +218,84 @@
 	text-align: right;
 }
 
-/* Ratings */
-.pmeta-rating {
-	display: flex;
-	align-items: center;
-	gap: 0.6rem;
-	font-size: 0.88rem;
-}
-
-.pmeta-rating__icon {
-	display: inline-flex;
-	color: var(--warning);
-}
-
-.pmeta-rating__label {
-	color: var(--text-muted);
-}
-
-.pmeta-rating__value {
-	margin-left: auto;
-	color: var(--text-main);
-	font-weight: 650;
-}
-
-.pmeta-muted {
-	color: var(--text-muted);
-	font-weight: 400;
-}
-
-/* Languages — plain text + fluency */
-.pmeta-workload {
+/* Ratings — premium interactive buttons that deep-link into the Reviews tab */
+.pmeta-ratings {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
 }
 
-.pmeta-workload__label {
-	font-size: 0.7rem;
+.pmeta-rating {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	width: 100%;
+	padding: 0.55rem 0.65rem;
+	font-family: inherit;
+	font-size: 0.88rem;
+	text-align: left;
+	color: var(--text-main);
+	background: var(--card);
+	border: 1px solid var(--hairline, var(--border-color));
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	transition:
+		border-color var(--fast) ease,
+		background var(--fast) ease,
+		transform var(--fast) ease;
+}
+
+.pmeta-rating:hover {
+	border-color: var(--primary);
+	background: var(--primary-surface);
+	transform: translateY(-1px);
+}
+
+.pmeta-rating:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.pmeta-rating__icon {
+	display: inline-flex;
+	color: var(--amber, var(--warning));
+}
+
+.pmeta-rating__id {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.pmeta-rating__label {
 	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
+	color: var(--text-main);
+}
+
+.pmeta-rating__reviews {
+	font-size: 0.74rem;
 	color: var(--text-muted);
 }
 
+.pmeta-rating__stars {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.03rem;
+	margin-left: auto;
+	color: var(--amber, var(--warning));
+}
+
+.pmeta-rating__chevron {
+	color: var(--text-disabled);
+	transition: transform var(--fast) ease, color var(--fast) ease;
+}
+
+.pmeta-rating:hover .pmeta-rating__chevron {
+	color: var(--primary);
+	transform: translateX(2px);
+}
+
+/* Languages — plain text + fluency */
 .pmeta-langs {
 	display: flex;
 	flex-direction: column;

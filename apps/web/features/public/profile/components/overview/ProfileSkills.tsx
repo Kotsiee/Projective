@@ -35,12 +35,24 @@ export default function ProfileSkills() {
 				))}
 
 				{hidden > 0 && (
-					<Button variant='link' size='small' onClick={() => (expanded.value = true)}>
+					<Button
+						variant='secondary'
+						size='small'
+						rounded
+						className='profile-skills__more'
+						onClick={() => (expanded.value = true)}
+					>
 						+{hidden} more
 					</Button>
 				)}
 				{expanded.value && skills.length > COLLAPSED_COUNT && (
-					<Button variant='link' size='small' onClick={() => (expanded.value = false)}>
+					<Button
+						variant='secondary'
+						size='small'
+						rounded
+						className='profile-skills__more'
+						onClick={() => (expanded.value = false)}
+					>
 						Show less
 					</Button>
 				)}

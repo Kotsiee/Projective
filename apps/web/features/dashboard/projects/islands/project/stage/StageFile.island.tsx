@@ -62,12 +62,12 @@ function toLightboxMedia(entry: StageFileEntry): LightboxMedia {
  * then filters/sorts/searches client-side to feed either the Grid or List
  * renderer. Selecting a file opens the shared media lightbox.
  */
-function StageFilesView() {
+function StageFilesView({ initialEntries }: { initialEntries: StageFileEntry[] | null }) {
 	const { stage } = useStageContext();
 	const { open } = useMediaViewer();
 
-	const entries = useSignal<StageFileEntry[]>([]);
-	const isLoading = useSignal(true);
+	const entries = useSignal<StageFileEntry[]>(initialEntries ?? []);
+	const isLoading = useSignal(initialEntries == null);
 	const error = useSignal<string | null>(null);
 
 	const search = useSignal('');
@@ -81,13 +81,18 @@ function StageFilesView() {
 	const clickTimer = useRef<number | null>(null);
 
 	const channelId = stage?.value?.channel_id ?? null;
+	// The channel we already hold entries for — seeded from server hydration so the mount fetch is
+	// skipped when the route pre-loaded this channel's files. Re-fetches on stage-to-stage nav.
+	const loadedChannel = useRef<string | null>(initialEntries != null ? channelId : null);
 
 	useEffect(() => {
 		if (!channelId) {
 			entries.value = [];
 			isLoading.value = false;
+			loadedChannel.current = null;
 			return;
 		}
+		if (loadedChannel.current === channelId) return;
 
 		let cancelled = false;
 		isLoading.value = true;
@@ -107,6 +112,7 @@ function StageFilesView() {
 				const data = await res.json();
 				if (cancelled) return;
 				entries.value = parseStageFiles(data.items);
+				loadedChannel.current = channelId;
 			} catch (err) {
 				if (!cancelled) error.value = (err as Error).message;
 			} finally {
@@ -266,10 +272,19 @@ function StageFilesView() {
 /* #endregion */
 
 /* #region Island */
-export default function ProjectFileIsland() {
+export interface ProjectFileIslandProps {
+	/**
+	 * Server-hydrated stage file entries resolved by the route (Route → Service → props, one-way; see
+	 * apps/web/CLAUDE.md). When present the Files tab paints instantly with no client fetch on mount;
+	 * client-side search/sort/filter stay interactive, and it re-fetches on stage-to-stage navigation.
+	 */
+	initialEntries?: StageFileEntry[] | null;
+}
+
+export default function ProjectFileIsland({ initialEntries = null }: ProjectFileIslandProps = {}) {
 	return (
 		<MediaViewerProvider>
-			<StageFilesView />
+			<StageFilesView initialEntries={initialEntries} />
 		</MediaViewerProvider>
 	);
 }

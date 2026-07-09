@@ -205,7 +205,7 @@
 }
 
 .entity-card__action.is-active {
-	color: var(--danger);
+	color: var(--primary);
 	background: rgba(0, 0, 0, 0.6);
 }
 
@@ -562,7 +562,7 @@
 }
 .entity-card--project .entity-card__action.is-active,
 .entity-card--compact .entity-card__action.is-active {
-	color: var(--danger);
+	color: var(--primary);
 }
 
 .entity-card__scope {

@@ -82,9 +82,29 @@ function RulesList({ rules }: { rules: AvailabilityRule[] }) {
 	);
 }
 
+/** Premium legend for the three public interval states. */
+function StatesLegend() {
+	return (
+		<div class='avail-page__legend' aria-hidden='true'>
+			<span class='avail-page__legend-item' data-state='available'>
+				<span class='avail-page__legend-swatch' />Available
+			</span>
+			<span class='avail-page__legend-item' data-state='reserved'>
+				<span class='avail-page__legend-swatch' />Reserved
+			</span>
+			<span class='avail-page__legend-item' data-state='unavailable'>
+				<span class='avail-page__legend-swatch' />Unavailable
+			</span>
+		</div>
+	);
+}
+
 export default function AvailabilityCalendar() {
-	const { profile, calendarView, calendarCursor, openBooking } = useProfileContext();
+	const { profile, calendarView, calendarCursor, openBooking, isOwn } = useProfileContext();
 	const av = profile.value.availability;
+	// External viewers must never see booked activity, attendees, or project
+	// context — collapse every booking to an anonymous "Reserved" block.
+	const masked = !isOwn.value;
 
 	// #region Adapt profile data → package types
 	// (Hooks must run unconditionally — the offline guard happens after.)
@@ -139,6 +159,7 @@ export default function AvailabilityCalendar() {
 			</aside>
 
 			<div class='avail-page__main'>
+				<StatesLegend />
 				<Calendar
 					view={calendarView.value}
 					cursor={calendarCursor.value}
@@ -148,6 +169,7 @@ export default function AvailabilityCalendar() {
 					windows={windows.value}
 					timeOff={timeOff.value}
 					slotMinutes={av.slotMinutes}
+					masked={masked}
 					onSelectSlot={(date, start) => openBooking(date, start)}
 				/>
 			</div>

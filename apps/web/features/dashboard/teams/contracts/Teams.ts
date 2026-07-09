@@ -17,6 +17,10 @@ export interface DashboardTeam {
 	user_role: string;
 	member_count: number;
 	payout_model: string;
+	/** Lifecycle status — 'draft' until the entity is verified/completed. */
+	status?: 'draft' | 'active' | 'archived' | string | null;
+	/** Subscription tier surfaced as a roster metadata badge (free, pro, enterprise…). */
+	tier?: string | null;
 	created_at: string;
 	updated_at: string;
 	total_count: number;

@@ -553,6 +553,11 @@
 		hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.85);
 	transition: transform var(--fast) ease, box-shadow var(--medium) ease, filter var(--fast) ease;
 }
+a.auth-cta {
+	display: grid;
+	place-items: center;
+	text-decoration: none;
+}
 .auth-cta:hover {
 	transform: translateY(-2px);
 	filter: saturate(1.08);
@@ -673,6 +678,47 @@
 .auth-icon svg {
 	width: 32px;
 	height: 32px;
+}
+.auth-icon--success {
+	background: var(--success-surface);
+	color: var(--success);
+}
+
+/* Live "waiting for confirmation" indicator on /verify */
+.auth-waiting {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 14px 0 0;
+	font-size: 13px;
+	color: var(--text-muted);
+}
+.auth-waiting__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--primary);
+	box-shadow: 0 0 0 0 var(--primary-surface);
+	animation: auth-waiting-pulse 1.6s ease-in-out infinite;
+}
+@keyframes auth-waiting-pulse {
+	0% {
+		opacity: 0.4;
+		box-shadow: 0 0 0 0 hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.4);
+	}
+	70% {
+		opacity: 1;
+		box-shadow: 0 0 0 6px hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0);
+	}
+	100% {
+		opacity: 0.4;
+		box-shadow: 0 0 0 0 hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.auth-waiting__dot {
+		animation: none;
+	}
 }
 
 /* password requirements checklist */

@@ -10,15 +10,42 @@ export function isGradient(value?: string): boolean {
 	return !!value && value.trim().startsWith('linear-gradient');
 }
 
+/**
+ * Safely wraps a raw asset URL in a CSS `url("…")` token. Encodes the value so
+ * stray spaces, quotes or `%` characters can never yield a malformed URI when the
+ * browser resolves the background (the cause of the Services-tab `URI malformed`
+ * console error). `encodeURI` is idempotent enough for our seed data and never
+ * throws — unlike `decodeURIComponent`, which does on lone `%`.
+ */
+export function cssUrl(value: string): string {
+	// Escape the two characters that can break out of the quoted url() token.
+	const safe = encodeURI(value).replace(/"/g, '%22').replace(/\)/g, '%29');
+	return `url("${safe}")`;
+}
+
 /** Returns an inline `background` style for either a gradient string or a URL. */
 export function mediaBackground(value?: string): Record<string, string> {
 	if (!value) return { background: 'var(--card-dark)' };
 	if (isGradient(value)) return { backgroundImage: value };
 	return {
-		backgroundImage: `url("${value}")`,
+		backgroundImage: cssUrl(value),
 		backgroundSize: 'cover',
 		backgroundPosition: 'center',
 	};
+}
+
+/**
+ * Builds a full CSS `background` shorthand for a card banner slot, accepting
+ * either a `linear-gradient(…)` sentinel or a real asset URL. Gradients are
+ * passed through untouched; URLs are wrapped via {@link cssUrl} so a value that
+ * happens to contain `%` (e.g. an `hsl(… 60% …)` gradient mistaken for a URL, or
+ * an encoded filename) never triggers a `URI malformed` error. Returns `null`
+ * for empty input so callers can fall back to the empty-banner treatment.
+ */
+export function bannerBackground(value?: string): string | null {
+	if (!value) return null;
+	if (isGradient(value)) return value;
+	return `${cssUrl(value)} center / cover no-repeat`;
 }
 
 /** Ordinal weight for competency, used for the filled-pip indicator (1–4). */

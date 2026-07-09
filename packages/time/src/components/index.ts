@@ -11,4 +11,5 @@ export * from './MonthView.tsx';
 export * from './MonthTimeline.tsx';
 export * from './MiniCalendar.tsx';
 export * from './TimelineScrollbar.tsx';
+export * from './PresentButton.tsx';
 export * from './EventBlock.tsx';

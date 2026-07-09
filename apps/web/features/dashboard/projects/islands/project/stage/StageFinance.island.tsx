@@ -35,7 +35,7 @@ interface StageFinanceSplit {
 	name: string | null;
 }
 
-interface StageFinanceData {
+export interface StageFinanceData {
 	stage_id: string;
 	stage_status: string;
 	currency: string;
@@ -61,11 +61,20 @@ function fmt(cents: number | null | undefined, currency: string): string {
 const label = (s: string) => s.replaceAll('_', ' ');
 // #endregion
 
-export default function StageFinanceIsland() {
+export interface StageFinanceIslandProps {
+	/**
+	 * Server-hydrated finance snapshot resolved by the route (Route → Service → props, one-way; see
+	 * apps/web/CLAUDE.md). When present the tab paints instantly with no client fetch on mount; the
+	 * island still re-loads after Fund/Approve/Cancel and falls back to a client fetch if absent.
+	 */
+	initialData?: StageFinanceData | null;
+}
+
+export default function StageFinanceIsland({ initialData }: StageFinanceIslandProps = {}) {
 	const { stage_id, stage, refresh: refreshStage } = useStageContext();
 	const { setMiddleNav } = useNavigationContext();
 
-	const finance = useSignal<StageFinanceData | null>(null);
+	const finance = useSignal<StageFinanceData | null>(initialData ?? null);
 	const isLoading = useSignal(false);
 	const error = useSignal<string | null>(null);
 	const busy = useSignal(false);
@@ -89,8 +98,9 @@ export default function StageFinanceIsland() {
 		}
 	};
 
+	// Only fetch on mount when the route didn't server-hydrate the snapshot (fallback path).
 	useEffect(() => {
-		load();
+		if (!finance.value) load();
 	}, [projectId, stageId]);
 	// #endregion
 

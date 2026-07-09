@@ -16,6 +16,14 @@ export interface INavApp {
 	name: string;
 	link?: string;
 	children?: { name: string; link: string }[];
+	/**
+	 * Persona/account gate. When set, the item only renders when the condition
+	 * holds against the active user context (see `side.tsx`):
+	 * - `operator`   → the account has opted into Client / Operator Mode.
+	 * - `freelancer` → the active persona is a Freelancer profile.
+	 * Omit for items that are always visible.
+	 */
+	requires?: 'operator' | 'freelancer';
 }
 
 export const apps1: INavApp[] = [
@@ -26,8 +34,10 @@ export const apps1: INavApp[] = [
 
 export const apps2: INavApp[] = [
 	{ icon: IconBriefcase, name: 'Projects', link: '/projects' },
-	{ icon: IconUsers, name: 'Teams', link: '/teams' },
-	{ icon: IconBuilding, name: 'Businesses', link: '/business' },
+	// Teams is a freelancer-only space — never shown to clients.
+	{ icon: IconUsers, name: 'Teams', link: '/teams', requires: 'freelancer' },
+	// Businesses only appears once the account opts into Client / Operator Mode.
+	{ icon: IconBuilding, name: 'Businesses', link: '/business', requires: 'operator' },
 ];
 
 export const apps3: INavApp[] = [

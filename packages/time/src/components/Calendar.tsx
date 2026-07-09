@@ -35,6 +35,12 @@ export interface CalendarProps {
 	endHour?: number;
 	/** Slot granularity in minutes for the clickable substrate. Default 30. */
 	slotMinutes?: number;
+	/**
+	 * Hide private booking detail from external viewers. Booked spans collapse to
+	 * anonymous "Reserved" blocks — no title, attendee, or project context leaks.
+	 * Open availability and time-off states remain visible so guests can still book.
+	 */
+	masked?: boolean;
 }
 
 export function Calendar(props: CalendarProps) {
@@ -50,6 +56,7 @@ export function Calendar(props: CalendarProps) {
 		onEventClick,
 		startHour = 7,
 		slotMinutes = 30,
+		masked = false,
 	} = props;
 
 	const stepCursor = (dir: -1 | 1) => {
@@ -88,6 +95,7 @@ export function Calendar(props: CalendarProps) {
 							events={events}
 							windows={windows}
 							timeOff={timeOff}
+							masked={masked}
 							onSelectDay={openDay}
 							onEventClick={onEventClick}
 							onAnchorChange={onCursorChange}
@@ -102,6 +110,7 @@ export function Calendar(props: CalendarProps) {
 							timeOff={timeOff}
 							slotMinutes={slotMinutes}
 							scrollToHour={startHour}
+							masked={masked}
 							onSelectSlot={onSelectSlot}
 							onEventClick={onEventClick}
 							onAnchorChange={onCursorChange}
@@ -115,6 +124,7 @@ export function Calendar(props: CalendarProps) {
 							timeOff={timeOff}
 							slotMinutes={slotMinutes}
 							scrollToHour={startHour}
+							masked={masked}
 							onSelectSlot={onSelectSlot}
 							onEventClick={onEventClick}
 							onAnchorChange={onCursorChange}

@@ -41,18 +41,25 @@ with only AC4 (Stripe card attach) deferred outside the internal-wallet demo pat
 
 | ⬜ Outstanding | ✅ Met                                                           |
 | :------------- | :--------------------------------------------------------------- |
-|                | AC1 · Business profile setup (legal name, billing, branding)     |
-|                | AC2 · Team profile setup + unique slug                           |
+|                | AC1 · Draft-first Business creation (Name + `@handle`, then defer profile) |
+|                | AC2 · Draft-first Team creation (Name + `@handle`, unique slug)  |
 |                | AC3 · Context switch to new `active_profile_id`/`active_team_id` |
 |                | AC4 · Unique name/slug per category                              |
 |                | AC5 · Initialise Team Vault / Business Wallet                    |
 |                | AC6 · Audit `business.created` / `team.created`                  |
 
-_Note: `org.create_business` / `org.create_team` (migs 0110 / 0107) persist branding as
-`files.items` references + `bio`, initialise the finance wallet / Team Vault (linked via
-`treasury_wallet_id`), and write the `business.created` / `team.created` audit rows from their
-SECURITY DEFINER context. The org/team context switch upserts `security.session_context` via
-`features/auth/services/context.ts` (`team_members`-guarded)._
+_Note: creation is low-friction and in-context — the `CreateBusinessModal` / `CreateTeamModal`
+islands capture only a display Name and a unique alphanumeric `@handle`, and the minimal-payload
+`org.create_business` / `org.create_team` RPCs (migs 0110 / 0107, rewritten in
+`20260709120000_business_teams_overhaul`) create the entity in `status = 'draft'`
+(Draft/Unverified) while still initialising the finance wallet / Team Vault (linked via
+`treasury_wallet_id`) and writing the `business.created` / `team.created` audit rows from their
+SECURITY DEFINER context. Extended metadata (branding, legal name, billing, roles, members) is
+deferred to the entity's settings page. Access to each space is nav-gated — the **Businesses** space
+requires account-level **Client / Operator Mode** (`is_operator`, toggled via `org.set_operator_mode`),
+and the **Teams** space is freelancer-only (`activeProfileType === 'freelancer'`). The org/team
+context switch upserts `security.session_context` via `features/auth/services/context.ts`
+(`team_members`-guarded)._
 
 ---
 

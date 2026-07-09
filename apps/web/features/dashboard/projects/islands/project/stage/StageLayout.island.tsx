@@ -5,12 +5,15 @@ import { StageContext, StageProvider, useStageContext } from '../../../contexts/
 import { ProjectContext, useProjectContext } from '../../../contexts/ProjectContext.tsx'; // NEW: Import Project Context
 import { useNavigationContext } from '@features/navigation/contexts/NavigationContext.tsx';
 import StageHeader from '../../../components/project/stage/StageHeader.tsx';
+import type { StageDetails } from '../../../contracts/Projects.ts';
 // #endregion
 
 // #region Interfaces
 export interface StageLayoutIslandProps {
 	projectId: string;
 	stageId: string;
+	/** Server-hydrated stage details from the layout route, seeded into the StageProvider. */
+	initialStage?: StageDetails | null;
 	children: ComponentChildren;
 }
 // #endregion
@@ -68,10 +71,11 @@ function StageLayoutInner({ children }: { children: ComponentChildren }) {
 export default function StageLayoutIsland({
 	projectId,
 	stageId,
+	initialStage = null,
 	children,
 }: StageLayoutIslandProps) {
 	return (
-		<StageProvider projectId={projectId} stageId={stageId}>
+		<StageProvider projectId={projectId} stageId={stageId} initialStage={initialStage}>
 			<StageLayoutInner>
 				{children}
 			</StageLayoutInner>

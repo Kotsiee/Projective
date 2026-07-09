@@ -58,13 +58,11 @@ export const mockProfile: ProfileData = {
 		workplace: 'Sol Studio (Founder)',
 		school: 'Central Saint Martins',
 		title: 'Independent Design Lead',
-		baseRate: '£85–£120 / hr',
 		memberSince: 'Mar 2021',
 		ratings: {
 			asFreelancer: { score: 4.9, count: 128 },
 			asClient: { score: 4.7, count: 22 },
 		},
-		workload: { current: 7.5, cap: 10 },
 	},
 
 	services: [
@@ -421,6 +419,69 @@ export const mockProfile: ProfileData = {
 			memberCount: 3,
 			description: 'A tiny SaaS for design-token linting and CI checks.',
 			tags: ['SaaS', 'Tooling'],
+		},
+	],
+
+	reviews: [
+		{
+			id: 'rv1',
+			role: 'freelancer',
+			rating: 5,
+			title: 'Elevated our whole product surface',
+			body:
+				'Nadia rebuilt our design system from first principles and the handoff was flawless — tokens, a Storybook and a governance model we still run today. Escrow milestones made the whole thing feel safe.',
+			authorName: 'Marcus Reid',
+			authorHandle: 'marcusr',
+			context: 'Design system audit & foundations',
+			date: '2026-05-18',
+		},
+		{
+			id: 'rv2',
+			role: 'freelancer',
+			rating: 5,
+			title: 'Calm under real complexity',
+			body:
+				'We threw a genuinely messy fintech flow at her and got back something that felt obvious in hindsight. Prototyped, tested and shipped inside the sprint.',
+			authorName: 'Priya Nandakumar',
+			authorHandle: 'priyan',
+			context: 'Product UX sprint',
+			date: '2026-04-02',
+		},
+		{
+			id: 'rv3',
+			role: 'freelancer',
+			rating: 4.5,
+			title: 'Sharp brand work',
+			body:
+				'The identity system landed well with our board. Only note is I wanted one more logo direction — she happily added it.',
+			authorName: 'Tom Ackerley',
+			authorHandle: 'tomack',
+			context: 'Brand & visual identity',
+			date: '2026-02-27',
+		},
+		{
+			id: 'rv4',
+			role: 'client',
+			rating: 5,
+			title: 'A dream client to work with',
+			body:
+				'Briefs were crisp, feedback was fast and payment cleared the moment we hit the milestone. Would take on her projects any day.',
+			authorName: 'Lena Fischer',
+			authorHandle: 'lenaf',
+			context: 'Illustration commission',
+			date: '2026-03-14',
+		},
+		{
+			id: 'rv5',
+			role: 'client',
+			rating: 4.5,
+			title: 'Clear scope, respectful of time',
+			body:
+				'Knew exactly what she wanted and gave us room to do our best work. Communication was excellent throughout.',
+			authorName: 'Owen Bramwell',
+			authorHandle: 'owenb',
+			context: 'Motion design retainer',
+			date: '2026-01-22',
 		},
 	],
 

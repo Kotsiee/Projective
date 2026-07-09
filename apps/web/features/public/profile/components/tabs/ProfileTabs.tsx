@@ -1,11 +1,14 @@
 /**
  * @file ProfileTabs.tsx
- * @description The public content tab bar. Only rendered when NOT in Editor
- * Mode (self-view deconstructs tabs into sidebar routes instead). Counts are
- * surfaced as small chips beside the label.
+ * @description The public content tab bar. Built on the bespoke `@projective/ui` NavTabs primitive
+ * (ripple + sliding accent underline) rather than stacked generic Buttons. Labels carry no numeric
+ * counters; selecting a tab reflects an elegant anchor hash (`#services`, `#reviews`, …) into the
+ * URL and, on load, the hash restores the active tab. Owners see every tab; the public never sees a
+ * tab the owner has toggled hidden.
  */
 
-import { Button } from '@projective/ui';
+import { NavTabs } from '@projective/ui';
+import { useEffect } from 'preact/hooks';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { ProfileTabKey } from '../../contracts/Profile.ts';
 
@@ -16,29 +19,42 @@ const TABS: { key: ProfileTabKey; label: string }[] = [
 	{ key: 'experience', label: 'Experience' },
 	{ key: 'education', label: 'Education' },
 	{ key: 'teams', label: 'Teams' },
+	{ key: 'reviews', label: 'Reviews' },
 ];
 
+const TAB_KEYS = new Set(TABS.map((t) => t.key));
+
 export default function ProfileTabs() {
-	const { profile, activeTab, setTab } = useProfileContext();
-	const counts = profile.value.counts;
+	const { activeTab, setTab, isOwn, hiddenTabs } = useProfileContext();
+
+	// On mount, restore the active tab from the URL hash (e.g. `/nadiaux#reviews`).
+	useEffect(() => {
+		const raw = globalThis.location?.hash?.replace(/^#/, '') as ProfileTabKey;
+		if (raw && TAB_KEYS.has(raw)) setTab(raw);
+	}, []);
+
+	const select = (key: string) => {
+		const tab = key as ProfileTabKey;
+		setTab(tab);
+		// Reflect an elegant anchor hash without scrolling the page or a history spam.
+		if (globalThis.history?.replaceState) {
+			globalThis.history.replaceState(null, '', `#${tab}`);
+		}
+	};
+
+	const own = isOwn.value;
+	const hidden = hiddenTabs.value;
+	const visible = TABS
+		.filter((t) => own || !hidden.has(t.key))
+		.map((t) => ({ id: t.key, label: t.label }));
 
 	return (
-		<nav class='profile-tabs' role='tablist' aria-label='Profile sections'>
-			{TABS.map((t) => {
-				const active = activeTab.value === t.key;
-				const count = counts[t.key];
-				return (
-					<Button
-						key={t.key}
-						variant={active ? 'secondary' : 'link'}
-						size='small'
-						badge={typeof count === 'number' ? count : undefined}
-						onClick={() => setTab(t.key)}
-					>
-						{t.label}
-					</Button>
-				);
-			})}
-		</nav>
+		<NavTabs
+			className='profile-tabs'
+			ariaLabel='Profile sections'
+			tabs={visible}
+			activeId={activeTab.value}
+			onSelect={select}
+		/>
 	);
 }

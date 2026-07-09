@@ -1,10 +1,11 @@
-// Day/Week date mapping over the shared infinite-viewport physics engine.
+// Day/Week date mapping over the shared boundless-viewport physics engine.
 //
-// `useViewportScroll` owns the virtual `offset` (there is no native scroll); this
-// hook fixes a stable time origin at canvas y=0, translates offset → the centred
-// page date (broadcast to the host), and re-anchors the offset when the host
-// cursor changes (toolbar nav / date picking). No feedback loop: the broadcast
-// and the cursor effect guard on a single `syncedCentre` ref.
+// `useViewportScroll` owns the virtual `offset` (there is no native scroll and no
+// bounds — the timeline is truly infinite in both directions); this hook fixes a
+// stable time origin at canvas y=0, gives the engine a ½-hour bounce-snap,
+// translates offset → the centred page date (broadcast to the host), and
+// re-anchors when the host cursor changes (toolbar nav / picking). No feedback
+// loop: broadcast + cursor effect guard on a single `syncedCentre`.
 
 import type { Signal } from '@preact/signals';
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
@@ -19,7 +20,7 @@ export interface TimelineScrollOptions {
 	daysPerPage: number;
 	/** Height of one page (a full 24h) in px. */
 	pageHeight: number;
-	/** Pixels per hour (for the intra-page landing offset). */
+	/** Pixels per hour (for the intra-page landing offset + snap grid). */
 	pxPerHour: number;
 	/** Hour the view lands on within the anchor page. Default 7. */
 	scrollToHour?: number;
@@ -37,7 +38,11 @@ export interface TimelineScroll {
 	viewportW: Signal<number>;
 	/** Fixed ISO date at canvas y = 0 (a page start). */
 	origin: string;
-	/** State + handlers for the floating custom scrollbar. */
+	/** Smoothly animate the offset to a target (teleport to "now"). */
+	animateTo: (target: number, bounce?: boolean) => void;
+	/** Begin a middle-mouse / grab pan from a pointer-down on the canvas. */
+	beginPan: (e: MouseEvent) => void;
+	/** State + handlers for the velocity scrollbar / schedule minimap. */
 	scrollbar: ViewportScrollbar;
 }
 
@@ -64,7 +69,13 @@ export function useTimelineScroll(opts: TimelineScrollOptions): TimelineScroll {
 	cbRange.current = opts.onVisibleRangeChange;
 
 	const broadcast = useRef<(offset: number) => void>(() => {});
-	const vp = useViewportScroll({ onScroll: (o) => broadcast.current(o) });
+	// Half-hour bounce-snap: canvas y=0 is a midnight, so ½-hour lines are exact
+	// multiples of (pxPerHour / 2) — the timeline settles cleanly on the interval.
+	const snapStep = pxPerHour / 2;
+	const vp = useViewportScroll({
+		onScroll: (o) => broadcast.current(o),
+		snap: (o) => Math.round(o / snapStep) * snapStep,
+	});
 
 	broadcast.current = (offset: number) => {
 		const centreY = offset + vp.viewportH.value / 2;
@@ -95,6 +106,8 @@ export function useTimelineScroll(opts: TimelineScrollOptions): TimelineScroll {
 		viewportH: vp.viewportH,
 		viewportW: vp.viewportW,
 		origin,
+		animateTo: vp.animateTo,
+		beginPan: vp.beginPan,
 		scrollbar: vp.scrollbar,
 	};
 }

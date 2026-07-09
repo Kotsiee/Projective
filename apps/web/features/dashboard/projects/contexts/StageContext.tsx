@@ -9,14 +9,22 @@ export const StageContext = createContext<StageState | null>(null);
 export function StageProvider({
 	projectId,
 	stageId: initialId,
+	initialStage = null,
 	children,
 }: {
 	projectId: string;
 	stageId: string;
+	/**
+	 * Server-hydrated stage details resolved by the stage `_layout.tsx` (Route → Service → props,
+	 * one-way; see apps/web/CLAUDE.md). When present the whole stage surface paints instantly with no
+	 * client fetch on mount — every tab avoids the "Loading…" flash. `refresh()` still re-pulls after
+	 * mutations, and stage-to-stage navigation re-fetches client-side as before.
+	 */
+	initialStage?: StageDetails | null;
 	children: ComponentChildren;
 }) {
 	const stageId = useSignal(initialId);
-	const stage = useSignal<StageDetails | null>(null);
+	const stage = useSignal<StageDetails | null>(initialStage);
 	const isLoading = useSignal(false);
 	const error = useSignal<string | null>(null);
 
@@ -47,8 +55,10 @@ export function StageProvider({
 		}
 	};
 
+	// Only fetch on mount when the layout didn't server-hydrate the stage (fallback path). After a
+	// stage-to-stage navigation the re-sync effect above clears `stage`, so this refetches then.
 	useEffect(() => {
-		if (stageId.value) {
+		if (stageId.value && !stage.value) {
 			fetchStage();
 		}
 	}, [projectId, stageId.value]);

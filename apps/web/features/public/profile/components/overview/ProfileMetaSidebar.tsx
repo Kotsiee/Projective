@@ -2,23 +2,41 @@
  * @file ProfileMetaSidebar.tsx
  * @description The right-hand details pane. No structural "Details" heading.
  * The current availability status + local time anchor the very top; the
- * remaining meta (location, response time, rate, member since, ratings) and
- * languages (plain text + fluency) stack below.
+ * remaining meta (location, response time, rate, member since) and languages
+ * (plain text + fluency) stack below. The freelancer/client ratings are premium
+ * interactive buttons — the raw numeric score is hidden; clicking opens the
+ * Reviews tab pre-filtered to that role.
  */
 
 import {
 	IconBolt,
 	IconCalendarStats,
+	IconChevronRight,
 	IconClock,
-	IconCurrencyPound,
 	IconMapPin,
+	IconStar,
 	IconStarFilled,
+	IconStarHalfFilled,
 	IconUserStar,
 } from '@tabler/icons-preact';
-import { WorkloadCapacityGauge } from '@projective/charts';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
+import type { ReviewsFilter } from '../../contexts/ProfileContext.tsx';
 import { localTimeAtOffset } from '../../utils.ts';
 import { StatusDot } from '../header/StatusDot.tsx';
+
+/** Compact star row for a 0–5 score (halves supported); no numeric text. */
+function StarRow({ score }: { score: number }) {
+	return (
+		<span class='pmeta-rating__stars' aria-hidden='true'>
+			{Array.from({ length: 5 }, (_, i) => {
+				const pos = i + 1;
+				if (score >= pos) return <IconStarFilled key={i} size={14} />;
+				if (score >= pos - 0.5) return <IconStarHalfFilled key={i} size={14} />;
+				return <IconStar key={i} size={14} />;
+			})}
+		</span>
+	);
+}
 
 function Row(
 	{ icon, label, value }: { icon: preact.ComponentChildren; label: string; value: string },
@@ -32,10 +50,39 @@ function Row(
 	);
 }
 
+/** Premium interactive rating badge → deep-links into the Reviews tab. */
+function RatingButton(
+	{ icon, label, score, count, onOpen }: {
+		icon: preact.ComponentChildren;
+		label: string;
+		score: number;
+		count: number;
+		onOpen: () => void;
+	},
+) {
+	return (
+		<button
+			type='button'
+			class='pmeta-rating'
+			onClick={onOpen}
+			aria-label={`${label} — view ${count} reviews`}
+		>
+			<span class='pmeta-rating__icon'>{icon}</span>
+			<span class='pmeta-rating__id'>
+				<span class='pmeta-rating__label'>{label}</span>
+				<span class='pmeta-rating__reviews'>{count} reviews</span>
+			</span>
+			<StarRow score={score} />
+			<IconChevronRight size={15} class='pmeta-rating__chevron' />
+		</button>
+	);
+}
+
 export default function ProfileMetaSidebar() {
-	const { profile } = useProfileContext();
+	const { profile, openReviews } = useProfileContext();
 	const m = profile.value.meta;
 	const p = profile.value;
+	const open = (role: ReviewsFilter) => openReviews(role);
 
 	return (
 		<aside class='pmeta'>
@@ -58,50 +105,27 @@ export default function ProfileMetaSidebar() {
 			<div class='pmeta-rows'>
 				<Row icon={<IconMapPin size={15} />} label='Location' value={m.location} />
 				<Row icon={<IconBolt size={15} />} label='Responds' value={m.responseTime} />
-				<Row icon={<IconCurrencyPound size={15} />} label='Base rate' value={m.baseRate} />
 				<Row icon={<IconCalendarStats size={15} />} label='Member since' value={m.memberSince} />
 			</div>
 
 			<div class='pmeta-divider' />
 
-			<div class='pmeta-rows'>
-				<div class='pmeta-rating'>
-					<span class='pmeta-rating__icon'>
-						<IconStarFilled size={15} />
-					</span>
-					<span class='pmeta-rating__label'>As freelancer</span>
-					<span class='pmeta-rating__value'>
-						{m.ratings.asFreelancer.score.toFixed(1)}{' '}
-						<span class='pmeta-muted'>({m.ratings.asFreelancer.count})</span>
-					</span>
-				</div>
-				<div class='pmeta-rating'>
-					<span class='pmeta-rating__icon'>
-						<IconUserStar size={15} />
-					</span>
-					<span class='pmeta-rating__label'>As client</span>
-					<span class='pmeta-rating__value'>
-						{m.ratings.asClient.score.toFixed(1)}{' '}
-						<span class='pmeta-muted'>({m.ratings.asClient.count})</span>
-					</span>
-				</div>
+			<div class='pmeta-ratings'>
+				<RatingButton
+					icon={<IconStarFilled size={15} />}
+					label='As freelancer'
+					score={m.ratings.asFreelancer.score}
+					count={m.ratings.asFreelancer.count}
+					onOpen={() => open('freelancer')}
+				/>
+				<RatingButton
+					icon={<IconUserStar size={15} />}
+					label='As client'
+					score={m.ratings.asClient.score}
+					count={m.ratings.asClient.count}
+					onOpen={() => open('client')}
+				/>
 			</div>
-
-			{m.workload && (
-				<>
-					<div class='pmeta-divider' />
-					<div class='pmeta-workload'>
-						<span class='pmeta-workload__label'>Current capacity</span>
-						<WorkloadCapacityGauge
-							variant='bar'
-							current={m.workload.current}
-							max={m.workload.cap}
-							label='Workload'
-							caption='Live intensity across active projects'
-						/>
-					</div>
-				</>
-			)}
 
 			<div class='pmeta-divider' />
 

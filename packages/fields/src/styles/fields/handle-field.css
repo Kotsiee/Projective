@@ -1,0 +1,17 @@
+/* HandleField — the `@` prefix reads as a fixed, muted adornment so the caret
+   sits flush with the editable handle. Inherits all other chrome from TextField. */
+.handle-field .field-text__adornment--prefix {
+	padding-inline-end: 0;
+}
+
+.handle-field__at {
+	font-weight: 600;
+	color: var(--text-muted, hsl(0, 0%, 55%));
+	user-select: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.handle-field .field-text__input {
+	font-variant-ligatures: none;
+	letter-spacing: 0.01em;
+}

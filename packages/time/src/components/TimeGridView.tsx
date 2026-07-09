@@ -1,16 +1,19 @@
 // SVG-driven continuous vertical timeline engine for the Day and Week views.
 //
-// There is NO native scroll and NO spacer. A single virtual `offset` signal
-// (Figma-style relative infinite viewport, driven by the wheel and a custom
-// floating scrollbar — see useViewportScroll) selects the visible slice, which a
-// single absolutely-positioned SVG repaints. Nothing mounts or unmounts while
-// scrolling, so there is no render loop.
+// There is NO native scroll, NO spacer, and NO bounds. A single virtual `offset`
+// signal (boundless viewport, driven by the wheel, a velocity accelerator thumb,
+// and a middle-mouse pan — see useViewportScroll) selects the visible slice,
+// which a single absolutely-positioned SVG repaints. Nothing mounts or unmounts
+// while scrolling, so there is no render loop.
 //
 // `useTimelineScroll` maps `offset` → a continuous time coordinate (origin at
-// canvas y=0). Everything drawn — hour rules, day columns, availability washes,
-// events, the now-line, hover + drag selections — is pure vector math against
-// that offset. A single pointer handler converts clientX/Y back into a precise
-// date + 30-minute block for booking.
+// canvas y=0). Everything drawn — hour rules, midnight demarcations, day
+// columns, availability washes, events, the now-line, hover + drag selections —
+// is pure vector math against that offset. A single pointer handler converts
+// clientX/Y back into a precise date + 30-minute block for booking.
+//
+// External viewers pass `masked`: booked events collapse into anonymous
+// "Reserved" blocks so no title, attendee, or project context ever leaks.
 
 import { type Signal, useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
@@ -27,7 +30,8 @@ import {
 	WEEKDAY_LABELS,
 } from '../hooks/date-utils.ts';
 import { useTimelineScroll } from '../hooks/useTimelineScroll.ts';
-import { TimelineScrollbar } from './TimelineScrollbar.tsx';
+import { type MinimapMark, TimelineScrollbar } from './TimelineScrollbar.tsx';
+import { PresentButton } from './PresentButton.tsx';
 import {
 	eventsForDate,
 	isWithinWindow,
@@ -39,6 +43,9 @@ import {
 
 /** Width of the hour-label gutter, in px. */
 const GUTTER_W = 56;
+
+/** Half-window (in pages) the schedule minimap maps around the viewport centre. */
+const MINIMAP_HALF_PAGES = 3;
 
 export interface TimeGridViewProps {
 	/** Externally-controlled cursor (ISO date) the timeline is anchored to. */
@@ -53,6 +60,11 @@ export interface TimeGridViewProps {
 	pxPerHour?: number;
 	/** Hour the matrix vertically lands on within the anchor page. Default 7. */
 	scrollToHour?: number;
+	/**
+	 * Hide all private booking detail (title / attendee / project). Booked spans
+	 * render as anonymous "Reserved" blocks. Set for external profile viewers.
+	 */
+	masked?: boolean;
 	onSelectSlot?: (date: string, startMin: number) => void;
 	onEventClick?: (event: CalendarEvent) => void;
 	/** Live centred page date as the timeline scrolls (drives toolbar/mini). */
@@ -72,6 +84,14 @@ function fit(text: string, width: number): string {
 	const max = Math.max(0, Math.floor((width - 14) / 6.5));
 	if (text.length <= max) return text;
 	return max <= 1 ? '' : `${text.slice(0, max - 1)}…`;
+}
+
+/** Short "Sat 12 Jul" stamp for a midnight demarcation. */
+function dayStamp(iso: string): string {
+	const dt = new Date(iso + 'T00:00:00');
+	return `${WEEKDAY_LABELS[isoWeekday(iso) - 1]} ${dt.getDate()} ${
+		MONTH_LABELS[dt.getMonth()].slice(0, 3)
+	}`;
 }
 
 interface Slot {
@@ -102,6 +122,7 @@ export function TimeGridView(props: TimeGridViewProps) {
 		slotMinutes,
 		pxPerHour = 60,
 		scrollToHour = 7,
+		masked = false,
 		onSelectSlot,
 		onEventClick,
 		onAnchorChange,
@@ -111,15 +132,16 @@ export function TimeGridView(props: TimeGridViewProps) {
 	const pxPerMin = pxPerHour / 60;
 	const pageHeight = 24 * pxPerHour; // one full continuous day (or week row)
 
-	const { scrollRef, offset, viewportH, viewportW, origin, scrollbar } = useTimelineScroll({
-		anchor,
-		daysPerPage: dpp,
-		pageHeight,
-		pxPerHour,
-		scrollToHour,
-		onAnchorChange,
-		onVisibleRangeChange,
-	});
+	const { scrollRef, offset, viewportH, viewportW, origin, animateTo, beginPan, scrollbar } =
+		useTimelineScroll({
+			anchor,
+			daysPerPage: dpp,
+			pageHeight,
+			pxPerHour,
+			scrollToHour,
+			onAnchorChange,
+			onVisibleRangeChange,
+		});
 
 	const paintRef = useRef<HTMLDivElement | null>(null);
 
@@ -146,6 +168,12 @@ export function TimeGridView(props: TimeGridViewProps) {
 	// The centred page drives the header band (and matches the broadcast date).
 	const centrePage = Math.floor((st + vh / 2) / pageHeight);
 	const headerDates = Array.from({ length: dpp }, (_, c) => addDays(origin, centrePage * dpp + c));
+
+	// "Now" in canvas-y — shared by the now-line, the minimap anchor, and teleport.
+	const today = todayIso();
+	const pToday = daysBetween(origin, dpp === 7 ? startOfWeek(today) : today) / dpp;
+	const colToday = dpp === 7 ? daysBetween(startOfWeek(today), today) : 0;
+	const nowAbsY = pToday * pageHeight + (now.value ?? 0) * pxPerMin;
 
 	// #region Pure geometry helpers ------------------------------------------
 	const dateAt = (page: number, col: number) => addDays(origin, page * dpp + col);
@@ -198,6 +226,12 @@ export function TimeGridView(props: TimeGridViewProps) {
 	};
 
 	const onDown = (e: MouseEvent) => {
+		// Middle button → grab-pan the whole canvas (does not start a booking).
+		if (e.button === 1) {
+			beginPan(e);
+			return;
+		}
+		if (e.button !== 0) return;
 		const slot = slotAt(e.clientX, e.clientY);
 		if (!slot || !isOpen(slot.date, slot.startMin)) return;
 		dragStart.current = slot;
@@ -228,13 +262,13 @@ export function TimeGridView(props: TimeGridViewProps) {
 
 	// #region Build the visible vector slice ---------------------------------
 	const grid: JSX.Element[] = [];
+	const daybreaks: JSX.Element[] = [];
 	const washes: JSX.Element[] = [];
 	const blocks: JSX.Element[] = [];
 	const labels: JSX.Element[] = [];
 	const overlays: JSX.Element[] = [];
 
 	if (vw > 0 && vh > 0) {
-		const today = todayIso();
 		const firstPage = Math.floor(st / pageHeight);
 		const lastPage = Math.floor((st + vh) / pageHeight);
 
@@ -253,16 +287,11 @@ export function TimeGridView(props: TimeGridViewProps) {
 			const y = cy - st;
 			const hourOfDay = ((Math.round(cy / pxPerHour) % 24) + 24) % 24;
 			const boundary = cy % pageHeight === 0;
-			grid.push(
-				<line
-					key={`h${cy}`}
-					class={boundary ? 'cal-svg__hour cal-svg__hour--day' : 'cal-svg__hour'}
-					x1={GUTTER_W}
-					y1={y}
-					x2={vw}
-					y2={y}
-				/>,
-			);
+			if (!boundary) {
+				grid.push(
+					<line key={`h${cy}`} class='cal-svg__hour' x1={GUTTER_W} y1={y} x2={vw} y2={y} />,
+				);
+			}
 			if (y > 8) {
 				labels.push(
 					<text key={`hl${cy}`} class='cal-svg__label' x={GUTTER_W - 8} y={y + 3} text-anchor='end'>
@@ -270,19 +299,48 @@ export function TimeGridView(props: TimeGridViewProps) {
 					</text>,
 				);
 			}
-			// Day view: stamp the date at each midnight boundary for context.
-			if (dpp === 1 && boundary && y > -20) {
-				const d = dateAt(Math.round(cy / pageHeight), 0);
-				const dt = new Date(d + 'T00:00:00');
-				labels.push(
-					<text key={`dl${cy}`} class='cal-svg__datelabel' x={GUTTER_W + 8} y={y + 15}>
-						{`${WEEKDAY_LABELS[isoWeekday(d) - 1]} ${dt.getDate()} ${
-							MONTH_LABELS[dt.getMonth()].slice(0, 3)
-						}`}
-					</text>,
-				);
-			}
 		}
+
+		// #region Midnight demarcations — a premium boundary between calendar days.
+		// A soft downward gradient wash into the new day + a crisp accent rule and
+		// a dated pill, so scrolling past 00:00 reads unmistakably.
+		const firstBoundary = Math.ceil(st / pageHeight) * pageHeight;
+		for (let cy = firstBoundary; cy <= st + vh; cy += pageHeight) {
+			const y = cy - st;
+			const pageIdx = Math.round(cy / pageHeight);
+			const startDate = dateAt(pageIdx, 0);
+			daybreaks.push(
+				<g key={`db${cy}`}>
+					<rect
+						class='cal-svg__daybreak-wash'
+						x={GUTTER_W}
+						y={y}
+						width={Math.max(0, vw - GUTTER_W)}
+						height={28}
+					/>
+					<line class='cal-svg__daybreak' x1={0} y1={y} x2={vw} y2={y} />
+				</g>,
+			);
+			const stampText = dpp === 7
+				? `${dayStamp(startDate)} – ${dayStamp(addDays(startDate, 6))}`
+				: dayStamp(startDate);
+			labels.push(
+				<g key={`dbl${cy}`} class='cal-svg__daybreak-tag'>
+					<rect
+						class='cal-svg__daybreak-tag-bg'
+						x={GUTTER_W + 6}
+						y={y + 6}
+						width={Math.min(Math.max(0, vw - GUTTER_W - 12), stampText.length * 6.6 + 16)}
+						height={17}
+						rx={8.5}
+					/>
+					<text class='cal-svg__daybreak-tag-text' x={GUTTER_W + 15} y={y + 18}>
+						{stampText}
+					</text>
+				</g>,
+			);
+		}
+		// #endregion
 
 		for (let p = firstPage; p <= lastPage; p++) {
 			for (let c = 0; c < dpp; c++) {
@@ -339,14 +397,34 @@ export function TimeGridView(props: TimeGridViewProps) {
 					}
 				}
 
-				// Events.
+				// Events. External viewers see anonymous "Reserved" spans only.
 				for (const ev of eventsForDate(date, events)) {
 					const yTop = p * pageHeight + ev.start * pxPerMin - st;
 					const h = Math.max((ev.end - ev.start) * pxPerMin, 18);
 					if (yTop + h < 0 || yTop > vh) continue;
-					const colour = ev.colour ?? 'var(--primary)';
 					const ex = x + 3;
 					const ew = Math.max(0, colW - 6);
+
+					if (masked) {
+						blocks.push(
+							<g key={ev.id} class='cal-svg__event cal-svg__event--reserved'>
+								<rect
+									class='cal-svg__reserved-bg'
+									x={ex}
+									y={yTop}
+									width={ew}
+									height={h}
+									rx={6}
+								/>
+								<text class='cal-svg__reserved-title' x={ex + 9} y={yTop + 15}>
+									{fit('Reserved', ew)}
+								</text>
+							</g>,
+						);
+						continue;
+					}
+
+					const colour = ev.colour ?? 'var(--primary)';
 					blocks.push(
 						<g
 							key={ev.id}
@@ -418,9 +496,7 @@ export function TimeGridView(props: TimeGridViewProps) {
 
 		// Now line (only when today's column is in view).
 		if (now.value !== null) {
-			const pToday = daysBetween(origin, dpp === 7 ? startOfWeek(today) : today) / dpp;
-			const colToday = dpp === 7 ? daysBetween(startOfWeek(today), today) : 0;
-			const y = pToday * pageHeight + now.value * pxPerMin - st;
+			const y = nowAbsY - st;
 			if (y >= 0 && y <= vh) {
 				const x = GUTTER_W + colToday * colW;
 				overlays.push(
@@ -432,6 +508,58 @@ export function TimeGridView(props: TimeGridViewProps) {
 			}
 		}
 	}
+	// #endregion
+
+	// #region Schedule minimap — a local availability map around the viewport ---
+	// Maps a ±MINIMAP_HALF_PAGES window centred on the viewport onto the scrollbar
+	// track: Available windows, Reserved bookings, Unavailable time-off, plus the
+	// live "now" anchor. Recomputed each paint but cheap (small seed arrays) and
+	// pure — no DOM reads, so it never thrashes layout even at max accel speed.
+	const minimap = (() => {
+		if (vh <= 0) return undefined;
+		const centreY = st + vh / 2;
+		const half = MINIMAP_HALF_PAGES * pageHeight;
+		const spanTop = centreY - half;
+		const span = 2 * half;
+		const toFrac = (y: number) => (y - spanTop) / span;
+		const marks: MinimapMark[] = [];
+		const p0 = Math.floor(spanTop / pageHeight);
+		const p1 = Math.floor((centreY + half) / pageHeight);
+		for (let p = p0; p <= p1; p++) {
+			for (let c = 0; c < dpp; c++) {
+				const date = dateAt(p, c);
+				const base = p * pageHeight;
+				if (timeOffForDate(date, timeOff)) {
+					marks.push({ top: toFrac(base), height: pageHeight / span, state: 'unavailable' });
+					continue;
+				}
+				for (const w of windowsForDate(date, windows)) {
+					marks.push({
+						top: toFrac(base + w.start * pxPerMin),
+						height: ((w.end - w.start) * pxPerMin) / span,
+						state: 'available',
+					});
+				}
+				for (const ev of eventsForDate(date, events)) {
+					marks.push({
+						top: toFrac(base + ev.start * pxPerMin),
+						height: Math.max((ev.end - ev.start) * pxPerMin, 6) / span,
+						state: 'reserved',
+					});
+				}
+			}
+		}
+		const visible = marks.filter((m) => m.top + m.height > 0 && m.top < 1);
+		const nf = toFrac(nowAbsY);
+		return { marks: visible, nowFrac: nf >= 0 && nf <= 1 ? nf : null };
+	})();
+	// #endregion
+
+	// #region Return-to-present teleport -------------------------------------
+	// "Present" is in view when the now-line sits inside the current slice.
+	const presentVisible = vh > 0 && nowAbsY >= st && nowAbsY <= st + vh;
+	const presentDir: 'up' | 'down' = nowAbsY < st ? 'up' : 'down';
+	const jumpToPresent = () => animateTo(nowAbsY - vh * 0.4, false);
 	// #endregion
 
 	return (
@@ -463,15 +591,26 @@ export function TimeGridView(props: TimeGridViewProps) {
 								<rect width={14} height={14} class='cal-svg__hatch-bg' />
 								<line x1={0} y1={0} x2={0} y2={14} class='cal-svg__hatch-line' />
 							</pattern>
+							<linearGradient id='cal-daybreak-grad' x1='0' y1='0' x2='0' y2='1'>
+								<stop offset='0%' class='cal-svg__daybreak-stop-a' />
+								<stop offset='100%' class='cal-svg__daybreak-stop-b' />
+							</linearGradient>
 						</defs>
 						{washes}
 						{grid}
+						{daybreaks}
 						{blocks}
 						{overlays}
 						{labels}
 					</svg>
 				</div>
-				<TimelineScrollbar viewportH={viewportH} scrollbar={scrollbar} />
+				<TimelineScrollbar viewportH={viewportH} scrollbar={scrollbar} minimap={minimap} />
+				<PresentButton
+					show={vh > 0 && !presentVisible}
+					direction={presentDir}
+					label='Now'
+					onClick={jumpToPresent}
+				/>
 			</div>
 		</div>
 	);

@@ -1,15 +1,21 @@
 /**
  * @file ProjectsTab.tsx
  * @description The "Projects" panel. Clean, banner-free cards (via the unified `ProjectCard`)
- * split into "Projects owned" and "Projects worked on" sections. A grid/list toggle is bound to
- * the `projectsView` signal.
+ * grouped into "Projects owned" and "Projects worked on" sections through the shared
+ * `@projective/ui` Accordion primitive — the same accordion used elsewhere on the platform, with
+ * no numerical tags on the headers. The layout is locked to a responsive grid (no list toggle) to
+ * match the Explore discovery surface.
  */
 
 import '../../styles/components/projects.css';
 
-import { useSignal } from '@preact/signals';
-import { Button, IconButton, ProjectCard } from '@projective/ui';
-import { IconChevronRight, IconLayoutGrid, IconList } from '@tabler/icons-preact';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+	ProjectCard,
+} from '@projective/ui';
 import type { EntityCardModel, EntityCardStatusTone } from '@projective/types';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { ProjectItem } from '../../contracts/Profile.ts';
@@ -73,81 +79,49 @@ function projectToCardModel(p: ProjectItem): EntityCardModel {
 	};
 }
 
-/** A collapsible accordion branch grouping projects by relationship. */
+/** A grouped section of projects rendered as one shared-Accordion item (no count tag). */
 function ProjectSection(
-	{ label, items, defaultOpen = true }: {
-		label: string;
-		items: ProjectItem[];
-		defaultOpen?: boolean;
-	},
+	{ value, label, items }: { value: string; label: string; items: ProjectItem[] },
 ) {
-	const open = useSignal(defaultOpen);
 	if (items.length === 0) return null;
-
 	return (
-		<section class='repo-branch' data-open={open.value}>
-			<Button
-				variant='link'
-				size='small'
-				fullWidth
-				startIcon={<IconChevronRight size={16} class='repo-branch__chevron' />}
-				badge={items.length}
-				onClick={() => (open.value = !open.value)}
-			>
-				{label}
-			</Button>
-			{open.value && (
+		<AccordionItem value={value}>
+			<AccordionTrigger>{label}</AccordionTrigger>
+			<AccordionContent>
 				<div class='repo-grid'>
 					{items.map((p) => <ProjectCard key={p.id} entity={projectToCardModel(p)} />)}
 				</div>
-			)}
-		</section>
+			</AccordionContent>
+		</AccordionItem>
 	);
 }
 
 export default function ProjectsTab() {
-	const { profile, projectsView } = useProfileContext();
-	const projects = profile.value.projects;
-	const view = projectsView.value;
+	const { profile, hiddenItems } = useProfileContext();
+	// Owner-hidden items are dropped from the presentation surface.
+	const hidden = hiddenItems.value;
+	const projects = profile.value.projects.filter((p) => !hidden.has(p.id));
 
 	const owned = projects.filter((p) => p.relationship === 'owned');
 	const workedOn = projects.filter((p) => p.relationship === 'worked_on');
 
 	return (
-		<section class='repo' data-view={view}>
+		<section class='repo'>
 			<header class='tab-head'>
 				<div>
 					<h2 class='tab-head__title'>Projects</h2>
 					<p class='tab-head__sub'>{projects.length} projects owned & contributed to</p>
 				</div>
-				<div class='view-toggle' role='group' aria-label='View mode'>
-					<IconButton
-						aria-label='Grid view'
-						variant={view === 'grid' ? 'primary' : 'secondary'}
-						ghost={view !== 'grid'}
-						size='small'
-						onClick={() => (projectsView.value = 'grid')}
-					>
-						<IconLayoutGrid size={17} />
-					</IconButton>
-					<IconButton
-						aria-label='List view'
-						variant={view === 'list' ? 'primary' : 'secondary'}
-						ghost={view !== 'list'}
-						size='small'
-						onClick={() => (projectsView.value = 'list')}
-					>
-						<IconList size={17} />
-					</IconButton>
-				</div>
 			</header>
 
-			{projects.length === 0 ? <div class='tab-empty'>No projects yet.</div> : (
-				<>
-					<ProjectSection label='Projects owned' items={owned} />
-					<ProjectSection label='Projects worked on' items={workedOn} />
-				</>
-			)}
+			{projects.length === 0
+				? <div class='tab-empty'>No projects yet.</div>
+				: (
+					<Accordion type='multiple' defaultValue={['owned', 'worked_on']} variant='ghost'>
+						<ProjectSection value='owned' label='Projects owned' items={owned} />
+						<ProjectSection value='worked_on' label='Projects worked on' items={workedOn} />
+					</Accordion>
+				)}
 		</section>
 	);
 }

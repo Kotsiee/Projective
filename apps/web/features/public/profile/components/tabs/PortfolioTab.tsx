@@ -8,7 +8,6 @@
 import '../../styles/components/portfolio.css';
 
 import { useSignal } from '@preact/signals';
-import { Button } from '@projective/ui';
 import {
 	type Icon,
 	IconFileText,
@@ -71,8 +70,10 @@ function Brick({ item }: { item: PortfolioItem }) {
 }
 
 export default function PortfolioTab() {
-	const { profile } = useProfileContext();
-	const portfolio = profile.value.portfolio;
+	const { profile, hiddenItems } = useProfileContext();
+	// Owner-hidden pieces are dropped from the presentation surface.
+	const hidden = hiddenItems.value;
+	const portfolio = profile.value.portfolio.filter((i) => !hidden.has(i.id));
 	const active = useSignal<'All' | PortfolioCategory>('All');
 
 	// Filter chips: "All" + the disciplines actually present, in canonical order.
@@ -92,17 +93,18 @@ export default function PortfolioTab() {
 				</div>
 			</header>
 
-			<div class='pfolio-filters' role='tablist' aria-label='Filter portfolio'>
+			<div class='profile-filters' role='tablist' aria-label='Filter portfolio'>
 				{filters.map((f) => (
-					<Button
+					<button
 						key={f}
-						variant={active.value === f ? 'secondary' : 'link'}
-						size='small'
-						rounded
+						type='button'
+						role='tab'
+						aria-selected={active.value === f}
+						class={`profile-filter ${active.value === f ? 'profile-filter--active' : ''}`}
 						onClick={() => (active.value = f)}
 					>
 						{f}
-					</Button>
+					</button>
 				))}
 			</div>
 

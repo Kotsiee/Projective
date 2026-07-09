@@ -3,7 +3,7 @@
 /** Which time span the calendar renders. */
 export type CalendarView = 'day' | 'week' | 'month';
 
-/** A single placed event on the calendar (booking / busy / tentative). */
+/** A single placed event on the calendar (booking / busy / reserved). */
 export interface CalendarEvent {
 	id: string;
 	title: string;
@@ -13,8 +13,8 @@ export interface CalendarEvent {
 	start: number;
 	/** Minutes from midnight. */
 	end: number;
-	/** Visual treatment of the chip. Defaults to 'booking'. */
-	kind?: 'booking' | 'busy' | 'tentative';
+	/** Visual treatment of the chip. Defaults to 'booking'. `reserved` = held/pending. */
+	kind?: 'booking' | 'busy' | 'reserved';
 	/** Chip accent colour (any CSS colour). Falls back to `--primary`. */
 	colour?: string;
 	/** Small secondary line under the title (e.g. attendee / platform). */

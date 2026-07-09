@@ -21,6 +21,7 @@ export * from './src/hooks/useMinAmountValidation.ts';
 
 // Components
 export * from './src/components/TextField.tsx';
+export * from './src/components/HandleField.tsx';
 export * from './src/components/SearchInput.tsx';
 export * from './src/types/components/search-input.ts';
 export * from './src/components/SelectField.tsx';
