@@ -18,7 +18,8 @@
 import '../../styles/components/rail.css';
 
 import type { JSX } from 'preact';
-import { Button, toast, Tooltip } from '@projective/ui';
+import { Button, ProgressMeter, toast, Tooltip } from '@projective/ui';
+import { computeProfileSetup } from '@features/shared/profile/completeness.ts';
 import {
 	IconArrowLeft,
 	IconBookmark,
@@ -37,6 +38,7 @@ import {
 	IconSchool,
 	IconSettings,
 	IconShare,
+	IconSparkles,
 	IconTimeline,
 	IconUser,
 	IconUserCheck,
@@ -47,18 +49,24 @@ import {
 } from '@tabler/icons-preact';
 import { useProfileContext } from '../../contexts/ProfileContext.tsx';
 import type { EditSectionKey } from '../../contexts/ProfileContext.tsx';
+import { useUserContext } from '@features/navigation/contexts/UserContext.tsx';
 
 export type RailPage = 'profile' | 'availability';
 
-/** A single rail row. Mirrors the main sidebar: a portalled tooltip fills in the collapsed label. */
+/**
+ * A single rail row. Mirrors the main sidebar: a portalled tooltip fills in the collapsed label.
+ * `premium` swaps the ghost/secondary skin for the design-system `premium` Button (a high-conversion
+ * gold CTA) while keeping the exact same collapse/tooltip responsive behaviour as every other row.
+ */
 function RailLink(
-	{ icon, label, href, active, collapsed, onClick }: {
+	{ icon, label, href, active, collapsed, onClick, premium }: {
 		icon: JSX.Element;
 		label: string;
 		href?: string;
 		active?: boolean;
 		collapsed: boolean;
 		onClick?: () => void;
+		premium?: boolean;
 	},
 ) {
 	return (
@@ -66,11 +74,11 @@ function RailLink(
 			<Button
 				href={href}
 				onClick={onClick}
-				ghost
-				variant='secondary'
+				ghost={!premium}
+				variant={premium ? 'premium' : 'secondary'}
 				startIcon={icon}
 				fullWidth
-				className='profile-rail__navbtn'
+				className={`profile-rail__navbtn${premium ? ' profile-rail__partner' : ''}`}
 				aria-label={label}
 				aria-current={active ? 'page' : undefined}
 				data-selected={active ? 'true' : 'false'}
@@ -113,12 +121,38 @@ export default function ProfileSideRail({ activePage = 'profile' }: { activePage
 		toggleRail,
 	} = useProfileContext();
 
+	// The authenticated viewer's own persona (independent of the profile being viewed). Drives the
+	// "Become a Partner" conversion CTA — shown only to a Client/Operator who has not yet unlocked a
+	// freelancer profile. Available because the rail renders inside the app-wide UserProvider.
+	const { user } = useUserContext();
+	const userIsFreelancer = user.value?.hasFreelancer ?? false;
+
 	const p = profile.value;
 	const v = viewer.value;
 	const own = isOwn.value;
 	const editing = isEditing.value && own;
 	const collapsed = railCollapsed.value;
 	const base = `/${p.handle}`;
+
+	// Own profile + not-yet-a-freelancer → offer the freelancer-suite unlock.
+	const showBecomePartner = own && !editing && !userIsFreelancer;
+
+	// Owner-only "profile strength" tracker, computed via the shared completeness engine (the same
+	// logic behind the /home + nav trackers) so the number is consistent across surfaces. Collapses
+	// from a linear bar to a radial ring in lockstep with the rail.
+	const setup = own
+		? computeProfileSetup({
+			username: p.handle,
+			isFreelancer: p.kind === 'person',
+			hasAvatar: !!p.avatarUrl,
+			hasHeadline: !!p.headline?.trim(),
+			hasBio: !!p.about?.trim(),
+			hasSkills: p.skills.length > 0,
+			hasLanguages: p.meta.languages.length > 0,
+			serviceCount: p.services.length,
+			projectCount: p.projects.length,
+		})
+		: null;
 
 	return (
 		<div class='profile-rail' data-collapsed={collapsed ? 'true' : 'false'}>
@@ -128,6 +162,53 @@ export default function ProfileSideRail({ activePage = 'profile' }: { activePage
 				href='/explore'
 				collapsed={collapsed}
 			/>
+
+			{setup && !editing && setup.percent < 100 && (
+				<div class='profile-rail__setup'>
+					{collapsed
+						? (
+							<Tooltip
+								label={`Profile ${setup.percent}% complete`}
+								position='right'
+								className='profile-rail__tip'
+							>
+								<a
+									class='profile-rail__setup-ring'
+									href={`${base}?edit=1`}
+									aria-label={`Profile ${setup.percent}% complete — finish setup`}
+								>
+									<ProgressMeter variant='radial' value={setup.percent} size={40} tone='gold' />
+								</a>
+							</Tooltip>
+						)
+						: (
+							<a class='profile-rail__setup-bar' href={`${base}?edit=1`}>
+								<ProgressMeter
+									value={setup.percent}
+									tone='gold'
+									label='Profile strength'
+									showValue
+									milestone={setup.milestone}
+								/>
+								<span class='profile-rail__setup-hint'>
+									{setup.total - setup.completed} steps to complete →
+								</span>
+							</a>
+						)}
+				</div>
+			)}
+
+			{showBecomePartner && (
+				<div class='profile-rail__group'>
+					<RailLink
+						icon={<IconSparkles size={18} />}
+						label='Become a Partner'
+						href='/become-partner'
+						collapsed={collapsed}
+						premium
+					/>
+				</div>
+			)}
 
 			{editing
 				? (

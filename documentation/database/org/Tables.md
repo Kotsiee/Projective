@@ -26,12 +26,11 @@ data remains isolated while providing a searchable directory for the platform.
 
 The "Seller" persona. A user has exactly one freelancer profile.
 
-| Column        | Type    | Notes                            |
-| :------------ | :------ | :------------------------------- |
-| `id`          | uuid    | PK.                              |
-| `user_id`     | uuid    | FK → `auth.users.id`, UNIQUE.    |
-| `hourly_rate` | integer | Signalling rate in minor units.  |
-| `skills`      | text[]  | Fast-lookup array of skill tags. |
+| Column                              | Type    | Notes                                                                                                                       |
+| :---------------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------- |
+| `user_id`                           | uuid    | PK, FK → `auth.users.id`.                                                                                                   |
+| `skills`                            | text[]  | Fast-lookup array of skill tags.                                                                                            |
+| `is_freelancer` (on `users_public`) | boolean | Denormalised persona flag; flipped to `true` by `org.enable_freelancer_profile` when a client unlocks a freelancer profile. |
 
 ### `org.business_profiles`
 
@@ -142,3 +141,10 @@ CREATE TABLE org.profile_links (
   has a strict TypeScript interface to validate these structures during team operations.
 - **Email Management**: `org.user_emails` allows for secondary emails but the auth linkage remains
   strictly on the primary `auth.users` record.
+  - `verified_at` is the app-owned mirror of GoTrue's `auth.users.email_confirmed_at`. Because the
+    email/password profile is provisioned at signup (before confirmation), the
+    `on_auth_user_confirmed` trigger (`public.handle_email_confirmed`,
+    `migrations/0312_email_verification_sync.sql`) advances `verified_at` on the NULL→timestamp
+    transition so it stays trustworthy. GoTrue still owns the single-use confirmation token; no
+    second token is stored here. The `/verify` page polls this via
+    `api/v1/auth/verification-status`.

@@ -157,6 +157,17 @@
 	--amber: hsl(37, 95%, 55%);
 	--amber-surface: hsla(37, 95%, 55%, 0.14);
 
+	/* Extended discovery accents (ocean / ember / forest / neutral) — promote the palette the
+	   entity-card + feed surfaces already reference so every accent resolves to a token. */
+	--ocean: hsl(199, 89%, 48%);
+	--ocean-surface: hsla(199, 89%, 48%, 0.14);
+	--ember: hsl(330, 81%, 60%);
+	--ember-surface: hsla(330, 81%, 60%, 0.14);
+	--forest: hsl(142, 71%, 42%);
+	--forest-surface: hsla(142, 71%, 42%, 0.14);
+	--neutral: hsl(220, 9%, 46%);
+	--neutral-surface: hsla(220, 9%, 46%, 0.14);
+
 	/* Micro-border hairline (the `border-zinc-700/50` equivalent) + sponsored frame. */
 	--hairline: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
 	--hairline-strong: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.18);
@@ -239,6 +250,40 @@
 	);
 	/* #endregion */
 
+	/* #region 4e. LUXURY SURFACES (the `/home` feed)
+	   An ultra-premium sub-palette layered on top of the showcase tokens: a cool pale
+	   "champagne" (editorial teal-tint off-white), a vibrant blue-green accent, and a
+	   deep velvet-indigo obsidian used for the feed's layered glass backdrops. The accent
+	   sits on a ~178° teal hue, deliberately kept off the 160° mint and 186° primary lanes
+	   so it reads as its own editorial blue-green. Each ships a -surface soft-fill;
+	   teal-tinted hairlines give the razor-thin luxury border. The historic `--gold` /
+	   `--champagne` / `--glow-gold` token NAMES are retained so every consumer re-themes
+	   here for free — they now carry the teal/velvet palette, not metal. Explicit dark
+	   overrides live below so nothing drifts through HSL arithmetic. */
+	--champagne: hsl(174, 40%, 88%);
+	--champagne-surface: hsla(174, 40%, 88%, 0.14);
+	--gold: hsl(178, 62%, 40%);
+	--gold-strong: hsl(182, 66%, 32%);
+	--gold-surface: hsla(178, 62%, 40%, 0.14);
+	--obsidian: hsl(252, 24%, 12%);
+	--obsidian-deep: hsl(252, 28%, 7%);
+
+	/* Teal-tinted razor-thin border + soft cool glass for premium cards/reels. */
+	--hairline-luxe: hsla(178, 62%, 40%, 0.22);
+	--glass-luxe: hsla(174, 40%, 90%, 0.06);
+	--glow-gold: 0 14px 44px -12px hsla(178, 62%, 40%, 0.4);
+
+	/* Teal→violet sweep for luxury CTAs, reel eyebrows, sponsored frames. */
+	--grad-champagne: linear-gradient(135deg, var(--champagne) 0%, var(--gold) 55%, var(--violet) 130%);
+	--grad-obsidian: linear-gradient(180deg, var(--obsidian) 0%, var(--obsidian-deep) 100%);
+	--grad-luxe-sheen: linear-gradient(
+		120deg,
+		transparent 0%,
+		var(--glass-luxe) 45%,
+		transparent 70%
+	);
+	/* #endregion */
+
 	/* #region 4. GLOBAL SEMANTICS */
 	--text-main: hsl(var(--text-hue), var(--text-saturation), var(--text-lightness));
 	--text-blue: hsl(var(--primary-hue), var(--primary-saturation), 30%);
@@ -306,6 +351,14 @@
 	--violet-surface: hsla(258, 90%, 72%, 0.18);
 	--amber: hsl(37, 100%, 60%);
 	--amber-surface: hsla(37, 100%, 60%, 0.16);
+	--ocean: hsl(199, 92%, 58%);
+	--ocean-surface: hsla(199, 92%, 58%, 0.16);
+	--ember: hsl(330, 88%, 68%);
+	--ember-surface: hsla(330, 88%, 68%, 0.16);
+	--forest: hsl(142, 70%, 50%);
+	--forest-surface: hsla(142, 70%, 50%, 0.16);
+	--neutral: hsl(220, 12%, 62%);
+	--neutral-surface: hsla(220, 12%, 62%, 0.16);
 
 	--hairline: hsla(0, 0%, 100%, 0.08);
 	--hairline-strong: hsla(0, 0%, 100%, 0.16);
@@ -333,6 +386,21 @@
 	--shadow-xl: 0 28px 70px rgba(0, 0, 0, 0.66), 0 10px 22px rgba(0, 0, 0, 0.5);
 
 	--grad-premium-text: linear-gradient(180deg, var(--text-main) 0%, var(--text-muted) 165%);
+
+	/* Luxury sub-palette on the near-black canvas: the cool champagne dims a touch, the
+	   teal accent gains saturation to pop against the deep feed, obsidian deepens toward
+	   velvet-indigo, hairlines/glass strengthen so the razor-thin luxury edge still reads.
+	   Token names are historic (see the light block); the palette is teal/velvet. */
+	--champagne: hsl(174, 34%, 82%);
+	--champagne-surface: hsla(174, 34%, 82%, 0.1);
+	--gold: hsl(176, 72%, 52%);
+	--gold-strong: hsl(178, 76%, 44%);
+	--gold-surface: hsla(176, 72%, 52%, 0.16);
+	--obsidian: hsl(252, 28%, 9%);
+	--obsidian-deep: hsl(252, 32%, 5%);
+	--hairline-luxe: hsla(176, 72%, 52%, 0.26);
+	--glass-luxe: hsla(174, 30%, 88%, 0.05);
+	--glow-gold: 0 16px 48px -12px hsla(176, 72%, 52%, 0.42);
 }
 
 /* #endregion */

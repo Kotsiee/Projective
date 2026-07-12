@@ -1,0 +1,213 @@
+/* =========================================================================
+   /articles/[slug] — premium editorial reader
+   Narrow reading column, luxe typography, gold hairlines. Tokens from the
+   global sheet. Server-rendered, so this lives in the always-loaded global CSS.
+   ========================================================================= */
+
+.article {
+	max-width: 760px;
+	width: 100%;
+	margin: 0 auto;
+	padding: clamp(1.5rem, 3vw, 3rem) clamp(1rem, 3vw, 1.5rem) 5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+	color: var(--text-main);
+}
+
+.article__back {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	transition: color var(--fast) ease;
+}
+
+.article__back:hover {
+	color: var(--gold-strong);
+}
+
+/* ---- Head ---- */
+.article__head {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.article__kicker {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--gold-strong);
+}
+
+.article__title {
+	margin: 0;
+	font-size: clamp(1.9rem, 4.5vw, 3rem);
+	line-height: 1.1;
+	font-weight: 600;
+	letter-spacing: -0.03em;
+}
+
+.article__standfirst {
+	margin: 0;
+	font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+	line-height: 1.5;
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+.article__byline {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--hairline-luxe);
+}
+
+.article__byline-avatar {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	background: var(--grad-champagne);
+	box-shadow: var(--glow-gold);
+	flex-shrink: 0;
+}
+
+.article__byline-name {
+	display: block;
+	font-weight: 600;
+	font-size: 0.92rem;
+}
+
+.article__byline-role {
+	display: block;
+	font-size: 0.78rem;
+	color: var(--text-muted);
+}
+
+/* ---- Cover ---- */
+.article__cover {
+	height: clamp(200px, 34vw, 340px);
+	border-radius: var(--border-radius__xxlarge);
+	border: 1px solid var(--hairline-luxe);
+	box-shadow: var(--shadow-xl);
+}
+
+/* ---- Body ---- */
+.article__body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.35rem;
+	font-size: 1.08rem;
+	line-height: 1.75;
+	color: var(--text-secondary);
+}
+
+.article__body p {
+	margin: 0;
+}
+
+.article__lead {
+	font-size: 1.2rem;
+	line-height: 1.6;
+	color: var(--text-main);
+}
+
+/* Elegant drop-cap on the lead paragraph. */
+.article__lead::first-letter {
+	float: left;
+	font-size: 3.4rem;
+	line-height: 0.82;
+	padding: 0.1rem 0.55rem 0 0;
+	font-weight: 700;
+	background: var(--grad-champagne);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+/* ---- Closing CTA ---- */
+.article__cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1.25rem;
+	margin-top: 1rem;
+	padding: clamp(1.5rem, 3vw, 2.25rem);
+	border-radius: var(--border-radius__xxlarge);
+	border: 1px solid var(--hairline-luxe);
+	background:
+		var(--glow-aurora),
+		var(--glass-luxe);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.article__cta-icon {
+	display: grid;
+	place-items: center;
+	width: 46px;
+	height: 46px;
+	border-radius: var(--border-radius__large);
+	border: 1px solid var(--hairline-luxe);
+	background: var(--gold-surface);
+	color: var(--gold-strong);
+	flex-shrink: 0;
+}
+
+.article__cta-copy {
+	flex: 1 1 16rem;
+}
+
+.article__cta-title {
+	margin: 0 0 0.3rem;
+	font-size: 1.2rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.article__cta-sub {
+	margin: 0;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	color: var(--text-secondary);
+}
+
+/* ---- Empty / coming-soon ---- */
+.article--empty {
+	min-height: 60vh;
+}
+
+.article__empty-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: clamp(2rem, 5vw, 3.5rem);
+	border-radius: var(--border-radius__xxlarge);
+	border: 1px solid var(--hairline-luxe);
+	background:
+		var(--glow-aurora),
+		var(--glass-luxe);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.article__empty-title {
+	margin: 0;
+	font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.article__empty-sub {
+	margin: 0;
+	max-width: 34rem;
+	font-size: 1rem;
+	line-height: 1.6;
+	color: var(--text-secondary);
+}

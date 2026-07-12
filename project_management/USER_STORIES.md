@@ -33,6 +33,15 @@ with only AC4 (Stripe card attach) deferred outside the internal-wallet demo pat
 |                | AC5 · Username validation (alphanumeric, 3–20)                  |
 |                | AC6 · Write `security.audit_logs` onboarding entry              |
 
+_Extension — post-onboarding persona expansion:_ persona is no longer fixed at signup. A
+Client/Operator can unlock a freelancer profile later from the luxury `/become-partner` funnel; the
+idempotent `org.enable_freelancer_profile` RPC (`0313_freelancer_conversion.sql`) creates the
+`freelancer_profiles` row, flips `is_freelancer`, activates the freelancer persona in
+`session_context`, and writes a `freelancer.unlocked` audit row — the same AC3/AC4/AC6 guarantees as
+first-run onboarding, just self-serve. The completeness engine gains a public **go-live milestone**
+so a converting user sees exactly which baseline unlocks selling/applying. (The freelancer
+`hourly_rate` column was removed platform-wide — rates are not a signalling field.)
+
 ---
 
 ## US-002 · Organizational-Unit Formation — ✅ Done (E2)
@@ -172,8 +181,10 @@ SQL engine. Ghosting auto-approve and the 7-day safety-window timer remain unbui
 |                                                      | AC3 · Financial ledger view — live from the Postgres ledger engine (`org.get_business_finance`) |
 |                                                      | AC5 · Member visibility list (roles + seat state, `org.get_business_members`)    |
 
-_Note: `/dashboard` renders the live Business Administration panel — real-time wallet balances, an
-Area/Line volume chart and the filterable Transaction Ledger read straight from `finance.*` via the
-`org.get_business_finance` wrapper (migration 0309); every business wallet is seeded with a one-time
-opening platform credit so escrow holds/releases produce real ledger lines. Only AC4 (Stripe card
-attach) is deferred, since payment intents sit outside the internal-wallet demo path._
+_Note: the finance backend is live — real-time wallet balances, an Area/Line volume series and the
+filterable Transaction Ledger read straight from `finance.*` via the `org.get_business_finance`
+wrapper (migration 0309); every business wallet is seeded with a one-time opening platform credit so
+escrow holds/releases produce real ledger lines. Its former `/dashboard` overview page was retired
+when the persona-adaptive `/home` feed became the authenticated landing — re-homing the business
+finance surface (fold into `/home` client persona, or a `/business` panel) is pending. Only AC4
+(Stripe card attach) is deferred, since payment intents sit outside the internal-wallet demo path._

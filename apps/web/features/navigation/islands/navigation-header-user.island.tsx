@@ -1,4 +1,4 @@
-import { Button, Icon, matchSystemTheme, setTheme, theme } from '@projective/ui';
+import { Button, Icon, matchSystemTheme, ProgressMeter, setTheme, theme } from '@projective/ui';
 import {
 	IconBriefcase,
 	IconCheck,
@@ -135,6 +135,29 @@ export default function NavigationHeaderUser() {
 							)}
 						</div>
 					</div>
+					{/* #endregion */}
+
+					{/* #region Profile setup mirror — concise echo of the /home tracker */}
+					{profile?.profileSetup && profile.profileSetup.percent < 100 && (
+						<a class='navigation__user-menu__setup' href='/home' role='menuitem'>
+							<div class='navigation__user-menu__setup-top'>
+								<span class='navigation__user-menu__setup-label'>Complete your profile</span>
+								<span class='navigation__user-menu__setup-pct'>
+									{profile.profileSetup.percent}%
+								</span>
+							</div>
+							<ProgressMeter
+								value={profile.profileSetup.percent}
+								tone='gold'
+								showValue={false}
+								thickness={5}
+								milestone={profile.profileSetup.milestone}
+							/>
+							<span class='navigation__user-menu__setup-hint'>
+								{profile.profileSetup.total - profile.profileSetup.completed} steps left →
+							</span>
+						</a>
+					)}
 					{/* #endregion */}
 
 					{/* #region Context switching */}

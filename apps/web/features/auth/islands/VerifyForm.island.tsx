@@ -31,7 +31,7 @@ export default function VerifyForm({ initialEmail }: { initialEmail?: string }) 
 	// Subscription state.
 	const verified = useSignal(false); // email confirmed (this or another device)
 	const redirecting = useSignal(false); // session landed on THIS device → auto login
-	const next = useSignal('/dashboard'); // captured return target
+	const next = useSignal('/home'); // captured return target
 
 	// Resend cooldown ticker.
 	useEffect(() => {
@@ -61,13 +61,13 @@ export default function VerifyForm({ initialEmail }: { initialEmail?: string }) 
 			attempts++;
 			try {
 				const status = await VerificationStatusService.check(controller.signal);
-				next.value = status.next || '/dashboard';
+				next.value = status.next || '/home';
 
 				// This device is signed in → automatic login, land on the return target.
 				if (status.authenticated) {
 					stopped = true;
 					redirecting.value = true;
-					globalThis.location.href = status.next || '/dashboard';
+					globalThis.location.href = status.next || '/home';
 					return;
 				}
 
@@ -106,7 +106,7 @@ export default function VerifyForm({ initialEmail }: { initialEmail?: string }) 
 
 	// --- Verified (cross-device) / signing-in states ---
 	if (verified.value || redirecting.value) {
-		const continueHref = `/login?next=${encodeURIComponent(next.value || '/dashboard')}`;
+		const continueHref = `/login?next=${encodeURIComponent(next.value || '/home')}`;
 		return (
 			<>
 				<div class='auth-head'>

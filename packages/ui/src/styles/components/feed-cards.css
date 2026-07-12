@@ -1,0 +1,310 @@
+/**
+ * Feed text cards + sponsored slots — the luxury non-media templates.
+ * Both lean on the shared accent tokens (accent-mint / accent-violet / accent-gold …)
+ * that cascade from the app theme, a razor-thin hairline, and deep glass.
+ */
+
+/* Accent resolution shared by both card types. */
+.feed-text,
+.feed-sponsored {
+	--fc-accent: var(--primary);
+	--fc-surface: var(--primary-surface);
+}
+
+.accent-mint {
+	--fc-accent: var(--mint);
+	--fc-surface: var(--mint-surface);
+}
+.accent-violet {
+	--fc-accent: var(--violet);
+	--fc-surface: var(--violet-surface);
+}
+.accent-amber {
+	--fc-accent: var(--amber);
+	--fc-surface: var(--amber-surface);
+}
+.accent-ocean {
+	--fc-accent: var(--ocean);
+	--fc-surface: var(--ocean-surface);
+}
+.accent-ember {
+	--fc-accent: var(--ember);
+	--fc-surface: var(--ember-surface);
+}
+.accent-forest {
+	--fc-accent: var(--forest);
+	--fc-surface: var(--forest-surface);
+}
+.accent-neutral {
+	--fc-accent: var(--neutral);
+	--fc-surface: var(--neutral-surface);
+}
+.accent-gold {
+	--fc-accent: var(--gold);
+	--fc-surface: var(--gold-surface);
+}
+.accent-champagne {
+	--fc-accent: var(--champagne);
+	--fc-surface: var(--champagne-surface);
+}
+.accent-primary {
+	--fc-accent: var(--primary);
+	--fc-surface: var(--primary-surface);
+}
+
+/* --- Text card ---------------------------------------------------------- */
+.feed-text {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	padding: 1.4rem 1.5rem;
+	border-radius: var(--border-radius__xxlarge);
+	border: 1px solid var(--hairline);
+	background:
+		radial-gradient(120% 140% at 0% 0%, var(--fc-surface) 0%, transparent 42%),
+		var(--glass-panel);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+	box-shadow: var(--shadow-md);
+	overflow: hidden;
+	transition:
+		transform var(--dur-luxe) var(--ease-luxe),
+		box-shadow var(--dur-luxe) var(--ease-luxe),
+		border-color var(--medium) var(--ease-luxe);
+}
+
+/* A hairline accent seam down the leading edge. */
+.feed-text::before {
+	content: '';
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	background: var(--fc-accent);
+	opacity: 0.7;
+}
+
+@media (hover: hover) {
+	.feed-text:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-lg);
+		border-color: var(--hairline-strong);
+	}
+}
+
+.feed-text__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	align-self: flex-start;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--fc-accent);
+}
+
+.feed-text__title {
+	margin: 0;
+	font-size: 1.16rem;
+	font-weight: 650;
+	line-height: 1.32;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+}
+
+.feed-text--quote .feed-text__title {
+	font-style: italic;
+	font-weight: 550;
+}
+
+.feed-text__body {
+	margin: 0;
+	font-size: 0.92rem;
+	line-height: 1.55;
+	color: var(--text-secondary);
+}
+
+.feed-text__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-top: 0.3rem;
+	padding-top: 0.85rem;
+	border-top: 1px solid var(--hairline);
+}
+
+.feed-text__author {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	min-width: 0;
+}
+
+.feed-text__avatar,
+.feed-sponsored__avatar,
+.feed-composer__avatar {
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	width: 34px;
+	height: 34px;
+	border-radius: 999px;
+	overflow: hidden;
+	background: var(--fc-surface, var(--primary-surface));
+	color: var(--fc-accent, var(--primary));
+	font-size: 0.82rem;
+	font-weight: 700;
+	border: 1px solid var(--hairline);
+}
+
+.feed-text__avatar img,
+.feed-sponsored__avatar img,
+.feed-composer__avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.feed-text__author-meta {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.2;
+}
+
+.feed-text__author-name {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.feed-text__author-handle {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+}
+
+.feed-text__cta,
+.feed-sponsored__cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex: 0 0 auto;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--fc-accent);
+	white-space: nowrap;
+	transition: gap var(--fast) var(--ease-luxe);
+}
+
+.feed-text__cta:hover,
+.feed-sponsored__cta:hover {
+	gap: 0.6rem;
+}
+
+/* --- Sponsored slot ----------------------------------------------------- */
+.feed-sponsored {
+	position: relative;
+	border-radius: var(--border-radius__xxlarge);
+	/* Gold-tinted luxe frame via a gradient border ring. */
+	padding: 1px;
+	background: linear-gradient(135deg, var(--hairline-luxe), transparent 55%, var(--hairline-luxe));
+	box-shadow: var(--shadow-md);
+	transition:
+		transform var(--dur-luxe) var(--ease-luxe),
+		box-shadow var(--dur-luxe) var(--ease-luxe);
+}
+
+@media (hover: hover) {
+	.feed-sponsored:hover {
+		transform: translateY(-2px);
+		box-shadow:
+			var(--glow-gold),
+			var(--shadow-lg);
+	}
+}
+
+.feed-sponsored__frame {
+	display: grid;
+	grid-template-columns: minmax(120px, 0.42fr) 1fr;
+	border-radius: calc(var(--border-radius__xxlarge) - 1px);
+	overflow: hidden;
+	background: var(--glass-panel-strong);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.feed-sponsored__media {
+	position: relative;
+	min-height: 148px;
+	background:
+		var(--grad-champagne),
+		linear-gradient(135deg, var(--obsidian), var(--obsidian-deep));
+}
+
+.feed-sponsored__badge {
+	position: absolute;
+	top: 0.7rem;
+	left: 0.7rem;
+	padding: 0.2rem 0.55rem;
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--obsidian-deep);
+	background: rgba(255, 255, 255, 0.82);
+	border-radius: 999px;
+	backdrop-filter: blur(4px);
+}
+
+.feed-sponsored__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 1.25rem 1.4rem;
+}
+
+.feed-sponsored__sponsor {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.feed-sponsored__sponsor-name {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+.feed-sponsored__title {
+	margin: 0.1rem 0 0;
+	font-size: 1.08rem;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	color: var(--text-main);
+}
+
+.feed-sponsored__text {
+	margin: 0;
+	font-size: 0.88rem;
+	line-height: 1.5;
+	color: var(--text-secondary);
+}
+
+.feed-sponsored__cta {
+	margin-top: 0.35rem;
+	align-self: flex-start;
+}
+
+@media (max-width: 560px) {
+	.feed-sponsored__frame {
+		grid-template-columns: 1fr;
+	}
+	.feed-sponsored__media {
+		min-height: 96px;
+	}
+}

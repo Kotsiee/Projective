@@ -124,7 +124,7 @@ BEGIN
     )
     VALUES (
         NEW.user_id, 'freelancer', 'Freelancer Profile', to_tsvector('english', array_to_string(NEW.skills, ' ')),
-        jsonb_build_object('hourly_rate', NEW.hourly_rate, 'skills', NEW.skills),
+        jsonb_build_object('skills', NEW.skills),
         NEW.rating_average, NEW.rating_count, NEW.current_workload_intensity, NEW.available_since, now()
     )
     ON CONFLICT (entity_id, entity_type) DO UPDATE SET

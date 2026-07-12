@@ -1,0 +1,137 @@
+/**
+ * HScroll — premium horizontal reel wrapper.
+ * Fade edges are a mask-image that retracts as you reach a boundary (driven by the
+ * data-at-start / data-at-end attributes the component sets on scroll). The nav
+ * affordances float over the fade and fade in on hover.
+ */
+
+.hscroll {
+	position: relative;
+	--hscroll-fade: 40px;
+}
+
+.hscroll__track {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-behavior: smooth;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior-x: contain;
+	padding-block: 4px;
+	/* Hide the native bar — the reel is drag/inertia-first. */
+	scrollbar-width: none;
+	touch-action: pan-y;
+	cursor: grab;
+}
+
+.hscroll__track::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+}
+
+.hscroll[data-dragging='true'] .hscroll__track {
+	cursor: grabbing;
+	scroll-behavior: auto;
+	user-select: none;
+}
+
+/* Reel children never shrink — they keep their intrinsic width so cards stay crisp. */
+.hscroll__track > * {
+	flex: 0 0 auto;
+	scroll-snap-align: start;
+}
+
+/* --- Premium fade edges ------------------------------------------------- */
+.hscroll[data-fade='true'] .hscroll__track {
+	--fade-l: var(--hscroll-fade);
+	--fade-r: var(--hscroll-fade);
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		#000 var(--fade-l),
+		#000 calc(100% - var(--fade-r)),
+		transparent 100%
+	);
+	mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		#000 var(--fade-l),
+		#000 calc(100% - var(--fade-r)),
+		transparent 100%
+	);
+	transition:
+		-webkit-mask-image var(--medium) var(--ease-luxe),
+		mask-image var(--medium) var(--ease-luxe);
+}
+
+.hscroll[data-fade='true'][data-at-start='true'] .hscroll__track {
+	--fade-l: 0px;
+}
+
+.hscroll[data-fade='true'][data-at-end='true'] .hscroll__track {
+	--fade-r: 0px;
+}
+
+/* --- Nav affordances ---------------------------------------------------- */
+.hscroll__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	transform: translateY(-50%) scale(0.9);
+	border-radius: 999px;
+	color: var(--text-main);
+	background: var(--glass-panel-strong);
+	backdrop-filter: blur(var(--glass-blur-sm));
+	-webkit-backdrop-filter: blur(var(--glass-blur-sm));
+	border: 1px solid var(--hairline-luxe);
+	box-shadow: var(--shadow-md);
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity var(--medium) var(--ease-luxe),
+		transform var(--medium) var(--ease-luxe),
+		background var(--fast) ease;
+}
+
+.hscroll__nav--prev {
+	left: 6px;
+}
+
+.hscroll__nav--next {
+	right: 6px;
+}
+
+@media (hover: hover) {
+	.hscroll:hover .hscroll__nav {
+		opacity: 1;
+		pointer-events: auto;
+		transform: translateY(-50%) scale(1);
+	}
+
+	.hscroll__nav:hover {
+		background: var(--card);
+		border-color: var(--gold);
+		color: var(--gold-strong);
+	}
+}
+
+/* Hide the affordance that points at an exhausted edge. */
+.hscroll[data-at-start='true'] .hscroll__nav--prev,
+.hscroll[data-at-end='true'] .hscroll__nav--next {
+	opacity: 0 !important;
+	pointer-events: none;
+}
+
+/* Touch devices never show the arrows — drag + inertia carry the interaction. */
+@media (hover: none) {
+	.hscroll__nav {
+		display: none;
+	}
+}

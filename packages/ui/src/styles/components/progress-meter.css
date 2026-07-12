@@ -1,0 +1,190 @@
+/**
+ * ProgressMeter — the shared profile-setup indicator (linear + radial).
+ * Tone ramps map to a gradient; the fill animates on value change with the luxe curve.
+ */
+
+.progress-meter {
+	--pm-accent: var(--gold);
+	--pm-accent-strong: var(--gold-strong);
+	--pm-grad: var(--grad-champagne);
+}
+
+.progress-meter--primary {
+	--pm-accent: var(--primary);
+	--pm-accent-strong: var(--primary);
+	--pm-grad: var(--grad-premium-diag);
+}
+
+.progress-meter--mint {
+	--pm-accent: var(--mint);
+	--pm-accent-strong: var(--mint);
+	--pm-grad: linear-gradient(120deg, var(--mint), var(--primary));
+}
+
+.progress-meter--violet {
+	--pm-accent: var(--violet);
+	--pm-accent-strong: var(--violet);
+	--pm-grad: linear-gradient(120deg, var(--violet), var(--primary));
+}
+
+/* --- Linear ------------------------------------------------------------- */
+.progress-meter--linear {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	width: 100%;
+}
+
+.progress-meter__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.progress-meter__label {
+	font-size: 0.78rem;
+	font-weight: 500;
+	color: var(--text-secondary);
+	letter-spacing: 0.01em;
+}
+
+.progress-meter__value {
+	font-size: 0.72rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--pm-accent-strong);
+}
+
+/* Wraps the track so a milestone marker can overflow it (the track itself clips the fill). */
+.progress-meter__bar {
+	position: relative;
+	width: 100%;
+}
+
+/* Reserve room beneath the bar for the milestone caption so it never overlaps sibling content. */
+.progress-meter--has-milestone-label .progress-meter__bar {
+	padding-bottom: 1.15rem;
+}
+
+.progress-meter__track {
+	position: relative;
+	height: 6px;
+	width: 100%;
+	border-radius: 999px;
+	background: var(--hairline-strong);
+	overflow: hidden;
+}
+
+.progress-meter__fill {
+	height: 100%;
+	border-radius: 999px;
+	background: var(--pm-grad);
+	background-size: 200% 100%;
+	box-shadow: 0 0 12px -2px var(--pm-accent);
+	transition: width var(--dur-luxe) var(--ease-luxe);
+}
+
+/* A slow sheen drifting across the fill reads as premium, not busy. */
+.progress-meter__fill::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--grad-luxe-sheen);
+	mix-blend-mode: screen;
+}
+
+/* --- Milestone marker --------------------------------------------------- */
+/* A fixed "go-live" threshold set partway along the bar: a slim tick topped by a faceted bead,
+   with an optional uppercase caption. Muted while pending, lit gold once the fill crosses it. */
+.progress-meter__milestone {
+	position: absolute;
+	top: 0;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	pointer-events: none;
+	transition: opacity var(--dur-luxe) var(--ease-luxe);
+}
+
+.progress-meter__milestone-tick {
+	position: relative;
+	width: 2px;
+	height: 12px;
+	margin-top: -3px;
+	border-radius: 2px;
+	background: var(--pm-accent-strong);
+	box-shadow: 0 0 8px -1px var(--pm-accent);
+}
+
+/* Faceted bead crowning the tick. */
+.progress-meter__milestone-tick::before {
+	content: '';
+	position: absolute;
+	top: -5px;
+	left: 50%;
+	width: 7px;
+	height: 7px;
+	transform: translateX(-50%) rotate(45deg);
+	border-radius: 1px;
+	background: var(--pm-grad);
+	box-shadow: var(--glow-gold, 0 0 8px -1px var(--pm-accent));
+}
+
+.progress-meter__milestone-label {
+	position: absolute;
+	top: 12px;
+	margin-top: 0.28rem;
+	font-size: 0.58rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--pm-accent-strong);
+	white-space: nowrap;
+}
+
+/* Pending: hollow bead + neutral tick, so it reads as a target not an achievement. */
+.progress-meter__milestone[data-reached='false'] .progress-meter__milestone-tick {
+	background: var(--hairline-strong);
+	box-shadow: none;
+}
+
+.progress-meter__milestone[data-reached='false'] .progress-meter__milestone-tick::before {
+	background: var(--card-bg, var(--bg, transparent));
+	border: 1px solid var(--text-muted);
+	box-shadow: none;
+}
+
+.progress-meter__milestone[data-reached='false'] .progress-meter__milestone-label {
+	color: var(--text-muted);
+}
+
+/* --- Radial ------------------------------------------------------------- */
+.progress-meter--radial {
+	position: relative;
+	display: inline-grid;
+	place-items: center;
+}
+
+.progress-meter__ring-track {
+	stroke: var(--hairline-strong);
+}
+
+.progress-meter__ring-fill {
+	stroke: var(--pm-accent);
+	transition: stroke-dashoffset var(--dur-luxe) var(--ease-luxe);
+	filter: drop-shadow(0 0 5px var(--pm-accent-strong));
+}
+
+.progress-meter__ring-value {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	font-size: 0.62rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--pm-accent-strong);
+	letter-spacing: -0.02em;
+}

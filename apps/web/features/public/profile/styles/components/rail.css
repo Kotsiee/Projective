@@ -82,3 +82,61 @@
 	justify-content: center;
 	width: auto;
 }
+
+/* =========================================================================
+   Owner profile-strength tracker
+   Linear bar when expanded, radial ring when collapsed (same value).
+   ========================================================================= */
+.profile-rail__setup {
+	padding: 0.5rem 0.15rem 0.6rem;
+	margin-bottom: 0.1rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.profile-rail__setup-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	padding: 0.65rem 0.6rem;
+	border-radius: var(--border-radius__large);
+	border: 1px solid var(--hairline-luxe);
+	background: var(--gold-surface);
+	color: var(--text-main);
+	transition: border-color var(--fast) ease;
+}
+
+.profile-rail__setup-bar:hover {
+	border-color: var(--gold);
+}
+
+.profile-rail__setup-hint {
+	font-size: 0.72rem;
+	color: var(--text-muted);
+}
+
+.profile-rail__setup-ring {
+	display: grid;
+	place-items: center;
+	padding: 0.25rem;
+	color: var(--text-main);
+}
+
+.profile-rail[data-collapsed='true'] .profile-rail__setup {
+	padding-inline: 0;
+}
+
+/* =========================================================================
+   "Become a Partner" conversion CTA
+   The design-system `premium` Button (gold gradient); this only adds a soft
+   glow so it reads as the rail's highest-intent action. Collapse behaviour is
+   inherited from `.profile-rail__navbtn`, so it matches every other row.
+   ========================================================================= */
+.profile-rail__partner {
+	margin-top: 0.1rem;
+	box-shadow: var(--glow-gold);
+	letter-spacing: 0.01em;
+}
+
+.profile-rail__partner .btn__icon {
+	color: inherit;
+}

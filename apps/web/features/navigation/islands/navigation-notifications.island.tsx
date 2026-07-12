@@ -1,4 +1,5 @@
 import { IconButton } from '@projective/ui';
+import { onNavigate } from '@projective/data';
 import { IconBell } from '@tabler/icons-preact';
 import { useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
@@ -13,6 +14,8 @@ interface NotificationRecord {
 	body: string;
 	readAt: string | null;
 	createdAt: string;
+	/** Pre-computed deep link to the exact project sub-tab the event belongs to. */
+	targetUrl?: string | null;
 }
 // #endregion
 
@@ -41,19 +44,26 @@ export default function NavigationNotifications() {
 	// #endregion
 
 	// #region Data
-	const load = async () => {
-		isLoading.value = true;
-		error.value = null;
+	/**
+	 * Fetch the recent summary. Pass `{ silent: true }` for a background refresh (client navigation):
+	 * it leaves the visible tray untouched on failure and never flips the loading spinner, so the
+	 * badge + list update in place instead of flashing "Loading…".
+	 */
+	const load = async (opts?: { silent?: boolean }) => {
+		if (!opts?.silent) isLoading.value = true;
 		try {
 			const res = await fetch('/api/v1/notifications');
 			if (!res.ok) throw new Error(`Error ${res.status}`);
 			const data = await res.json();
 			items.value = Array.isArray(data.notifications) ? data.notifications : [];
 			hasLoaded.value = true;
+			error.value = null;
 		} catch (err) {
-			error.value = err instanceof Error ? err.message : 'Failed to load notifications';
+			if (!opts?.silent) {
+				error.value = err instanceof Error ? err.message : 'Failed to load notifications';
+			}
 		} finally {
-			isLoading.value = false;
+			if (!opts?.silent) isLoading.value = false;
 		}
 	};
 
@@ -62,6 +72,15 @@ export default function NavigationNotifications() {
 		// Lazy-load on first open (respects the islands "no eager mount fetch" rule).
 		if (isOpen.value && !hasLoaded.value) load();
 	};
+
+	// This tray lives in the persistent header — it sits OUTSIDE any swapped <Partial>, so Fresh
+	// never remounts it on a client-side navigation and its data would otherwise freeze at the first
+	// open until a hard refresh. Once the initial lazy load has happened, silently re-fetch on every
+	// client navigation so the unread badge and list stay current.
+	useEffect(() =>
+		onNavigate(() => {
+			if (hasLoaded.value) load({ silent: true });
+		}), []);
 	// #endregion
 
 	// #region Outside-click / Escape dismissal
@@ -124,7 +143,8 @@ export default function NavigationNotifications() {
 							: items.value.map((n) => (
 								<a
 									key={n.id}
-									href='/dashboard/notifications'
+									href={n.targetUrl ?? '/dashboard/notifications'}
+									f-client-nav={false}
 									class='navigation__notifications__item'
 									data-unread={!n.readAt}
 								>

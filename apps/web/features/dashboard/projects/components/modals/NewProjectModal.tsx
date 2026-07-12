@@ -36,15 +36,20 @@ export interface NewProjectModalProps {
 	isOpen: boolean;
 	/** Callback fired when the modal should be closed. */
 	onClose: () => void;
+	/**
+	 * Optional starting values from a Templates Hub blueprint. The modal mounts fresh each open, so
+	 * these seed the initial signal state (title + format) — the user can still edit everything.
+	 */
+	templateData?: { title?: string; format?: ProjectFormat };
 }
 // #endregion
 
-export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
+export default function NewProjectModal({ isOpen, onClose, templateData }: NewProjectModalProps) {
 	// #region State
-	const title = useSignal('');
+	const title = useSignal(templateData?.title ?? '');
 	const description = useSignal('');
 	const attachments = useSignal<FileWithMeta[]>([]);
-	const format = useSignal<ProjectFormat>(ProjectFormat.Pipeline);
+	const format = useSignal<ProjectFormat>(templateData?.format ?? ProjectFormat.Pipeline);
 	const visibility = useSignal<Visibility>(Visibility.Public);
 	const timelinePreset = useSignal<TimelinePreset>(TimelinePreset.Sequential);
 

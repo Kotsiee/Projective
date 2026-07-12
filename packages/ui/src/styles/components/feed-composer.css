@@ -1,0 +1,110 @@
+/**
+ * FeedComposer — the intentionally-inert "share an insight" header box.
+ * Reads as a premium, disabled promise: subtle glass, champagne sheen on hover,
+ * a "coming soon" tag, and inert action chips.
+ */
+
+.feed-composer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	padding: 1.15rem 1.3rem;
+	border-radius: var(--border-radius__xxlarge);
+	border: 1px solid var(--hairline);
+	background:
+		var(--grad-luxe-sheen),
+		var(--glass-panel);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+	box-shadow: var(--shadow-sm);
+	transition:
+		border-color var(--medium) var(--ease-luxe),
+		box-shadow var(--dur-luxe) var(--ease-luxe);
+}
+
+@media (hover: hover) {
+	.feed-composer--disabled:hover {
+		border-color: var(--hairline-luxe);
+		box-shadow: var(--shadow-md);
+	}
+}
+
+.feed-composer__top {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.feed-composer__avatar {
+	width: 40px;
+	height: 40px;
+	font-size: 0.9rem;
+}
+
+.feed-composer__field {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	height: 42px;
+	padding: 0 1rem;
+	border-radius: 999px;
+	background: var(--bg);
+	border: 1px solid var(--hairline);
+	color: var(--text-muted);
+}
+
+.feed-composer--disabled .feed-composer__field {
+	cursor: not-allowed;
+}
+
+.feed-composer__placeholder {
+	font-size: 0.92rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.feed-composer__soon {
+	flex: 0 0 auto;
+	padding: 0.24rem 0.6rem;
+	font-size: 0.64rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--gold-strong);
+	background: var(--gold-surface);
+	border: 1px solid var(--hairline-luxe);
+	border-radius: 999px;
+}
+
+.feed-composer__actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	padding-left: calc(40px + 0.75rem);
+}
+
+.feed-composer__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.4rem 0.8rem;
+	font-size: 0.8rem;
+	font-weight: 550;
+	color: var(--text-secondary);
+	background: var(--hairline);
+	border-radius: 999px;
+	opacity: 0.85;
+}
+
+.feed-composer__chip svg {
+	color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+	.feed-composer__actions {
+		padding-left: 0;
+	}
+}

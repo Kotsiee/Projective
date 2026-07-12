@@ -17,7 +17,7 @@ export default function NavigationMobileFooter() {
 
 	return (
 		<footer class='navigation__mobile__footer'>
-			<a href='/dashboard' class='navigation__mobile__footer-link'>
+			<a href='/home' class='navigation__mobile__footer-link'>
 				<IconHome size={24} stroke={1.5} />
 				<span>Home</span>
 			</a>

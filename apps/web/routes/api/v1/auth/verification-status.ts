@@ -35,7 +35,10 @@ import {
 } from '@projective/backend';
 // #endregion
 
-const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
+const JSON_HEADERS = {
+	'content-type': 'application/json; charset=utf-8',
+	'cache-control': 'no-store',
+};
 
 interface VerificationStatus {
 	verified: boolean;

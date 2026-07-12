@@ -9,7 +9,7 @@
  */
 
 /** Default landing when no (valid) return target is supplied. */
-export const DEFAULT_RETURN_TO = '/dashboard';
+export const DEFAULT_RETURN_TO = '/home';
 
 /**
  * Returns `value` only when it is a safe same-origin path, else `fallback`.
@@ -31,8 +31,11 @@ export function safeReturnTo(
 	if (v.startsWith('//') || v.startsWith('/\\')) return fallback;
 	if (v.includes('\\')) return fallback;
 
-	// Reject control chars and whitespace that browsers may normalise into a host.
-	if (/[\x00-\x1f\x7f]/.test(v)) return fallback;
+	// Reject control chars that browsers may normalise into a host or header.
+	for (let i = 0; i < v.length; i++) {
+		const code = v.charCodeAt(i);
+		if (code <= 0x1f || code === 0x7f) return fallback;
+	}
 
 	return v;
 }

@@ -38,8 +38,6 @@ SELECT
         array_to_string (skills, ' ')
     ),
     jsonb_build_object (
-        'hourly_rate',
-        hourly_rate,
         'skills',
         skills
     ),

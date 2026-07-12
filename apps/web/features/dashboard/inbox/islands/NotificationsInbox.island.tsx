@@ -10,6 +10,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 import '../styles/inbox.css';
+import { onNavigate } from '@projective/data';
 import { useComputed, useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
 
@@ -20,6 +21,8 @@ interface InboxNotification {
 	body: string;
 	readAt: string | null;
 	createdAt: string;
+	/** Pre-computed deep link to the exact project sub-tab the event belongs to. */
+	targetUrl?: string | null;
 }
 
 function timeAgo(iso: string): string {
@@ -39,25 +42,32 @@ export default function NotificationsInbox() {
 	const isLoading = useSignal(true);
 	const error = useSignal<string | null>(null);
 
+	// Fetch the recent feed. `{ silent: true }` refreshes in place (client navigation) without
+	// flipping the loading state or clobbering the list on a transient failure.
+	const hydrate = async (opts?: { silent?: boolean }) => {
+		if (!opts?.silent) isLoading.value = true;
+		try {
+			const res = await fetch('/api/v1/notifications');
+			if (!res.ok) throw new Error(`Error ${res.status}`);
+			const json = await res.json();
+			items.value = json.notifications ?? [];
+			error.value = null;
+		} catch (err: any) {
+			if (!opts?.silent) error.value = err?.message || 'Failed to load notifications';
+		} finally {
+			if (!opts?.silent) isLoading.value = false;
+		}
+	};
+
 	// Initial backfill of the recent feed.
 	useEffect(() => {
-		let active = true;
-		(async () => {
-			try {
-				const res = await fetch('/api/v1/notifications');
-				if (!res.ok) throw new Error(`Error ${res.status}`);
-				const json = await res.json();
-				if (active) items.value = json.notifications ?? [];
-			} catch (err: any) {
-				if (active) error.value = err?.message || 'Failed to load notifications';
-			} finally {
-				if (active) isLoading.value = false;
-			}
-		})();
-		return () => {
-			active = false;
-		};
+		hydrate();
 	}, []);
+
+	// Refresh across Fresh client-side navigation. If a partial swap preserves this island, its
+	// mount effect won't re-run — a silent re-hydrate keeps the list current without a hard refresh.
+	// (The SSE stream below only delivers pushes that arrive while the island is already mounted.)
+	useEffect(() => onNavigate(() => hydrate({ silent: true })), []);
 
 	// Live pushes via Server-Sent Events (browser auto-reconnects on drop).
 	useEffect(() => {
@@ -115,6 +125,12 @@ export default function NotificationsInbox() {
 					<ul class='inbox__list'>
 						{visible.value.map((n) => (
 							<li key={n.id} class='inbox__item' data-unread={!n.readAt ? 'true' : 'false'}>
+								<a
+									class='inbox__item-link'
+									href={n.targetUrl ?? '/dashboard/notifications'}
+									f-client-nav={false}
+									aria-label={n.title}
+								/>
 								<span class='inbox__item-indicator' aria-hidden='true' />
 								<div class='inbox__item-body'>
 									<span class='inbox__item-title'>{n.title}</span>

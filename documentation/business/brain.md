@@ -130,6 +130,15 @@ Teams on Projective exist to eliminate the legal and financial friction of colla
 - **Freelancer-Only Space:** The Teams workspace belongs to the freelancer side of the platform. It
   is visible only when the active persona is a Freelancer profile, and is never surfaced to a
   Client/Business persona.
+- **Additive, Unlockable Personas:** A user's persona is not fixed at signup. Someone who onboarded
+  as a Client/Operator can unlock a Freelancer profile at any time from the **Become a Partner**
+  conversion page (`/become-partner`) — the freelancer suite layers on top of the same identity and
+  reputation, and the two are switched from the account menu. A freelancer profile carries the
+  seller's **skills** (used for discovery ranking); it does **not** carry an hourly rate — Projective
+  does not treat a signalling hourly rate as a platform field. Unlocking is free, idempotent, and
+  immediately activates the Freelancer persona. Reaching the profile's **go-live milestone** (a
+  baseline of photo, headline, story, and skills) is what lets a freelancer publish publicly, sell
+  premium services, and apply to workspaces — this can happen before the profile is 100% complete.
 - **Draft-First Creation:** Creating a Team is deliberately low-friction — a member supplies only a
   display **Name** and a unique alphanumeric **`@handle`**. The Team is created instantly in a
   **Draft/Unverified** state; branding, contribution splits, roles, and member invitations are
@@ -483,8 +492,9 @@ Designed for organizations managing multiple projects and teams.
 - **Hierarchy Controls:** Owners can set "Spending Caps" for Project Managers to prevent
   unauthorized budget depletion.
 - **Analytics:** Provides a macro-view of organizational burn-rate across all departments. The
-  Business Administration dashboard (`/dashboard`) reads live balances, transaction lines and escrow
-  allocations directly from the ledger via the `org.get_business_finance` wrapper.
+  `org.get_business_finance` wrapper reads live balances, transaction lines and escrow allocations
+  directly from the ledger. Its former `/dashboard` overview page has been retired in favour of the
+  persona-adaptive `/home` engagement feed; the dedicated business finance surface is being re-homed.
 - **Opening Platform Credit (MVP demo path):** On creation every Business Wallet is seeded with a
   one-time promotional platform credit so the internal-wallet flow is exercisable end-to-end — a
   business can fund a Stage (debiting the credit into Escrow) and watch the hold/release move real
@@ -1191,7 +1201,9 @@ Projective treats sensitive identity data with "Zero-Trust" principles.
 |               | `/login`                  |                          | User login                  |
 |               | `/register`               |                          | User registration           |
 |               | `/forgot-password`        |                          | Password recovery           |
-| **Dashboard** | `/dashboard`              |                          | Main user overview          |
+| **Dashboard** | `/home`                   |                          | Persona-adaptive engagement feed (recommended work, reels, activity, profile-setup tracker) |
+|               | `/become-partner`         |                          | Freelancer conversion funnel (Client/Operator → unlock freelancer suite) |
+|               | `/articles/[slug]`        |                          | Editorial reader for freelancer stories linked from `/become-partner` |
 |               | `/business`               |                          | Show all businesses         |
 |               | `/business/create`        |                          | Create a new business       |
 |               | `/business/[business id]` | `index`                  | View business details       |

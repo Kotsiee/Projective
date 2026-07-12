@@ -7,7 +7,7 @@
 
 // #region Imports
 import { define } from '@utils';
-import { getAuthCookies, supabaseClient } from '@projective/backend';
+import { getAuthCookies, safeReturnTo, supabaseClient } from '@projective/backend';
 import { CompleteOnboardingBackendService } from '@features/auth/services/CompleteOnboardingServiceBackend.ts';
 // #endregion
 
@@ -38,8 +38,12 @@ export const handler = define.handlers({
 			);
 		}
 
+		// Return the captured origin page (validated) so the freshly-onboarded user
+		// lands back where they hit "Join", not a generic dashboard.
+		const redirectTo = safeReturnTo(typeof body?.redirectTo === 'string' ? body.redirectTo : null);
+
 		return new Response(
-			JSON.stringify({ ok: true, redirectTo: '/dashboard' }),
+			JSON.stringify({ ok: true, redirectTo }),
 			{ status: 200, headers: JSON_HEADERS },
 		);
 	},

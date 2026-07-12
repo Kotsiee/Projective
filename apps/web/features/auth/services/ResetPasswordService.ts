@@ -31,7 +31,7 @@ export class ResetPasswordService {
 			throw new Error(data.error?.message || data.message || `Failed to reset password.`);
 		}
 
-		return data.redirectTo || '/dashboard';
+		return data.redirectTo || '/home';
 	}
 }
 // #endregion

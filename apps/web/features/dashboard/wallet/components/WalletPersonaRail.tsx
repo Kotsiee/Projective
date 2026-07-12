@@ -46,9 +46,9 @@ export function WalletPersonaRail() {
 
 	return (
 		<nav class='wallet-rail' aria-label='Wallet navigation'>
-			<a class='wallet-rail__back' href='/dashboard'>
+			<a class='wallet-rail__back' href='/home'>
 				<IconChevronLeft size={16} stroke={2} />
-				<span>Dashboard</span>
+				<span>Home</span>
 			</a>
 
 			<div class='wallet-rail__section'>

@@ -1,17 +1,11 @@
+/**
+ * @file index.tsx
+ * @description Projects Workspace landing route. Renders the persona-gated control-hub dashboard
+ * island inside the layout's `project-content` partial (no project selected → workspace overview).
+ */
+
+import ProjectsDashboard from '@features/dashboard/projects/islands/ProjectsDashboard.island.tsx';
+
 export default function Projects() {
-	return (
-		<div>
-			{
-				/* <div>
-				<h1>Select a project</h1>
-				<p>
-					Or <a href='/projects/new' f-client-nav={false}>Join</a> a New One
-				</p>
-			</div>
-			<div>
-				<h3>Recommended Projects</h3>
-			</div> */
-			}
-		</div>
-	);
+	return <ProjectsDashboard />;
 }

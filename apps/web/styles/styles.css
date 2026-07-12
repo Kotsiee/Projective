@@ -17,6 +17,14 @@
 @import '../../../packages/fields/src/styles/fields/handle-field.css';
 @import '../features/dashboard/shared/styles/workspace.css';
 
+/* Luxury /home feed primitives (packages/ui). Consumed by island bundles + a
+   server-rendered shell, so — per the bundling note above — they live in the
+   always-loaded global sheet. */
+@import '../../../packages/ui/src/styles/components/hscroll.css';
+@import '../../../packages/ui/src/styles/components/progress-meter.css';
+@import '../../../packages/ui/src/styles/components/feed-cards.css';
+@import '../../../packages/ui/src/styles/components/feed-composer.css';
+
 /* Auth flow design system. Global because the shell/visual panes are rendered by
    server components (routes/layout), whose CSS imports are not bundled to the
    client — so this must live in the always-loaded global sheet. */
@@ -30,6 +38,15 @@
    static presentational components), so its CSS must live in the always-loaded
    global sheet rather than an island bundle. */
 @import '../features/dashboard/overview/styles/overview.css';
+
+/* /home — the persona feed. Server-rendered shell + atomic islands, so its CSS lives
+   in the always-loaded global sheet. */
+@import '../features/dashboard/home/styles/home.css';
+
+/* /become-partner — the luxury freelancer conversion funnel + the /articles reader it
+   links to. Server-rendered shells with nested islands, so their CSS lives in the global sheet. */
+@import '../features/marketing/become-partner/styles/become-partner.css';
+@import '../features/marketing/articles/styles/article.css';
 
 /* Business profile settings (US-008) — server-renders its static chrome around atomic
    islands, so its CSS lives in the global sheet. */

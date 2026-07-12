@@ -4,6 +4,7 @@
  */
 
 import { SupabaseClient } from 'supabaseClient';
+import { computeProfileSetup } from '@features/shared/profile/completeness.ts';
 
 // #region Interfaces
 export interface Deps {
@@ -89,11 +90,15 @@ export class AuthBackendService {
 			return { ok: false, error: { status: 401, code: 'unauthorized' } };
 		}
 
-		// 2. Fetch Public Profile
+		// 2. Fetch Public Profile. The select is widened past the header essentials to the fields the
+		// profile-setup completeness engine reads (headline / bio / interests / languages / counts) —
+		// all on this same already-fetched row, so the tracker costs no extra round-trip.
 		const { data: publicProfile } = await sb
 			.schema('org')
 			.from('users_public')
-			.select('user_id, first_name, last_name, username, avatar_file_id, is_operator')
+			.select(
+				'user_id, first_name, last_name, username, avatar_file_id, is_operator, headline, bio, interests, languages, service_count, active_project_count',
+			)
 			.eq('user_id', userRes.user.id)
 			.single();
 
@@ -109,7 +114,10 @@ export class AuthBackendService {
 		const userId = userRes.user.id;
 		const [freelancerRes, ownedBizRes, memberBizRes, ownedTeamRes, memberTeamRes] = await Promise
 			.all([
-				sb.schema('org').from('freelancer_profiles').select('user_id').eq('user_id', userId)
+				sb.schema('org').from('freelancer_profiles').select('user_id, skills').eq(
+					'user_id',
+					userId,
+				)
 					.maybeSingle(),
 				sb.schema('org').from('business_profiles').select('id, name').eq('owner_user_id', userId),
 				sb.schema('org').from('business_members').select('business:business_profiles(id, name)')
@@ -135,6 +143,32 @@ export class AuthBackendService {
 		// Resolve the avatar file id into a public storage URL (null if unset/unscanned).
 		const avatarUrl = await resolveAvatarUrl(sb, publicProfile?.avatar_file_id);
 
+		// Profile-setup completeness — computed from the widened public-profile row + freelancer skills
+		// via the shared engine so /home, the nav dropdown, and the profile rail never disagree.
+		const bio = publicProfile?.bio;
+		const hasBio = bio != null &&
+			(typeof bio === 'string' ? bio.trim().length > 0 : Object.keys(bio).length > 0);
+		const freelancerSkills = (freelancerRes.data as { skills?: unknown[] } | null)?.skills ?? [];
+		const interests = (publicProfile?.interests as unknown[] | null) ?? [];
+		const languages = (publicProfile?.languages as unknown[] | null) ?? [];
+		const activeProjectCount = Number(publicProfile?.active_project_count ?? 0);
+		const profileSetup = computeProfileSetup({
+			username: publicProfile?.username ?? null,
+			isFreelancer: hasFreelancer,
+			// A hiring footprint (operator mode, an owned/member business or team) keeps the client
+			// tail alongside the freelancer one — the dual-state a converted "Become a Partner" user
+			// lands in. A plain client who converts simply swaps the client tail for the freelancer one.
+			isClient: !hasFreelancer || !!publicProfile?.is_operator ||
+				businesses.length > 0 || teams.length > 0,
+			hasAvatar: !!publicProfile?.avatar_file_id,
+			hasHeadline: !!(publicProfile?.headline && String(publicProfile.headline).trim().length > 0),
+			hasBio,
+			hasSkills: hasFreelancer ? freelancerSkills.length > 0 : interests.length > 0,
+			hasLanguages: languages.length > 0,
+			serviceCount: Number(publicProfile?.service_count ?? 0),
+			projectCount: activeProjectCount,
+		});
+
 		// 5. Construct Payload
 		const payload = {
 			id: userRes.user.id,
@@ -157,8 +191,15 @@ export class AuthBackendService {
 			businesses,
 			teams,
 
+			// Count of active projects the user is engaged in — gates the "start/find a project"
+			// action-hub CTAs (a completed action is permanently hidden).
+			activeProjectCount,
+
 			// Account-level "Client / Operator Mode" modifier — gates the Businesses nav space.
 			isOperator: !!publicProfile?.is_operator,
+
+			// Profile-setup completeness snapshot (percent + ordered checklist with edit deep-links).
+			profileSetup,
 		};
 
 		return { ok: true, data: payload };

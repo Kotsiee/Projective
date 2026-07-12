@@ -20,8 +20,8 @@ export interface INavApp {
 export const apps1: INavApp[] = [
 	{
 		icon: IconHome,
-		name: 'Dashboard',
-		link: '/dashboard',
+		name: 'Home',
+		link: '/home',
 	},
 	{
 		icon: IconCompass,

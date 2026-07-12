@@ -15,6 +15,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { define } from '@utils';
 import { getAuthCookies, supabaseClient } from '@projective/backend';
+import { notificationTargetUrl } from '@features/navigation/contracts/notifications.ts';
 // #endregion
 
 const SSE_HEADERS = {
@@ -72,8 +73,28 @@ export const handler = define.handlers({
 							table: 'notifications',
 							filter: `user_id=eq.${uid}`,
 						},
-						(payload: any) => {
+						async (payload: any) => {
 							const n = payload.new ?? {};
+
+							// Resolve the owning project for stage-scoped events so the pushed row carries the
+							// same deep link the REST feed does. Defensive: any failure → inbox fallback.
+							let projectId: string | null = null;
+							if (n.entity_table === 'projects.projects') {
+								projectId = n.entity_id ?? null;
+							} else if (n.entity_table === 'projects.project_stages' && n.entity_id) {
+								try {
+									const { data } = await supabase
+										.schema('projects')
+										.from('project_stages')
+										.select('project_id')
+										.eq('id', n.entity_id)
+										.limit(1);
+									projectId = (data as any[])?.[0]?.project_id ?? null;
+								} catch {
+									projectId = null;
+								}
+							}
+
 							send('notification', {
 								id: n.id,
 								type: n.type,
@@ -81,6 +102,15 @@ export const handler = define.handlers({
 								body: n.body,
 								readAt: n.read_at ?? null,
 								createdAt: n.created_at,
+								entityTable: n.entity_table ?? null,
+								entityId: n.entity_id ?? null,
+								projectId,
+								targetUrl: notificationTargetUrl({
+									entityTable: n.entity_table,
+									entityId: n.entity_id,
+									type: n.type,
+									projectId,
+								}),
 							});
 						},
 					)

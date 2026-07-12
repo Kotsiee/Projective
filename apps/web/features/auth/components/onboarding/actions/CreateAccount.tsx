@@ -59,7 +59,7 @@ export function CreateAccountButton({ enabled }: { enabled: boolean }) {
 					redirectTo,
 				});
 
-				globalThis.location.href = res.redirectTo ?? '/dashboard';
+				globalThis.location.href = res.redirectTo ?? '/home';
 				return;
 			}
 

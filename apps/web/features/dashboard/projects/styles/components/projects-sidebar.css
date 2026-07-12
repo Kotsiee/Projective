@@ -5,6 +5,13 @@
 	flex-direction: column;
 	position: relative;
 	padding: 1rem;
+	transition: padding var(--medium) var(--ease-standard);
+}
+
+/* Tighter gutters when the rail is in its icon-only collapsed state. */
+.layout-projects__sidebar[data-collapsed='true'] {
+	padding: 0.85rem 0.6rem;
+	align-items: center;
 }
 
 .layout-projects__sidebar__close-btn {
@@ -12,4 +19,6 @@
 	bottom: calc(var(--middle-footer-height) + 2.25rem);
 	right: -1rem;
 	background-color: var(--bg);
+	box-shadow: var(--shadow-sm);
+	z-index: 5;
 }

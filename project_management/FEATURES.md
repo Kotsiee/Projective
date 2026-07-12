@@ -10,7 +10,7 @@ Status is edited **in place** — move a feature between lanes, don't append not
 | ⬜ Todo                                         | 🟡 In Progress                               | ✅ Done                                                                    |
 | :---------------------------------------------- | :------------------------------------------- | :------------------------------------------------------------------------- |
 | Departmental isolation (dept-scoped visibility) | Session context / active-profile propagation | Row-level security & permission grants                                     |
-|                                                 |                                              | Main `/dashboard` — live Business Administration panel (US-008)            |
+|                                                 |                                              | Persona-adaptive `/home` engagement feed + profile-setup trackers          |
 |                                                 |                                              | Realtime infrastructure                                                    |
 |                                                 |                                              | Storage buckets & file security                                            |
 |                                                 |                                              | Notifications pipeline (writer + API + SSE inbox)                          |
@@ -18,11 +18,18 @@ Status is edited **in place** — move a feature between lanes, don't append not
 
 _Evidence:_ `supabase/migrations/0200`–`0207`; notifications — `comms.fn_notify` (`0305`),
 `api/v1/notifications` (list) + `.../notifications/stream` (SSE), `features/dashboard/inbox`
-(`NotificationsInbox.island`); `/dashboard` — server-rendered route
-(`routes/(dashboard)/dashboard/index.tsx` loads finance + members via
-`BusinessOverviewServiceBackend` and renders `features/dashboard/overview` as static server
-components; only `FinanceChart.island` + `RefreshButton.island` hydrate, refresh via Fresh
-Partial), `packages/*` (charts `AreaLineChart`, ui `TransactionLedger`/`StatusBadge`/`MetricCard`).
+(`NotificationsInbox.island`); `/home` — persona-gated server route
+(`routes/(dashboard)/home/index.tsx`) resolves persona via `getMe` and assembles the feed through
+`HomeFeedServiceBackend` (live discovery via `SearchEngineServiceBackend` + curated seed fallback →
+`EntityCardModel`), rendering `HomeShell` + atomic islands (`FeedStream` infinite scroll,
+`InsightsPanel`, `ProfileSetupCard`, `HighlightsRail`) + a server-rendered state-aware `ActionHub`
+(persona CTAs gated on DB signals — completed actions are permanently hidden); pagination via
+`api/v1/home/feed`.
+Feed primitives live in `packages/ui` (`HScroll`, `ProgressMeter`, `FeedTextCard`, `SponsoredCard`,
+`FeedComposer`); charts `AreaLineChart`. Profile-setup completeness computed once in `getMe`
+(`features/shared/profile/completeness.ts`) and mirrored on the home tracker, nav dropdown, and
+profile rail. _The prior US-008 `/dashboard` overview UI (`features/dashboard/overview`) is retired
+from routing pending relocation of the business finance surface._
 
 ---
 
@@ -35,18 +42,37 @@ Partial), `packages/*` (charts `AreaLineChart`, ui `TransactionLedger`/`StatusBa
 |         |                | Multi-persona onboarding (`/join`, email + OAuth) |
 |         |                | Profile / team context switching                  |
 |         |                | Email verification (`token_hash` + `verifyOtp`)   |
+|         |                | Live `/verify` subscription (poll → auto-login)   |
+|         |                | Return-to redirect context (`Join` → `redirectTo`) |
 |         |                | Password recovery / reset                         |
 |         |                | Logout, token refresh, `me` / `user`              |
 |         |                | Onboarding session-context init                   |
 |         |                | Onboarding audit logging                          |
 |         |                | Onboarding avatar picker + upload                 |
+|         |                | Become-a-Partner unlock (`/become-partner` → freelancer persona) |
+|         |                | Profile-setup go-live milestone + dual-state tracker |
 
 _Evidence:_ `routes/(auth)/*`, `api/v1/auth/*` (incl. `switch-profile`, `switch-team`,
-`complete-onboarding`); `features/auth/services/*Backend.ts`; `packages/backend/src/auth/pkce.ts`;
-`provision_user_profile()` / deferred `handle_new_user()` / `complete_onboarding()` in
-`supabase/migrations/0304_onboarding_session_and_audit.sql`; avatar upload —
-`api/v1/files/avatar/{init,finalise}`,
-`features/auth/components/onboarding/inputs/AvatarPicker.tsx`.
+`complete-onboarding`, `verification-status`); `features/auth/services/*Backend.ts` +
+`VerificationStatusService.ts`; `packages/backend/src/auth/pkce.ts`; `provision_user_profile()` /
+deferred `handle_new_user()` / `complete_onboarding()` in
+`supabase/migrations/0304_onboarding_session_and_audit.sql`; verified-status sync trigger
+(`on_auth_user_confirmed`) in `supabase/migrations/0312_email_verification_sync.sql`; the `/verify`
+island polls `verification-status` for cross-tab auto-login, and the guest/mobile `Join` buttons
+capture the current path into `?redirectTo=` — threaded through `pjv_return_to` cookie +
+`safeReturnTo()` guard into `confirm.ts` / `complete-onboarding` / the confirmation email link;
+avatar upload — `api/v1/files/avatar/{init,finalise}`,
+`features/auth/components/onboarding/inputs/AvatarPicker.tsx`. **Post-onboarding persona expansion**
+— a Client/Operator unlocks a freelancer profile from the luxury `/become-partner` funnel
+(`features/marketing/become-partner/*` shell + `PartnerCta`/`PartnerFaq` islands, `/articles/[slug]`
+story reader) via `api/v1/profile/enable-freelancer` → `BecomePartnerServiceBackend` →
+`org.enable_freelancer_profile` (idempotent SECURITY DEFINER RPC in
+`supabase/migrations/0313_freelancer_conversion.sql`: creates `freelancer_profiles`, flips
+`is_freelancer`, activates the freelancer persona, audits `freelancer.unlocked`). The gated
+"Become a Partner" entry lives on the profile side rail (`ProfileSideRail`, shown when
+`isOwn && !hasFreelancer`). The shared completeness engine (`features/shared/profile/completeness.ts`)
+now emits a public **go-live milestone** (baseline → publish / sell / apply) and a dual-state tail,
+surfaced as a `ProgressMeter` marker across the `/home` card, nav dropdown, and profile rail.
 
 ---
 
@@ -101,8 +127,45 @@ and **Teams** only when `activeProfileType === 'freelancer'`. New primitives: `@
 |                                     |                                         | Stage workspace access control (stage-scoped chat/room)                         |
 |                                     |                                         | Modular project creation (header + draft)                                       |
 |                                     |                                         | Per-stage IP overrides + timeline sequencing                                    |
+|                                     | Workspace CRM tray + Services Pipeline toggle (frontend seed) | Projects Workspace control hub (persona-gated landing dashboard)  |
+|                                     |                                         | Workspace sidebar redesign (collapse-aware icon rail, Button-primitive nav)     |
+|                                     |                                         | Activity-feed deep-linking (notification → exact project sub-tab)               |
 
-_Evidence:_ `api/v1/dashboard/projects/new/{save,publish}`, `.../stages/*`,
+**Projects Workspace control hub** — the former empty `projects/(projects)/index.tsx` now renders
+`ProjectsDashboard.island`: a glassmorphic, persona-gated control hub. Shared list is fetched once
+(`useWorkspaceProjects`) and threaded to a **hero + KPIs** (`WorkspaceHero`), an **Active Projects
+Matrix** (`ActiveProjectsMatrix` → live `/api/v1/dashboard/projects` list, each tile enriched with
+`get_project_card_summary` for real phase/health/velocity), a real-time **Activity Feed**
+(`ProjectActivityFeed` → `/api/v1/notifications` + SSE, each row deep-links to the exact project
+sub-tab), and a **Premium Templates Hub** (`ProjectTemplatesHub`, frontend-seed blueprints that
+pre-fill `NewProjectModal`). Persona strip: freelancers get **Targeted Opportunities**
+(`TargetedOpportunities` → Explore `type=project`), clients get **Curated Talent**
+(`TalentRecommendations` → Explore `type=person`, matched to the client's own projects with a
+project-context hire link that turns the profile CTA into "Hire {name} for {project}"). The
+workspace **sidebar** (`ProjectSidebarList` + `ProjectsSidebar`) is rebuilt on the `Button` primitive
+with facet nav, quick links and an icon-rail collapse (persisted to `localStorage`) mirroring the
+primary nav. Notification deep-linking is server-resolved in `NotificationsBackendService` /
+`notifications/stream` (stage→project via `projects.project_stages`) and reused by the header tray +
+inbox. _Templates are frontend-seed (no `project_templates` table); matrix/feed/opportunities/talent
+are live._
+
+**Workspace CRM & Services Pipeline** — for freelancers/teams the hub gains a premium
+`WorkspaceModeTabs` segment (Projects Workspace ⇄ Services Pipeline) and a collapsible `CrmFilterTray`
+that segments the client roster three holistic ways — **General Clients**, **Specific Services**
+(the exact tier purchased), and **Specific Projects** — with multi-select chips and live match
+counts. The live `ActiveProjectsMatrix` stays the default projects body; engaging any filter (or the
+Services Pipeline tab) swaps in the filtered `WorkspaceRoster`. `useWorkspaceFilters` resets mode +
+filters on `onNavigate`, and `useWorkspaceCrm` silently revalidates the roster on client nav, so
+hopping between projects and services never carries stale state. _Roster is frontend seed
+(`/api/v1/dashboard/workspace-crm`); a real `projects.get_workspace_roster` RPC drops in behind the
+same `WorkspaceEntry[]` contract._
+
+_Evidence:_ `routes/(dashboard)/projects/(projects)/index.tsx` → `islands/ProjectsDashboard.island`,
+`components/dashboard/*` (incl. `WorkspaceModeTabs`, `CrmFilterTray`, `WorkspaceRoster`,
+`useWorkspaceFilters`, `useWorkspaceCrm`), `contracts/{dashboard,crm}.ts`, `data/workspaceCrmSeed.ts`,
+`routes/api/v1/dashboard/workspace-crm.ts`, `styles/components/dashboard/projects-dashboard.css`;
+`features/navigation/contracts/notifications.ts`; `features/public/profile/components/header/ProfileCTAs.tsx`.
+`api/v1/dashboard/projects/new/{save,publish}`, `.../stages/*`,
 `.../stages/[id]/submissions/*`, `.../stages/[id]/seats/*`,
 `.../stages/[id]/applications/[id]/assign`;
 `services/{Projects,ProjectLifecycle,Stages,Submissions,Staffing}ServiceBackend.ts`;
@@ -248,17 +311,34 @@ auto-expands on edit).
 
 ## E9 · Marketplace & IP Governance
 
-| ⬜ Todo                             | 🟡 In Progress                             | ✅ Done |
-| :---------------------------------- | :----------------------------------------- | :------ |
-| Product listings & storefront       | _(marketplace schema scaffolding, `0215`)_ | —       |
-| IP framework (Client-first default) |                                            |         |
-| "Request to Sell" approval workflow |                                            |         |
-| Shared-IP negotiation               |                                            |         |
-| Royalties / revenue split on resale |                                            |         |
-| IP audit trail / provenance linking |                                            |         |
+| ⬜ Todo                             | 🟡 In Progress                                  | ✅ Done |
+| :---------------------------------- | :---------------------------------------------- | :------ |
+| Product listings & storefront       | Services suite — listings & pricing (fe seed)   | —       |
+| IP framework (Client-first default) | Services analytics dashboard (fe seed)          |         |
+| "Request to Sell" approval workflow | Services nav entry + quick-link submenu (fe)    |         |
+| Shared-IP negotiation               | _(marketplace schema scaffolding, `0215`)_      |         |
+| Royalties / revenue split on resale |                                                 |         |
+| IP audit trail / provenance linking |                                                 |         |
 
-_Evidence:_ `migrations/0215_marketplace.sql` (schema only). No products routes; search seed
-explicitly omits products.
+**Services management suite** — `/services` is an independent, executive management page (NOT a
+project workspace): `ServicesDashboard.island` seeds from `ServicesServiceBackend.getServicesOverview`
+(Route → Service → `initialData` → signals) and lets freelancers/teams **create listings**
+(`ServiceTierEditor` modal), **edit pricing tiers**, and **activate/pause** active listings
+(`ServiceListingsManager`), above an **analytics sub-section** (`ServiceAnalyticsPanel`) with KPI
+MetricCards + inline sparklines and two `@projective/charts` visualizations — an Area/Line pipeline
+vs. won trend and a per-listing performance scatter (`PipelineFlowChart`). The primary sidebar gains
+a persona-gated **Services** link (`requires: 'freelancer'` ⇒ freelancer or team) plus **luxurious
+quick-link submenus under both Projects and Services** (`QuickLinkSubmenu`) — compact avatar +
+status micro-rows for the 3–5 most recent/favorited items, lazily fetched on open so nav hydration
+pays nothing, and silently revalidated on client nav. Projects rows show the **client's** avatar;
+services rows show the **service's** asset thumbnail. _All data is frontend seed; mutations are
+optimistic against the island signal._
+
+_Evidence:_ `routes/(dashboard)/services/index.tsx` → `features/dashboard/services/{islands,components,
+contracts,data,services,styles}/*`; `features/navigation/{contracts/quicklinks.ts,data/quickLinksSeed.ts,
+services/QuickLinksService.ts,hooks/useQuickLinks.ts,components/side/QuickLinkSubmenu.tsx}`;
+`routes/api/v1/navigation/quick-links.ts`. `migrations/0215_marketplace.sql` (schema only). No products
+routes and no `services.*` backend; search seed omits products.
 
 ---
 

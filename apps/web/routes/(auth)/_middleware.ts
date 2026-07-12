@@ -2,12 +2,12 @@ import { define } from '@utils';
 
 /**
  * Auth-group guard. Keeps already-authenticated users out of the credential pages
- * (login / forgot-password / reset) by sending them to the dashboard, while still
- * allowing the pages an authenticated user legitimately needs:
+ * (login / forgot-password / reset) by sending them home, while still allowing the
+ * pages an authenticated user legitimately needs:
  *   - /join   → SSO users who still have to finish onboarding
  *   - /verify → users confirming their email address
  *
- * The dashboard's own middleware handles the verify-pending vs. onboarded routing
+ * The dashboard group's own middleware handles the verify-pending vs. onboarded routing
  * from there, so this only needs the coarse allow-list.
  *   - /reset → the recovery session is what authorises the password update, so an
  *     "authenticated" user must still be able to reach it.
@@ -23,7 +23,7 @@ export const handler = define.middleware(async (ctx) => {
 	) {
 		return new Response(null, {
 			status: 302,
-			headers: { Location: '/dashboard' },
+			headers: { Location: '/home' },
 		});
 	}
 

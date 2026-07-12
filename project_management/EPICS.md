@@ -63,11 +63,17 @@ Businesses and Freelancer Teams (the "Virtual Agency"), their membership, roles,
   `org.set_operator_mode`) and **Teams** is freelancer-only. Org context switch upserts
   `session_context` (`0110`, `0107`, `0111`, `0209`–`0212`, `0301`,
   `20260709120000_business_teams_overhaul`).
-- **Done (US-008):** The Business Administration dashboard is live — `/dashboard` renders real-time
-  wallet balances, an Area/Line volume chart and a filterable Transaction Ledger read straight from
-  the `finance.*` ledger via `org.get_business_finance` (`0309`), plus the member visibility list
-  and functional profile management (`org.update_business`). Every business wallet is seeded a
-  one-time opening platform credit so escrow holds/releases post real ledger lines.
+- **Done (US-008 backend):** The business finance ledger is live — `org.get_business_finance`
+  (`0309`) exposes real-time wallet balances, an Area/Line volume series and a filterable
+  Transaction Ledger from `finance.*`, plus the member visibility list and functional profile
+  management (`org.update_business`). Every business wallet is seeded a one-time opening platform
+  credit so escrow holds/releases post real ledger lines. Its former `/dashboard` overview page is
+  retired by the persona-adaptive `/home` feed; re-homing the finance surface is pending.
+- **Now (Home):** `/home` replaces the business-only `/dashboard` as the authenticated landing — a
+  persona-adaptive engagement feed (recommended projects/services/talent/teams from the discovery
+  engine with seed fallback, horizontal reels, sponsored slots, personal insights + a live
+  highlights strip) with profile-setup completeness trackers on the home hero, nav dropdown, and
+  profile side rail.
 - **Gap:** Full RBAC role matrices (Owner/PM/Observer; Lead/Member/Contributor), member add/remove,
   spending caps, and Stripe card attach (US-008 AC4, deferred) remain.
 
@@ -82,6 +88,12 @@ stage CRUD, and deliverable submissions.
   backend, and **stage staffing (US-004)** — open seats + required skills, freelancer/team
   applications, and atomic conflict-guarded assignment (`0101`, `0115`–`0122`, `0204`, `0303`,
   `0306`–`0308`).
+- **Partial UI only (workspace CRM):** the Projects Workspace hub now carries a freelancer/team
+  **workspace toggle** (Projects Workspace ⇄ Services Pipeline) and an elegant **CRM filter tray**
+  that segments the client roster three ways — by client account, by specific service tier, and by
+  distinct project contract. The live projects matrix stays the default body; engaging any filter (or
+  the Services Pipeline tab) swaps in the filtered roster. All CRM state resets on SPA navigation;
+  roster data is seed (`/api/v1/dashboard/workspace-crm`).
 - **Gap:** Session-based stages, the industry-category taxonomy/picker, and the checklist model are
   frontend-only or unstarted.
 
@@ -161,6 +173,13 @@ royalties.
 
 - **Partial backend only:** a `marketplace` schema exists (`0215`); no products routes, no IP/
   request-to-sell/royalty logic, and the search seed explicitly excludes products.
+- **Partial UI only:** a frontend-seed **Services management suite** (`/services`) — an executive
+  dashboard where freelancers/teams create productised service listings, edit pricing tiers, and
+  activate/pause active listings, alongside an ultra-luxury **analytics sub-section** (page views,
+  conversion, active pipeline value, engagement trends) rendered with `@projective/charts`. The
+  primary nav carries a persona-gated (`requires: 'freelancer'` ⇒ freelancer **or** team) **Services**
+  entry with a lazy, luxurious quick-link submenu of recent/favorited listings. All data is seed
+  behind `ServicesServiceBackend` + `/api/v1/navigation/quick-links`; no `services.*` backend exists.
 
 ## E10 · Dispute Resolution — ⬜ Todo
 

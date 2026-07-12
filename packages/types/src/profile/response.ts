@@ -29,7 +29,6 @@ export const FullProfileResponseSchema = IdentifiableSchema
 		skills: z.array(z.string()).default([]),
 		stats: ProfileStatsResponseSchema,
 		is_freelancer: z.boolean(),
-		hourly_rate_cents: z.number().int().positive().optional(),
 		availability_status: z.enum(['available', 'busy', 'unavailable']).optional(),
 	});
 export type FullProfileResponse = z.infer<typeof FullProfileResponseSchema>;

@@ -51,11 +51,18 @@ projects, stages, tickets, escrow SQL engine, messaging, files, search) is mater
 **trust, commerce, and compliance layers** (disputes, marketplace, sessions, KYC/tax) are largely
 unstarted. The **guest presentation shell** (glass navbar with live search + light/dark toggle,
 global footer, cinematic landing page) is built, and the **Explore search UI now consumes the live
-ranking engine** (`/api/v1/public/search`) with a seed fallback. The **Business Administration
-dashboard** (`/dashboard`, US-008) now reads live balances, transaction lines and escrow allocations
-straight from the `finance.*` ledger via `org.get_business_finance` (`0309`). The remaining gap is
-that several mature UIs (Wallet, Profile, the Explore **home hub**, Workspace, Submissions
-checklist/roster) still render from **frontend seed data** rather than the live backend.
+ranking engine** (`/api/v1/public/search`) with a seed fallback. The authenticated landing is now
+the persona-adaptive **`/home`** engagement feed (recommended work + horizontal reels + sponsored
+slots + insights/highlights, with profile-setup trackers), which **replaced the business-only
+`/dashboard`**; the **business finance ledger** (US-008) still reads live balances, transaction
+lines and escrow allocations from `finance.*` via `org.get_business_finance` (`0309`), though its
+overview UI is pending relocation off the retired route. A new **Services management suite**
+(`/services`) — productised listings, pricing-tier editing, and an ultra-luxury analytics
+sub-section — plus a **workspace CRM** (client-roster filter tray + Projects⇄Services Pipeline
+toggle) and **luxury sidebar quick-link submenus** ship as freelancer/team-facing UI; both are
+**frontend seed** behind clean Service boundaries (E9 / E3). The remaining gap is that several mature
+UIs (Wallet, Profile, the Explore **home hub**, Workspace, the new Services suite + workspace CRM,
+Submissions checklist/roster) still render from **frontend seed data** rather than the live backend.
 
 ## Authoritative Sources
 

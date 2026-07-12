@@ -98,7 +98,7 @@
 									<tr>
 										<td align="center" bgcolor="#278690" style="border-radius: 10px">
 											<a
-												href="{{ .SiteURL }}/api/v1/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard"
+												href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email"
 												style="display: inline-block; padding: 14px 32px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 10px"
 											>
 												Confirm my email
@@ -117,10 +117,9 @@
 								</p>
 								<p style="margin: 0; font-size: 13px; line-height: 1.6; word-break: break-all">
 									<a
-										href="{{ .SiteURL }}/api/v1/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard"
+										href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email"
 										style="color: #278690"
-									>{{ .SiteURL }}/api/v1/auth/confirm?token_hash={{ .TokenHash
-										}}&type=email&next=/dashboard</a>
+									>{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email</a>
 								</p>
 							</td>
 						</tr>

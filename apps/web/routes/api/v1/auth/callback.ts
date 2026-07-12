@@ -26,7 +26,7 @@ export const handler = define.handlers({
 	async GET(ctx) {
 		const reqUrl = new URL(ctx.req.url);
 		const code = reqUrl.searchParams.get('code');
-		const next = reqUrl.searchParams.get('next') || '/dashboard';
+		const next = reqUrl.searchParams.get('next') || '/home';
 		const verifier = getPkceCookie(ctx.req);
 
 		// Always tear down the one-shot handshake cookie, whatever the outcome.

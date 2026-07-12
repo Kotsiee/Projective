@@ -7,6 +7,8 @@ export * from './src/components/splitter/index.ts';
 export * from './src/components/stepper/index.ts';
 export * from './src/components/button/index.ts';
 export * from './src/components/ripple/index.ts';
+export * from './src/components/scroller/index.ts';
+export * from './src/components/progress/index.ts';
 export * from './src/components/theme/index.ts';
 export * from './src/components/layouts/index.ts';
 export * from './src/components/card/index.ts';

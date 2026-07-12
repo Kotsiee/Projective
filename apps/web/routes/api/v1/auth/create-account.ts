@@ -6,6 +6,7 @@
 // #region Imports
 import { define } from '@utils';
 import { setCookie } from '@std/http/cookie';
+import { safeReturnTo } from '@projective/backend';
 import { CreateAccountBackendService } from '@features/auth/services/CreateAccountServiceBackend.ts';
 // #endregion
 
@@ -32,6 +33,21 @@ export const handler = define.handlers({
 		const headers = new Headers({
 			location: verifyUrl,
 		});
+
+		// Persist the captured return target so the /verify poll endpoint and (in the
+		// same-browser flow) confirm.ts can send the user back where they started.
+		const returnTo = safeReturnTo(typeof body?.redirectTo === 'string' ? body.redirectTo : null);
+		if (returnTo !== '/home') {
+			setCookie(headers, {
+				name: 'pjv_return_to',
+				value: encodeURIComponent(returnTo),
+				httpOnly: true,
+				sameSite: 'Lax',
+				secure: reqUrl.protocol === 'https:',
+				path: '/',
+				maxAge: 10 * 60, // 10 minutes — matches verify_email
+			});
+		}
 
 		if (email) {
 			setCookie(headers, {

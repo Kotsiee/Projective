@@ -56,7 +56,15 @@ export default function LoginForm() {
 				email: email.value.trim().toLowerCase(),
 				password: password.value,
 			});
-			if (res.redirectTo) globalThis.location.href = res.redirectTo;
+			// Honour a captured return target (?next=/page) over the default so users
+			// land back where they were — e.g. arriving here from /verify on another
+			// device. Only same-origin relative paths are accepted.
+			const nextParam = new URLSearchParams(globalThis.location.search).get('next');
+			const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+				? nextParam
+				: undefined;
+			const target = next ?? res.redirectTo;
+			if (target) globalThis.location.href = target;
 		} catch (err) {
 			formError.value = err instanceof Error
 				? err.message

@@ -92,7 +92,6 @@ CREATE TABLE org.user_preferences (
 
 CREATE TABLE org.freelancer_profiles (
     user_id uuid NOT NULL,
-    hourly_rate integer,
     skills text[] NOT NULL DEFAULT '{}'::text[],
     availability_status text DEFAULT 'available',
     

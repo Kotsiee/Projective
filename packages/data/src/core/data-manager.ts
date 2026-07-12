@@ -58,6 +58,10 @@ export class DataManager<TOut, TIn> {
 			(this.dataset.value.totalCount !== null || this.isFetching.value)
 		) return;
 
+		// Revive a manager whose host was torn down (destroy()) and later reused — e.g. Fresh
+		// preserving an island across a partial navigation. Without this reset, checkGaps/fetchRange
+		// would silently bail and the list would stay empty.
+		this.isDestroyed = false;
 		this.dataSource = newSource;
 		this.pendingRequests.clear();
 
@@ -172,6 +176,31 @@ export class DataManager<TOut, TIn> {
 				this.isFetching.value = false;
 			}
 		}
+	}
+
+	/**
+	 * Force a fresh load of the current view. Used to recover data-backed lists that live in
+	 * persistent regions (top nav, middle-nav sidebar) across Fresh partial navigation, where the
+	 * host component never remounts and would otherwise keep its first-load snapshot forever.
+	 *
+	 * Safe to call repeatedly: for a local-array manager (no data source) it is a no-op, and the
+	 * RestDataSource response cache collapses rapid re-navigations into a single network round-trip.
+	 */
+	public revalidate() {
+		if (!this.dataSource) return;
+
+		this.isDestroyed = false;
+		this.pendingRequests.clear();
+
+		// Reset to an empty (totalCount === null) dataset so fetchMeta/checkGaps run again and the
+		// virtualiser re-requests the visible window with fresh data.
+		batch(() => {
+			this.dataset.value = createEmptyDataset<TOut>();
+			this.isFetching.value = false;
+		});
+
+		this.fetchMeta();
+		this.checkGaps();
 	}
 
 	public destroy() {

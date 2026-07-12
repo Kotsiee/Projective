@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'preact/hooks';
 import { computed, Signal, useSignal } from '@preact/signals';
 import { ComponentChildren } from 'preact';
 import { getCsrfToken } from '@projective/utils';
+import type { ProfileSetupSummary } from '@projective/types';
 
 /** A switchable business or team context surfaced in the header dropdown. */
 export interface UserOrgRef {
@@ -31,6 +32,8 @@ export interface UserProfile {
 	 * opted into client/hiring tooling and the Businesses nav space is revealed.
 	 */
 	isOperator: boolean;
+	/** Profile-setup completeness snapshot (percent + ordered checklist), from `getMe`. */
+	profileSetup: ProfileSetupSummary | null;
 }
 
 export interface UserState {
@@ -85,6 +88,7 @@ export function UserProvider({ children }: { children: ComponentChildren }) {
 					businesses: Array.isArray(rawUser.businesses) ? rawUser.businesses : [],
 					teams: Array.isArray(rawUser.teams) ? rawUser.teams : [],
 					isOperator: rawUser.isOperator ?? rawUser.is_operator ?? false,
+					profileSetup: rawUser.profileSetup ?? rawUser.profile_setup ?? null,
 				};
 			}
 

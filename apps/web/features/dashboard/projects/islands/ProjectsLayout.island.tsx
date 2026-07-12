@@ -26,7 +26,7 @@ function ProjectsLayoutInner({ children }: { children: any }) {
 	useEffect(() => {
 		setMiddleNav({
 			show: true,
-			sideWidth: '280px',
+			sideWidth: '300px',
 			sideContent: (
 				<ProjectContext.Provider value={projectState}>
 					<ProjectsSidebar />

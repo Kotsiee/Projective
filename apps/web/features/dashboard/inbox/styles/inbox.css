@@ -68,15 +68,29 @@
 }
 
 .inbox__item {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 0.875rem;
 	padding: 1rem 1.25rem;
 	border-bottom: 1px solid var(--border-color);
+	transition: background-color var(--fast);
 }
 
 .inbox__item:last-child {
 	border-bottom: none;
+}
+
+/* Stretched link: the whole row is the click target, deep-linking to the event's exact tab. */
+.inbox__item-link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	border-radius: inherit;
+}
+
+.inbox__item:hover {
+	background-color: var(--field-bg-hover, var(--primary-surface));
 }
 
 .inbox__item-indicator {

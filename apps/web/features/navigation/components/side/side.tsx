@@ -1,17 +1,22 @@
 import { Button, IconButton, Tooltip } from '@projective/ui';
 import { apps, INavApp } from '../../contracts/navigation.ts';
 import '../../styles/components/side/side.css';
+import '../../styles/components/side/quick-links.css';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { useNavigationContext } from '../../contexts/NavigationContext.tsx';
 import { useUserContext } from '../../contexts/UserContext.tsx';
 import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@tabler/icons-preact';
+import QuickLinkSubmenu from './QuickLinkSubmenu.tsx';
 
 // Mini-component to handle local expansion state
 function SidebarItem(
 	{ app, isSidebarOpen, selected }: { app: INavApp; isSidebarOpen: boolean; selected: string },
 ) {
 	const [isOpen, setIsOpen] = useState(false);
-	const hasChildren = app.children && app.children.length > 0;
+	const hasChildren = !!(app.children && app.children.length > 0);
+	const hasQuickLinks = !!app.quickLinks;
+	// Either kind of submenu earns a chevron + tooltip-suppression.
+	const hasSubmenu = hasChildren || hasQuickLinks;
 
 	// This strictly handles the chevron click
 	const handleChevronClick = (e: MouseEvent) => {
@@ -41,7 +46,7 @@ function SidebarItem(
 			<Tooltip
 				label={app.name}
 				position='right'
-				disabled={isSidebarOpen || hasChildren}
+				disabled={isSidebarOpen || hasSubmenu}
 				className='navigation__side__items__item__tooltip'
 			>
 				<Button
@@ -64,7 +69,7 @@ function SidebarItem(
 			</Tooltip>
 
 			{/* 2. Independent Toggle Button: Sits on the right edge */}
-			{hasChildren && (
+			{hasSubmenu && (
 				<div
 					class='navigation__side__items__item__chevron'
 					onClick={handleChevronClick}
@@ -73,7 +78,19 @@ function SidebarItem(
 				</div>
 			)}
 
-			{/* 3. Submenu: NOW strictly requires `isOpen` to be true */}
+			{
+				/* 3a. Dynamic quick-link reel (Projects / Services) — mounted only when opened, so the
+			    lazy fetch fires on open and nav hydration pays nothing for it. */
+			}
+			{hasQuickLinks && isSidebarOpen && isOpen && (
+				<QuickLinkSubmenu
+					source={app.quickLinks!}
+					open
+					selected={selected}
+				/>
+			)}
+
+			{/* 3b. Static submenu (e.g. Analytics): NOW strictly requires `isOpen` to be true */}
 			{hasChildren && isSidebarOpen && isOpen && (
 				<div class='navigation__side__submenu'>
 					{app.children?.map((child, k) => (

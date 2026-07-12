@@ -9,7 +9,8 @@
 
 // #region Imports
 import { define } from '@utils';
-import { setAuthCookies } from '@projective/backend';
+import { safeReturnTo, setAuthCookies } from '@projective/backend';
+import { deleteCookie, getCookies } from '@std/http/cookie';
 import {
 	ConfirmBackendService,
 	isEmailConfirmType,
@@ -29,7 +30,15 @@ export const handler = define.handlers({
 		const url = new URL(ctx.req.url);
 		const tokenHash = url.searchParams.get('token_hash');
 		const type = url.searchParams.get('type');
-		const next = url.searchParams.get('next') || '/dashboard';
+
+		// Resolve the return target: the same-browser pjv_return_to cookie wins (most
+		// reliable), then the link's ?next=, then the /dashboard default. safeReturnTo
+		// blocks open redirects from either source.
+		const cookies = getCookies(ctx.req.headers);
+		const cookieNext = cookies['pjv_return_to']
+			? decodeURIComponent(cookies['pjv_return_to'])
+			: null;
+		const next = safeReturnTo(cookieNext ?? url.searchParams.get('next'));
 
 		const headers = new Headers();
 
@@ -58,13 +67,22 @@ export const handler = define.handlers({
 			requestUrl: url,
 		});
 
+		// Verification succeeded — the return target has now been consumed, so clear it
+		// (only on success; failures above keep it so a resent link still works).
+		deleteCookie(headers, 'pjv_return_to', { path: '/' });
+
 		// Recovery: land on the reset form; the session authorises the password update.
 		if (type === 'recovery') {
 			return redirectTo(headers, '/reset');
 		}
 
-		// Confirmation / magic link: route by onboarding completion.
-		return redirectTo(headers, res.data.isOnboarded ? next : '/join');
+		// Confirmation / magic link: route by onboarding completion. Not-yet-onboarded
+		// users finish on /join — carry the return target so complete_onboarding lands
+		// them back where they started.
+		return redirectTo(
+			headers,
+			res.data.isOnboarded ? next : `/join?redirectTo=${encodeURIComponent(next)}`,
+		);
 	},
 });
 // #endregion

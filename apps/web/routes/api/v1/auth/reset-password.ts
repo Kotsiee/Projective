@@ -32,7 +32,7 @@ export const handler = define.handlers({
 			});
 		}
 
-		return new Response(JSON.stringify({ ok: true, redirectTo: '/dashboard' }), {
+		return new Response(JSON.stringify({ ok: true, redirectTo: '/home' }), {
 			status: 200,
 			headers: { 'content-type': 'application/json; charset=utf-8' },
 		});
