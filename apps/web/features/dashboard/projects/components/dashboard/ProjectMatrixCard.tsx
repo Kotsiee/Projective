@@ -40,7 +40,7 @@ export function ProjectMatrixCard(
 			<div class='pw-matrix-card__progress'>
 				<ProgressMeter
 					value={project.progress}
-					tone='gold'
+					tone='teal'
 					showValue
 					ariaLabel={`${project.title} progress`}
 				/>

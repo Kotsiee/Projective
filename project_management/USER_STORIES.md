@@ -34,7 +34,7 @@ with only AC4 (Stripe card attach) deferred outside the internal-wallet demo pat
 |                | AC6 · Write `security.audit_logs` onboarding entry              |
 
 _Extension — post-onboarding persona expansion:_ persona is no longer fixed at signup. A
-Client/Operator can unlock a freelancer profile later from the luxury `/become-partner` funnel; the
+Client/Operator can unlock a freelancer profile later from the `/become-partner` funnel; the
 idempotent `org.enable_freelancer_profile` RPC (`0313_freelancer_conversion.sql`) creates the
 `freelancer_profiles` row, flips `is_freelancer`, activates the freelancer persona in
 `session_context`, and writes a `freelancer.unlocked` audit row — the same AC3/AC4/AC6 guarantees as

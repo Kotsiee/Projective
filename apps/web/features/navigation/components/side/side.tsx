@@ -1,4 +1,5 @@
 import { Button, IconButton, Tooltip } from '@projective/ui';
+import { onNavigate } from '@projective/data';
 import { apps, INavApp } from '../../contracts/navigation.ts';
 import '../../styles/components/side/side.css';
 import '../../styles/components/side/quick-links.css';
@@ -7,6 +8,16 @@ import { useNavigationContext } from '../../contexts/NavigationContext.tsx';
 import { useUserContext } from '../../contexts/UserContext.tsx';
 import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@tabler/icons-preact';
 import QuickLinkSubmenu from './QuickLinkSubmenu.tsx';
+
+/**
+ * True when `link` owns the current `path` — an exact hit, or `path` nested beneath it.
+ * Root (`/`) only ever matches exactly so it never swallows every route.
+ */
+function linkMatchesPath(link: string, path: string): boolean {
+	if (!link) return false;
+	if (link === '/') return path === '/';
+	return path === link || path.startsWith(link + '/');
+}
 
 // Mini-component to handle local expansion state
 function SidebarItem(
@@ -32,10 +43,17 @@ function SidebarItem(
 		if (!isSidebarOpen) setIsOpen(false);
 	}, [isSidebarOpen]);
 
+	const isSelected = selected === app.link;
+	// A parent whose (static) child owns the route reads as an active ancestor even though the
+	// exact-match highlight lands on the child.
+	const isAncestor = !isSelected && !!app.children?.some((c) => c.link === selected);
+
 	return (
 		<li
 			class={`navigation__side__items__item ${isOpen ? 'is-open' : ''}`}
-			data-selected={selected === app.link}
+			data-selected={isSelected}
+			data-ancestor={isAncestor}
+			aria-current={isSelected ? 'page' : undefined}
 		>
 			{
 				/* 1. Main Button: This is ALWAYS a functional link now.
@@ -57,6 +75,12 @@ function SidebarItem(
 					href={app.link}
 				>
 					<div class='navigation__side__items__item__content'>
+						{
+							/* Asymmetric active indicator: a teal accent bar hugging the rail's inner
+						    edge on the current route (collapsed) that grows into a leading dot when
+						    the labels are revealed. Driven purely by the item's [data-selected]. */
+						}
+						<span class='navigation__side__items__item__indicator' aria-hidden='true' />
 						<div class='navigation__side__items__item__icon'>
 							<app.icon size={20} stroke={1.5} />
 						</div>
@@ -112,13 +136,15 @@ function SidebarItem(
 export default function NavigationSide() {
 	const { isTopSideNavExpanded, toggleTopSideNav } = useNavigationContext();
 	const { user } = useUserContext();
-	const [selected, setSelected] = useState('');
+	// The live pathname. Seeded on mount, then kept fresh across Fresh client-side navigations —
+	// this island lives in the persistent shell, so without `onNavigate` its active state would
+	// freeze at the first-painted route (see the fresh-partial-nav-data-lifecycle gotcha).
+	const [path, setPath] = useState('');
 
 	useEffect(() => {
-		if (typeof globalThis !== 'undefined') {
-			const path = globalThis.location.pathname;
-			setSelected(path);
-		}
+		if (typeof globalThis === 'undefined') return;
+		setPath(globalThis.location.pathname);
+		return onNavigate(() => setPath(globalThis.location.pathname));
 	}, []);
 
 	// Persona/account visibility gates. Reading `user.value` here keeps the nav
@@ -143,6 +169,21 @@ export default function NavigationSide() {
 				})
 			)
 			.filter((group) => group.length > 0), [isFreelancer, isOperator]);
+
+	// Resolve the single active route: the LONGEST candidate link that owns the current path, so a
+	// nested view (e.g. /projects/123) highlights the most specific tab and never lights up two.
+	const selected = useMemo(() => {
+		const candidates: string[] = [];
+		for (const group of visibleGroups) {
+			for (const app of group) {
+				if (app.link) candidates.push(app.link);
+				app.children?.forEach((c) => c.link && candidates.push(c.link));
+			}
+		}
+		return candidates
+			.filter((link) => linkMatchesPath(link, path))
+			.sort((a, b) => b.length - a.length)[0] ?? '';
+	}, [visibleGroups, path]);
 
 	return (
 		<nav class='navigation__side'>

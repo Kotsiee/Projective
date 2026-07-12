@@ -27,6 +27,8 @@ export * from './src/types/components/search-input.ts';
 export * from './src/components/SelectField.tsx';
 export * from './src/components/SliderField.tsx';
 export * from './src/components/Checkbox.tsx';
+export * from './src/components/Switch.tsx';
+export type { SwitchProps } from './src/types/components/switch.ts';
 export * from './src/components/StatusSlider.tsx';
 export * from './src/components/DateField.tsx';
 export * from './src/components/TimeField.tsx';

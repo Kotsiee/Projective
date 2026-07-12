@@ -4,14 +4,14 @@
 .field-array {
 	display: flex;
 	flex-direction: column;
-	gap: var(--field-gap, 8px);
+	gap: var(--field-gap);
 	/* cite: 1 */
 }
 
 .field-array__item {
 	display: flex;
 	align-items: flex-start;
-	gap: var(--field-gap, 8px);
+	gap: var(--field-gap);
 	/* cite: 1 */
 }
 

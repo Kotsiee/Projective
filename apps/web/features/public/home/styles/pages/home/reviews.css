@@ -31,7 +31,7 @@
 
 .home-review--featured {
 	background:
-		var(--grad-premium-soft),
+		var(--grad-brand-soft),
 		var(--card);
 	border-color: var(--accent, var(--primary));
 }
@@ -72,7 +72,7 @@
 	color: #fff;
 	font-weight: 700;
 	font-size: 0.85rem;
-	background: var(--accent-fill, var(--grad-premium-diag));
+	background: var(--accent-fill, var(--grad-brand-diag));
 }
 
 .home-review__name {

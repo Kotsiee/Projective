@@ -3,6 +3,7 @@ import NavigationGuestHeader from '../components/header/header.guest.tsx';
 import NavigationMobileHeader from '../components/header/header.mobile.tsx';
 import NavigationHeader from '../components/header/header.tsx';
 import NavigationSide from '../components/side/side.tsx';
+import NavigationSplitter from '../islands/navigation-splitter.island.tsx';
 import NavigationMobileFooter from '../components/footer/footer.mobile.tsx';
 import { NavigationProvider, useNavigationContext } from '../contexts/NavigationContext.tsx';
 import { ComponentChildren, CSSProperties } from 'preact';
@@ -13,12 +14,21 @@ import { useEffect, useRef } from 'preact/hooks';
 // #region 1. Inner Layout Engine
 // deno-lint-ignore no-explicit-any
 function NavigationInner({ children }: { children?: any }) {
-	const { isTopSideNavExpanded, middleNav, isCustomScrollEnabled } = useNavigationContext();
+	const {
+		isTopSideNavExpanded,
+		middleNav,
+		isCustomScrollEnabled,
+		middleSideWidth,
+		middleDensity,
+		isSplitterResizing,
+	} = useNavigationContext();
 	const { isAuthenticated } = useUserContext();
 
 	const isMiddleActive = middleNav.value.show;
 	const isGuest = !isAuthenticated.value;
 	const hasFooter = isMiddleActive && middleNav.value.footerHeight !== '0px';
+	// The rail is present only when the active domain actually declares a side width.
+	const hasMiddleSide = isMiddleActive && middleSideWidth.value > 0;
 
 	const bodyRef = useRef<HTMLDivElement>(null);
 	const thumbRef = useRef<HTMLDivElement>(null);
@@ -107,7 +117,9 @@ function NavigationInner({ children }: { children?: any }) {
 	const dynamicStyles = {
 		'--middle-header-height': isMiddleActive ? middleNav.value.headerHeight : '0px',
 		'--middle-footer-height': isMiddleActive ? middleNav.value.footerHeight : '0px',
-		'--middle-side-width': isMiddleActive ? middleNav.value.sideWidth : '0px',
+		/* Effective (drag-adjusted) rail width, resolved by the context from the domain's
+		   declared width + any live Splitter override. */
+		'--middle-side-width': hasMiddleSide ? `${middleSideWidth.value}px` : '0px',
 		'--mask-bg': isMiddleActive ? 'var(--mid)' : 'var(--header)',
 
 		/* Side-Favored Intersection Coordinates */
@@ -117,7 +129,7 @@ function NavigationInner({ children }: { children?: any }) {
 
 		/* Bottom Curve & Border Dynamic States */
 		'--overlay-bottom': hasFooter ? 'var(--middle-footer-height)' : '-40px',
-		'--footer-radius': hasFooter ? '80px' : '0px',
+		'--footer-radius': hasFooter ? 'var(--nav-shell-radius)' : '0px',
 		'--footer-border': hasFooter ? '1px solid var(--border-color)' : 'none',
 	} as CSSProperties;
 
@@ -125,6 +137,7 @@ function NavigationInner({ children }: { children?: any }) {
 		<div
 			class='navigation'
 			data-sidebar-open={isTopSideNavExpanded.value}
+			data-splitter-resizing={isSplitterResizing.value}
 			style={dynamicStyles}
 		>
 			<div class='navigation__desktop-components'>
@@ -142,8 +155,11 @@ function NavigationInner({ children }: { children?: any }) {
 											{middleNav.value.headerContent}
 										</div>
 									)}
-									{middleNav.value.sideWidth !== '0px' && (
-										<div class='navigation__middle-side'>
+									{hasMiddleSide && (
+										<div
+											class='navigation__middle-side'
+											data-density={middleDensity.value}
+										>
 											{middleNav.value.sideContent}
 										</div>
 									)}
@@ -155,6 +171,7 @@ function NavigationInner({ children }: { children?: any }) {
 								</div>
 							</>
 						)}
+						{hasMiddleSide && <NavigationSplitter />}
 						<div class='navigation__overlay'></div>
 					</>
 				)}

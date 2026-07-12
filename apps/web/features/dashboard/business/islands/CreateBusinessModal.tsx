@@ -112,7 +112,7 @@ export default function CreateBusinessModal({ isOpen, onClose }: CreateBusinessM
 								color: '#fff',
 								fontWeight: 650,
 								background:
-									'var(--grad-premium-diag, linear-gradient(135deg, var(--primary), var(--violet)))',
+									'var(--grad-brand-diag, linear-gradient(135deg, var(--primary), var(--violet)))',
 								opacity: isLoading.value ? 0.7 : 1,
 							}}
 						>

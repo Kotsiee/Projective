@@ -71,7 +71,7 @@
 
 .home-display em {
 	font-style: normal;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -109,7 +109,7 @@
 
 .home-section__title em {
 	font-style: normal;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;

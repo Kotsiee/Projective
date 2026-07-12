@@ -6,14 +6,17 @@
 	min-width: var(--side-nav-width);
 	height: calc(100vh - var(--header-height));
 	background-color: var(--header);
-	z-index: 60;
-	transition: all var(--medium);
+	z-index: var(--z-nav);
+	transition: width var(--motion-structural);
 
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
-	padding-top: 2rem;
+	/* Clear the shell's top-left corner curve so the first interactive item sits strictly
+	   BELOW where the squircle ends — no button ever tucks under the structural curve. */
+	padding-top: var(--side-nav-top-clearance);
+	padding-bottom: 1rem;
 	overflow-y: auto;
 	/* Allow scrolling if menus get too long */
 	overflow-x: hidden;
@@ -69,13 +72,26 @@
 	width: 2.5rem;
 	height: 2.5rem;
 	padding: 0 !important;
-	transition: width var(--medium), background-color var(--fast), color var(--fast);
+	border-radius: var(--radius-button);
+	/* Non-active items read as muted; the active route earns full-contrast text below. */
+	color: var(--text-muted);
+	transition:
+		width var(--motion-structural),
+		background-color var(--motion-standard),
+		color var(--motion-standard);
+}
 
-	&[data-selected='true'] {
-		background-color: var(--primary-surface);
-		color: var(--primary);
-		font-weight: 500;
-	}
+/* Active-route styling keys off the <li>'s [data-selected] (the button never carries it). */
+.navigation__side__items__item[data-selected='true'] .navigation__side__items__item__button {
+	background-color: var(--primary-surface);
+	color: var(--text-main);
+	font-weight: 500;
+}
+
+/* An ancestor of the active route (a parent tab of the current child) gets the contrast
+   bump without the filled surface, so the hierarchy still reads at a glance. */
+.navigation__side__items__item[data-ancestor='true'] .navigation__side__items__item__button {
+	color: var(--text-main);
 }
 
 .navigation__side__items__item__button .btn__content {
@@ -88,6 +104,45 @@
 	display: flex;
 	align-items: center;
 	width: 100%;
+	position: relative;
+}
+
+/* --- ACTIVE INDICATOR (asymmetric, tactile) ---
+   Collapsed rail: a short teal accent bar pinned to the inner (left) edge.
+   Expanded rail: it morphs into a compact leading dot before the icon.
+   Hidden entirely unless the item owns the current route. */
+.navigation__side__items__item__indicator {
+	position: absolute;
+	left: -0.75rem;
+	top: 50%;
+	width: 3px;
+	height: 0;
+	transform: translateY(-50%);
+	border-radius: var(--radius-pill);
+	background-color: var(--primary);
+	opacity: 0;
+	transition:
+		height var(--motion-micro),
+		opacity var(--motion-standard),
+		box-shadow var(--motion-standard);
+}
+
+.navigation__side__items__item[data-selected='true'] .navigation__side__items__item__indicator {
+	height: 1.25rem;
+	opacity: 1;
+	/* Subtle teal glow so the marker feels lit rather than painted. */
+	box-shadow: 0 0 6px var(--primary);
+}
+
+/* When the rail is expanded, the accent bar collapses into a leading dot inside the row. */
+[data-sidebar-open='true']
+	.navigation__side__items__item[data-selected='true']
+	.navigation__side__items__item__indicator {
+	left: -0.35rem;
+	top: 50%;
+	width: 6px;
+	height: 6px;
+	border-radius: var(--radius-pill);
 }
 
 .navigation__side__items__item__icon {

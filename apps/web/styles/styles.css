@@ -2,6 +2,7 @@
 @import 'themes/variables/font.css';
 @import 'themes/variables/ui.css';
 @import 'themes/variables/fields.css';
+@import 'themes/variables/system.css';
 @import 'themes/variables/data.css';
 @import 'themes/utils/tooltip.css';
 @import '../../../packages/ui/src/styles/components/list-card.css';
@@ -17,7 +18,7 @@
 @import '../../../packages/fields/src/styles/fields/handle-field.css';
 @import '../features/dashboard/shared/styles/workspace.css';
 
-/* Luxury /home feed primitives (packages/ui). Consumed by island bundles + a
+/* /home feed primitives (packages/ui). Consumed by island bundles + a
    server-rendered shell, so — per the bundling note above — they live in the
    always-loaded global sheet. */
 @import '../../../packages/ui/src/styles/components/hscroll.css';
@@ -43,7 +44,7 @@
    in the always-loaded global sheet. */
 @import '../features/dashboard/home/styles/home.css';
 
-/* /become-partner — the luxury freelancer conversion funnel + the /articles reader it
+/* /become-partner — the freelancer conversion funnel + the /articles reader it
    links to. Server-rendered shells with nested islands, so their CSS lives in the global sheet. */
 @import '../features/marketing/become-partner/styles/become-partner.css';
 @import '../features/marketing/articles/styles/article.css';

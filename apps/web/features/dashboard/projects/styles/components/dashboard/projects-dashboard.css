@@ -16,8 +16,8 @@
 	gap: 1.5rem;
 	/* A whisper of gold at the top edge for the fashion-magazine feel. */
 	background:
-		radial-gradient(120% 60% at 85% -10%, var(--gold-surface) 0%, transparent 55%),
-		radial-gradient(90% 50% at 0% -5%, var(--glass-luxe) 0%, transparent 45%);
+		radial-gradient(120% 60% at 85% -10%, var(--accent-teal-surface) 0%, transparent 55%),
+		radial-gradient(90% 50% at 0% -5%, var(--surface-subtle) 0%, transparent 45%);
 }
 
 .pw__grid {
@@ -56,8 +56,8 @@
 	color: var(--text-muted);
 }
 
-.pw-eyebrow--gold {
-	color: var(--gold-strong);
+.pw-eyebrow--accent {
+	color: var(--accent-teal-strong);
 }
 
 .pw-eyebrow svg {
@@ -81,9 +81,9 @@
 
 /* Luxe surfaces carry a soft champagne sheen + gold hairline. */
 .pw-panel--luxe {
-	border-color: var(--hairline-luxe);
+	border-color: var(--border-subtle);
 	background:
-		radial-gradient(130% 130% at 100% 0%, var(--gold-surface) 0%, transparent 46%),
+		radial-gradient(130% 130% at 100% 0%, var(--accent-teal-surface) 0%, transparent 46%),
 		var(--glass-panel);
 }
 
@@ -131,9 +131,9 @@
 	gap: 1.4rem;
 	padding: 1.7rem clamp(1.25rem, 2.4vw, 1.9rem) 1.6rem;
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background:
-		radial-gradient(120% 140% at 100% 0%, var(--gold-surface) 0%, transparent 42%),
+		radial-gradient(120% 140% at 100% 0%, var(--accent-teal-surface) 0%, transparent 42%),
 		linear-gradient(180deg, var(--glass-panel-strong), var(--glass-panel));
 	backdrop-filter: blur(var(--glass-blur)) saturate(150%);
 	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
@@ -146,7 +146,7 @@
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: var(--grad-luxe-sheen);
+	background: var(--surface-subtle);
 	opacity: 0.6;
 	pointer-events: none;
 	z-index: 0;
@@ -221,21 +221,21 @@
 	color: inherit;
 	cursor: pointer;
 	transition:
-		transform var(--dur-luxe) var(--ease-luxe),
-		box-shadow var(--dur-luxe) var(--ease-luxe),
-		border-color var(--medium) var(--ease-luxe);
+		transform var(--dur-cinematic) var(--ease-expressive),
+		box-shadow var(--dur-cinematic) var(--ease-expressive),
+		border-color var(--medium) var(--ease-expressive);
 }
 
 @media (hover: hover) {
 	.pw-matrix-card:hover {
 		transform: translateY(-3px);
 		box-shadow: var(--shadow-lg);
-		border-color: var(--hairline-luxe);
+		border-color: var(--border-subtle);
 	}
 
 	.pw-matrix-card:hover .pw-matrix-card__go {
 		transform: translateX(3px);
-		color: var(--gold-strong);
+		color: var(--accent-teal-strong);
 	}
 }
 
@@ -261,7 +261,7 @@
 }
 
 .pw-matrix-card__star {
-	color: var(--gold);
+	color: var(--accent-teal);
 }
 
 .pw-matrix-card__unread {
@@ -365,7 +365,7 @@
 
 .pw-matrix-card__go {
 	color: var(--text-disabled);
-	transition: transform var(--medium) var(--ease-luxe), color var(--medium);
+	transition: transform var(--medium) var(--ease-expressive), color var(--medium);
 }
 
 /* #endregion */
@@ -386,9 +386,9 @@
 	width: 54px;
 	height: 54px;
 	border-radius: 999px;
-	color: var(--gold-strong);
-	background: var(--gold-surface);
-	border: 1px solid var(--hairline-luxe);
+	color: var(--accent-teal-strong);
+	background: var(--accent-teal-surface);
+	border: 1px solid var(--border-subtle);
 	margin-bottom: 0.35rem;
 }
 
@@ -431,7 +431,7 @@
 	border-radius: var(--border-radius__large);
 	border: 1px solid var(--hairline);
 	background:
-		linear-gradient(100deg, transparent 30%, var(--glass-luxe) 50%, transparent 70%),
+		linear-gradient(100deg, transparent 30%, var(--surface-subtle) 50%, transparent 70%),
 		var(--glass-panel);
 	background-size: 220% 100%, auto;
 	animation: pw-shimmer 1.5s var(--ease-standard) infinite;
@@ -459,7 +459,7 @@
 	gap: 0.15rem;
 	padding: 0.2rem;
 	border-radius: 999px;
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 	border: 1px solid var(--hairline);
 }
 
@@ -506,7 +506,7 @@
 
 @media (hover: hover) {
 	.pw-activity__item:hover {
-		background: var(--glass-luxe);
+		background: var(--surface-subtle);
 		border-color: var(--hairline);
 		transform: translateX(2px);
 	}
@@ -550,7 +550,7 @@
 
 .pw-activity__glyph--neutral {
 	color: var(--text-muted);
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 }
 
 .pw-activity__body {
@@ -611,8 +611,8 @@
 	box-shadow: var(--shadow-sm);
 	scroll-snap-align: start;
 	transition:
-		transform var(--dur-luxe) var(--ease-luxe),
-		box-shadow var(--dur-luxe) var(--ease-luxe),
+		transform var(--dur-cinematic) var(--ease-expressive),
+		box-shadow var(--dur-cinematic) var(--ease-expressive),
 		border-color var(--medium);
 }
 
@@ -661,9 +661,9 @@
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	color: var(--gold-strong);
-	background: var(--gold-surface);
-	border: 1px solid var(--hairline-luxe);
+	color: var(--accent-teal-strong);
+	background: var(--accent-teal-surface);
+	border: 1px solid var(--border-subtle);
 	padding: 0.2rem 0.5rem;
 	border-radius: 999px;
 }
@@ -757,8 +757,8 @@
 	background: var(--glass-panel-strong);
 	box-shadow: var(--shadow-sm);
 	transition:
-		transform var(--dur-luxe) var(--ease-luxe),
-		box-shadow var(--dur-luxe) var(--ease-luxe),
+		transform var(--dur-cinematic) var(--ease-expressive),
+		box-shadow var(--dur-cinematic) var(--ease-expressive),
 		border-color var(--medium);
 }
 
@@ -766,7 +766,7 @@
 	.pw-talent:hover {
 		transform: translateY(-3px);
 		box-shadow: var(--shadow-md);
-		border-color: var(--hairline-luxe);
+		border-color: var(--border-subtle);
 	}
 }
 
@@ -804,7 +804,7 @@
 	gap: 0.2rem;
 	font-size: 0.76rem;
 	font-weight: 600;
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 	flex-shrink: 0;
 }
 
@@ -813,12 +813,12 @@
 	gap: 0.45rem;
 	padding: 0.6rem 0.65rem;
 	border-radius: var(--border-radius);
-	background: var(--gold-surface);
-	border: 1px solid var(--hairline-luxe);
+	background: var(--accent-teal-surface);
+	border: 1px solid var(--border-subtle);
 }
 
 .pw-talent__fit-glyph {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 	flex-shrink: 0;
 	margin-top: 0.1rem;
 }
@@ -832,7 +832,7 @@
 
 .pw-talent__fit-text strong {
 	font-weight: 660;
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .pw-talent__tags {
@@ -846,7 +846,7 @@
 	font-size: 0.68rem;
 	font-weight: 500;
 	color: var(--text-muted);
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 	border: 1px solid var(--hairline);
 	padding: 0.15rem 0.5rem;
 	border-radius: 999px;
@@ -904,8 +904,8 @@
 	gap: 0.2rem;
 	padding: 0.25rem;
 	border-radius: 999px;
-	background: var(--glass-luxe);
-	border: 1px solid var(--hairline-luxe);
+	background: var(--surface-subtle);
+	border: 1px solid var(--border-subtle);
 	box-shadow: var(--shadow-sm);
 }
 
@@ -924,7 +924,7 @@
 	cursor: pointer;
 	transition:
 		color var(--fast),
-		background var(--dur-luxe) var(--ease-luxe),
+		background var(--dur-cinematic) var(--ease-expressive),
 		box-shadow var(--fast);
 }
 
@@ -935,11 +935,11 @@
 .pw-modetabs__seg[data-active='true'] {
 	color: var(--text-main);
 	background:
-		radial-gradient(140% 140% at 0% 0%, var(--gold-surface) 0%, transparent 60%),
+		radial-gradient(140% 140% at 0% 0%, var(--accent-teal-surface) 0%, transparent 60%),
 		var(--glass-panel-strong);
 	box-shadow:
 		var(--shadow-sm),
-		inset 0 0 0 1px var(--hairline-luxe);
+		inset 0 0 0 1px var(--border-subtle);
 }
 
 /* --- CRM filter tray --- */
@@ -951,7 +951,7 @@
 }
 
 .pw-crm[data-open='true'] {
-	border-color: var(--hairline-luxe);
+	border-color: var(--border-subtle);
 }
 
 .pw-crm__bar {
@@ -978,7 +978,7 @@
 }
 
 .pw-crm__trigger:hover {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .pw-crm__badge {
@@ -990,13 +990,13 @@
 	border-radius: 999px;
 	font-size: 0.68rem;
 	font-weight: 700;
-	color: var(--obsidian, #1a1d24);
-	background: var(--gold);
+	color: var(--surface-dark-workspace);
+	background: var(--accent-teal);
 }
 
 .pw-crm__chev {
 	color: var(--text-muted);
-	transition: transform var(--medium) var(--ease-luxe);
+	transition: transform var(--medium) var(--ease-expressive);
 }
 
 .pw-crm[data-open='true'] .pw-crm__chev {
@@ -1009,7 +1009,7 @@
 	gap: 0.25rem;
 	appearance: none;
 	border: 1px solid var(--hairline);
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 	color: var(--text-muted);
 	font-size: 0.72rem;
 	font-weight: 600;
@@ -1021,7 +1021,7 @@
 
 .pw-crm__clear:hover {
 	color: var(--danger, hsl(0, 70%, 55%));
-	border-color: var(--hairline-luxe);
+	border-color: var(--border-subtle);
 }
 
 .pw-crm__body {
@@ -1058,7 +1058,7 @@
 	gap: 0.4rem;
 	appearance: none;
 	border: 1px solid var(--hairline);
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 	color: var(--text-muted);
 	font-size: 0.76rem;
 	font-weight: 560;
@@ -1070,13 +1070,13 @@
 
 .pw-crm__chip:hover {
 	color: var(--text-main);
-	border-color: var(--hairline-luxe);
+	border-color: var(--border-subtle);
 }
 
 .pw-crm__chip[data-active='true'] {
-	color: var(--gold-strong);
-	background: var(--gold-surface);
-	border-color: var(--hairline-luxe);
+	color: var(--accent-teal-strong);
+	background: var(--accent-teal-surface);
+	border-color: var(--border-subtle);
 }
 
 .pw-crm__chip-count {
@@ -1089,7 +1089,7 @@
 }
 
 .pw-crm__chip[data-active='true'] .pw-crm__chip-count {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 	background: var(--glass-panel-strong);
 }
 
@@ -1132,9 +1132,9 @@
 .pw-roster__note {
 	font-size: 0.7rem;
 	font-weight: 600;
-	color: var(--gold-strong);
-	background: var(--gold-surface);
-	border: 1px solid var(--hairline-luxe);
+	color: var(--accent-teal-strong);
+	background: var(--accent-teal-surface);
+	border: 1px solid var(--border-subtle);
 	padding: 0.2rem 0.55rem;
 	border-radius: 999px;
 }
@@ -1155,13 +1155,13 @@
 	padding: 0.75rem 0.85rem;
 	border-radius: var(--border-radius__large);
 	border: 1px solid var(--hairline);
-	background: var(--glass-luxe);
+	background: var(--surface-subtle);
 	transition: border-color var(--fast), transform var(--fast), box-shadow var(--fast);
 }
 
 @media (hover: hover) {
 	.pw-roster__row:hover {
-		border-color: var(--hairline-luxe);
+		border-color: var(--border-subtle);
 		transform: translateY(-1px);
 		box-shadow: var(--shadow-sm);
 	}
@@ -1199,7 +1199,7 @@
 }
 
 .pw-roster__service {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .pw-roster__value {

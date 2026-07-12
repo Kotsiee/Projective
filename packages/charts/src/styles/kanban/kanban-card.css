@@ -8,12 +8,12 @@
 	background-color: color-mix(in srgb, var(--text-main) 5%, var(--card));
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius__large);
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+	box-shadow: var(--elevation-1);
 
 	will-change: transform, box-shadow;
 	transition:
-		box-shadow var(--fast) cubic-bezier(0.4, 0, 0.2, 1),
-		transform var(--fast) cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow var(--motion-standard),
+		transform var(--motion-standard),
 		border-color var(--fast) ease,
 		background-color var(--fast) ease;
 }
@@ -30,13 +30,13 @@
 .kanban-card:hover {
 	border-color: color-mix(in srgb, var(--text-main) 22%, var(--border-color));
 	transform: translateY(-2px);
-	box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+	box-shadow: var(--elevation-3);
 }
 
 .kanban-card[data-reorderable='true']:active {
 	cursor: grabbing;
 	transform: translateY(-1px) scale(0.985);
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+	box-shadow: var(--elevation-2);
 }
 
 /* Ghost placeholder left behind in the column track during drag. */
@@ -176,15 +176,15 @@
 		var(--primary),
 		color-mix(in srgb, var(--primary) 40%, var(--danger))
 	);
-	color: #fff;
+	color: var(--on-accent);
 	font-size: 0.72rem;
 	font-weight: 700;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	box-shadow: var(--elevation-1);
 }
 
 .kanban-card__avatar-img {
 	object-fit: cover;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	box-shadow: var(--elevation-1);
 }
 
 .kanban-card__avatar--empty {
@@ -216,7 +216,7 @@
 
 .kanban-card--frozen:hover {
 	border-color: color-mix(in srgb, var(--danger) 75%, transparent);
-	box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+	box-shadow: var(--elevation-3);
 }
 
 .kanban-card__frozen-pill {
@@ -226,7 +226,7 @@
 	padding: 0.08rem 0.4rem;
 	border-radius: var(--border-radius__small);
 	background-color: var(--danger);
-	color: #fff;
+	color: var(--on-accent);
 	font-size: 0.64rem;
 	font-weight: 700;
 	letter-spacing: 0.05em;

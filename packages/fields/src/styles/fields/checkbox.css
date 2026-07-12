@@ -10,7 +10,7 @@
 }
 
 .checkbox--success {
-	--cb-color: var(--complete, var(--success, var(--primary)));
+	--cb-color: var(--complete);
 }
 
 .checkbox--disabled {
@@ -38,14 +38,14 @@
 	justify-content: center;
 	width: 18px;
 	height: 18px;
-	border-radius: var(--border-radius__xsmall, 4px);
-	border: 1px solid var(--border-color, hsl(220, 8%, 65%));
-	background: var(--card, var(--background));
-	color: #fff;
+	border-radius: var(--radius-control);
+	border: 1px solid var(--border-color);
+	background: var(--card);
+	color: var(--on-accent);
 	transition:
-		background-color var(--fast, 150ms) ease,
-		border-color var(--fast, 150ms) ease,
-		box-shadow var(--fast, 150ms) ease;
+		background-color var(--motion-micro) ease,
+		border-color var(--motion-micro) ease,
+		box-shadow var(--motion-micro) ease;
 }
 
 .checkbox--sm .checkbox__box {
@@ -59,7 +59,7 @@
 }
 
 .checkbox__input:focus-visible + .checkbox__box {
-	box-shadow: var(--focus-ring, 0 0 0 2px var(--background), 0 0 0 4px var(--primary));
+	box-shadow: var(--focus-glow);
 }
 
 .checkbox:hover:not(.checkbox--disabled) .checkbox__box {
@@ -75,7 +75,7 @@
 
 .checkbox__label {
 	font-size: 0.875rem;
-	color: var(--text-main, var(--text-primary));
+	color: var(--text-main);
 }
 
 .checkbox--sm .checkbox__label {
@@ -84,5 +84,5 @@
 
 .checkbox__description {
 	font-size: 0.75rem;
-	color: var(--text-muted, var(--text-secondary));
+	color: var(--text-muted);
 }

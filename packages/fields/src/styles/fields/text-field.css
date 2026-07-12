@@ -11,31 +11,31 @@
 	display: flex;
 	align-items: center;
 	position: relative;
-	background-color: var(--field-bg, #ffffff);
-	border: 1px solid var(--field-border, #d1d5db);
-	border-radius: var(--field-radius, 8px);
-	transition: all var(--field-transition, 150ms ease);
-	min-height: var(--field-height, 2.5rem);
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-radius: var(--field-radius);
+	transition: all var(--field-transition);
+	min-height: var(--field-height);
 	cursor: text;
 }
 
 .field-text__container:hover {
-	background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
-	border-color: var(--field-border-hover, #6b7280);
+	background-color: var(--field-bg-hover);
+	border-color: var(--field-border-hover);
 }
 
 .field-text__container--focused {
-	border-color: var(--field-border-focus, #3b82f6);
-	background-color: var(--field-bg-active, #ffffff);
+	border-color: var(--field-border-focus);
+	background-color: var(--field-bg-active);
 }
 
 .field-text__container--error {
-	border-color: var(--field-border-error, #ef4444);
+	border-color: var(--field-border-error);
 }
 
 .field-text__container--disabled {
-	background-color: var(--field-bg-disabled, #f3f4f6);
-	border-color: var(--field-border-disabled, #d1d5db);
+	background-color: var(--field-bg-disabled);
+	border-color: var(--field-border-disabled);
 	cursor: not-allowed;
 	opacity: 0.8;
 }
@@ -46,34 +46,34 @@
 	height: 100%;
 	border: none;
 	background: transparent;
-	padding: 0 var(--field-padding-x, 0.75rem);
+	padding: 0 var(--field-padding-x);
 	font-family: inherit;
-	font-size: var(--field-font-size, 14px);
-	color: var(--field-text, #111827);
+	font-size: var(--field-font-size);
+	color: var(--field-text);
 	outline: none;
 	min-width: 0;
 }
 
 .field-text__input::placeholder {
-	color: var(--field-text-placeholder, #6b7280);
+	color: var(--field-text-placeholder);
 }
 
 textarea.field-text__input {
 	padding-top: 8px;
 	padding-bottom: 8px;
-	min-height: var(--field-height, 2.5rem);
+	min-height: var(--field-height);
 	line-height: 1.5;
 }
 
 .field-text__count {
 	align-self: flex-end;
 	font-size: 0.75rem;
-	color: var(--field-text-placeholder, #6b7280);
+	color: var(--field-text-placeholder);
 	margin-top: 4px;
 }
 
 .field-text__count--limit {
-	color: var(--field-text-error, #ef4444);
+	color: var(--field-text-error);
 }
 
 /* Glass variant — frosted aurora-glass field used by the auth flow. Self-contained:

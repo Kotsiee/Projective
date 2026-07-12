@@ -6,7 +6,7 @@
 	align-items: center;
 	justify-content: center;
 	padding: clamp(0.5rem, 3vw, 2.5rem);
-	background: rgba(0, 0, 0, 0.55);
+	background: var(--scrim);
 	backdrop-filter: blur(3px);
 	animation: chart-focus-in 160ms ease;
 }
@@ -28,7 +28,7 @@
 	background: var(--mid);
 	border: 1px solid var(--hairline-strong, var(--border-color));
 	border-radius: 14px;
-	box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+	box-shadow: var(--elevation-4);
 	overflow: hidden;
 }
 

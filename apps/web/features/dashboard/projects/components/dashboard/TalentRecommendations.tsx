@@ -150,7 +150,7 @@ export function TalentRecommendations({ projects }: { projects: Signal<Dashboard
 		<section class='pw-panel pw-talent-rec pw-panel--luxe' aria-label='Recommended freelancers'>
 			<header class='pw-panel__head'>
 				<div class='pw-panel__heading'>
-					<span class='pw-eyebrow pw-eyebrow--gold'>
+					<span class='pw-eyebrow pw-eyebrow--accent'>
 						<IconUserSearch size={13} /> Smart match
 					</span>
 					<h2 class='pw-panel__title'>Curated Talent for Your Projects</h2>

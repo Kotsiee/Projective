@@ -76,7 +76,7 @@
 	gap: 1rem;
 	padding-bottom: 2rem; /* Space between steps */
 	opacity: 0.6;
-	transition: var(--fast) ease;
+	transition: var(--motion-standard);
 }
 
 .stepper__step--active {
@@ -110,19 +110,19 @@
 	font-size: 0.875rem;
 	z-index: 2; /* Sit above the connector line */
 	background-color: var(--step-bg);
-	transition: var(--fast) ease;
+	transition: var(--motion-standard);
 }
 
 .stepper__step--active .stepper__step-indicator {
 	border-color: var(--step-active);
 	color: var(--step-active);
-	box-shadow: var(--focus-ring);
+	box-shadow: var(--focus-glow);
 }
 
 .stepper__step--completed .stepper__step-indicator {
 	background-color: var(--step-active);
 	border-color: var(--step-active);
-	color: white;
+	color: var(--on-accent);
 }
 /* #endregion */
 
@@ -135,7 +135,7 @@
 	width: 2px;
 	background-color: var(--border-color);
 	z-index: 1;
-	transition: background-color var(--medium) ease;
+	transition: background-color var(--motion-standard);
 }
 
 .stepper--vertical .stepper__connector--active {

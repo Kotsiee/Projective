@@ -14,7 +14,7 @@ Status is edited **in place** — move a feature between lanes, don't append not
 |                                                 |                                              | Realtime infrastructure                                                    |
 |                                                 |                                              | Storage buckets & file security                                            |
 |                                                 |                                              | Notifications pipeline (writer + API + SSE inbox)                          |
-|                                                 |                                              | Shared package suite (ui, fields, data, charts, time, files, utils, types) |
+|                                                 |                                              | Consolidated `@projective/ui` design system (sub-path exports + tokens + `DesignSystemProvider`) |
 
 _Evidence:_ `supabase/migrations/0200`–`0207`; notifications — `comms.fn_notify` (`0305`),
 `api/v1/notifications` (list) + `.../notifications/stream` (SSE), `features/dashboard/inbox`
@@ -29,7 +29,14 @@ Feed primitives live in `packages/ui` (`HScroll`, `ProgressMeter`, `FeedTextCard
 `FeedComposer`); charts `AreaLineChart`. Profile-setup completeness computed once in `getMe`
 (`features/shared/profile/completeness.ts`) and mirrored on the home tracker, nav dropdown, and
 profile rail. _The prior US-008 `/dashboard` overview UI (`features/dashboard/overview`) is retired
-from routing pending relocation of the business finance surface._
+from routing pending relocation of the business finance surface._ Design system: the standalone UI
+packages consolidate under a single `@projective/ui` parent via multi-export sub-paths
+(`packages/ui/{atoms,fields,charts,data,time,files,types,system,utils}.ts` + `deno.json` /
+`vite.config.ts` aliases), the semantic token layer `apps/web/styles/themes/variables/system.css`
+(surfaces / radius / motion / focus-glow / status), the `DesignSystemProvider` context engine
+(`packages/ui/src/system/`), the `Switch` primitive (`packages/fields`), and the authoritative spec +
+per-component state/variant matrices in `documentation/design-system/`. The bare `@projective/*`
+package aliases remain as deprecated shims pending the ~236-file consumer-import migration.
 
 ---
 
@@ -63,7 +70,7 @@ capture the current path into `?redirectTo=` — threaded through `pjv_return_to
 `safeReturnTo()` guard into `confirm.ts` / `complete-onboarding` / the confirmation email link;
 avatar upload — `api/v1/files/avatar/{init,finalise}`,
 `features/auth/components/onboarding/inputs/AvatarPicker.tsx`. **Post-onboarding persona expansion**
-— a Client/Operator unlocks a freelancer profile from the luxury `/become-partner` funnel
+— a Client/Operator unlocks a freelancer profile from the `/become-partner` funnel
 (`features/marketing/become-partner/*` shell + `PartnerCta`/`PartnerFaq` islands, `/articles/[slug]`
 story reader) via `api/v1/profile/enable-freelancer` → `BecomePartnerServiceBackend` →
 `org.enable_freelancer_profile` (idempotent SECURITY DEFINER RPC in

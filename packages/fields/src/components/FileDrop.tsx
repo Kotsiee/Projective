@@ -215,7 +215,9 @@ export function FileDrop(props: FileFieldProps) {
 								{(file.file.size / 1024 / 1024).toFixed(2)} MB
 								{file.status === 'processing' && ` • ${Math.round(file.progress)}%`}
 								{file.status === 'error' && (
-									<span style={{ color: 'var(--error-500)' }}>• Failed</span>
+									<span style={{ color: 'var(--danger)' }}>
+										• Failed
+									</span>
 								)}
 							</span>
 						</div>

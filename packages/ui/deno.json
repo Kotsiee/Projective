@@ -1,7 +1,20 @@
 {
 	"name": "@projective/ui",
 	"version": "0.0.0",
-	"exports": "./mod.ts",
+	"exports": {
+		".": "./mod.ts",
+		"./skeletons": "./skeletons.ts",
+		"./system": "./system.ts",
+		"./atoms": "./atoms.ts",
+		"./fields": "./fields.ts",
+		"./charts": "./charts.ts",
+		"./charts/finance": "./charts-finance.ts",
+		"./data": "./data.ts",
+		"./time": "./time.ts",
+		"./files": "./files.ts",
+		"./utils": "./utils.ts",
+		"./types": "./types.ts"
+	},
 	"compilerOptions": {
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact"

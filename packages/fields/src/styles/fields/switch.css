@@ -1,0 +1,127 @@
+/**
+ * @file switch.css
+ * @description Styles for the Switch (toggle) primitive. Pure token-driven — the track re-tints to
+ * the active status accent and the thumb travels on the spring curve (`--motion-micro`). See the
+ * full state matrix in documentation/design-system/components/fields.md. Never inline a colour here.
+ */
+.switch {
+	--switch-track-w: 2.25rem;
+	--switch-track-h: 1.25rem;
+	--switch-gap: 2px;
+	--switch-thumb: calc(var(--switch-track-h) - var(--switch-gap) * 2);
+	--switch-travel: calc(var(--switch-track-w) - var(--switch-thumb) - var(--switch-gap) * 2);
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.625rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.switch--sm {
+	--switch-track-w: 1.75rem;
+	--switch-track-h: 1rem;
+}
+
+/* Visually hidden native input — keeps keyboard + screen-reader semantics. */
+.switch__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.switch__track {
+	position: relative;
+	flex: none;
+	inline-size: var(--switch-track-w);
+	block-size: var(--switch-track-h);
+	border-radius: var(--radius-pill);
+	background: var(--surface-sunken);
+	border: 1px solid var(--field-border);
+	transition:
+		background var(--motion-micro),
+		border-color var(--motion-micro),
+		box-shadow var(--motion-standard);
+}
+
+.switch--square .switch__track {
+	border-radius: var(--radius-control);
+}
+
+.switch__thumb {
+	position: absolute;
+	inset-block-start: var(--switch-gap);
+	inset-inline-start: var(--switch-gap);
+	inline-size: var(--switch-thumb);
+	block-size: var(--switch-thumb);
+	border-radius: var(--radius-pill);
+	background: var(--surface-card);
+	box-shadow: var(--elevation-1);
+	transition: transform var(--motion-micro);
+}
+
+.switch--square .switch__thumb {
+	border-radius: 2px;
+}
+
+/* ON — track tints to the accent, thumb slides across on the spring curve. */
+.switch--on .switch__track {
+	background: var(--status-primary);
+	border-color: transparent;
+}
+
+.switch--on.switch--success .switch__track {
+	background: var(--status-success);
+}
+
+.switch--on.switch--danger .switch__track {
+	background: var(--status-danger);
+}
+
+.switch--on .switch__thumb {
+	transform: translateX(var(--switch-travel));
+}
+
+/* Focus — the signature 3px teal glow halo (danger contexts swap the hue). */
+.switch__input:focus-visible + .switch__track {
+	box-shadow: var(--focus-glow);
+}
+
+.switch--danger .switch__input:focus-visible + .switch__track {
+	box-shadow: var(--focus-glow-danger);
+}
+
+/* Disabled — greyed structural fill, no interaction. */
+.switch--disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.switch--disabled .switch__track {
+	background: var(--disabled-bg);
+	border-color: var(--field-border-disabled);
+}
+
+.switch__text {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.switch__label {
+	color: var(--field-text-label);
+	font-size: 0.875rem;
+	line-height: 1.2;
+}
+
+.switch__description {
+	color: var(--text-muted);
+	font-size: 0.75rem;
+	line-height: 1.2;
+}

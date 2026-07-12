@@ -31,11 +31,11 @@
 
 .forecast-runway__band {
 	opacity: 0.16;
-	transition: d var(--medium, 240ms) ease, opacity var(--medium, 240ms) ease;
+	transition: d var(--medium) var(--ease-standard), opacity var(--medium) var(--ease-standard);
 }
 
 .forecast-runway__fill {
-	transition: d var(--medium, 240ms) ease;
+	transition: d var(--medium) var(--ease-standard);
 }
 
 .forecast-runway__line {
@@ -43,7 +43,7 @@
 	stroke-width: 2.5;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-	transition: d var(--medium, 240ms) ease;
+	transition: d var(--medium) var(--ease-standard);
 }
 
 .forecast-runway__marker line {
@@ -66,7 +66,7 @@
 	background: var(--card);
 	border: 1px solid var(--hairline-strong, var(--border-color));
 	border-radius: 8px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+	box-shadow: var(--elevation-3);
 	pointer-events: none;
 	z-index: 4;
 }

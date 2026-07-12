@@ -50,7 +50,7 @@ export function TargetedOpportunities({ skills = [] }: { skills?: string[] }) {
 		<section class='pw-panel pw-opps pw-panel--luxe' aria-label='Targeted opportunities'>
 			<header class='pw-panel__head'>
 				<div class='pw-panel__heading'>
-					<span class='pw-eyebrow pw-eyebrow--gold'>
+					<span class='pw-eyebrow pw-eyebrow--accent'>
 						<IconTargetArrow size={13} /> For you
 					</span>
 					<h2 class='pw-panel__title'>Targeted Opportunities</h2>

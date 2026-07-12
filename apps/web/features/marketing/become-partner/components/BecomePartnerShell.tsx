@@ -117,7 +117,7 @@ export function BecomePartnerShell({ alreadyPartner, displayName }: BecomePartne
 								<span />
 							</div>
 						</div>
-						<div class='partner-hero__orb partner-hero__orb--gold' />
+						<div class='partner-hero__orb partner-hero__orb--accent' />
 						<div class='partner-hero__orb partner-hero__orb--violet' />
 					</div>
 				</div>

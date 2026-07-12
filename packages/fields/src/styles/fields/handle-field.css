@@ -6,7 +6,7 @@
 
 .handle-field__at {
 	font-weight: 600;
-	color: var(--text-muted, hsl(0, 0%, 55%));
+	color: var(--text-muted);
 	user-select: none;
 	font-variant-numeric: tabular-nums;
 }

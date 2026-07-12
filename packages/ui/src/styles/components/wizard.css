@@ -44,7 +44,7 @@
 	/* We want the Stepper to handle all internal spacing so it sits flush */
 	padding: 0;
 
-	border-radius: var(--border-radius__large, 12px);
+	border-radius: var(--radius-card);
 	border: 1px solid var(--border-color);
 	background-color: var(--card);
 	overflow: hidden; /* This acts as a mask, keeping the flush stepper rounded! */

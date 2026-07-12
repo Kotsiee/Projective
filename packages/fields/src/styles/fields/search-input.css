@@ -4,7 +4,7 @@
 
 .field-search {
 	--fs-height: 2.75rem;
-	--fs-radius: 999px;
+	--fs-radius: var(--radius-pill);
 	--fs-pad: 0.35rem;
 	--fs-icon-gap: 0.6rem;
 	--fs-font: 0.95rem;
@@ -29,10 +29,10 @@
 	cursor: text;
 	overflow: hidden;
 	transition:
-		border-color var(--medium, 250ms) var(--ease-out, ease),
-		background var(--medium, 250ms) var(--ease-out, ease),
-		box-shadow var(--medium, 250ms) var(--ease-out, ease),
-		transform var(--medium, 250ms) var(--ease-out, ease);
+		border-color var(--motion-standard),
+		background var(--motion-standard),
+		box-shadow var(--motion-standard),
+		transform var(--motion-standard);
 }
 
 .field-search__container:hover {
@@ -67,7 +67,7 @@
 	background-position: 180% 0;
 	opacity: 0;
 	pointer-events: none;
-	transition: opacity var(--medium, 250ms) ease;
+	transition: opacity var(--motion-standard);
 }
 
 .field-search__container--focused .field-search__sheen {
@@ -90,9 +90,7 @@
 	justify-content: center;
 	color: var(--text-muted);
 	flex-shrink: 0;
-	transition:
-		color var(--medium, 250ms) ease,
-		transform var(--slow, 350ms) var(--ease-spring, ease);
+	transition: color var(--motion-standard), transform var(--motion-standard);
 }
 
 .field-search__container--focused .field-search__icon {
@@ -116,7 +114,7 @@
 .field-search__input::placeholder {
 	color: var(--text-muted);
 	opacity: 1;
-	transition: color var(--medium) ease;
+	transition: color var(--motion-standard);
 }
 
 /* Kill the native WebKit search decorations so our clear button owns that role. */
@@ -140,12 +138,15 @@
 	background: var(--input-bg);
 	color: var(--text-muted);
 	cursor: pointer;
-	animation: field-search-clear-in var(--medium, 250ms) var(--ease-spring, ease);
-	transition: background var(--fast) ease, color var(--fast) ease, transform var(--fast) ease;
+	animation: field-search-clear-in var(--medium) var(--ease-spring);
+	transition:
+		background var(--motion-micro),
+		color var(--motion-micro),
+		transform var(--motion-micro);
 }
 
 .field-search__clear:hover {
-	background: var(--danger-surface, rgba(0, 0, 0, 0.08));
+	background: var(--danger-surface);
 	color: var(--danger);
 	transform: rotate(90deg);
 }
@@ -196,22 +197,22 @@
 }
 
 .field-search--glass .field-search__container {
-	backdrop-filter: blur(var(--glass-blur, 18px));
-	-webkit-backdrop-filter: blur(var(--glass-blur, 18px));
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
 }
 /* #endregion */
 
 /* #region Cinematic variant — the hero centrepiece. */
 .field-search--cinematic {
-	--fs-radius: var(--border-radius__xlarge, 16px);
+	--fs-radius: var(--radius-stage);
 	--fs-bg: var(--glass-panel-strong);
 	--fs-border: var(--glass-hairline);
 	max-width: 640px;
 }
 
 .field-search--cinematic .field-search__container {
-	backdrop-filter: blur(var(--glass-blur-lg, 30px));
-	-webkit-backdrop-filter: blur(var(--glass-blur-lg, 30px));
+	backdrop-filter: blur(var(--glass-blur-lg));
+	-webkit-backdrop-filter: blur(var(--glass-blur-lg));
 	box-shadow: var(--shadow-lg);
 	border-width: 1px;
 }

@@ -6,7 +6,7 @@ import '../../styles/components/feed-cards.css';
 export type FeedTextTone = 'insight' | 'quote' | 'prompt' | 'milestone';
 
 export interface FeedTextCardProps {
-	/** Editorial intent — selects the eyebrow icon + accent default. @default 'insight' */
+	/** Content intent — selects the eyebrow icon + accent default. @default 'insight' */
 	tone?: FeedTextTone;
 	eyebrow?: string;
 	title: ComponentChildren;
@@ -31,14 +31,14 @@ const TONE_ICON = {
 const TONE_ACCENT: Record<FeedTextTone, string> = {
 	insight: 'mint',
 	quote: 'violet',
-	prompt: 'gold',
+	prompt: 'teal',
 	milestone: 'amber',
 };
 
 /**
  * @function FeedTextCard
- * @description A luxury text card — insight / quote / prompt / milestone — that breaks the rhythm of
- * media cards in the feed. Razor-thin hairline, deep glass, a tone-coded eyebrow, and an optional
+ * @description A text card — insight / quote / prompt / milestone — that breaks the rhythm of
+ * media cards in the feed. Crisp hairline, clean surface, a tone-coded eyebrow, and an optional
  * author footer or CTA. Purely presentational.
  */
 export function FeedTextCard(props: FeedTextCardProps) {

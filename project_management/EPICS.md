@@ -25,14 +25,31 @@ The cross-cutting substrate: RLS/permissions, realtime, storage, notifications, 
 the shared monorepo package suite.
 
 - **Done:** Row-level security & permission grants (`0200`–`0206`), storage buckets (`0207`), the
-  notifications pipeline (writer `comms.fn_notify`, list API + SSE stream, live inbox island), the
-  design-system packages (`@projective/ui`, `fields`, `data`, `charts`, `time`, `files`, `utils`,
-  `types`). Premium guest presentation shell: glassmorphism navbar (live search + spring light/dark
+  notifications pipeline (writer `comms.fn_notify`, list API + SSE stream, live inbox island), and the
+  **design-system layer**: the standalone UI packages are consolidated under a single `@projective/ui`
+  parent exposed through multi-export sub-paths
+  (`@projective/ui/{atoms,fields,charts,data,time,files,types,system,utils}`), backed by a formal
+  semantic token layer (`styles/themes/variables/system.css` — surfaces, radius, motion, focus-glow,
+  status map), a Preact `<DesignSystemProvider>` context engine (density/radius/accent/motion
+  overrides), the `Switch` primitive, and the authoritative spec + per-component state/variant
+  matrices in `documentation/design-system/`. The bare `@projective/fields` · `charts` · `data` ·
+  `time` · `files` · `utils` aliases remain live as **deprecated shims** pending the consumer-import
+  migration. The **atoms + fields layers** (Button/IconButton/Badge/Tag/Ripple/ProgressMeter/
+  ThemeToggle/FileTypeIcon/Avatar/Logo + all inputs/wrappers) are migrated onto the semantic tokens
+  (verified raw-value-clean); surfaces/charts/data token-migration is pending. Premium guest presentation shell: glassmorphism navbar (live search + spring light/dark
   `ThemeToggle` + ripple links), dense multi-column global footer, and a cinematic landing page
   (`routes/(public)/(index)`) built from atomic islands (parallax aurora-canvas hero, showcase
   rails) + static partials (value engine, escrow-loop explainer, reviews, stats, CTA). New shared
   primitives: `SearchInput` (`@projective/fields`), `ThemeToggle` + `RippleSurface` + premium
-  gradient/glass/blur/elevation tokens (`@projective/ui`, `styles/themes/variables`).
+  gradient/glass/blur/elevation tokens (`@projective/ui`, `styles/themes/variables`). **Authenticated
+  app-shell overhaul** (`features/navigation`): the primary side rail is active-route aware
+  (longest-prefix match, live across client nav, muted→`--text-main` with an asymmetric teal
+  indicator) and clears the shell's tokenised corner curve (`--nav-shell-radius`); the contextual
+  middle-nav lane gains a drag `NavigationSplitter` island (rAF-throttled) that resolves a live width
+  into three density stages (icon-rail → icon-grid → master-detail) over a shared `.mid-rail`
+  blueprint; the header avatar opens a frosted-glass account panel (user short-card, animated
+  completeness tracker, embedded Freelancer⇄Client persona toggle, corner `ThemeToggle` micro-switch)
+  and the header action icons share one 20/1.5 stroke footprint.
 - **Gap:** `security.session_context` / active-profile propagation is only partially wired into the
   app.
 
@@ -175,7 +192,7 @@ royalties.
   request-to-sell/royalty logic, and the search seed explicitly excludes products.
 - **Partial UI only:** a frontend-seed **Services management suite** (`/services`) — an executive
   dashboard where freelancers/teams create productised service listings, edit pricing tiers, and
-  activate/pause active listings, alongside an ultra-luxury **analytics sub-section** (page views,
+  activate/pause active listings, alongside a high-density **analytics sub-section** (page views,
   conversion, active pipeline value, engagement trends) rendered with `@projective/charts`. The
   primary nav carries a persona-gated (`requires: 'freelancer'` ⇒ freelancer **or** team) **Services**
   entry with a lazy, luxurious quick-link submenu of recent/favorited listings. All data is seed

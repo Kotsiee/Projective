@@ -9,15 +9,15 @@
 
 /* Tones */
 .allocation-meter--primary {
-	--am-color: var(--complete, var(--primary));
+	--am-color: var(--complete);
 }
 
 .allocation-meter--warning {
-	--am-color: var(--in-progress, var(--warning));
+	--am-color: var(--in-progress);
 }
 
 .allocation-meter--danger {
-	--am-color: var(--incomplete, var(--danger));
+	--am-color: var(--incomplete);
 }
 
 /* Dots */
@@ -33,7 +33,7 @@
 	border-radius: 50%;
 	background-color: color-mix(in srgb, var(--am-color) 22%, transparent);
 	border: 1px solid color-mix(in srgb, var(--am-color) 35%, transparent);
-	transition: background-color var(--fast, 150ms) ease;
+	transition: background-color var(--motion-standard);
 }
 
 .allocation-meter__dot--filled {
@@ -54,7 +54,7 @@
 .allocation-meter__track {
 	width: 96px;
 	height: 8px;
-	border-radius: var(--border-radius__large, 999px);
+	border-radius: var(--radius-pill);
 	background-color: color-mix(in srgb, var(--am-color) 16%, transparent);
 	overflow: hidden;
 }
@@ -68,7 +68,7 @@
 	height: 100%;
 	border-radius: inherit;
 	background-color: var(--am-color);
-	transition: width var(--medium, 300ms) ease;
+	transition: width var(--motion-structural);
 }
 
 /* Caption */

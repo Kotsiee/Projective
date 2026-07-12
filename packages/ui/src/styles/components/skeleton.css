@@ -2,7 +2,7 @@
 .skeleton {
 	display: block;
 	/* Uses the global text color with low opacity for a neutral structural feel */
-	background-color: hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.1);
+	background-color: var(--hairline);
 	border-radius: var(--border-radius__small);
 	position: relative;
 	overflow: hidden;
@@ -38,7 +38,7 @@
 }
 
 .skeleton--button {
-	height: var(--input-height, 2.5rem);
+	height: var(--input-height);
 	width: 100px;
 	/* Default generic width */
 	border-radius: var(--border-radius);
@@ -47,7 +47,7 @@
 .skeleton--badge {
 	height: 1.5rem;
 	width: 60px;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	/* Pill shape */
 }
 
@@ -68,9 +68,9 @@
 	/* Uses a linear gradient sweep for a shimmer effect */
 	background: linear-gradient(
 		90deg,
-		hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05) 25%,
-		hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.15) 50%,
-		hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05) 75%
+		var(--hairline) 25%,
+		var(--hairline-strong) 50%,
+		var(--hairline) 75%
 	);
 	background-size: 400% 100%;
 	animation: skeleton-wave 1.5s ease-in-out infinite;

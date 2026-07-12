@@ -10,7 +10,7 @@
 	font-weight: 600;
 	line-height: 1;
 	letter-spacing: 0.02em;
-	color: #fff;
+	color: var(--on-accent);
 	user-select: none;
 	background-image: linear-gradient(
 		135deg,

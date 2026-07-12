@@ -29,10 +29,10 @@
 	color: var(--text-medium, var(--text-main));
 	background-color: var(--card);
 	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius__small, 6px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	border-radius: var(--border-radius__small);
+	box-shadow: var(--elevation-2);
 
-	animation: tooltip-fade-in var(--fast, 150ms) ease forwards;
+	animation: tooltip-fade-in var(--fast) ease forwards;
 }
 
 /* --- Anchor-side transforms ---

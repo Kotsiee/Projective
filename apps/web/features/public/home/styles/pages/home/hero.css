@@ -16,7 +16,7 @@
 	position: absolute;
 	inset: 0;
 	z-index: -1;
-	background: var(--surface-premium);
+	background: var(--surface-showcase);
 }
 
 .home-hero__bg::after {
@@ -111,7 +111,7 @@
 
 .home-hero__title em {
 	font-style: normal;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -207,7 +207,7 @@
 	border-radius: 50%;
 	border: 2px solid var(--bg);
 	margin-left: -0.6rem;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;

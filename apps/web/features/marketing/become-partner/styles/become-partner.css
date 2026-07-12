@@ -1,9 +1,9 @@
 /* =========================================================================
-   /become-partner — ultra-luxury freelancer conversion funnel
-   Deep glassmorphism, razor-thin gold hairlines, luxe easing. All colour /
-   radius / motion pulled from the global tokens (colour.css / ui.css); this
-   sheet only composes them. Server-rendered shell + nested islands, so it
-   lives in the always-loaded global sheet (see the CSS-loading gotcha).
+   /become-partner — freelancer conversion funnel
+   Crisp glass panels, teal-tinted accent hairlines, expressive structural
+   easing. All colour / radius / motion pulled from the global tokens
+   (colour.css / ui.css); this sheet only composes them. Server-rendered shell +
+   nested islands, so it lives in the always-loaded global sheet (see the CSS-loading gotcha).
    ========================================================================= */
 
 .partner {
@@ -27,15 +27,15 @@
 	font-weight: 700;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .partner-eyebrow__dot {
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background: var(--grad-champagne);
-	box-shadow: var(--glow-gold);
+	background: var(--grad-teal-velvet);
+	box-shadow: var(--glow-teal);
 }
 
 .partner__note {
@@ -43,15 +43,15 @@
 	align-items: center;
 	gap: 0.6rem;
 	padding: 0.75rem 1.1rem;
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	border-radius: var(--border-radius__large);
-	background: var(--gold-surface);
+	background: var(--accent-teal-surface);
 	color: var(--text-secondary);
 	font-size: 0.9rem;
 }
 
 .partner__note svg {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 	flex-shrink: 0;
 }
 
@@ -88,10 +88,10 @@
 	align-items: center;
 	padding: clamp(1.75rem, 4vw, 3.5rem);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background:
 		var(--glow-aurora),
-		var(--glass-luxe);
+		var(--surface-subtle);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 	box-shadow: var(--shadow-xl);
@@ -115,7 +115,7 @@
 
 .partner-hero__title em {
 	font-style: italic;
-	background: var(--grad-champagne);
+	background: var(--grad-teal-velvet);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -142,7 +142,7 @@
 	gap: clamp(1.25rem, 3vw, 2.5rem);
 	margin: 0.75rem 0 0;
 	padding-top: 1.25rem;
-	border-top: 1px solid var(--hairline-luxe);
+	border-top: 1px solid var(--border-subtle);
 }
 
 .partner-hero__stats dt {
@@ -172,14 +172,14 @@
 	aspect-ratio: 5 / 3;
 	padding: 1.25rem;
 	border-radius: var(--border-radius__xlarge);
-	border: 1px solid var(--hairline-luxe);
-	background: linear-gradient(155deg, var(--obsidian), hsl(252 22% 15%));
+	border: 1px solid var(--border-subtle);
+	background: linear-gradient(155deg, var(--surface-dark-workspace), hsl(252 22% 15%));
 	box-shadow:
-		var(--glow-gold),
+		var(--glow-teal),
 		var(--shadow-lg);
 	overflow: hidden;
 	transform: rotate(-6deg);
-	transition: transform var(--dur-luxe) var(--ease-luxe);
+	transition: transform var(--dur-cinematic) var(--ease-expressive);
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
@@ -192,7 +192,7 @@
 .partner-hero__card-sheen {
 	position: absolute;
 	inset: 0;
-	background: var(--grad-luxe-sheen);
+	background: var(--surface-subtle);
 	mix-blend-mode: screen;
 }
 
@@ -200,8 +200,8 @@
 	width: 46px;
 	height: 46px;
 	border-radius: 50%;
-	background: var(--grad-champagne);
-	box-shadow: var(--glow-gold);
+	background: var(--grad-teal-velvet);
+	box-shadow: var(--glow-teal);
 }
 
 .partner-hero__card-line {
@@ -227,8 +227,8 @@
 	height: 18px;
 	width: 44px;
 	border-radius: 999px;
-	border: 1px solid var(--hairline-luxe);
-	background: var(--gold-surface);
+	border: 1px solid var(--border-subtle);
+	background: var(--accent-teal-surface);
 }
 
 .partner-hero__orb {
@@ -238,12 +238,12 @@
 	opacity: 0.55;
 }
 
-.partner-hero__orb--gold {
+.partner-hero__orb--accent {
 	width: 200px;
 	height: 200px;
 	top: -30px;
 	right: -20px;
-	background: var(--gold);
+	background: var(--accent-teal);
 }
 
 .partner-hero__orb--violet {
@@ -272,20 +272,20 @@
 	gap: 0.6rem;
 	padding: 1.4rem;
 	border-radius: var(--border-radius__xlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background: var(--glass-panel);
 	backdrop-filter: blur(var(--glass-blur-sm, 8px));
 	-webkit-backdrop-filter: blur(var(--glass-blur-sm, 8px));
 	transition:
-		transform var(--dur-luxe) var(--ease-luxe),
+		transform var(--dur-cinematic) var(--ease-expressive),
 		border-color var(--medium) ease,
 		box-shadow var(--medium) ease;
 }
 
 .partner-card:hover {
 	transform: translateY(-4px);
-	border-color: var(--gold);
-	box-shadow: var(--glow-gold);
+	border-color: var(--accent-teal);
+	box-shadow: var(--glow-teal);
 }
 
 .partner-card__art {
@@ -300,9 +300,9 @@
 	width: 38px;
 	height: 38px;
 	border-radius: var(--border-radius__large);
-	border: 1px solid var(--hairline-luxe);
-	background: var(--gold-surface);
-	color: var(--gold-strong);
+	border: 1px solid var(--border-subtle);
+	background: var(--accent-teal-surface);
+	color: var(--accent-teal-strong);
 }
 
 .partner-card__eyebrow {
@@ -340,8 +340,8 @@
 	gap: 1.5rem;
 	padding: clamp(1.75rem, 4vw, 3rem);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
-	background: linear-gradient(135deg, var(--obsidian), hsl(252 24% 14%));
+	border: 1px solid var(--border-subtle);
+	background: linear-gradient(135deg, var(--surface-dark-workspace), hsl(252 24% 14%));
 	box-shadow: var(--shadow-xl);
 	color: hsl(174 38% 94%);
 }
@@ -349,7 +349,7 @@
 .partner-banner__glow {
 	position: absolute;
 	inset: 0;
-	background: radial-gradient(60% 120% at 85% 0%, var(--gold-surface) 0%, transparent 60%);
+	background: radial-gradient(60% 120% at 85% 0%, var(--accent-teal-surface) 0%, transparent 60%);
 	pointer-events: none;
 }
 
@@ -390,19 +390,19 @@
 	flex-direction: column;
 	overflow: hidden;
 	border-radius: var(--border-radius__xlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background: var(--glass-panel);
 	color: inherit;
 	transition:
-		transform var(--dur-luxe) var(--ease-luxe),
+		transform var(--dur-cinematic) var(--ease-expressive),
 		border-color var(--medium) ease,
 		box-shadow var(--medium) ease;
 }
 
 .partner-story:hover {
 	transform: translateY(-5px);
-	border-color: var(--gold);
-	box-shadow: var(--glow-gold);
+	border-color: var(--accent-teal);
+	box-shadow: var(--glow-teal);
 }
 
 .partner-story__cover {
@@ -471,7 +471,7 @@
 	margin-top: 0.35rem;
 	font-size: 0.82rem;
 	font-weight: 600;
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .partner-story__link svg {
@@ -490,8 +490,8 @@
 	overflow: hidden;
 	aspect-ratio: 16 / 7;
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
-	background: linear-gradient(135deg, var(--obsidian), hsl(258 40% 20%) 130%);
+	border: 1px solid var(--border-subtle);
+	background: linear-gradient(135deg, var(--surface-dark-workspace), hsl(258 40% 20%) 130%);
 	display: grid;
 	place-items: center;
 	box-shadow: var(--shadow-xl);
@@ -502,7 +502,7 @@
 	inset: 0;
 	background:
 		var(--glow-spotlight),
-		var(--grad-luxe-sheen);
+		var(--surface-subtle);
 	pointer-events: none;
 }
 
@@ -514,9 +514,9 @@
 	width: 76px;
 	height: 76px;
 	border-radius: 50%;
-	color: var(--obsidian);
-	background: var(--grad-champagne);
-	box-shadow: var(--glow-gold);
+	color: var(--surface-dark-workspace);
+	background: var(--grad-teal-velvet);
+	box-shadow: var(--glow-teal);
 	transition: transform var(--medium) var(--ease-spring);
 }
 
@@ -546,7 +546,7 @@
 }
 
 .partner-faq__item {
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	border-radius: var(--border-radius__large);
 	background: var(--glass-panel);
 	overflow: hidden;
@@ -554,8 +554,8 @@
 }
 
 .partner-faq__item[data-open='true'] {
-	border-color: var(--gold);
-	background: var(--gold-surface);
+	border-color: var(--accent-teal);
+	background: var(--accent-teal-surface);
 }
 
 .partner-faq__q {
@@ -579,20 +579,20 @@
 	height: 28px;
 	flex-shrink: 0;
 	border-radius: 50%;
-	border: 1px solid var(--hairline-luxe);
-	color: var(--gold-strong);
+	border: 1px solid var(--border-subtle);
+	color: var(--accent-teal-strong);
 	transition: transform var(--medium) var(--ease-out);
 }
 
 .partner-faq__item[data-open='true'] .partner-faq__q-icon {
 	transform: rotate(180deg);
-	background: var(--gold-surface);
+	background: var(--accent-teal-surface);
 }
 
 .partner-faq__a {
 	display: grid;
 	grid-template-rows: 0fr;
-	transition: grid-template-rows var(--dur-luxe) var(--ease-luxe);
+	transition: grid-template-rows var(--dur-cinematic) var(--ease-expressive);
 }
 
 .partner-faq__item[data-open='true'] .partner-faq__a {
@@ -620,10 +620,10 @@
 	margin-top: 0.5rem;
 	padding: clamp(1.5rem, 3vw, 2.25rem);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background:
 		var(--glow-aurora),
-		var(--glass-luxe);
+		var(--surface-subtle);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 }

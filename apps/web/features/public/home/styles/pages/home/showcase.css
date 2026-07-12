@@ -6,7 +6,7 @@
 }
 
 .home-showcase--alt {
-	background: var(--surface-premium-inv);
+	background: var(--surface-showcase-inv);
 	border-block: 1px solid var(--hairline);
 }
 

@@ -7,7 +7,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.375rem;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	font-weight: 600;
 	line-height: 1;
 	white-space: nowrap;
@@ -82,7 +82,7 @@
 
 .status-badge--solid {
 	background: var(--badge-color);
-	color: hsl(0, 0%, 100%);
+	color: var(--on-accent);
 }
 
 /* Neutral solid needs a legible dark-on-light / light-on-dark treatment. */

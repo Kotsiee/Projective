@@ -28,9 +28,12 @@
 - **Thin Routes, Fat Services:** Fresh API routes (`routes/api/...`) are only for HTTP parsing, Zod
   validation, and Auth Guarding. All business logic, financial math, and database mutations MUST be
   abstracted into Services.
-- **Deno 2.x Workspaces:** Strictly use defined path aliases (e.g., `@projective/ui`,
-  `@projective/fields`, `@server/services`). Never use relative path traversal (`../../../`) across
-  workspace boundaries.
+- **Deno 2.x Workspaces:** Strictly use defined path aliases. The UI layer is consolidated under
+  `@projective/ui` with multi-export sub-paths (`@projective/ui/atoms` · `/fields` · `/charts` ·
+  `/data` · `/time` · `/files` · `/system`); the bare `@projective/fields` · `charts` · `data` ·
+  `time` · `files` · `utils` aliases are **deprecated shims** pending consumer migration. App-side use
+  `@server/services`, `@features/*`. Never use relative path traversal (`../../../`) across workspace
+  boundaries.
 
 ### 3. UI, Styling & Reactivity
 
@@ -421,7 +424,12 @@ Footer) without introducing client-side logic.
 #### Core Component Library
 
 The `@projective/ui` package also contains standard atomic components following the same strict
-design patterns and variable architecture.
+design patterns and variable architecture. The **authoritative design-system spec** — the token
+contract, the consolidated `@projective/ui` sub-path taxonomy, the `<DesignSystemProvider>` context
+engine, and the per-component state/variant matrices — lives in
+[`documentation/design-system/`](../design-system/DESIGN_SYSTEM.md) and the root `CLAUDE.md`
+"Design System & Component Architecture" guardrails. Treat those as the source of truth for the
+component layer; this section stays a narrative overview, not a duplicate of the matrices.
 
 ##### Visual Components
 

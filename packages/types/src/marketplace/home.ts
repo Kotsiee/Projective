@@ -1,7 +1,7 @@
 /**
  * @file home.ts
  * @description Presentation contracts for the persona-adaptive `/home` engagement feed (the
- * ultra-premium discovery surface that replaced the business-only `/dashboard`). These are plain
+ * high-density discovery surface that replaced the business-only `/dashboard`). These are plain
  * interfaces — no Zod — because the feed is assembled server-side from live discovery results
  * (`ExploreEntity`, structurally assignable to `EntityCardModel`) plus curated seed fallback, then
  * streamed to the client for infinite scroll. VNode/handler concerns stay in the app + UI layers.
@@ -25,10 +25,10 @@ export type Persona = 'freelancer' | 'client';
 
 /**
  * Accent token suffix for the feed's non-entity templates (sponsored / text cards). Widens the
- * discovery `Accent` with the luxury-only tokens (`gold`, `champagne`) that exist as CSS variables
- * but never apply to a marketplace entity.
+ * discovery `Accent` with the structural feed-only tokens (`teal`, `mist`) that exist as CSS
+ * variables but never apply to a marketplace entity.
  */
-export type FeedAccent = Accent | 'gold' | 'champagne';
+export type FeedAccent = Accent | 'teal' | 'mist';
 
 // #endregion
 
@@ -81,7 +81,7 @@ export interface ProfileSetupSummary {
 
 // #region Mixed-media feed items
 
-/** A standard recommended card (uses the shared luxury `EntityCard`). */
+/** A standard recommended card (uses the shared `EntityCard`). */
 export interface HomeFeedCardItem {
 	kind: 'card';
 	id: string;

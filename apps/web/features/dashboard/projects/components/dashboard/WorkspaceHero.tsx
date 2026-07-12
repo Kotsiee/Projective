@@ -39,7 +39,7 @@ export function WorkspaceHero({ persona, displayName, projects, loading, onCreat
 		<header class='pw-hero pw-panel--luxe'>
 			<div class='pw-hero__bar'>
 				<div class='pw-hero__intro'>
-					<span class='pw-eyebrow pw-eyebrow--gold'>Projects Workspace</span>
+					<span class='pw-eyebrow pw-eyebrow--accent'>Projects Workspace</span>
 					<h1 class='pw-hero__title'>
 						{first ? <>Welcome back, {first}</> : 'Your Project Control Hub'}
 					</h1>

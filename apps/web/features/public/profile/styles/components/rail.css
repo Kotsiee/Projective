@@ -99,14 +99,14 @@
 	gap: 0.45rem;
 	padding: 0.65rem 0.6rem;
 	border-radius: var(--border-radius__large);
-	border: 1px solid var(--hairline-luxe);
-	background: var(--gold-surface);
+	border: 1px solid var(--border-subtle);
+	background: var(--accent-teal-surface);
 	color: var(--text-main);
 	transition: border-color var(--fast) ease;
 }
 
 .profile-rail__setup-bar:hover {
-	border-color: var(--gold);
+	border-color: var(--accent-teal);
 }
 
 .profile-rail__setup-hint {
@@ -133,7 +133,7 @@
    ========================================================================= */
 .profile-rail__partner {
 	margin-top: 0.1rem;
-	box-shadow: var(--glow-gold);
+	box-shadow: var(--glow-teal);
 	letter-spacing: 0.01em;
 }
 

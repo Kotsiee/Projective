@@ -1,0 +1,190 @@
+/**
+ * @file system.css
+ * @description The formal SEMANTIC layer of the Projective design system — the "Teal-Velvet System".
+ *
+ * Everything here is an ALIAS onto the primitives already defined in `colour.css` / `ui.css`, so the
+ * whole system re-themes for free (light/dark/sepia/dim/high-contrast) and no component ever needs a
+ * raw hex/hsl value. This is the vocabulary every component in `@projective/ui` (and its sub-exports
+ * `atoms` / `fields` / `charts` / `data` / `time` / `files`) is expected to consume.
+ *
+ * Authoritative documentation: `documentation/design-system/DESIGN_SYSTEM.md`.
+ *
+ * GUARDRAIL: never hard-code a hex/hsl in a component stylesheet — reach for one of these semantic
+ * tokens (or, failing that, the primitive it aliases). PRs that inline colour literals are rejected.
+ *
+ * The `[data-ds-*]` blocks at the bottom are the CSS half of `<DesignSystemProvider>`: the provider
+ * stamps `data-ds-density` / `data-ds-radius` / `data-ds-accent` / `data-ds-motion` onto its wrapper
+ * element and these rules re-scope the tokens for everything beneath it.
+ */
+:root {
+	/* #region 1. SURFACE ELEVATION LADDER (canvas → workspace → card)
+	   Canvas layers sit the app on a soft ground; workspace layers lift chrome + content above it.
+	   Light: surface-0 = 98% ground, surface-2 / card = 100% white.
+	   Dark:  header(6%) < mid(9%) < bg(12%) < card(13%) — card is the most-elevated (lightest). */
+	--surface-0: var(--bg); /* base app canvas */
+	--surface-1: var(--mid); /* recessed / alternate canvas: row striping, wells, insets */
+	--surface-2: var(--header); /* elevated chrome: top nav, sticky bars, toolbars */
+	--surface-card: var(--card); /* primary content surface: cards, panels, sheets, modals */
+	--surface-sunken: hsl(
+		var(--bg-hue),
+		var(--bg-saturation),
+		calc(var(--bg-lightness) + var(--darker-delta))
+	); /* pressed wells, track grooves */
+	--surface-overlay: var(--card); /* menus / popovers / tooltips — pair with --elevation-3 */
+	/* #endregion */
+
+	/* #region 2. GEOMETRY — "soft outer container, sharp inner control" radius ladder.
+	   Nesting rule: a nested control's radius is ALWAYS <= its container's, so corners stay concentric
+	   (inner ≈ outer − padding). Each alias points at the primitive step already defined in ui.css. */
+	--radius-control: var(--border-radius__xsmall); /* 4px  — checkbox, switch, chip, swatch, tag */
+	--radius-field: var(--border-radius__small); /* 6px  — text / select / number / search fields */
+	--radius-button: var(--border-radius__small); /* 6px  — buttons, segmented controls */
+	--radius-card: var(--border-radius__large); /* 12px — standard cards, tiles, list rows */
+	--radius-stage: var(--border-radius__xlarge); /* 16px — project-stage containers, panels */
+	--radius-feed: var(--border-radius__xxlarge); /* 22px — social feed cards / reels */
+	--radius-pill: 999px; /* fully rounded pills, avatars, status dots */
+	/* #endregion */
+
+	/* #region 3. MOTION — (duration · curve) pairs. Structural = expressive expo-out; micro = spring. */
+	/* 620ms — structural layout shifts, stage / page / feed reveals. */
+	--motion-structural: var(--dur-cinematic) var(--ease-expressive);
+	/* 250ms — micro-interactions: clicks, toggles, checkbox, tactile press. */
+	--motion-micro: var(--medium) var(--ease-spring);
+	/* 150ms — the default: hover tint / colour transitions. */
+	--motion-standard: var(--fast) var(--ease-standard);
+	/* #endregion */
+
+	/* #region 4. FOCUS — the signature 3px semi-transparent teal glow halo (#28869066 ≡ --primary @ .4).
+	   Interactive elements get a glow ring on :focus-visible; danger / social contexts swap the hue. */
+	--focus-glow: 0 0 0 3px hsla(
+		var(--primary-hue),
+		var(--primary-saturation),
+		var(--primary-lightness),
+		0.4
+	);
+	--focus-glow-danger: 0 0 0 3px hsla(
+		var(--danger-hue),
+		var(--danger-saturation),
+		var(--danger-lightness),
+		0.4
+	);
+	--focus-glow-violet: 0 0 0 3px hsla(
+		var(--violet-hue),
+		var(--violet-saturation),
+		var(--violet-lightness),
+		0.4
+	);
+	/* #endregion */
+
+	/* #region 5. ELEVATION — dual-shadow tokens (ambient translucent glow + sharp occlusion mask).
+	   The two-layer shadows already defined in colour.css are aliased to a numeric elevation scale. */
+	--elevation-0: none;
+	--elevation-1: var(--shadow-sm); /* resting cards, chips */
+	--elevation-2: var(--shadow-md); /* raised cards, hovered tiles, sticky bars */
+	--elevation-3: var(--shadow-lg); /* popovers, dropdowns, floating panels */
+	--elevation-4: var(--shadow-xl); /* modals, command palette, dialogs */
+	/* #endregion */
+
+	/* #region 6. STATUS ACCENT MAP — the 7 semantic variants → palette hues + soft surfaces.
+	   primary=teal · secondary=slate · success=emerald · warning=amber · danger=red · info=ocean ·
+	   neutral=grey. `violet` (hue 258) is the SOCIAL accent, reserved for people/feed/community. */
+	--status-primary: var(--primary);
+	--status-secondary: var(--text-secondary);
+	--status-success: var(--success);
+	--status-warning: var(--warning);
+	--status-danger: var(--danger);
+	--status-info: var(--ocean);
+	--status-neutral: var(--neutral);
+	--status-social: var(--violet);
+
+	--status-primary-surface: var(--primary-surface);
+	--status-secondary-surface: var(--hairline);
+	--status-success-surface: var(--success-surface);
+	--status-warning-surface: var(--amber-surface);
+	--status-danger-surface: var(--danger-surface);
+	--status-info-surface: var(--ocean-surface);
+	--status-neutral-surface: var(--neutral-surface);
+	--status-social-surface: var(--violet-surface);
+
+	/* On-accent foreground (text/iconography that sits on a solid status fill). */
+	--on-accent: hsl(0, 0%, 100%);
+	--on-accent-muted: hsla(0, 0%, 100%, 0.7); /* secondary text on a solid accent surface */
+	--on-accent-subtle: hsla(0, 0%, 100%, 0.3); /* hairlines / ticks on a solid accent surface */
+	/* Scrim — the dark veil behind modals / drop-overlays / drag-over states. */
+	--scrim: hsla(0, 0%, 0%, 0.5);
+	--scrim-strong: hsla(
+		0,
+		0%,
+		0%,
+		0.62
+	); /* heavier veil: icon buttons over media, hovered thumbnails */
+	/* #endregion */
+
+	/* #region 7. INTERACTION DELTAS — tactile press + hover offsets used by the state matrices. */
+	--press-translate: 1px; /* :active nudges the control down by this much */
+	--hover-lift: -1px; /* elevated cards rise by this on :hover */
+	/* #endregion */
+}
+
+/* #region 8. <DesignSystemProvider> CONTEXT OVERRIDES
+   Structural modifier scopes. A provider (or any author) sets these data-attributes and every token
+   below re-scopes for the subtree. Keep these in lock-step with `useDesignSystem()` in
+   `packages/ui/src/system/`. */
+
+/* Density — compresses / relaxes control heights + padding (Carbon/Fluent professional density). */
+[data-ds-density='compact'] {
+	--input-height: 2rem;
+	--input-padding-x: 0.5rem;
+	--table-header-height: 32px;
+	--grid-gap: 0.5rem;
+}
+[data-ds-density='spacious'] {
+	--input-height: 3rem;
+	--input-padding-x: 1rem;
+	--table-header-height: 48px;
+	--grid-gap: 1.5rem;
+}
+
+/* Radius — sharpen (Carbon-leaning) or soften (Material-leaning) the whole ladder at once. */
+[data-ds-radius='sharp'] {
+	--radius-control: 2px;
+	--radius-field: 2px;
+	--radius-button: 2px;
+	--radius-card: 4px;
+	--radius-stage: 8px;
+	--radius-feed: 10px;
+}
+[data-ds-radius='soft'] {
+	--radius-control: 6px;
+	--radius-field: 10px;
+	--radius-button: 10px;
+	--radius-card: 18px;
+	--radius-stage: 22px;
+	--radius-feed: 28px;
+}
+
+/* Accent — remap the brand accent (e.g. a social surface running on the violet lane). */
+[data-ds-accent='violet'] {
+	--primary-hue: var(--violet-hue);
+	--primary-saturation: var(--violet-saturation);
+	--primary-lightness: var(--violet-lightness);
+}
+[data-ds-accent='ocean'] {
+	--primary-hue: 199;
+	--primary-saturation: 89%;
+	--primary-lightness: 48%;
+}
+
+/* Motion — collapse all transitions for a subtree (reduced-motion or print/export contexts). */
+[data-ds-motion='reduced'] {
+	--motion-structural: 1ms linear;
+	--motion-micro: 1ms linear;
+	--motion-standard: 1ms linear;
+}
+
+/* The <DesignSystemProvider> wrapper. `display: contents` keeps it out of the layout box tree while
+   its data-ds-* attributes still set custom properties that cascade to every descendant. */
+.pjv-ds {
+	display: contents;
+}
+/* #endregion */

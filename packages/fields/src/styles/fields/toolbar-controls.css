@@ -32,6 +32,7 @@
 	background-color: var(--field-bg-hover);
 	border-color: var(--field-border-hover);
 	outline: none;
+	box-shadow: var(--focus-glow);
 }
 
 .menu-select__prefix {
@@ -65,7 +66,7 @@
 	background-color: var(--card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius);
-	box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
+	box-shadow: var(--elevation-3);
 }
 
 .menu-select__menu--right {
@@ -119,7 +120,7 @@
 	color: var(--text-muted);
 	background-color: transparent;
 	border: 1px solid transparent;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	cursor: pointer;
 	white-space: nowrap;
 	transition: background-color var(--fast) ease, color var(--fast) ease;

@@ -86,7 +86,7 @@
 	font-size: 1.15rem;
 	font-weight: 700;
 	letter-spacing: -0.03em;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -119,7 +119,7 @@
 	bottom: 0.28rem;
 	height: 2px;
 	border-radius: 2px;
-	background: var(--grad-premium);
+	background: var(--grad-brand);
 	transform: scaleX(0);
 	transform-origin: left;
 	transition: transform var(--medium) var(--ease-out);

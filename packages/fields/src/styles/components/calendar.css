@@ -9,7 +9,7 @@
 	padding: 1rem;
 	user-select: none;
 	font-family: var(--font-sans);
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	box-shadow: var(--elevation-2);
 	/* Optional elevation */
 }
 
@@ -138,7 +138,7 @@
 .calendar__day--selected,
 .calendar__cell-lg--selected {
 	background-color: var(--primary) !important;
-	color: #ffffff !important;
+	color: var(--on-accent) !important;
 	/* Always white on primary */
 	font-weight: 600;
 }
@@ -174,14 +174,14 @@
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 	background-color: var(--primary);
-	color: #ffffff;
+	color: var(--on-accent);
 }
 
 .calendar__day--range-end {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	background-color: var(--primary);
-	color: #ffffff;
+	color: var(--on-accent);
 }
 
 .calendar__day--range-middle {

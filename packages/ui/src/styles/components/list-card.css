@@ -5,7 +5,7 @@
 	padding: 1.5rem 0;
 	background-color: transparent;
 	border-bottom: 1px solid var(--border-color);
-	transition: all var(--fast, 150ms) ease;
+	transition: all var(--motion-standard);
 	text-align: left;
 	width: 100%;
 }
@@ -17,7 +17,7 @@
 .list-card[role='button']:hover,
 .list-card[role='button']:focus-visible {
 	background-color: var(--input-bg);
-	border-radius: var(--border-radius__small, 8px);
+	border-radius: var(--radius-field);
 	padding-left: 1rem;
 	padding-right: 1rem;
 	margin-left: -1rem;
@@ -34,7 +34,7 @@
 .list-card__image {
 	width: 120px;
 	height: 120px;
-	border-radius: var(--border-radius__large, 16px);
+	border-radius: var(--radius-card);
 	object-fit: cover;
 	background-color: var(--border-color);
 }

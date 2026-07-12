@@ -8,13 +8,13 @@
 }
 
 .status-slider--success {
-	--ss-color: var(--complete, var(--success, var(--primary)));
+	--ss-color: var(--complete);
 }
 .status-slider--warning {
-	--ss-color: var(--in-progress, var(--warning));
+	--ss-color: var(--in-progress);
 }
 .status-slider--danger {
-	--ss-color: var(--incomplete, var(--danger));
+	--ss-color: var(--incomplete);
 }
 
 /* Rail sits behind the nodes, vertically centred on them. */
@@ -24,7 +24,7 @@
 	left: 8px;
 	right: 8px;
 	height: 3px;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	background-color: color-mix(in srgb, var(--ss-color) 16%, transparent);
 }
 
@@ -36,7 +36,7 @@
 	height: 100%;
 	border-radius: inherit;
 	background-color: var(--ss-color);
-	transition: width var(--medium, 300ms) ease;
+	transition: width var(--motion-micro) ease;
 }
 
 .status-slider__steps {
@@ -63,14 +63,14 @@
 	height: 18px;
 	border-radius: 50%;
 	border: 2px solid color-mix(in srgb, var(--ss-color) 30%, transparent);
-	background: var(--card, var(--background));
+	background: var(--card);
 	padding: 0;
 	cursor: default;
 	transition:
-		background-color var(--fast, 150ms) ease,
-		border-color var(--fast, 150ms) ease,
-		transform var(--fast, 150ms) ease,
-		box-shadow var(--fast, 150ms) ease;
+		background-color var(--motion-micro) ease,
+		border-color var(--motion-micro) ease,
+		transform var(--motion-micro) ease,
+		box-shadow var(--motion-micro) ease;
 }
 
 .status-slider--sm .status-slider__node {
@@ -88,13 +88,13 @@
 }
 
 .status-slider__step--tone-success .status-slider__node {
-	--ss-color: var(--complete, var(--success));
+	--ss-color: var(--complete);
 }
 .status-slider__step--tone-warning .status-slider__node {
-	--ss-color: var(--in-progress, var(--warning));
+	--ss-color: var(--in-progress);
 }
 .status-slider__step--tone-danger .status-slider__node {
-	--ss-color: var(--incomplete, var(--danger));
+	--ss-color: var(--incomplete);
 }
 
 .status-slider__step--selectable .status-slider__node {
@@ -108,13 +108,13 @@
 
 .status-slider__node:focus-visible {
 	outline: none;
-	box-shadow: var(--focus-ring, 0 0 0 2px var(--background), 0 0 0 4px var(--primary));
+	box-shadow: var(--focus-glow);
 }
 
 .status-slider__label {
 	font-size: 0.6875rem;
 	line-height: 1.2;
-	color: var(--text-muted, var(--text-secondary));
+	color: var(--text-muted);
 	text-align: center;
 	max-width: 8ch;
 	overflow: hidden;
@@ -123,6 +123,6 @@
 }
 
 .status-slider__step--current .status-slider__label {
-	color: var(--text-main, var(--text-primary));
+	color: var(--text-main);
 	font-weight: 600;
 }

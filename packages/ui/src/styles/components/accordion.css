@@ -9,7 +9,7 @@
 	width: 100%;
 	--accordion-padding-x: 1rem;
 	--accordion-padding-y: 1rem;
-	--accordion-radius: var(--field-radius, 8px);
+	--accordion-radius: var(--field-radius);
 	/* cite: 13, 14 */
 	--accordion-border-color: var(--field-border);
 	/* cite: 3, 14 */
@@ -59,7 +59,7 @@
 	background-color: var(--card);
 	/* cite: 3 */
 	/* Uses card background to lift open items visually */
-	box-shadow: 0 1px 2px hsla(var(--text-hue), var(--text-saturation), var(--text-lightness), 0.05);
+	box-shadow: var(--elevation-1);
 	/* cite: 14 */
 	margin-bottom: 2px;
 	border-radius: var(--accordion-radius);
@@ -94,12 +94,12 @@
 	/* cite: 14 */
 	padding: var(--accordion-padding-y) var(--accordion-padding-x);
 	font-family: inherit;
-	font-size: var(--field-font-size, 14px);
+	font-size: var(--field-font-size);
 	color: var(--field-text);
 	/* cite: 3 */
 	background-color: transparent;
 	cursor: pointer;
-	transition: background-color var(--fast);
+	transition: background-color var(--motion-standard);
 	/* cite: 13, 14 */
 	min-height: 24px;
 }
@@ -151,7 +151,7 @@
 	display: grid;
 	grid-template-rows: 0fr;
 	/* Standard pattern for CSS height transition cite: 14 */
-	transition: grid-template-rows var(--medium) cubic-bezier(0.87, 0, 0.13, 1);
+	transition: grid-template-rows var(--motion-structural);
 	/* cite: 13, 14 */
 	background-color: inherit;
 	visibility: hidden;
@@ -185,7 +185,7 @@
 	justify-content: center;
 	color: var(--field-text-placeholder);
 	/* cite: 3 */
-	transition: transform var(--medium) cubic-bezier(0.87, 0, 0.13, 1);
+	transition: transform var(--motion-structural);
 	/* cite: 13, 14 */
 }
 

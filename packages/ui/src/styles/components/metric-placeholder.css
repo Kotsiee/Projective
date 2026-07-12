@@ -1,31 +1,32 @@
 /* MetricPlaceholder — a soft premium-gradient tile with shimmering skeleton bars
    for org-health metrics that aren't wired to data yet. */
 .metric-placeholder {
-	--mp-accent: var(--primary, hsl(186, 57%, 40%));
-	--mp-surface: var(--primary-surface, hsla(186, 57%, 40%, 0.12));
+	--mp-accent: var(--primary);
+	--mp-surface: var(--primary-surface);
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	gap: 0.9rem;
 	min-height: 8rem;
 	padding: 1.1rem;
-	border-radius: var(--border-radius__large, 14px);
-	background: var(--card-bg, hsl(0, 0%, 100%));
-	border: 1px solid var(--glass-hairline, hsla(0, 0%, 50%, 0.12));
+	border-radius: var(--radius-card);
+	/* A secondary (not-yet-wired) widget: distinguished by its accent gradient wash
+	   over the card surface, not by an enclosing border. */
+	background: var(--card);
 	overflow: hidden;
 	isolation: isolate;
 }
 .metric-placeholder--mint {
-	--mp-accent: var(--mint, hsl(160, 70%, 42%));
-	--mp-surface: var(--mint-surface, hsla(160, 70%, 42%, 0.14));
+	--mp-accent: var(--mint);
+	--mp-surface: var(--mint-surface);
 }
 .metric-placeholder--violet {
-	--mp-accent: var(--violet, hsl(258, 85%, 66%));
-	--mp-surface: var(--violet-surface, hsla(258, 85%, 66%, 0.14));
+	--mp-accent: var(--violet);
+	--mp-surface: var(--violet-surface);
 }
 .metric-placeholder--amber {
-	--mp-accent: var(--amber, hsl(38, 92%, 55%));
-	--mp-surface: hsla(38, 92%, 55%, 0.15);
+	--mp-accent: var(--amber);
+	--mp-surface: var(--amber-surface);
 }
 
 /* Diagonal gradient wash. */

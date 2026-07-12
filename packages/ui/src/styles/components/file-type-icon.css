@@ -7,7 +7,7 @@
 }
 
 .file-type-icon--filled {
-	color: #fff;
-	border-radius: var(--border-radius__small, 6px);
+	color: var(--on-accent);
+	border-radius: var(--radius-field);
 }
 /* #endregion */

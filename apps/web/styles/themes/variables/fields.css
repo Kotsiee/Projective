@@ -25,11 +25,17 @@
 	--field-text-disabled: var(--text-disabled);
 	--field-text-error: var(--danger);
 
-	/* Geometry & Transition (Mapped from ui.css) */
+	/* Geometry, type-scale & transition (mapped from ui.css / system.css). The type-scale + spacing
+	   tokens below were previously referenced by inputs but never defined (dead fallbacks) — they now
+	   resolve here so no field CSS needs an inline literal. */
 	--field-height: var(--input-height);
 	--field-padding-x: var(--input-padding-x);
-	--field-radius: var(--border-radius);
-	--field-transition: var(--fast) cubic-bezier(0.4, 0, 0.2, 1);
+	--field-radius: var(--radius-field);
+	--field-font-size: 1rem;
+	--field-gap: 0.5rem;
+	--field-icon-size: 1.25rem;
+	--field-ring-width: 3px;
+	--field-transition: var(--motion-standard);
 
 	/* Effects */
 	--field-ring-color: hsla(

@@ -177,7 +177,7 @@ export default function ProfileSideRail({ activePage = 'profile' }: { activePage
 									href={`${base}?edit=1`}
 									aria-label={`Profile ${setup.percent}% complete — finish setup`}
 								>
-									<ProgressMeter variant='radial' value={setup.percent} size={40} tone='gold' />
+									<ProgressMeter variant='radial' value={setup.percent} size={40} tone='teal' />
 								</a>
 							</Tooltip>
 						)
@@ -185,7 +185,7 @@ export default function ProfileSideRail({ activePage = 'profile' }: { activePage
 							<a class='profile-rail__setup-bar' href={`${base}?edit=1`}>
 								<ProgressMeter
 									value={setup.percent}
-									tone='gold'
+									tone='teal'
 									label='Profile strength'
 									showValue
 									milestone={setup.milestone}

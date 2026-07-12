@@ -12,10 +12,10 @@
 	padding: 0.4rem 0.65rem;
 	background: color-mix(in srgb, var(--pii-accent) 12%, transparent);
 	border-left: 2px solid var(--pii-accent);
-	border-radius: var(--border-radius__small, 4px);
+	border-radius: var(--radius-control);
 	font-size: 0.78rem;
 	color: var(--text-secondary);
-	animation: pii-notice-in var(--medium, 350ms) var(--ease-out, ease-out) both;
+	animation: pii-notice-in var(--medium) var(--ease-out) both;
 }
 
 @keyframes pii-notice-in {
@@ -50,7 +50,7 @@
 .pii-notice__chip {
 	padding: 0.1rem 0.4rem;
 	background: color-mix(in srgb, var(--pii-accent) 16%, transparent);
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	font-size: 0.66rem;
 	font-weight: 600;
 	line-height: 1.2;

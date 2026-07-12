@@ -17,7 +17,7 @@
 
 .home-value__statement em {
 	font-style: normal;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -62,7 +62,7 @@
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: var(--grad-premium-soft);
+	background: var(--grad-brand-soft);
 	opacity: 0;
 	transition: opacity var(--medium) ease;
 	pointer-events: none;

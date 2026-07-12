@@ -4,16 +4,16 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: var(--border-radius__small);
+	border-radius: var(--radius-control);
 	font-weight: 500;
 	line-height: 1;
 	white-space: nowrap;
-	transition: var(--fast) cubic-bezier(0.4, 0, 0.2, 1);
+	transition: var(--motion-standard);
 	box-sizing: border-box;
 }
 
 .tag--rounded {
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 }
 
 /* --- Sizes --- */
@@ -54,7 +54,7 @@
 /* Primary */
 .tag--color-primary.tag--variant-solid {
 	background-color: var(--primary);
-	color: #fff;
+	color: var(--on-accent);
 }
 
 .tag--color-primary.tag--variant-subtle {
@@ -94,7 +94,7 @@
 /* Success */
 .tag--color-success.tag--variant-solid {
 	background-color: var(--success);
-	color: #fff;
+	color: var(--on-accent);
 }
 
 .tag--color-success.tag--variant-subtle {
@@ -116,7 +116,7 @@
 /* Warning */
 .tag--color-warning.tag--variant-solid {
 	background-color: var(--warning);
-	color: #fff;
+	color: var(--on-accent);
 }
 
 .tag--color-warning.tag--variant-subtle {
@@ -138,7 +138,7 @@
 /* Danger */
 .tag--color-danger.tag--variant-solid {
 	background-color: var(--danger);
-	color: #fff;
+	color: var(--on-accent);
 }
 
 .tag--color-danger.tag--variant-subtle {

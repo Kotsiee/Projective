@@ -56,7 +56,7 @@ export default function ProfileSetupCard({ setup }: ProfileSetupCardProps) {
 
 			<ProgressMeter
 				value={setup.percent}
-				tone='gold'
+				tone='teal'
 				label='Completeness'
 				showValue
 				milestone={setup.milestone}
@@ -70,7 +70,7 @@ export default function ProfileSetupCard({ setup }: ProfileSetupCardProps) {
 			>
 				<div class='home-setup__modal'>
 					<div class='home-setup__modal-head'>
-						<ProgressMeter variant='radial' value={setup.percent} size={68} tone='gold' />
+						<ProgressMeter variant='radial' value={setup.percent} size={68} tone='teal' />
 						<div>
 							<strong class='home-setup__modal-count'>
 								{setup.completed} of {setup.total} done

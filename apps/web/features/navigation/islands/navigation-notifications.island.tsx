@@ -115,7 +115,11 @@ export default function NavigationNotifications() {
 				variant='secondary'
 				onClick={toggle}
 			>
-				<IconBell />
+				{
+					/* Stroke + size matched to the sidebar nav icons (20 / 1.5) so the bell, cart and
+				    avatar trigger share one baseline weight and bounding footprint. */
+				}
+				<IconBell size={20} stroke={1.5} />
 			</IconButton>
 
 			{unreadCount > 0 && (

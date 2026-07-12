@@ -97,7 +97,7 @@ export default function InsightsPanel(
 			</a>
 
 			<div class='home-insights__dial'>
-				<ProgressMeter variant='radial' value={insights.visibilityPercent} size={104} tone='gold' />
+				<ProgressMeter variant='radial' value={insights.visibilityPercent} size={104} tone='teal' />
 				<div class='home-insights__dial-meta'>
 					<span class='home-insights__dial-label'>{insights.visibilityLabel}</span>
 					<span class='home-insights__dial-hint'>{insights.headline}</span>
@@ -119,7 +119,7 @@ export default function InsightsPanel(
 							{
 								id: 'cash',
 								label: insights.cashLabel ?? 'Cash',
-								color: 'var(--gold)',
+								color: 'var(--accent-teal)',
 								points: insights.cashSeries,
 							},
 						]}

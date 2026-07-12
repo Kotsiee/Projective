@@ -1,7 +1,7 @@
 import '../../styles/components/progress-meter.css';
 
 /* #region Types */
-export type ProgressTone = 'gold' | 'primary' | 'mint' | 'violet';
+export type ProgressTone = 'teal' | 'primary' | 'mint' | 'violet';
 
 /**
  * A fixed threshold marker rendered partway along the linear bar — e.g. a profile's public
@@ -30,7 +30,7 @@ export interface ProgressMeterProps {
 	label?: string;
 	/** Render the "62%" readout. @default true */
 	showValue?: boolean;
-	/** Accent ramp. @default 'gold' */
+	/** Accent ramp. @default 'teal' */
 	tone?: ProgressTone;
 	/** Optional go-live threshold marker (linear only). */
 	milestone?: ProgressMilestone;
@@ -46,9 +46,9 @@ const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 /**
  * @function ProgressMeter
  * @description The shared completeness indicator behind every profile-setup tracker. Renders a sleek
- * minimalist linear bar or, when space collapses (e.g. a collapsed side rail), a high-end radial ring
+ * minimalist linear bar or, when space collapses (e.g. a collapsed side rail), a compact radial ring
  * — both from the same value. The radial is pure SVG (no DOM measurement) so it is SSR-safe and
- * paints instantly; the fill animates with the luxury easing curve.
+ * paints instantly; the fill animates with the expressive easing curve.
  */
 export function ProgressMeter(props: ProgressMeterProps) {
 	const {
@@ -58,7 +58,7 @@ export function ProgressMeter(props: ProgressMeterProps) {
 		thickness,
 		label,
 		showValue = true,
-		tone = 'gold',
+		tone = 'teal',
 		milestone,
 		ariaLabel,
 		class: klass,

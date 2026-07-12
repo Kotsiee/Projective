@@ -1,15 +1,18 @@
+/* A ledger is a run of linear rows, not a boxed panel. The Separation Hierarchy
+   says: distinguish it with its own surface tint + razor-thin row hairlines, never
+   a full four-sided envelope. The rows carry the structure; the card is just a
+   quieter ground with clipped corners. */
 .ledger-card {
 	display: flex;
 	flex-direction: column;
 	background-color: var(--card);
-	border: 1px solid var(--border-color);
-	border-radius: var(--border-radius__large);
+	border-radius: var(--radius-card);
 	overflow: hidden;
 }
 
 .ledger-card__header {
 	padding: 1rem 1.25rem;
-	border-bottom: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--hairline);
 }
 
 .ledger-card__title {
@@ -33,7 +36,7 @@
 	text-align: left;
 	background: transparent;
 	border: none;
-	border-top: 1px solid var(--border-color);
+	border-top: 1px solid var(--hairline);
 	color: inherit;
 	font: inherit;
 }
@@ -49,7 +52,7 @@
 
 .ledger-row--interactive {
 	cursor: pointer;
-	transition: background-color var(--fast) ease;
+	transition: background-color var(--motion-standard);
 }
 
 .ledger-row--interactive:hover {
@@ -92,7 +95,7 @@
 	font-weight: 600;
 	color: var(--text-secondary);
 	background-color: var(--primary-half);
-	border-radius: 50px;
+	border-radius: var(--radius-pill);
 }
 
 .ledger-row__cells {

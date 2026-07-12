@@ -81,7 +81,7 @@
 	display: flex;
 	align-items: center;
 	background-color: var(--primary-surface);
-	border-radius: var(--border-radius__small);
+	border-radius: var(--radius-control);
 	padding: 2px 6px;
 	font-size: 0.85em;
 	gap: 4px;
@@ -112,7 +112,7 @@
 	background-color: var(--card);
 	border: 1px solid var(--field-border);
 	border-radius: var(--field-radius);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--elevation-3);
 	z-index: 50;
 	max-height: 250px;
 	overflow-y: auto;
@@ -174,7 +174,7 @@
 }
 
 .field-select__arrow {
-	transition: transform 150ms;
+	transition: transform var(--motion-standard);
 }
 
 .field-select__container--open {

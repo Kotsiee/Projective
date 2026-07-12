@@ -2,7 +2,7 @@
 
 .home-how {
 	position: relative;
-	background: var(--surface-premium-inv);
+	background: var(--surface-showcase-inv);
 	border-block: 1px solid var(--hairline);
 }
 
@@ -50,7 +50,7 @@
 	width: 2.75rem;
 	height: 2.75rem;
 	border-radius: 50%;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	color: #fff;
 	font-weight: 700;
 	font-size: 1.1rem;

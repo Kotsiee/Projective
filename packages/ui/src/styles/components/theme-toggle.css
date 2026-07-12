@@ -1,6 +1,8 @@
 /* packages/ui/src/styles/components/theme-toggle.css
    Spring-physics light/dark switch. The thumb overshoots slightly on toggle via the
-   --ease-spring curve; the track cross-fades between daylight and a starfield. */
+   --ease-spring curve; the track cross-fades between daylight and a starfield. The decorative
+   sky / night / starfield / thumb palette lives as --tt-* tokens in colour.css so this file stays
+   literal-free (see the design-system guardrails); the focus ring is the shared --focus-glow. */
 
 .theme-toggle {
 	--tt-w: 3.4rem;
@@ -26,25 +28,25 @@
 	display: block;
 	width: var(--tt-w);
 	height: var(--tt-h);
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	background: radial-gradient(
 		120% 140% at 15% -20%,
-		hsl(41, 96%, 62%) 0%,
-		hsl(199, 84%, 60%) 60%,
-		hsl(206, 70%, 52%) 100%
+		var(--tt-sky-sun) 0%,
+		var(--tt-sky-mid) 60%,
+		var(--tt-sky-far) 100%
 	);
-	border: 1px solid var(--glass-hairline, rgba(0, 0, 0, 0.12));
-	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
-	transition: background var(--slow, 350ms) var(--ease-in-out, ease);
+	border: 1px solid var(--glass-hairline);
+	box-shadow: inset 0 1px 3px var(--tt-inset);
+	transition: background var(--slow) var(--ease-in-out);
 	overflow: hidden;
 }
 
 .theme-toggle--dark .theme-toggle__track {
 	background: radial-gradient(
 		120% 140% at 85% -10%,
-		hsl(258, 60%, 42%) 0%,
-		hsl(230, 55%, 20%) 55%,
-		hsl(230, 60%, 10%) 100%
+		var(--tt-night-near) 0%,
+		var(--tt-night-mid) 55%,
+		var(--tt-night-far) 100%
 	);
 }
 
@@ -53,12 +55,12 @@
 	position: absolute;
 	inset: 0;
 	opacity: 0;
-	transition: opacity var(--slow, 350ms) var(--ease-in-out, ease);
+	transition: opacity var(--slow) var(--ease-in-out);
 	background-image:
-		radial-gradient(1px 1px at 20% 35%, #fff 50%, transparent 51%),
-		radial-gradient(1px 1px at 62% 25%, rgba(255, 255, 255, 0.85) 50%, transparent 51%),
-		radial-gradient(1.4px 1.4px at 44% 68%, #fff 50%, transparent 51%),
-		radial-gradient(1px 1px at 78% 60%, rgba(255, 255, 255, 0.7) 50%, transparent 51%);
+		radial-gradient(1px 1px at 20% 35%, var(--tt-star) 50%, transparent 51%),
+		radial-gradient(1px 1px at 62% 25%, var(--tt-star-dim) 50%, transparent 51%),
+		radial-gradient(1.4px 1.4px at 44% 68%, var(--tt-star) 50%, transparent 51%),
+		radial-gradient(1px 1px at 78% 60%, var(--tt-star-faint) 50%, transparent 51%);
 	pointer-events: none;
 }
 
@@ -76,27 +78,25 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #fff;
-	color: hsl(41, 90%, 45%);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+	background: var(--tt-thumb-day);
+	color: var(--tt-sun-glyph);
+	box-shadow: 0 2px 6px var(--tt-thumb-shadow), inset 0 0 0 1px var(--tt-thumb-sheen);
 	transform: translateX(0);
 	transition:
-		transform var(--slow, 350ms) var(--ease-spring, ease),
-		color var(--medium, 250ms) ease,
-		background var(--medium, 250ms) ease;
+		transform var(--slow) var(--ease-spring),
+		color var(--medium) var(--ease-standard),
+		background var(--medium) var(--ease-standard);
 }
 
 .theme-toggle--dark .theme-toggle__thumb {
 	transform: translateX(calc(var(--tt-w) - var(--tt-thumb) - var(--tt-pad) * 2));
-	background: hsl(230, 30%, 96%);
-	color: hsl(250, 45%, 40%);
+	background: var(--tt-thumb-night);
+	color: var(--tt-moon-glyph);
 }
 
 .theme-toggle__glyph {
 	position: absolute;
-	transition:
-		opacity var(--medium, 250ms) var(--ease-out, ease),
-		transform var(--slow, 350ms) var(--ease-spring, ease);
+	transition: opacity var(--medium) var(--ease-out), transform var(--slow) var(--ease-spring);
 }
 
 .theme-toggle__glyph--sun {
@@ -122,8 +122,8 @@
 .theme-toggle:focus-visible .theme-toggle__track {
 	outline: none;
 	box-shadow:
-		var(--focus-ring, 0 0 0 3px rgba(66, 153, 225, 0.5)),
-		inset 0 1px 3px rgba(0, 0, 0, 0.18);
+		var(--focus-glow),
+		inset 0 1px 3px var(--tt-inset);
 }
 
 @media (prefers-reduced-motion: reduce) {

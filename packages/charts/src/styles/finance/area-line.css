@@ -41,12 +41,12 @@
 	stroke-width: 2;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-	transition: d var(--slow, 350ms) ease;
+	transition: d var(--slow) var(--ease-standard);
 }
 
 .area-line__fill {
 	stroke: none;
-	transition: d var(--slow, 350ms) ease;
+	transition: d var(--slow) var(--ease-standard);
 }
 /* #endregion */
 
@@ -69,7 +69,7 @@
 	padding: 0.5rem 0.625rem;
 	background: var(--card);
 	border: 1px solid var(--hairline-strong, var(--hairline));
-	border-radius: var(--border-radius__small, 6px);
+	border-radius: var(--border-radius__small);
 	box-shadow: var(--shadow-lg);
 	pointer-events: none;
 	z-index: 3;

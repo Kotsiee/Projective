@@ -7,17 +7,17 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	border-radius: var(--field-radius, 8px);
+	border-radius: var(--field-radius);
 	/* cite: 1 */
 	pointer-events: none;
 	box-shadow: 0 0 0 0 transparent;
-	transition: box-shadow var(--field-transition, 150ms ease);
+	transition: box-shadow var(--field-transition);
 	/* cite: 1 */
 }
 
 .field-focus-ring--active {
 	/* Uses mapped focus ring color and width from the design system */
-	box-shadow: 0 0 0 var(--field-ring-width, 3px) var(--field-ring-color, rgba(59, 130, 246, 0.12));
+	box-shadow: 0 0 0 var(--field-ring-width) var(--field-ring-color);
 	/* cite: 1 */
 }
 
@@ -26,7 +26,7 @@
 	border-radius: 50%;
 	transform: scale(0);
 	animation: ripple 600ms linear;
-	background-color: var(--field-ripple-color, rgba(0, 0, 0, 0.1));
+	background-color: var(--field-ripple-color);
 	/* cite: 1 */
 	pointer-events: none;
 }

@@ -13,7 +13,7 @@ export interface SponsoredCardProps {
 	sponsorAvatar?: string | null;
 	/** CSS background value (gradient string or `url("…")`) for the media panel. */
 	media?: string | null;
-	/** Accent token suffix, e.g. `gold` / `violet`. @default 'gold' */
+	/** Accent token suffix, e.g. `teal` / `violet`. @default 'teal' */
 	accent?: string;
 	class?: string;
 	className?: string;
@@ -23,7 +23,7 @@ export interface SponsoredCardProps {
 /**
  * @function SponsoredCard
  * @description A beautifully framed placeholder for a future ad network — a clearly-disclosed
- * "Sponsored Partner Post". Gold-tinted luxe frame, glass body, media panel, sponsor identity, and a
+ * "Sponsored Partner Post". Teal-tinted accent frame, glass body, media panel, sponsor identity, and a
  * single CTA. Inserted into the feed every 5–7 items by the mixed-media rule engine.
  */
 export function SponsoredCard(props: SponsoredCardProps) {
@@ -36,7 +36,7 @@ export function SponsoredCard(props: SponsoredCardProps) {
 		sponsorName,
 		sponsorAvatar,
 		media,
-		accent = 'gold',
+		accent = 'teal',
 		class: klass,
 		className,
 	} = props;

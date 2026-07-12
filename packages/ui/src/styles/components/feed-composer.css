@@ -1,6 +1,6 @@
 /**
  * FeedComposer — the intentionally-inert "share an insight" header box.
- * Reads as a premium, disabled promise: subtle glass, champagne sheen on hover,
+ * Reads as a crisp, disabled promise: a subtle surface, a teal-tinted accent border on hover,
  * a "coming soon" tag, and inert action chips.
  */
 
@@ -9,22 +9,20 @@
 	flex-direction: column;
 	gap: 0.9rem;
 	padding: 1.15rem 1.3rem;
-	border-radius: var(--border-radius__xxlarge);
+	border-radius: var(--radius-feed);
 	border: 1px solid var(--hairline);
 	background:
-		var(--grad-luxe-sheen),
+		var(--surface-subtle),
 		var(--glass-panel);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 	box-shadow: var(--shadow-sm);
-	transition:
-		border-color var(--medium) var(--ease-luxe),
-		box-shadow var(--dur-luxe) var(--ease-luxe);
+	transition: border-color var(--motion-standard), box-shadow var(--motion-structural);
 }
 
 @media (hover: hover) {
 	.feed-composer--disabled:hover {
-		border-color: var(--hairline-luxe);
+		border-color: var(--border-subtle);
 		box-shadow: var(--shadow-md);
 	}
 }
@@ -48,7 +46,7 @@
 	align-items: center;
 	height: 42px;
 	padding: 0 1rem;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	background: var(--bg);
 	border: 1px solid var(--hairline);
 	color: var(--text-muted);
@@ -73,10 +71,10 @@
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: var(--gold-strong);
-	background: var(--gold-surface);
-	border: 1px solid var(--hairline-luxe);
-	border-radius: 999px;
+	color: var(--accent-teal-strong);
+	background: var(--accent-teal-surface);
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-pill);
 }
 
 .feed-composer__actions {
@@ -95,7 +93,7 @@
 	font-weight: 550;
 	color: var(--text-secondary);
 	background: var(--hairline);
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	opacity: 0.85;
 }
 

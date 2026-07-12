@@ -3,10 +3,10 @@
 	display: flex;
 	align-items: center;
 	font-family: inherit;
-	font-size: var(--field-font-size, 14px);
-	color: var(--field-text-label, #4b5563);
+	font-size: var(--field-font-size);
+	color: var(--field-text-label);
 	margin-bottom: 4px;
-	transition: all var(--field-transition, 150ms ease);
+	transition: all var(--field-transition);
 	pointer-events: none;
 	line-height: 1.5;
 }
@@ -17,7 +17,7 @@
 .field-label--floating {
 	position: absolute;
 	z-index: 10;
-	left: var(--field-padding-x, 12px);
+	left: var(--field-padding-x);
 	top: 50%;
 	transform: translateY(-50%);
 	background-color: transparent;
@@ -32,23 +32,23 @@
 .field-label--active {
 	top: 0 !important;
 	transform: translateY(-50%) scale(0.85) !important;
-	left: calc(var(--field-padding-x, 12px) - 2px);
-	color: var(--field-border-focus, #3b82f6);
-	background-color: var(--field-bg, #ffffff);
+	left: calc(var(--field-padding-x) - 2px);
+	color: var(--field-border-focus);
+	background-color: var(--field-bg);
 	font-weight: 600;
 	z-index: 20;
 }
 
 .field-label--error {
-	color: var(--field-text-error, #ef4444);
+	color: var(--field-text-error);
 }
 
 .field-label--disabled {
-	color: var(--field-text-disabled, #9ca3af);
+	color: var(--field-text-disabled);
 }
 
 .field-label__required {
-	color: var(--danger, #ef4444);
+	color: var(--danger);
 	margin-left: 2px;
 }
 

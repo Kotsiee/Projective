@@ -24,14 +24,14 @@
 }
 
 .ql-row:hover {
-	background: var(--glass-luxe);
-	border-color: var(--hairline-luxe);
+	background: var(--surface-subtle);
+	border-color: var(--border-subtle);
 	transform: translateX(1px);
 }
 
 .ql-row[data-selected='true'] {
-	background: var(--gold-surface);
-	border-color: var(--hairline-luxe);
+	background: var(--accent-teal-surface);
+	border-color: var(--border-subtle);
 }
 
 /* --- Media: circular avatar with an overlaid status dot --- */
@@ -97,7 +97,7 @@
 .ql-row__fav {
 	flex-shrink: 0;
 	margin-left: auto;
-	color: var(--gold);
+	color: var(--accent-teal);
 }
 
 /* --- "All …" footer row --- */
@@ -110,7 +110,7 @@
 }
 
 .ql-row--all:hover {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 	background: transparent;
 	border-color: transparent;
 	transform: none;
@@ -132,9 +132,9 @@
 .ql-row--skeleton .ql-row__sub {
 	background: linear-gradient(
 		90deg,
-		var(--glass-luxe) 25%,
-		var(--glass-panel, var(--glass-luxe)) 50%,
-		var(--glass-luxe) 75%
+		var(--surface-subtle) 25%,
+		var(--glass-panel, var(--surface-subtle)) 50%,
+		var(--surface-subtle) 75%
 	);
 	background-size: 200% 100%;
 	animation: ql-shimmer 1.3s ease-in-out infinite;

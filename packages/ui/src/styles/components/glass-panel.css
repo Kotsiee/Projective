@@ -4,12 +4,12 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	border-radius: var(--border-radius__large, 16px);
-	background: var(--glass-panel, hsla(210, 20%, 100%, 0.65));
-	border: 1px solid var(--glass-hairline, hsla(0, 0%, 100%, 0.12));
-	box-shadow: var(--shadow-md, 0 4px 12px hsla(0, 0%, 0%, 0.12));
-	backdrop-filter: blur(var(--glass-blur, 18px)) saturate(140%);
-	-webkit-backdrop-filter: blur(var(--glass-blur, 18px)) saturate(140%);
+	border-radius: var(--radius-card);
+	background: var(--glass-panel);
+	border: 1px solid var(--glass-hairline);
+	box-shadow: var(--shadow-md);
+	backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
 	overflow: hidden;
 	isolation: isolate;
 }
@@ -20,18 +20,15 @@
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	background: var(
-		--grad-premium-soft,
-		linear-gradient(160deg, hsla(186, 57%, 40%, 0.10), transparent 60%)
-	);
+	background: var(--grad-brand-soft);
 	opacity: 0.6;
 	pointer-events: none;
 	z-index: 0;
 }
 
 .glass-panel--strong {
-	background: var(--glass-panel-strong, hsla(210, 20%, 100%, 0.85));
-	box-shadow: var(--shadow-lg, 0 12px 32px hsla(0, 0%, 0%, 0.18));
+	background: var(--glass-panel-strong);
+	box-shadow: var(--shadow-lg);
 }
 
 .glass-panel__header {
@@ -42,7 +39,7 @@
 	justify-content: space-between;
 	gap: 1rem;
 	padding: 1.15rem 1.35rem 0.9rem;
-	border-bottom: 1px solid var(--glass-hairline, hsla(0, 0%, 100%, 0.1));
+	border-bottom: 1px solid var(--glass-hairline);
 }
 
 .glass-panel__heading {
@@ -60,7 +57,7 @@
 .glass-panel__subtitle {
 	margin: 0.2rem 0 0;
 	font-size: 0.8rem;
-	color: var(--text-muted, hsl(0, 0%, 55%));
+	color: var(--text-muted);
 }
 
 .glass-panel__actions {

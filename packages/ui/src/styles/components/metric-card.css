@@ -2,6 +2,9 @@
  * MetricCard — financial KPI / quick-action card. A single `--metric-accent` per accent modifier
  * tints the icon chip + left rule; everything else uses palette tokens so light/dark just works.
  */
+/* A static KPI tile establishes hierarchy through elevation (surface + shadow) and
+   its accent left-rule — not a four-sided box. The full border is reserved for the
+   interactive (shortcut) variant below, where it signals a clickable target. */
 .metric-card {
 	position: relative;
 	display: flex;
@@ -9,8 +12,7 @@
 	gap: 0.35rem;
 	padding: 1rem 1.1rem;
 	background: var(--card);
-	border: 1px solid var(--hairline);
-	border-radius: var(--border-radius__large, 12px);
+	border-radius: var(--radius-card);
 	box-shadow: var(--shadow-sm);
 	overflow: hidden;
 	text-align: left;
@@ -57,10 +59,13 @@
 /* #region Interactive (shortcut) */
 .metric-card--interactive {
 	cursor: pointer;
+	/* Functional border: this tile is a clickable shortcut, so it earns an enclosing
+	   outline the static tile does not. */
+	border: 1px solid var(--hairline);
 	transition:
-		transform var(--fast, 150ms) ease,
-		box-shadow var(--fast, 150ms) ease,
-		border-color var(--fast, 150ms) ease;
+		transform var(--motion-standard),
+		box-shadow var(--motion-standard),
+		border-color var(--motion-standard);
 }
 
 .metric-card--interactive:hover {
@@ -71,7 +76,7 @@
 
 .metric-card--interactive:focus-visible {
 	outline: none;
-	box-shadow: var(--focus-ring);
+	box-shadow: var(--focus-glow);
 }
 /* #endregion */
 
@@ -87,7 +92,7 @@
 	justify-content: center;
 	width: 30px;
 	height: 30px;
-	border-radius: var(--border-radius__small, 6px);
+	border-radius: var(--radius-field);
 	background: color-mix(in srgb, var(--metric-accent) 15%, transparent);
 	color: var(--metric-accent);
 	flex: 0 0 auto;

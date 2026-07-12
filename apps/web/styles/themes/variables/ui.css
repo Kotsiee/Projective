@@ -4,6 +4,25 @@
 	--header-height: 4rem;
 	--side-nav-width: 4rem;
 
+	/* #region Navigation shell geometry
+	   The app shell's signature squircle curve is a bespoke STRUCTURAL radius that
+	   sits above the component radius ladder (control→feed, 4→22px). It is tokenised
+	   here so the header / side-rail / content-overlay masks all curve in lockstep and
+	   no stylesheet hard-codes the raw length. `--side-nav-top-clearance` pushes the
+	   first interactive rail item strictly below where that corner curve ends. */
+	--nav-shell-radius: 80px;
+	--side-nav-top-clearance: var(--nav-shell-radius);
+
+	/* Contextual middle-navigation rail: drag bounds + the density-state thresholds the
+	   Splitter island snaps between (collapsed icon rail → intermediate grid → master-detail). */
+	--nav-splitter-width: 6px;
+	--middle-side-min: 64px;
+	--middle-side-collapsed-max: 132px; /* ≤ this ⇒ State A: icon-only rail */
+	--middle-side-intermediate-max: 232px; /* ≤ this ⇒ State B: compact icon grid */
+	--middle-side-default: 300px; /* State C: full master-detail */
+	--middle-side-max: 460px;
+	/* #endregion */
+
 	--border-radius__xsmall: 4px;
 	--border-radius__small: 0.375rem;
 	--border-radius: 8px;
@@ -15,17 +34,18 @@
 	--fast: 150ms;
 	--medium: 250ms;
 	--slow: 350ms;
-	/* Slow, cinematic easing durations reserved for the luxury feed's reveals + hovers. */
-	--dur-luxe: 620ms;
+	/* 620ms — reserved strictly for smoothing large-scale dashboard/feed layout changes
+	   (structural reveals, splitter, accordion, sheet open), not decorative transitions. */
+	--dur-cinematic: 620ms;
 
-	/* Expressive easing curves for premium motion (spring toggle, hero reveals,
-	   card hovers). Durations above stay unitless ms; these are the companion curves. */
+	/* Expressive easing curves for kinetic motion (spring toggle, structural reveals,
+	   tactile press). Durations above stay unitless ms; these are the companion curves. */
 	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 	--ease-in-out: cubic-bezier(0.83, 0, 0.17, 1);
-	/* Refined expo-out — the signature curve for premium feed micro-interactions. */
-	--ease-luxe: cubic-bezier(0.19, 1, 0.22, 1);
+	/* Refined expo-out — the signature curve for structural layout motion. */
+	--ease-expressive: cubic-bezier(0.19, 1, 0.22, 1);
 
 	/* #region Z-Index Scale
 	   Single source of truth for stacking order across the whole app.

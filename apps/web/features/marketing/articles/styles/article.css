@@ -1,7 +1,7 @@
 /* =========================================================================
-   /articles/[slug] — premium editorial reader
-   Narrow reading column, luxe typography, gold hairlines. Tokens from the
-   global sheet. Server-rendered, so this lives in the always-loaded global CSS.
+   /articles/[slug] — long-form reader
+   Narrow reading column, generous typography, teal-tinted accent hairlines.
+   Tokens from the global sheet. Server-rendered, so this lives in the always-loaded global CSS.
    ========================================================================= */
 
 .article {
@@ -26,7 +26,7 @@
 }
 
 .article__back:hover {
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 /* ---- Head ---- */
@@ -41,7 +41,7 @@
 	font-weight: 700;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: var(--gold-strong);
+	color: var(--accent-teal-strong);
 }
 
 .article__title {
@@ -65,15 +65,15 @@
 	align-items: center;
 	gap: 0.75rem;
 	padding-top: 0.5rem;
-	border-top: 1px solid var(--hairline-luxe);
+	border-top: 1px solid var(--border-subtle);
 }
 
 .article__byline-avatar {
 	width: 42px;
 	height: 42px;
 	border-radius: 50%;
-	background: var(--grad-champagne);
-	box-shadow: var(--glow-gold);
+	background: var(--grad-teal-velvet);
+	box-shadow: var(--glow-teal);
 	flex-shrink: 0;
 }
 
@@ -93,7 +93,7 @@
 .article__cover {
 	height: clamp(200px, 34vw, 340px);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	box-shadow: var(--shadow-xl);
 }
 
@@ -124,7 +124,7 @@
 	line-height: 0.82;
 	padding: 0.1rem 0.55rem 0 0;
 	font-weight: 700;
-	background: var(--grad-champagne);
+	background: var(--grad-teal-velvet);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
@@ -139,10 +139,10 @@
 	margin-top: 1rem;
 	padding: clamp(1.5rem, 3vw, 2.25rem);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background:
 		var(--glow-aurora),
-		var(--glass-luxe);
+		var(--surface-subtle);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 }
@@ -153,9 +153,9 @@
 	width: 46px;
 	height: 46px;
 	border-radius: var(--border-radius__large);
-	border: 1px solid var(--hairline-luxe);
-	background: var(--gold-surface);
-	color: var(--gold-strong);
+	border: 1px solid var(--border-subtle);
+	background: var(--accent-teal-surface);
+	color: var(--accent-teal-strong);
 	flex-shrink: 0;
 }
 
@@ -189,10 +189,10 @@
 	gap: 1rem;
 	padding: clamp(2rem, 5vw, 3.5rem);
 	border-radius: var(--border-radius__xxlarge);
-	border: 1px solid var(--hairline-luxe);
+	border: 1px solid var(--border-subtle);
 	background:
 		var(--glow-aurora),
-		var(--glass-luxe);
+		var(--surface-subtle);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 }

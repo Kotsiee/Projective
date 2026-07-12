@@ -32,7 +32,11 @@ export default function NavigationBasket() {
 				variant='secondary'
 				onClick={goToCart}
 			>
-				<IconShoppingCart />
+				{
+					/* Stroke + size matched to the sidebar nav icons (20 / 1.5) so the header action
+				    row reads as one consistent icon set — see the notifications bell. */
+				}
+				<IconShoppingCart size={20} stroke={1.5} />
 			</IconButton>
 			{isActive && (
 				<span class='navigation__basket__badge' aria-hidden='true'>

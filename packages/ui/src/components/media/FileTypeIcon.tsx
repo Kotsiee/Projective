@@ -16,20 +16,20 @@ export type FileTone = 'image' | 'pdf' | 'design' | 'audio' | 'video' | 'archive
 
 /** The canonical tone → colour map shared across every file surface. */
 export const FILE_TONE_COLORS: Record<FileTone, string> = {
-	image: 'hsl(160, 60%, 42%)',
-	pdf: 'hsl(4, 74%, 57%)',
-	design: 'hsl(258, 70%, 62%)',
-	audio: 'hsl(258, 70%, 62%)',
-	video: 'hsl(258, 70%, 62%)',
-	archive: 'hsl(220, 9%, 55%)',
-	file: 'hsl(220, 9%, 55%)',
+	image: 'var(--mint)',
+	pdf: 'var(--danger)',
+	design: 'var(--violet)',
+	audio: 'var(--violet)',
+	video: 'var(--violet)',
+	archive: 'var(--neutral)',
+	file: 'var(--neutral)',
 };
 
 export interface FileVisual {
 	tone: FileTone;
 	/** Single-letter shorthand for compact badges. */
 	letter: string;
-	/** Resolved tone colour (an `hsl(...)` string). */
+	/** Resolved tone colour — a CSS token reference (e.g. `var(--mint)`), applied via inline style. */
 	color: string;
 }
 

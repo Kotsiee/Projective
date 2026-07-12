@@ -52,7 +52,7 @@ function ctasFor(p: ActionHubProps): Cta[] {
 				ctaLabel: 'Create a project',
 				href: '/projects',
 				icon: <IconRocket size={20} stroke={1.8} />,
-				accent: 'gold',
+				accent: 'teal',
 				done: p.hasProjects,
 			},
 			{
@@ -87,7 +87,7 @@ function ctasFor(p: ActionHubProps): Cta[] {
 			ctaLabel: 'Find work',
 			href: '/explore?type=project',
 			icon: <IconBriefcase size={20} stroke={1.8} />,
-			accent: 'gold',
+			accent: 'teal',
 			done: p.hasProjects,
 		},
 		{

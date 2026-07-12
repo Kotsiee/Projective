@@ -25,7 +25,7 @@
 	color: var(--text-muted);
 	white-space: nowrap;
 	cursor: pointer;
-	transition: color var(--fast, 150ms) var(--ease-out, ease-out);
+	transition: color var(--motion-standard);
 }
 
 /* Sliding underline — collapsed by default, expands from the center when active. */
@@ -34,13 +34,11 @@
 	position: absolute;
 	inset: auto 0.55rem -1px;
 	height: 2px;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	background: var(--primary);
 	transform: scaleX(0);
 	transform-origin: center;
-	transition:
-		transform var(--fast, 150ms) var(--ease-out, ease-out),
-		background var(--fast, 150ms) var(--ease-out, ease-out);
+	transition: transform var(--motion-micro), background var(--motion-micro);
 }
 
 .channel-tabs__tab:hover:not(:disabled) {
@@ -50,7 +48,7 @@
 .channel-tabs__tab:focus-visible {
 	outline: none;
 	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent);
-	border-radius: var(--border-radius__small, 4px);
+	border-radius: var(--radius-control);
 }
 
 .channel-tabs__tab--active {

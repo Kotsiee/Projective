@@ -14,7 +14,7 @@
 	border: 1px solid var(--glass-hairline);
 	background:
 		radial-gradient(120% 140% at 50% -20%, var(--primary-surface), transparent 60%),
-		var(--surface-premium-inv);
+		var(--surface-showcase-inv);
 	box-shadow: var(--shadow-xl);
 }
 
@@ -44,7 +44,7 @@
 
 .home-cta__title em {
 	font-style: normal;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;

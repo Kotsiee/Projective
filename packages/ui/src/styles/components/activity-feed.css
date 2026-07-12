@@ -11,7 +11,7 @@
 	padding: 2rem 1rem;
 	text-align: center;
 	font-size: 0.85rem;
-	color: var(--text-muted, hsl(0, 0%, 55%));
+	color: var(--text-muted);
 }
 
 .activity-feed__row {
@@ -32,7 +32,7 @@
 	top: 1.9rem;
 	bottom: -0.35rem;
 	width: 2px;
-	background: var(--glass-hairline, hsla(0, 0%, 50%, 0.18));
+	background: var(--glass-hairline);
 }
 .activity-feed__row:last-child::before {
 	display: none;
@@ -40,10 +40,10 @@
 
 .activity-feed__row--link {
 	border-radius: 10px;
-	transition: background var(--fast, 150ms) var(--ease-out, ease);
+	transition: background var(--motion-standard);
 }
 .activity-feed__row--link:hover {
-	background: var(--surface-hover, hsla(0, 0%, 50%, 0.06));
+	background: var(--surface-hover);
 }
 
 .activity-feed__node {
@@ -56,29 +56,29 @@
 	height: 1.5rem;
 	margin-top: 0.1rem;
 	border-radius: 50%;
-	background: var(--node-surface, hsla(0, 0%, 50%, 0.14));
-	color: var(--node-accent, hsl(0, 0%, 45%));
-	border: 2px solid var(--card-bg, hsl(0, 0%, 100%));
+	background: var(--node-surface, var(--neutral-surface));
+	color: var(--node-accent, var(--neutral));
+	border: 2px solid var(--card);
 }
 .activity-feed__node--primary {
-	--node-accent: var(--primary, hsl(186, 57%, 40%));
-	--node-surface: var(--primary-surface, hsla(186, 57%, 40%, 0.16));
+	--node-accent: var(--primary);
+	--node-surface: var(--primary-surface);
 }
 .activity-feed__node--mint {
-	--node-accent: var(--mint, hsl(160, 70%, 42%));
-	--node-surface: var(--mint-surface, hsla(160, 70%, 42%, 0.16));
+	--node-accent: var(--mint);
+	--node-surface: var(--mint-surface);
 }
 .activity-feed__node--violet {
-	--node-accent: var(--violet, hsl(258, 85%, 66%));
-	--node-surface: var(--violet-surface, hsla(258, 85%, 66%, 0.16));
+	--node-accent: var(--violet);
+	--node-surface: var(--violet-surface);
 }
 .activity-feed__node--amber {
-	--node-accent: var(--amber, hsl(38, 92%, 55%));
-	--node-surface: hsla(38, 92%, 55%, 0.18);
+	--node-accent: var(--amber);
+	--node-surface: var(--amber-surface);
 }
 .activity-feed__node--danger {
-	--node-accent: var(--danger, hsl(0, 72%, 55%));
-	--node-surface: hsla(0, 72%, 55%, 0.16);
+	--node-accent: var(--danger);
+	--node-surface: var(--danger-surface);
 }
 
 .activity-feed__content {
@@ -101,13 +101,13 @@
 
 .activity-feed__meta {
 	font-size: 0.76rem;
-	color: var(--text-muted, hsl(0, 0%, 55%));
+	color: var(--text-muted);
 }
 
 .activity-feed__time {
 	flex-shrink: 0;
 	font-size: 0.72rem;
-	color: var(--text-muted, hsl(0, 0%, 55%));
+	color: var(--text-muted);
 	font-variant-numeric: tabular-nums;
 	padding-top: 0.15rem;
 }

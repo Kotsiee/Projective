@@ -57,9 +57,9 @@ slots + insights/highlights, with profile-setup trackers), which **replaced the 
 `/dashboard`**; the **business finance ledger** (US-008) still reads live balances, transaction
 lines and escrow allocations from `finance.*` via `org.get_business_finance` (`0309`), though its
 overview UI is pending relocation off the retired route. A new **Services management suite**
-(`/services`) — productised listings, pricing-tier editing, and an ultra-luxury analytics
+(`/services`) — productised listings, pricing-tier editing, and a high-density analytics
 sub-section — plus a **workspace CRM** (client-roster filter tray + Projects⇄Services Pipeline
-toggle) and **luxury sidebar quick-link submenus** ship as freelancer/team-facing UI; both are
+toggle) and **sidebar quick-link submenus** ship as freelancer/team-facing UI; both are
 **frontend seed** behind clean Service boundaries (E9 / E3). The remaining gap is that several mature
 UIs (Wallet, Profile, the Explore **home hub**, Workspace, the new Services suite + workspace CRM,
 Submissions checklist/roster) still render from **frontend seed data** rather than the live backend.

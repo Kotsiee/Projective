@@ -3,7 +3,7 @@
 .home-stats {
 	position: relative;
 	overflow: hidden;
-	background: var(--surface-premium-inv);
+	background: var(--surface-showcase-inv);
 	border-block: 1px solid var(--hairline);
 }
 
@@ -43,7 +43,7 @@
 	font-weight: 800;
 	line-height: 1;
 	letter-spacing: -0.04em;
-	background: var(--grad-premium-diag);
+	background: var(--grad-brand-diag);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;

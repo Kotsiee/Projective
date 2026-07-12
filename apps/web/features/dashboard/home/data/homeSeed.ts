@@ -377,7 +377,7 @@ export const SPONSORED_POOL: SponsoredSeed[] = [
 		ctaLabel: 'Explore Ledger',
 		ctaHref: '/wallet',
 		sponsorName: 'Ledger',
-		accent: 'gold',
+		accent: 'teal',
 		media: GRAD.gold,
 	},
 	{
@@ -428,7 +428,7 @@ export const TEXT_POOL_FREELANCER: TextSeed[] = [
 		body: 'Open roles are refreshed daily — apply while they’re warm.',
 		ctaLabel: 'See matching roles',
 		ctaHref: '/explore?type=project',
-		accent: 'gold',
+		accent: 'teal',
 	},
 	{
 		tone: 'quote',
@@ -454,7 +454,7 @@ export const TEXT_POOL_CLIENT: TextSeed[] = [
 		body: 'Describe the outcome and let ranked talent come to you.',
 		ctaLabel: 'Start a project',
 		ctaHref: '/projects/new',
-		accent: 'gold',
+		accent: 'teal',
 	},
 	{
 		tone: 'quote',

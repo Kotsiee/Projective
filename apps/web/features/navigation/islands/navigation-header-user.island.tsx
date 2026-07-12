@@ -1,14 +1,13 @@
-import { Button, Icon, matchSystemTheme, ProgressMeter, setTheme, theme } from '@projective/ui';
+import { Button, Icon, ProgressMeter, ThemeToggle } from '@projective/ui';
 import {
+	IconBell,
 	IconBriefcase,
-	IconCheck,
-	IconDeviceDesktop,
+	IconChevronRight,
 	IconLogout,
 	IconMenu,
-	IconMoon,
 	IconSettings,
-	IconSun,
 	IconUser,
+	IconUserCircle,
 	IconUsersGroup,
 } from '@tabler/icons-preact';
 import { useSignal } from '@preact/signals';
@@ -20,42 +19,73 @@ const AVATAR_FALLBACK = 'https://www.mamp.one/wp-content/uploads/2024/09/image-r
 
 /**
  * @island NavigationHeaderUser
- * @description Header avatar button that toggles a BEM-styled dropdown exposing
- * the four account surfaces required by the shell:
- *  1. **Context switching** — freelancer persona, owned/member businesses & teams,
- *     each dispatching to {@link UserContext} `switchProfile`/`switchTeam` (thin
- *     `/api/v1/auth/switch-*` routes that mutate `security.session_context`).
- *  2. **Theming** — light/dark override plus a "match system" reset, kept in sync
- *     with `document[data-theme]` through the shared {@link theme} signal.
- *  3. **Navigation** — public profile (`/[username]`) and account settings.
- *  4. **Logout** — delegates to {@link UserContext} `logout`, which clears cookies
- *     and redirects to `/login`.
+ * @description Header avatar trigger opening a high-density, frosted-glass account panel:
  *
- * Reactive signals: `isOpen` (dropdown visibility) and, transitively, the user
- * signal from context plus the global theme signal.
+ *  1. **User short card** — avatar, display name, `@handle`, and the active operational
+ *     mode, with the theme micro-switch tucked into its top-right corner.
+ *  2. **Embedded persona toggle** — a compact two-segment control adjacent to the card
+ *     that smoothly swaps the UI between **Freelancer** and **Client / Operator** modes
+ *     (dispatching to {@link UserContext} `switchProfile`). Users with additional
+ *     businesses/teams get a progressively-disclosed "more workspaces" reel so nothing is
+ *     lost to the condensed control.
+ *  3. **Profile completeness tracker** — an animated {@link ProgressMeter} echoing the
+ *     /home milestone tracker.
+ *  4. **Action matrix** — Settings, Public profile, Notifications, Logout.
  *
- * @returns {preact.JSX.Element} The avatar trigger and its absolute dropdown.
+ * Reactive signals: `isOpen` (panel visibility), `showMore` (extra-context reel), and,
+ * transitively, the user signal from context plus the global theme signal (via ThemeToggle).
+ *
+ * @returns {preact.JSX.Element} The avatar trigger and its absolute frosted panel.
  */
 export default function NavigationHeaderUser() {
 	// #region State & Context
 	const rootRef = useRef<HTMLDivElement>(null);
 	const isOpen = useSignal(false);
+	const showMore = useSignal(false);
 	const { user, logout, switchProfile, switchTeam } = useUserContext();
 
 	const profile = user.value;
 	const avatar = profile?.avatarUrl && profile.avatarUrl.startsWith('http')
 		? profile.avatarUrl
 		: AVATAR_FALLBACK;
-	const activeTheme = theme.value;
+	// #endregion
+
+	// #region Persona model
+	// The active side of the Freelancer ⇄ Client/Operator axis. A live team context counts as
+	// the freelancer side (teams are a freelancer-only space).
+	const isFreelancerSide = profile?.activeProfileType === 'freelancer' ||
+		!!profile?.activeTeamId;
+	const primaryBusiness = profile?.businesses?.[0] ?? null;
+	// The toggle can only flip to a side that actually exists for this account.
+	const canBeFreelancer = !!profile?.hasFreelancer && !!profile?.freelancerProfileId;
+	const canBeClient = !!primaryBusiness || profile?.isOperator === true;
+	const modeLabel = isFreelancerSide
+		? 'Freelancer'
+		: profile?.activeProfileType === 'business'
+		? `Client · ${primaryBusiness?.name ?? 'Business'}`
+		: 'Client / Operator';
+
+	// Extra switchable contexts beyond the primary two (surfaced only on demand).
+	const extraBusinesses = (profile?.businesses ?? []).filter((b) => b.id !== primaryBusiness?.id);
+	const extraTeams = profile?.teams ?? [];
+	const hasExtras = extraBusinesses.length > 0 || extraTeams.length > 0;
 	// #endregion
 
 	// #region Handlers
-	const close = () => (isOpen.value = false);
+	const close = () => {
+		isOpen.value = false;
+		showMore.value = false;
+	};
 
-	const onFreelancer = async () => {
-		if (profile?.freelancerProfileId) {
-			await switchProfile(profile.freelancerProfileId, 'freelancer');
-		}
+	const selectFreelancer = async () => {
+		if (isFreelancerSide || !canBeFreelancer) return;
+		await switchProfile(profile!.freelancerProfileId!, 'freelancer');
+		close();
+	};
+
+	const selectClient = async () => {
+		if (!isFreelancerSide || !canBeClient) return;
+		if (primaryBusiness) await switchProfile(primaryBusiness.id, 'business');
 		close();
 	};
 
@@ -95,13 +125,6 @@ export default function NavigationHeaderUser() {
 	}, [isOpen.value]);
 	// #endregion
 
-	// #region Derived active-context flags
-	const isFreelancerActive = profile?.activeProfileType === 'freelancer';
-	const isBusinessActive = (id: string) =>
-		profile?.activeProfileType === 'business' && profile?.activeProfileId === id;
-	const isTeamActive = (id: string) => profile?.activeTeamId === id;
-	// #endregion
-
 	return (
 		<div class='navigation__user-menu' ref={rootRef}>
 			{/* #region Trigger */}
@@ -112,8 +135,8 @@ export default function NavigationHeaderUser() {
 				variant='secondary'
 				onClick={() => (isOpen.value = !isOpen.value)}
 			>
-				<Icon class='navigation__user-icon' size={18}>
-					<IconMenu />
+				<Icon class='navigation__user-icon' size={20}>
+					<IconMenu stroke={1.5} />
 				</Icon>
 				<div class='navigation__user-avatar'>
 					<img src={avatar} alt='' />
@@ -123,8 +146,11 @@ export default function NavigationHeaderUser() {
 
 			{isOpen.value && (
 				<div class='navigation__user-menu__dropdown' role='menu'>
-					{/* #region Identity header */}
-					<div class='navigation__user-menu__identity'>
+					{/* #region User short card + theme micro-switch */}
+					<div class='navigation__user-menu__card'>
+						<div class='navigation__user-menu__theme-slot'>
+							<ThemeToggle compact />
+						</div>
 						<img class='navigation__user-menu__avatar' src={avatar} alt='' />
 						<div class='navigation__user-menu__identity-text'>
 							<span class='navigation__user-menu__name'>
@@ -133,11 +159,98 @@ export default function NavigationHeaderUser() {
 							{profile?.username && (
 								<span class='navigation__user-menu__handle'>@{profile.username}</span>
 							)}
+							<span class='navigation__user-menu__mode'>
+								<span class='navigation__user-menu__mode-dot' aria-hidden='true' />
+								{modeLabel}
+							</span>
 						</div>
 					</div>
 					{/* #endregion */}
 
-					{/* #region Profile setup mirror — concise echo of the /home tracker */}
+					{/* #region Embedded persona toggle */}
+					<div
+						class='navigation__user-menu__persona'
+						role='group'
+						aria-label='Switch operational mode'
+					>
+						<button
+							type='button'
+							class='navigation__user-menu__persona-seg'
+							data-active={isFreelancerSide}
+							disabled={!canBeFreelancer}
+							onClick={selectFreelancer}
+						>
+							<Icon size={16}>
+								<IconUser />
+							</Icon>
+							Freelancer
+						</button>
+						<button
+							type='button'
+							class='navigation__user-menu__persona-seg'
+							data-active={!isFreelancerSide}
+							disabled={!canBeClient}
+							onClick={selectClient}
+						>
+							<Icon size={16}>
+								<IconBriefcase />
+							</Icon>
+							Client
+						</button>
+					</div>
+
+					{hasExtras && (
+						<div class='navigation__user-menu__section'>
+							<button
+								type='button'
+								class='navigation__user-menu__more'
+								data-open={showMore.value}
+								onClick={() => (showMore.value = !showMore.value)}
+							>
+								<span class='navigation__user-menu__item-text'>
+									More workspaces ({extraBusinesses.length + extraTeams.length})
+								</span>
+								<Icon size={16} class='navigation__user-menu__more-chevron'>
+									<IconChevronRight />
+								</Icon>
+							</button>
+
+							{showMore.value && (
+								<div class='navigation__user-menu__more-list'>
+									{extraBusinesses.map((b) => (
+										<button
+											key={b.id}
+											type='button'
+											class='navigation__user-menu__item'
+											onClick={() => onBusiness(b.id)}
+										>
+											<Icon size={18}>
+												<IconBriefcase />
+											</Icon>
+											<span class='navigation__user-menu__item-text'>{b.name}</span>
+										</button>
+									))}
+									{extraTeams.map((t) => (
+										<button
+											key={t.id}
+											type='button'
+											class='navigation__user-menu__item'
+											data-active={profile?.activeTeamId === t.id}
+											onClick={() => onTeam(t.id)}
+										>
+											<Icon size={18}>
+												<IconUsersGroup />
+											</Icon>
+											<span class='navigation__user-menu__item-text'>{t.name}</span>
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+					)}
+					{/* #endregion */}
+
+					{/* #region Profile completeness tracker */}
 					{profile?.profileSetup && profile.profileSetup.percent < 100 && (
 						<a class='navigation__user-menu__setup' href='/home' role='menuitem'>
 							<div class='navigation__user-menu__setup-top'>
@@ -148,141 +261,40 @@ export default function NavigationHeaderUser() {
 							</div>
 							<ProgressMeter
 								value={profile.profileSetup.percent}
-								tone='gold'
+								tone='teal'
 								showValue={false}
 								thickness={5}
 								milestone={profile.profileSetup.milestone}
 							/>
 							<span class='navigation__user-menu__setup-hint'>
-								{profile.profileSetup.total - profile.profileSetup.completed} steps left →
+								{profile.profileSetup.total - profile.profileSetup.completed}{' '}
+								steps to partner status →
 							</span>
 						</a>
 					)}
 					{/* #endregion */}
 
-					{/* #region Context switching */}
-					<div class='navigation__user-menu__section'>
-						<span class='navigation__user-menu__label'>Switch context</span>
-
-						{profile?.hasFreelancer && (
-							<button
-								type='button'
-								class='navigation__user-menu__item'
-								data-active={isFreelancerActive}
-								onClick={onFreelancer}
-							>
-								<Icon size={18}>
-									<IconUser />
-								</Icon>
-								<span class='navigation__user-menu__item-text'>Freelancer</span>
-								{isFreelancerActive && (
-									<Icon size={16} class='navigation__user-menu__check'>
-										<IconCheck />
-									</Icon>
-								)}
-							</button>
-						)}
-
-						{profile?.businesses.map((b) => (
-							<button
-								key={b.id}
-								type='button'
-								class='navigation__user-menu__item'
-								data-active={isBusinessActive(b.id)}
-								onClick={() => onBusiness(b.id)}
-							>
-								<Icon size={18}>
-									<IconBriefcase />
-								</Icon>
-								<span class='navigation__user-menu__item-text'>{b.name}</span>
-								{isBusinessActive(b.id) && (
-									<Icon size={16} class='navigation__user-menu__check'>
-										<IconCheck />
-									</Icon>
-								)}
-							</button>
-						))}
-
-						{profile?.teams.map((t) => (
-							<button
-								key={t.id}
-								type='button'
-								class='navigation__user-menu__item'
-								data-active={isTeamActive(t.id)}
-								onClick={() => onTeam(t.id)}
-							>
-								<Icon size={18}>
-									<IconUsersGroup />
-								</Icon>
-								<span class='navigation__user-menu__item-text'>{t.name}</span>
-								{isTeamActive(t.id) && (
-									<Icon size={16} class='navigation__user-menu__check'>
-										<IconCheck />
-									</Icon>
-								)}
-							</button>
-						))}
-					</div>
-					{/* #endregion */}
-
-					{/* #region Theming */}
-					<div class='navigation__user-menu__section'>
-						<span class='navigation__user-menu__label'>Appearance</span>
-						<div class='navigation__user-menu__theme'>
-							<button
-								type='button'
-								class='navigation__user-menu__theme-option'
-								data-active={activeTheme === 'light'}
-								onClick={() => setTheme('light')}
-							>
-								<Icon size={16}>
-									<IconSun />
-								</Icon>
-								Light
-							</button>
-							<button
-								type='button'
-								class='navigation__user-menu__theme-option'
-								data-active={activeTheme === 'dark'}
-								onClick={() => setTheme('dark')}
-							>
-								<Icon size={16}>
-									<IconMoon />
-								</Icon>
-								Dark
-							</button>
-							<button
-								type='button'
-								class='navigation__user-menu__theme-option'
-								onClick={() => matchSystemTheme()}
-							>
-								<Icon size={16}>
-									<IconDeviceDesktop />
-								</Icon>
-								System
-							</button>
-						</div>
-					</div>
-					{/* #endregion */}
-
-					{/* #region Navigation links */}
+					{/* #region Action matrix */}
 					<div class='navigation__user-menu__section'>
 						{profile?.username && (
-							<a
-								class='navigation__user-menu__item'
-								href={`/${profile.username}`}
-							>
+							<a class='navigation__user-menu__item' href={`/${profile.username}`}>
 								<Icon size={18}>
-									<IconUser />
+									<IconUserCircle />
 								</Icon>
-								<span class='navigation__user-menu__item-text'>View public profile</span>
+								<span class='navigation__user-menu__item-text'>Public profile</span>
 							</a>
 						)}
 						<a class='navigation__user-menu__item' href='/dashboard/settings'>
 							<Icon size={18}>
 								<IconSettings />
 							</Icon>
-							<span class='navigation__user-menu__item-text'>Account settings</span>
+							<span class='navigation__user-menu__item-text'>Settings</span>
+						</a>
+						<a class='navigation__user-menu__item' href='/dashboard/notifications'>
+							<Icon size={18}>
+								<IconBell />
+							</Icon>
+							<span class='navigation__user-menu__item-text'>Notifications</span>
 						</a>
 					</div>
 					{/* #endregion */}

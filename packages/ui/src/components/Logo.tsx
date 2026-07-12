@@ -7,7 +7,7 @@ interface LogoProps extends SVGAttributes<SVGSVGElement> {
 
 export function Logo({
 	size = 1080,
-	color = '#ffffff',
+	color = 'currentColor',
 	...props
 }: LogoProps) {
 	return (

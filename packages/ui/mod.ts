@@ -30,3 +30,6 @@ export * from './src/components/ledger/index.ts';
 export * from './src/hooks/useRipple.ts';
 export * from './src/hooks/useWizard.tsx';
 export * from './src/components/Logo.tsx';
+
+// Design-system context engine (also available at the @projective/ui/system sub-path).
+export * from './src/system/DesignSystemProvider.tsx';

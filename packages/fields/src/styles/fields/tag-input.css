@@ -13,32 +13,32 @@
 	align-items: center;
 	gap: 4px;
 	position: relative;
-	background-color: var(--field-bg, #ffffff);
-	border: 1px solid var(--field-border, #d1d5db);
-	border-radius: var(--field-radius, 8px);
-	transition: all var(--field-transition, 150ms ease);
-	min-height: var(--field-height, 2.5rem);
-	padding: 4px var(--field-padding-x, 0.75rem);
+	background-color: var(--field-bg);
+	border: 1px solid var(--field-border);
+	border-radius: var(--field-radius);
+	transition: all var(--field-transition);
+	min-height: var(--field-height);
+	padding: 4px var(--field-padding-x);
 	cursor: text;
 }
 
 .field-tag__container:hover {
-	background-color: var(--field-bg-hover, rgba(0, 0, 0, 0.05));
-	border-color: var(--field-border-hover, #6b7280);
+	background-color: var(--field-bg-hover);
+	border-color: var(--field-border-hover);
 }
 
 .field-tag__container--focused {
-	border-color: var(--field-border-focus, #3b82f6);
-	background-color: var(--field-bg-active, #ffffff);
+	border-color: var(--field-border-focus);
+	background-color: var(--field-bg-active);
 }
 
 .field-tag__container--error {
-	border-color: var(--field-border-error, #ef4444);
+	border-color: var(--field-border-error);
 }
 
 .field-tag__container--disabled {
-	background-color: var(--field-bg-disabled, #f3f4f6);
-	border-color: var(--field-border-disabled, #d1d5db);
+	background-color: var(--field-bg-disabled);
+	border-color: var(--field-border-disabled);
 }
 
 /* Tag Chips */
@@ -50,10 +50,10 @@
 	background-color: var(--primary-surface);
 	color: var(--text-blue);
 	border: 1px solid var(--primary-half);
-	border-radius: var(--border-radius__xlarge, 16px);
+	border-radius: var(--radius-control);
 	padding: 2px 8px;
 	font-size: 0.875em;
-	transition: all var(--fast, 150ms ease);
+	transition: all var(--motion-standard);
 }
 
 .field-tag__chip-remove {
@@ -62,7 +62,7 @@
 	justify-content: center;
 	cursor: pointer;
 	opacity: 0.6;
-	transition: opacity var(--fast, 150ms ease), color var(--fast, 150ms ease);
+	transition: opacity var(--motion-standard), color var(--motion-standard);
 }
 
 .field-tag__chip-remove:hover {
@@ -71,16 +71,16 @@
 }
 
 .field-tag__input {
-	color: var(--field-text, #111827);
+	color: var(--field-text);
 	flex: 1;
 	min-width: 60px;
 	border: none;
 	background: transparent;
 	outline: none;
 	font-family: inherit;
-	font-size: var(--field-font-size, 14px);
+	font-size: var(--field-font-size);
 }
 
 .field-tag__input::placeholder {
-	color: var(--field-text-placeholder, #6b7280);
+	color: var(--field-text-placeholder);
 }

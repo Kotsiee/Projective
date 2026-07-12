@@ -34,17 +34,17 @@
 	cursor: pointer;
 	text-decoration: none;
 	border-radius: var(--border-radius__small) var(--border-radius__small) 0 0;
-	transition: color var(--fast) ease, background var(--fast) ease;
+	transition: color var(--motion-standard), background var(--motion-standard);
 }
 
 .nav-tabs__tab:hover {
 	color: var(--text-main);
-	background: var(--button-hover, rgba(255, 255, 255, 0.05));
+	background: var(--button-hover);
 }
 
 .nav-tabs__tab:focus-visible {
 	outline: none;
-	box-shadow: var(--focus-ring);
+	box-shadow: var(--focus-glow);
 }
 
 .nav-tabs__tab[data-active='true'] {
@@ -64,7 +64,7 @@
 	background: var(--primary);
 	transform: scaleX(0);
 	transform-origin: center;
-	transition: transform var(--medium) ease;
+	transition: transform var(--motion-micro);
 }
 
 .nav-tabs__tab[data-active='true']::after {
